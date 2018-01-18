@@ -1,7 +1,7 @@
 {
   "name": "aphelion-desktop-wallet",
   "version": "0.0.0",
-  "author": "Chris Mitchell <cmitchell@crishell.co>",
+  "author": "Chris Mitchell <cbm3384@gmail.com>",
   "description": "The Aphelion desktop wallet application",
   "license": null,
   "main": "./dist/electron/main.js",
