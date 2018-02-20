@@ -6,6 +6,7 @@ import App from './App';
 import router from './router';
 import store from './store';
 import * as mixins from './mixins';
+import Icon from './components/Icon';
 window._ = _;
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
@@ -16,6 +17,9 @@ Vue.config.productionTip = false;
 _.each(mixins, (mixin) => {
   Vue.mixin(mixin);
 });
+
+// Register global components.
+Vue.component('aph-icon', Icon);
 
 /* eslint-disable no-new */
 new Vue({
