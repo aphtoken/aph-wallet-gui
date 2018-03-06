@@ -1,0 +1,12 @@
+@import "~normalize.css/normalize";
+
+@import 'functions';
+@import 'icons';
+@import 'mixins';
+@import 'space';
+@import 'variables';
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}

@@ -6,13 +6,13 @@ Vue.use(Router);
 export default new Router({
   routes: [
     {
-      path: '/',
+      path: '/login',
       name: 'login',
       component: require('@/components/Login').default,
     },
     {
       path: '*',
-      redirect: '/',
+      redirect: '/login',
     },
   ],
 });

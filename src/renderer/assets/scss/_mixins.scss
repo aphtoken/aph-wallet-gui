@@ -1,0 +1,14 @@
+@mixin propertyValues($properties, $values) {
+  @each $property in $properties {
+      @each $value in $values {
+          $kebabValue: strReplace($value, ' ', '-');
+
+          ".#{$property}--#{$kebabValue}" {
+              #{$property}: #{$value};
+          }
+          ".#{$property}--#{$kebabValue}--important" {
+              #{$property}: #{$value} !important;
+          }
+      }
+  }
+}

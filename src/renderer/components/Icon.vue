@@ -45,9 +45,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.create--path, .wallet--path
-{
-  fill: var(--primary);
+path {
+  fill: $dark-grey;
 }
 
 .icon {
@@ -58,11 +57,7 @@ export default {
   height: 15rem;
 }
 
-// .logo--mark {
-//   fill: var(--primary);
-// }
-
-// .logo--word {
-//   fill: #1c0e29;
-// }
+.logo--mark {
+  fill: $purple;
+}
 </style>

@@ -1,20 +1,26 @@
 <template>
-  <section class="flex align-items-center flex-row full-height">
-    <div class="flex-1 flex flex-column align-items-center">
-      <aph-icon name="logo"></aph-icon>
-      <div class="margin-top-xl margin-bottom-l flex">
-        <div class="flex flex-column flex-1 margin-right-s align-items-center login-button padding-bottom-xs padding-top-s">
-          <aph-icon class="flex-1" name="wallet"></aph-icon>
-          <div class="copy flex-none font-size-xs font-weight-bold color-primary">Login</div>
+  <section id="login">
+    <div class="left">
+      <aph-icon class="logo" name="logo"></aph-icon>
+      <div class="login-btn-group">
+        <div class="btn login-btn">
+          <aph-icon name="wallet"></aph-icon>
+          <p class="">Login</p>
         </div>
-        <div class="flex flex-column flex-1 align-items-center login-button padding-bottom-xs padding-top-s">
-          <aph-icon class="flex-1" name="create"></aph-icon>
-          <div class="copy flex-none font-size-xs font-weight-bold color-primary">Create Wallet</div>
+        <div class="btn create-wallet-btn">
+          <aph-icon name="create"></aph-icon>
+          <p class="">Create Wallet</p>
         </div>
       </div>
-      <div class="settings-button font-size-s font-weight-bold">Settings</div>
+      <div class="settings-btn-group">
+        <div class="btn-outline">Settings</div>
+      </div>
     </div>
-    <div class="flex-1 background-primary-300 full-height">&nbsp;</div>
+    <div class="right">
+      <video loop muted autoplay>
+        <source src="~@/assets/video/login.mp4" type="video/mp4">
+      </video>
+    </div>
   </section>
 </template>
 
@@ -24,31 +30,95 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.login-button {
-  background: white;
-  border-radius: 0;
-  border: none;
-  box-shadow: 0px 0px 100px 10px rgba(#A75BF6, .25);
-  // color: #A75BF6;
-  color: var(--primary-100);
-  cursor: pointer;
-  height: 11rem;
-  width: 10rem;
+<style lang="scss" scoped>
 
-  &:hover {
-    // background: #A75BF6;
-    // color: white;
+#login {
+  display: flex;
+}
 
-    .create--path, .wallet--path {
-      fill: white;
-    }
+.left, .right {
+  flex: 1;
+}
+
+.right {
+  overflow: hidden;
+
+  video {
+    height: 100%;
   }
 }
 
+.left {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
 .right {
-  background: black;
+  background: $purple;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+}
+
+.btn {
+  background: white;
+  border-radius: 6px;
+  border: none;
+  box-shadow: 0px 0px 100px 10px rgba($light-purple, .25);
+  color: $purple;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: $space * 10;
+  width: $space * 10;
+
+  .aph-icon {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+
+  p {
+    font-size: .8rem;
+    margin: $space 0;
+    text-align: center;
+  }
+
+  &:hover {
+    background: $light-purple;
+    color: white;
+  }
+}
+
+.btn-outline {
+  border-radius: 4px;
+  border: 3px solid $light-purple;
+  color: $light-purple;
+  cursor: pointer;
+  font-size: .8rem;
+  padding: $space-sm;
+  text-align: center;
+  width: $space * 10;
+
+  &:hover {
+    background: $light-purple;
+    color: white;
+  }
+}
+
+.login-btn-group, .settings-btn-group {
+  display: flex;
+  flex-direction: row;
+  margin-top: $space * 5;
+
+  > .btn:not(:first-child) {
+    margin-left: $space-lg;
+  }
 }
 </style>
 
