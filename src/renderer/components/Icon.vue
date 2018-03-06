@@ -44,20 +44,22 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-path {
-  fill: $dark-grey;
-}
+<style lang="scss">
+.aph-icon {
+  .icon {
+    height: 3rem;
+  }
 
-.icon {
-  height: 3rem;
-}
+  path {
+    fill: $dark-grey;
+  }
 
-.logo {
-  height: 15rem;
-}
+  .logo {
+    height: 15rem;
+  }
 
-.logo--mark {
-  fill: $purple;
+  .logo--mark {
+    fill: $purple;
+  }
 }
 </style>

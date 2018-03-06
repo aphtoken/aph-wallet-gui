@@ -30,7 +30,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 
 #login {
   display: flex;
@@ -69,7 +69,7 @@ export default {
   border-radius: 6px;
   border: none;
   box-shadow: 0px 0px 100px 10px rgba($light-purple, .25);
-  color: $purple;
+  color: $light-purple;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -81,6 +81,10 @@ export default {
     display: flex;
     flex: 1;
     justify-content: center;
+
+    path {
+      fill: $purple;
+    }
   }
 
   p {
@@ -92,6 +96,9 @@ export default {
   &:hover {
     background: $light-purple;
     color: white;
+    .aph-icon path {
+      fill: white;
+    }
   }
 }
 
