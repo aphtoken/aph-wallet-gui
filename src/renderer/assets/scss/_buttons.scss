@@ -25,7 +25,7 @@
   border: 3px solid $light-purple;
   color: $light-purple;
   cursor: pointer;
-  font-size: .8rem;
+  font-size: $font-size-sm;
   padding: $space * .7 $space * 5;
   text-align: center;
 
@@ -59,7 +59,7 @@
     }
 
     p {
-      font-size: .8rem;
+      font-size: $font-size-sm;
       margin: $space 0;
       text-align: center;
     }

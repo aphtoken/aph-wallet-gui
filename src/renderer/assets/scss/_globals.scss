@@ -3,13 +3,13 @@
 @import 'functions';
 @import 'mixins';
 @import 'variables';
-@import 'space';
 
 @import 'buttons';
 @import 'fonts';
 
 html, body {
   font-family: GilroyMedium;
+  font-size: $font-size;
   height: 100%;
   letter-spacing: .1rem;
 }
