@@ -8,6 +8,16 @@
   align-items: center;
   justify-content: center;
   color: white;
+
+  .aph-icon {
+    .icon {
+      height: 1rem;
+    }
+
+    path {
+      fill: white;
+    }
+  }
 }
 
 %btn-outline {

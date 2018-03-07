@@ -32,23 +32,10 @@
     </svg>
 
     <!-- back -->
-    <svg class="icon back" v-if="name === 'back'"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 375 667">
-      <defs>
-        <clipPath id="clip-path" transform="translate(162.54 591.71)">
-          <path class="cls-1" d="M21.68,18.49a.68.68,0,0,1,1,1l-4.87,4.88H33.86a.67.67,0,0,1,.68.67.68.68,0,0,1-.68.69H17.77l4.87,4.87a.69.69,0,0,1,0,1,.67.67,0,0,1-1,0l-6-6a.69.69,0,0,1,0-1Z" />
-        </clipPath>
-        <clipPath id="clip-path-2" transform="translate(162.54 591.71)">
-          <rect class="cls-1" x="-162.54" y="-591.71" width="375" height="667" />
-        </clipPath>
-      </defs>
-      <path class="cls-1" d="M21.68,18.49a.68.68,0,0,1,1,1l-4.87,4.88H33.86a.67.67,0,0,1,.68.67.68.68,0,0,1-.68.69H17.77l4.87,4.87a.69.69,0,0,1,0,1,.67.67,0,0,1-1,0l-6-6a.69.69,0,0,1,0-1Z" transform="translate(162.54 591.71)" />
-      <g class="cls-2">
-        <rect class="cls-1" width="375" height="667" />
-        <g class="cls-3">
-          <rect class="cls-1" x="173" y="605" width="29.09" height="23.42" />
-        </g>
-      </g>
+    <svg class="icon back" v-if="name === 'back'"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 19.11 13.54">
+      <path class="back--path" d="M8.7,3.44a.7.7,0,0,1,1,0,.72.72,0,0,1,0,1L4.83,9.32h16a.67.67,0,0,1,.68.66h0a.69.69,0,0,1-.67.69H4.79l4.87,4.87a.69.69,0,0,1,0,1l0,0a.68.68,0,0,1-.95.05l-.05-.05-6-6a.69.69,0,0,1,0-1l0,0Z" transform="translate(-2.44 -3.23)"/>
     </svg>
+
 
   </div>
 </template>
@@ -66,6 +53,8 @@ export default {
 
 <style lang="scss">
 .aph-icon {
+  font-size: 0;
+
   .icon {
     height: 3rem;
   }
@@ -80,20 +69,6 @@ export default {
 
   .logo--mark {
     fill: $purple;
-  }
-
-  .back {
-    .cls-1 {
-      fill: #404653;
-    }
-
-    .cls-2 {
-      clip-path: url(#clip-path);
-    }
-
-    .cls-3 {
-      clip-path: url(#clip-path-2);
-    }
   }
 }
 </style>

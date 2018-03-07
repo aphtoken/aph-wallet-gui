@@ -23,8 +23,7 @@
     </div>
     <router-link to="landing" class="back-link">
       <div class="back-btn">
-        &lt;
-        <!-- <aph-icon name="back"></aph-icon> -->
+        <aph-icon name="back"></aph-icon>
       </div>
     </router-link>
   </section>
@@ -66,7 +65,7 @@ export default {
 
   .right-content {
     align-items: center;
-    background: rgba($purple, .5);
+    background: rgba($dark-grey, .7);
     bottom: 0;
     display: flex;
     flex-direction: column;

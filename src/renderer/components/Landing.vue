@@ -3,18 +3,16 @@
     <div class="left">
       <aph-icon class="logo" name="logo"></aph-icon>
       <div class="btn-group">
-        <router-link to="login">
-          <div class="login-btn">
-            <aph-icon name="wallet"></aph-icon>
-            <p class="">Login</p>
-          </div>
+        <router-link class="login-btn" to="login">
+          <aph-icon name="wallet"></aph-icon>
+          <p class="">Login</p>
         </router-link>
-        <div class="create-wallet-btn">
+        <router-link class="create-wallet-btn" to="landing">
           <aph-icon name="create"></aph-icon>
           <p class="">Create Wallet</p>
-        </div>
+        </router-link>
       </div>
-      <div class="settings-btn">Settings</div>
+      <router-link class="settings-btn" to="landing">Settings</router-link>
     </div>
     <div class="right">
       <video loop muted autoplay>
