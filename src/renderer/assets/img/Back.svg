@@ -1,1 +1,31 @@
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 375 667"><defs><style>.cls-1{fill:#404653;}.cls-2{clip-path:url(#clip-path);}.cls-3{clip-path:url(#clip-path-2);}</style><clipPath id="clip-path" transform="translate(162.54 591.71)"><path class="cls-1" d="M21.68,18.49a.68.68,0,0,1,1,1l-4.87,4.88H33.86a.67.67,0,0,1,.68.67.68.68,0,0,1-.68.69H17.77l4.87,4.87a.69.69,0,0,1,0,1,.67.67,0,0,1-1,0l-6-6a.69.69,0,0,1,0-1Z"/></clipPath><clipPath id="clip-path-2" transform="translate(162.54 591.71)"><rect class="cls-1" x="-162.54" y="-591.71" width="375" height="667"/></clipPath></defs><title>Back</title><path class="cls-1" d="M21.68,18.49a.68.68,0,0,1,1,1l-4.87,4.88H33.86a.67.67,0,0,1,.68.67.68.68,0,0,1-.68.69H17.77l4.87,4.87a.69.69,0,0,1,0,1,.67.67,0,0,1-1,0l-6-6a.69.69,0,0,1,0-1Z" transform="translate(162.54 591.71)"/><g class="cls-2"><rect class="cls-1" width="375" height="667"/><g class="cls-3"><rect class="cls-1" x="173" y="605" width="29.09" height="23.42"/></g></g></svg>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 375 667">
+    <defs>
+        <style>
+            .cls-1 {
+                fill: #404653;
+            }
+
+            .cls-2 {
+                clip-path: url(#clip-path);
+            }
+
+            .cls-3 {
+                clip-path: url(#clip-path-2);
+            }
+        </style>
+        <clipPath id="clip-path" transform="translate(162.54 591.71)">
+            <path class="cls-1" d="M21.68,18.49a.68.68,0,0,1,1,1l-4.87,4.88H33.86a.67.67,0,0,1,.68.67.68.68,0,0,1-.68.69H17.77l4.87,4.87a.69.69,0,0,1,0,1,.67.67,0,0,1-1,0l-6-6a.69.69,0,0,1,0-1Z" />
+        </clipPath>
+        <clipPath id="clip-path-2" transform="translate(162.54 591.71)">
+            <rect class="cls-1" x="-162.54" y="-591.71" width="375" height="667" />
+        </clipPath>
+    </defs>
+    <title>Back</title>
+    <path class="cls-1" d="M21.68,18.49a.68.68,0,0,1,1,1l-4.87,4.88H33.86a.67.67,0,0,1,.68.67.68.68,0,0,1-.68.69H17.77l4.87,4.87a.69.69,0,0,1,0,1,.67.67,0,0,1-1,0l-6-6a.69.69,0,0,1,0-1Z" transform="translate(162.54 591.71)" />
+    <g class="cls-2">
+        <rect class="cls-1" width="375" height="667" />
+        <g class="cls-3">
+            <rect class="cls-1" x="173" y="605" width="29.09" height="23.42" />
+        </g>
+    </g>
+</svg>

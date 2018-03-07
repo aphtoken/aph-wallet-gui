@@ -2,129 +2,108 @@
   <section id="login">
     <div class="left">
       <aph-icon class="logo" name="logo"></aph-icon>
-      <div class="login-btn-group">
-        <div class="btn login-btn">
-          <aph-icon name="wallet"></aph-icon>
-          <p class="">Login</p>
-        </div>
-        <div class="btn create-wallet-btn">
-          <aph-icon name="create"></aph-icon>
-          <p class="">Create Wallet</p>
-        </div>
-      </div>
-      <div class="settings-btn-group">
-        <div class="btn-outline">Settings</div>
-      </div>
     </div>
     <div class="right">
       <video loop muted autoplay>
         <source src="~@/assets/video/login.mp4" type="video/mp4">
       </video>
+      <div class="right-content">
+        <div class="btn-group">
+          <router-link class="saved-wallet-btn" to="login">
+            Saved wallet
+          </router-link>
+          <router-link class="encrypted-key-btn" to="login">
+            Encrypted key
+          </router-link>
+          <router-link class="private-key-btn" to="login">
+            Private key
+          </router-link>
+        </div>
+      </div>
     </div>
+    <router-link to="landing" class="back-link">
+      <div class="back-btn">
+        &lt;
+        <!-- <aph-icon name="back"></aph-icon> -->
+      </div>
+    </router-link>
   </section>
 </template>
-
 <script>
 export default {
-  //
+
 };
 </script>
 
 <style lang="scss">
-
 #login {
   display: flex;
-}
 
-.left, .right {
-  flex: 1;
-}
-
-.right {
-  overflow: hidden;
-
-  video {
-    height: 100%;
+  .left, .right {
+    flex: 1;
   }
-}
 
-.left {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.right {
-  background: $purple;
-}
-
-.logo {
-  display: flex;
-  justify-content: center;
-}
-
-.btn {
-  background: white;
-  border-radius: 6px;
-  border: none;
-  box-shadow: 0px 0px 100px 10px rgba($light-purple, .25);
-  color: $light-purple;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  height: $space * 10;
-  width: $space * 10;
-
-  .aph-icon {
+  .left {
     align-items: center;
     display: flex;
-    flex: 1;
+    flex-direction: column;
     justify-content: center;
+  }
 
-    path {
-      fill: $purple;
+  .right {
+    overflow: hidden;
+    position: relative;
+
+    video {
+      bottom: 0;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
     }
   }
 
-  p {
-    font-size: .8rem;
-    margin: $space 0;
-    text-align: center;
+  .right-content {
+    align-items: center;
+    background: rgba($purple, .5);
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
   }
 
-  &:hover {
-    background: $light-purple;
-    color: white;
-    .aph-icon path {
-      fill: white;
+  .btn-group {
+    a {
+      color: white;
+      display: block;
+
+      & + a {
+        margin-top: $space-lg;
+      }
     }
   }
-}
 
-.btn-outline {
-  border-radius: 4px;
-  border: 3px solid $light-purple;
-  color: $light-purple;
-  cursor: pointer;
-  font-size: .8rem;
-  padding: $space-sm;
-  text-align: center;
-  width: $space * 10;
-
-  &:hover {
-    background: $light-purple;
-    color: white;
+  .back-link {
+    left: 50%;
+    position: absolute;
+    bottom: 15%;
+    transform: translate(-50%, -50%);
   }
-}
 
-.login-btn-group, .settings-btn-group {
-  display: flex;
-  flex-direction: row;
-  margin-top: $space * 5;
+  .back-btn {
+    @extend %btn-circle;
 
-  > .btn:not(:first-child) {
-    margin-left: $space-lg;
+    box-shadow: 0px 0px 30px 10px rgba($purple, .25);
+  }
+
+  .saved-wallet-btn, .encrypted-key-btn, .private-key-btn {
+    @extend %btn-outline;
   }
 }
 </style>
