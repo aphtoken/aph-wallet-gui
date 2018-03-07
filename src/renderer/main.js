@@ -2,11 +2,17 @@ import Vue from 'vue';
 import _ from 'lodash';
 import axios from 'axios';
 
+// Initial Vue Libraries
 import App from './App';
 import router from './router';
 import store from './store';
 import * as mixins from './mixins';
+
+// Global Vue Components
 import Icon from './components/Icon';
+import Select from './components/Select';
+
+// Global Libraries
 window._ = _;
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
@@ -20,6 +26,7 @@ _.each(mixins, (mixin) => {
 
 // Register global components.
 Vue.component('aph-icon', Icon);
+Vue.component('aph-select', Select);
 
 /* eslint-disable no-new */
 new Vue({

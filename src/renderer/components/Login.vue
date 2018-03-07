@@ -8,29 +8,21 @@
         <source src="~@/assets/video/login.mp4" type="video/mp4">
       </video>
       <div class="right-content">
-        <div class="btn-group">
-          <router-link class="saved-wallet-btn" to="login">
-            Saved wallet
-          </router-link>
-          <router-link class="encrypted-key-btn" to="login">
-            Encrypted key
-          </router-link>
-          <router-link class="private-key-btn" to="login">
-            Private key
-          </router-link>
-        </div>
+        <router-view></router-view>
       </div>
     </div>
-    <router-link to="landing" class="back-link">
-      <div class="back-btn">
-        <aph-icon name="back"></aph-icon>
-      </div>
-    </router-link>
+    <div class="back-btn" @click="back">
+      <aph-icon name="back"></aph-icon>
+    </div>
   </section>
 </template>
 <script>
 export default {
-
+  methods: {
+    back() {
+      this.$router.back();
+    },
+  },
 };
 </script>
 
@@ -77,32 +69,14 @@ export default {
     top: 0;
   }
 
-  .btn-group {
-    a {
-      color: white;
-      display: block;
-
-      & + a {
-        margin-top: $space-lg;
-      }
-    }
-  }
-
-  .back-link {
-    left: 50%;
-    position: absolute;
-    bottom: 15%;
-    transform: translate(-50%, -50%);
-  }
-
   .back-btn {
     @extend %btn-circle;
 
+    bottom: 15%;
     box-shadow: 0px 0px 30px 10px rgba($purple, .25);
-  }
-
-  .saved-wallet-btn, .encrypted-key-btn, .private-key-btn {
-    @extend %btn-outline;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
   }
 }
 </style>
