@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="Windows-1252"?>
 <template>
   <div id="login--saved-wallet">
     <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>

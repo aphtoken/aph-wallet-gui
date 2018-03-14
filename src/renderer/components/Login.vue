@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="Windows-1252"?>
 <template>
   <section id="login">
     <div class="left">

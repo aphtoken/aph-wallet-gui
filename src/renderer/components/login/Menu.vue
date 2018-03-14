@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="Windows-1252"?>
 <template>
   <div id="login--menu">
     <router-link class="saved-wallet-btn" to="login/saved-wallet">
