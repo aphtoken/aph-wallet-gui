@@ -20,6 +20,8 @@ export default {
 
 <style lang="scss">
 #login--menu {
+  width: 20rem;
+
   a {
     color: white;
     display: block;

@@ -1,7 +1,7 @@
 <template>
   <section id="login">
     <div class="left">
-      <aph-icon class="logo" name="logo"></aph-icon>
+      <aph-icon name="logo"></aph-icon>
     </div>
     <div class="right">
       <video loop muted autoplay>
@@ -29,6 +29,10 @@ export default {
 <style lang="scss">
 #login {
   display: flex;
+
+  .icon.logo {
+    height: 15rem;
+  }
 
   .left, .right {
     flex: 1;

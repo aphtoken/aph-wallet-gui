@@ -1,7 +1,7 @@
 <template>
   <section id="landing">
     <div class="left">
-      <aph-icon class="logo" name="logo"></aph-icon>
+      <aph-icon name="logo"></aph-icon>
       <div class="btn-group">
         <router-link class="login-btn" to="login">
           <aph-icon name="wallet"></aph-icon>
@@ -33,6 +33,10 @@ export default {
 #landing {
   display: flex;
 
+  .icon.logo {
+    height: 15rem;
+  }
+
   .left, .right {
     flex: 1;
   }
@@ -54,11 +58,16 @@ export default {
 
   .login-btn, .create-wallet-btn {
     @extend %btn-square;
+
+    svg {
+      height: 3rem;
+    }
   }
 
   .settings-btn {
     @extend %btn-outline;
 
+    color: $purple;
     margin-top: $space * 5;
   }
 

@@ -10,6 +10,7 @@ import * as mixins from './mixins';
 
 // Global Vue Components
 import Icon from './components/Icon';
+import Input from './components/Input';
 import Select from './components/Select';
 
 // Global Libraries
@@ -27,6 +28,7 @@ _.each(mixins, (mixin) => {
 // Register global components.
 Vue.component('aph-icon', Icon);
 Vue.component('aph-select', Select);
+Vue.component('aph-input', Input);
 
 /* eslint-disable no-new */
 new Vue({

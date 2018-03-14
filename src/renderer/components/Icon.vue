@@ -1,7 +1,7 @@
 <template>
   <div class="aph-icon">
     <!-- logo -->
-    <svg class="logo" v-if="name === 'logo'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 324 406.9">
+    <svg class="icon logo" v-if="name === 'logo'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 324 406.9">
       <path class="logo--mark fill-secondary" d="M500,293.55c-89.33,0-162,72.67-162,162s72.67,162,162,162,162-72.67,162-162S589.33,293.55,500,293.55Zm130.64,162A130,130,0,0,1,620,507.14L532.62,329C588.92,343.56,630.64,394.78,630.64,455.55Zm-131.7-45.48,31.62,64.45H467.42Zm-34.11-80.34L385.09,492.79l-5.74,12.84a129.91,129.91,0,0,1-10-50.08C369.36,395.7,409.83,345.12,464.83,329.73ZM500,586.19a130.46,130.46,0,0,1-101.75-48.81H526.74l17-35.89,17.61,35.89h40.35A130.46,130.46,0,0,1,500,586.19Z" transform="translate(-338 -293.55)"/>
       <path class="logo--word" d="M346.33,699.44v-.32a2.42,2.42,0,0,1,0-.37l5.4-30.43c.18-.94.46-1.19.82-1.19h3.56c.37,0,.67.25.83,1.19l5.21,30.43c0,.25.11.51.11.71,0,.51-.14.67-.37.67h-2.84c-.3,0-.64-.14-.78-1l-.94-6.18c-.05-.21-.09-.39-.21-.39h-6.29c-.09,0-.14.21-.18.42l-1.06,6.15c-.16.87-.36,1-.71,1h-2.22C346.47,700.13,346.33,700,346.33,699.44Zm10.56-9.32c.07,0,.11-.16.11-.32s0-.14,0-.16l-2.67-18.24c0-.1,0-.14,0-.14s-.07.07-.07.11l-2.91,18.2a.61.61,0,0,0,0,.21c0,.16.07.34.3.34Z" transform="translate(-338 -293.55)"/>
       <path class="logo--word" d="M390.34,699V668.18c0-1,.23-1,.55-1H397c4.29,0,8.56.62,8.56,10.65,0,9.5-3.79,10.46-7.83,10.46h-3.51c-.12,0-.21.07-.21.39V699c0,.9-.23,1.13-.57,1.13h-2.57C390.57,700.13,390.34,699.92,390.34,699Zm7-13.72c3.28,0,4.52-.85,4.52-7.48,0-7.34-2.09-7.74-5-7.74h-2.62c-.12,0-.21.12-.21.4v14.45c0,.28.07.37.19.37Z" transform="translate(-338 -293.55)"/>
@@ -36,6 +36,28 @@
       <path class="back--path" d="M8.7,3.44a.7.7,0,0,1,1,0,.72.72,0,0,1,0,1L4.83,9.32h16a.67.67,0,0,1,.68.66h0a.69.69,0,0,1-.67.69H4.79l4.87,4.87a.69.69,0,0,1,0,1l0,0a.68.68,0,0,1-.95.05l-.05-.05-6-6a.69.69,0,0,1,0-1l0,0Z" transform="translate(-2.44 -3.23)"/>
     </svg>
 
+    <!-- arrow-down -->
+    <svg class="icon arrow-down" v-if="name === 'arrow-down'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 5">
+      <path class="arrow--path" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" transform="translate(-20.5 -22.5)" />
+    </svg>
+
+    <!-- arrow-up -->
+    <svg class="icon arrow-up" v-if="name === 'arrow-up'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 5">
+      <path class="arrow--path" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" />
+    </svg>
+
+    <!-- add -->
+    <svg class="icon add" v-if="name === 'add'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7">
+      <path class="add--path" d="M25,28.5a.5.5,0,0,1-.5-.5V22a.5.5,0,0,1,1,0v6A.5.5,0,0,1,25,28.5Z" transform="translate(-21.5 -21.5)"/>
+      <path class="add--path" d="M28,25.5H22a.5.5,0,0,1,0-1h6a.5.5,0,0,1,0,1Z" transform="translate(-21.5 -21.5)" />
+    </svg>
+
+    <!-- remove -->
+    <svg class="icon remove" v-if="name === 'remove'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7">
+      <path class="remove--path" d="M25,28.5a.5.5,0,0,1-.5-.5V22a.5.5,0,0,1,1,0v6A.5.5,0,0,1,25,28.5Z" />
+      <path class="remove--path" d="M28,25.5H22a.5.5,0,0,1,0-1h6a.5.5,0,0,1,0,1Z" />
+    </svg>
+
 
   </div>
 </template>
@@ -55,20 +77,24 @@ export default {
 .aph-icon {
   font-size: 0;
 
-  .icon {
-    height: 3rem;
-  }
-
   path {
     fill: $dark;
   }
 
-  .logo {
-    height: 15rem;
-  }
-
   .logo--mark {
     fill: $purple;
+  }
+
+  .arrow-up {
+    path {
+      transform: rotate(180deg) translate(-29.5px, -27.5px);
+    }
+  }
+
+  .remove {
+    path {
+      transform: rotate(45deg) translate(-20px, -25px);
+    }
   }
 }
 </style>
