@@ -13,6 +13,13 @@
         </router-link>
       </div>
       <router-link class="settings-btn" to="landing">Settings</router-link>
+
+      <button v-on:click="testCreateWallet">
+        Test Create
+      </button>
+      <button v-on:click="testGetBalances">
+        Get Balances
+      </button>
     </div>
     <div class="right">
       <video loop muted autoplay>
@@ -23,8 +30,16 @@
 </template>
 
 <script>
+import neo from '../services/neo';
 export default {
-  //
+  methods: {
+    testCreateWallet() {
+      neo.createWallet('Test Wallet 1', 'testing', 'testing');
+    },
+    testGetBalances() {
+      neo.fetchRecentTransactions('Test Wallet 1');
+    },
+  },
 };
 </script>
 
