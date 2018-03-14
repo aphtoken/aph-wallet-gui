@@ -57,7 +57,7 @@ export default {
 
   .right-content {
     align-items: center;
-    background: rgba($dark-grey, .7);
+    background: rgba($dark, .7);
     bottom: 0;
     display: flex;
     flex-direction: column;

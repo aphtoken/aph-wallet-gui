@@ -60,7 +60,7 @@ export default {
   }
 
   path {
-    fill: $dark-grey;
+    fill: $dark;
   }
 
   .logo {
