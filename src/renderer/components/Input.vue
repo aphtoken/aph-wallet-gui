@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="Windows-1252"?>
 <template>
   <div class="aph-text-input">
     <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value" />
