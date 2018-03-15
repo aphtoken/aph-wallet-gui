@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="Windows-1252"?>
 <template>
   <div :class="['aph-select', {'is-open': isOpen}]">
     <div class="aph-select--label" @click="toggleOpen">{{ label }}</div>
