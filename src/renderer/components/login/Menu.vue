@@ -1,12 +1,12 @@
 <template>
   <div id="login--menu">
-    <router-link class="saved-wallet-btn" to="login/saved-wallet">
+    <router-link class="saved-wallet-btn" to="/login/saved-wallet">
       Saved wallet
     </router-link>
-    <router-link class="encrypted-key-btn" to="login">
+    <router-link class="encrypted-key-btn" to="/login/menu">
       Encrypted key
     </router-link>
-    <router-link class="private-key-btn" to="login">
+    <router-link class="private-key-btn" to="/login/menu">
       Private key
     </router-link>
   </div>

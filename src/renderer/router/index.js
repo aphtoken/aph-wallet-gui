@@ -6,26 +6,41 @@ Vue.use(Router);
 export default new Router({
   routes: [
     {
-      path: '/landing',
-      component: require('@/components/Landing').default,
-    },
-    {
       path: '/login',
       component: require('@/components/Login').default,
       children: [
         {
           path: '',
-          component: require('@/components/login/Menu').default,
+          components: {
+            left: require('@/components/login/Landing').default,
+          },
+        },
+        {
+          path: 'menu',
+          components: {
+            left: require('@/components/login/Logo').default,
+            right: require('@/components/login/Menu').default,
+          },
+        },
+        {
+          path: 'create-wallet',
+          components: {
+            left: require('@/components/login/Logo').default,
+            right: require('@/components/login/CreateWallet').default,
+          },
         },
         {
           path: 'saved-wallet',
-          component: require('@/components/login/SavedWallet').default,
+          components: {
+            left: require('@/components/login/Logo').default,
+            right: require('@/components/login/SavedWallet').default,
+          },
         },
       ],
     },
     {
       path: '*',
-      redirect: '/landing',
+      redirect: '/login',
     },
   ],
 });

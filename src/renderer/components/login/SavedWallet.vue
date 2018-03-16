@@ -1,7 +1,7 @@
 <template>
   <div id="login--saved-wallet">
-    <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
     <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
+    <aph-input v-if="showPassphrase" v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
     <div v-if="showButton" class="login">Login</div>
   </div>
 </template>
@@ -10,7 +10,11 @@
 export default {
   computed: {
     showButton() {
-      return this.passphrase.length > 0 && !_.isNull(this.wallet);
+      return this.passphrase.length > 0 && this.showPassphrase;
+    },
+
+    showPassphrase() {
+      return !_.isNull(this.wallet);
     },
   },
 
@@ -30,6 +34,12 @@ export default {
       ],
     };
   },
+
+  watch: {
+    wallet() {
+      this.passphrase = '';
+    },
+  },
 };
 </script>
 
@@ -38,7 +48,7 @@ export default {
   width: 20rem;
 
   .aph-text-input {
-    margin-bottom: $space-lg;
+    margin-top: $space-lg;
   }
 
   .login {

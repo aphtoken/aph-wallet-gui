@@ -1,38 +1,27 @@
 <template>
   <section id="login">
     <div class="left">
-      <aph-icon name="logo"></aph-icon>
+      <router-view name="left"></router-view>
     </div>
     <div class="right">
       <video loop muted autoplay>
         <source src="~@/assets/video/login.mp4" type="video/mp4">
       </video>
       <div class="right-content">
-        <router-view></router-view>
+        <router-view name="right"></router-view>
       </div>
-    </div>
-    <div class="back-btn" @click="back">
-      <aph-icon name="back"></aph-icon>
     </div>
   </section>
 </template>
 <script>
 export default {
-  methods: {
-    back() {
-      this.$router.back();
-    },
-  },
+  //
 };
 </script>
 
 <style lang="scss">
 #login {
   display: flex;
-
-  .icon.logo {
-    height: 15rem;
-  }
 
   .left, .right {
     flex: 1;
@@ -71,16 +60,6 @@ export default {
     position: absolute;
     right: 0;
     top: 0;
-  }
-
-  .back-btn {
-    @extend %btn-circle;
-
-    bottom: 15%;
-    box-shadow: 0px 0px 30px 10px rgba($purple, .25);
-    left: 50%;
-    position: absolute;
-    transform: translate(-50%, -50%);
   }
 }
 </style>
