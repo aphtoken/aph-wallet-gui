@@ -2,16 +2,16 @@
   <section id="login--landing">
     <aph-icon name="logo"></aph-icon>
     <div class="btn-group">
-      <router-link class="login-btn" to="login/menu">
+      <router-link class="login-btn" to="/login/menu">
         <aph-icon name="wallet"></aph-icon>
         <p class="">Login</p>
       </router-link>
-      <router-link class="create-wallet-btn" to="login/create-wallet">
+      <router-link class="create-wallet-btn" to="/login/create-wallet">
         <aph-icon name="create"></aph-icon>
         <p class="">Create Wallet</p>
       </router-link>
     </div>
-    <router-link class="settings-btn" to="landing">Settings</router-link>
+    <router-link class="settings-btn" to="/landing">Settings</router-link>
     <button v-on:click="testCreateWallet">
       Test Create
     </button>
@@ -25,7 +25,15 @@
 export default {
   methods: {
     testCreateWallet() {
-      this.$services.neo.createWallet('Test Wallet 1', 'testing', 'testing');
+      this.$services.neo.createWallet('Test Wallet 9999', 'testing', 'testing')
+        .then((data) => {
+          debugger;
+          return data;
+        })
+        .catch((error) => {
+          debugger;
+          return error;
+        });
     },
     testGetBalances() {
       this.$services.neo.fetchRecentTransactions('Test Wallet 1');

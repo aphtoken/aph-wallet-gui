@@ -30,6 +30,13 @@ export default new Router({
           },
         },
         {
+          path: 'wallet-created',
+          components: {
+            left: require('@/components/login/Logo').default,
+            right: require('@/components/login/WalletCreated').default,
+          },
+        },
+        {
           path: 'saved-wallet',
           components: {
             left: require('@/components/login/Logo').default,

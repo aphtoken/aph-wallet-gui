@@ -1,9 +1,8 @@
 /* eslint-disable */
 import { wallet, Neon, rpc, tx, api } from "@cityofzion/neon-js";
-import storage from 'electron-json-storage'
+import wallets from './wallets';
 
 export default {
-    
 
     /**
      * @param {String} passphrase
@@ -20,55 +19,32 @@ export default {
      */
     createWallet(walletName, passphrase, passphraseConfirm) {
         return new Promise((resolve, reject) => {
-            if (passphrase !== passphraseConfirm) {
-                console.log('Passphrases do not match');
-                return;
+            // TODO: abstract validation
+            if(wallets.walletExists(walletName)) {
+                return reject(`Wallet with name '${walletName}' already exists!`);
             }
+
+            if (passphrase !== passphraseConfirm) {
+                return reject('Passphrases do not match');
+            }
+
             else if (passphrase.length < 4) {
-                console.log('Please choose a longer passphrase');
-                return;
+                return reject('Please choose a longer passphrase');
             }
 
 
             try {
-                var account = new wallet.Account(wallet.generatePrivateKey());
-                var { WIF, address } = account;
+                let account = new wallet.Account(wallet.generatePrivateKey());
+                const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
+
                 account.label = walletName;
-                var encryptedWIF = wallet.encrypt(WIF, passphrase);
-                console.log(account);
 
-                return storage.get('userWallet', (readError, data) => {
-                    if (readError) {
-                        console.log(`Error loading wallet: ${readError.message}`);
-                    }
-                    
-                    if (typeof data.accounts === 'undefined') {
-                        data.accounts = [];
-                    }
-                    
-                    if (data.accounts.some(e => e.address === account.address)) {
-                        console.log(`Error saving wallet: '${account.address}' already exists`);
-                        return
-                    } else if (data.accounts.some(e => e.label === account.label)) {
-                        console.log(`Error saving wallet: '${account.label}' already exists`);
-                        return
-                    } else {
-                        data.accounts.push(account)
-                    }
+                wallets.add(walletName, account);
 
-                    storage.set('userWallet', data, (saveError) => {
-                        if (saveError) {
-                            console.log(`Error saving wallet: ${saveError.message}`);
-                        } else {
-                            console.log(`Saved key as ${walletName}`);
-                        }
-                    })
-                })
+                resolve(walletName);
             }
             catch (e) {
-                console.log('An error occured while trying to generate a new wallet.')
-                console.log(e);
-                return;
+                return reject('An error occured while trying to generate a new wallet.')
             }
         });
     },
