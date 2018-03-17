@@ -123,6 +123,7 @@ export default {
   font-size: $font-size-sm;
   padding: $space * 0.7 $space * 5;
   text-align: center;
+  transition: all .1s linear;
   white-space: nowrap;
 }
 
@@ -142,6 +143,7 @@ export default {
     cursor: pointer;
     font-size: $font-size-sm;
     padding: $space;
+    transition: all .1s linear;
 
     &:hover,
     &.selected {

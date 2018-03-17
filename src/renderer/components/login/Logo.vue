@@ -27,7 +27,6 @@ export default {
     @extend %btn-circle;
 
     bottom: 15%;
-    box-shadow: 0px 0px 30px 10px rgba($purple, .25);
     left: 50%;
     position: absolute;
     transform: translate(-50%, -50%);

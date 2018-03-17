@@ -12,12 +12,12 @@
       </router-link>
     </div>
     <router-link class="settings-btn" to="/landing">Settings</router-link>
-    <button v-on:click="testCreateWallet">
+    <!-- <button v-on:click="testCreateWallet">
       Test Create
     </button>
     <button v-on:click="testGetBalances">
       Get Balances
-    </button>
+    </button> -->
   </section>
 </template>
 
@@ -54,6 +54,8 @@ export default {
 
   .login-btn, .create-wallet-btn {
     @extend %btn-square;
+
+    box-shadow: 0 0 100px 10px rgba($purple, .25);
 
     svg {
       height: 3rem;

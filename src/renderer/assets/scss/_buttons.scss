@@ -1,13 +1,18 @@
 %btn-circle {
+  align-items: center;
   background: $purple;
   border-radius: 100%;
-  height: 4rem;
-  width: 4rem;
+  color: white;
   cursor: pointer;
   display: inline-flex;
-  align-items: center;
+  height: 4rem;
   justify-content: center;
-  color: white;
+  transition: $transition;
+  width: 4rem;
+
+  &:hover {
+    box-shadow: $box-shadow;
+  }
 
   .aph-icon {
     .icon {
@@ -28,9 +33,11 @@
   font-size: $font-size-sm;
   padding: $space * .7 $space * 5;
   text-align: center;
+  transition: $transition;
 
   &:hover {
     background: $purple;
+    box-shadow: $box-shadow;
     color: white;
   }
 }
@@ -39,12 +46,12 @@
     background: white;
     border-radius: 6px;
     border: none;
-    box-shadow: 0 0 100px 10px rgba($purple, .25);
     color: $purple;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     height: $space * 10;
+    transition: $transition;
     width: $space * 10;
 
     .aph-icon {

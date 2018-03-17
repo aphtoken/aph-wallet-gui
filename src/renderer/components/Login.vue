@@ -7,7 +7,7 @@
       <video loop muted autoplay>
         <source src="~@/assets/video/login.mp4" type="video/mp4">
       </video>
-      <div class="right-content">
+      <div :class="['right-content', routeClassName]">
         <router-view name="right"></router-view>
       </div>
     </div>
@@ -15,7 +15,11 @@
 </template>
 <script>
 export default {
-  //
+  computed: {
+    routeClassName() {
+      return _.kebabCase(this.$route.path);
+    },
+  },
 };
 </script>
 
@@ -60,6 +64,10 @@ export default {
     position: absolute;
     right: 0;
     top: 0;
+
+    &.login-wallet-created {
+      background: $light-grey;
+    }
   }
 }
 </style>

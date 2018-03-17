@@ -17,11 +17,11 @@ export default {
      *  {String} public_address
      *  {String} public_address_qr
      */
-    createWallet(walletName, passphrase, passphraseConfirm) {
+    createWallet(name, passphrase, passphraseConfirm) {
         return new Promise((resolve, reject) => {
             // TODO: abstract validation
-            if(wallets.walletExists(walletName)) {
-                return reject(`Wallet with name '${walletName}' already exists!`);
+            if(wallets.walletExists(name)) {
+                return reject(`Wallet with name '${name}' already exists!`);
             }
 
             if (passphrase !== passphraseConfirm) {
@@ -35,13 +35,13 @@ export default {
 
             try {
                 let account = new wallet.Account(wallet.generatePrivateKey());
-                const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
+                const _encryptedWIF = wallet.encrypt(account.WIF, passphrase);
 
-                account.label = walletName;
+                account.label = name;
 
-                wallets.add(walletName, account);
+                wallets.add(name, _.merge(account, { _encryptedWIF, name, passphrase }));
 
-                resolve(walletName);
+                resolve(name);
             }
             catch (e) {
                 return reject('An error occured while trying to generate a new wallet.')
@@ -62,7 +62,7 @@ export default {
      *  {String} timestamp
      *  {String} to_address
      */
-    fetchRecentTransactions(walletName) {
+    fetchRecentTransactions(name) {
         return new Promise((resolve, reject) => {
 
             return storage.get('userWallet', (readError, data) => {
@@ -74,9 +74,9 @@ export default {
                     data.accounts = [];
                 }
 
-                var account = data.accounts.find(e => e.label === walletName);
+                var account = data.accounts.find(e => e.label === name);
                 if (typeof account === 'undefined') {
-                    console.log(`Error opening wallet: '${walletName}' doesn't exit.`);
+                    console.log(`Error opening wallet: '${name}' doesn't exit.`);
                     return
                 }
 
