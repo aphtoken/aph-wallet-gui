@@ -46,8 +46,13 @@ export default new Router({
       ],
     },
     {
+      path: '/dashboard',
+      component: require('@/components/Dashboard').default,
+      // children: [],
+    },
+    {
       path: '*',
-      redirect: '/login',
+      redirect: '/dashboard',
     },
   ],
 });
