@@ -30,7 +30,7 @@
       </a>
     </div>
     <div class="footer link-list">
-      <a>
+      <a @click="logOut">
         <span class="icon">
           <aph-icon name="back"></aph-icon>
         </span>
@@ -42,7 +42,11 @@
 
 <script>
 export default {
-
+  methods: {
+    logOut() {
+      this.$router.push('login');
+    },
+  },
 };
 </script>
 
@@ -84,6 +88,10 @@ export default {
 
         svg {
           height: $space * 2;
+        }
+
+        path {
+          transition: $transition;
         }
       }
 
