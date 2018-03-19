@@ -6,7 +6,7 @@
     <div class="menu link-list">
       <a>
         <span class="icon">
-          <aph-icon name="wallet"></aph-icon>
+          <aph-icon name="dashboard"></aph-icon>
         </span>
         <span class="label">Dashboard</span>
       </a>
@@ -18,13 +18,13 @@
       </a>
       <a>
         <span class="icon">
-          <aph-icon name="wallet"></aph-icon>
+          <aph-icon name="history"></aph-icon>
         </span>
         <span class="label">History</span>
       </a>
       <a>
         <span class="icon">
-          <aph-icon name="wallet"></aph-icon>
+          <aph-icon name="settings"></aph-icon>
         </span>
         <span class="label">Settings</span>
       </a>
@@ -90,7 +90,7 @@ export default {
           height: $space * 2;
         }
 
-        path {
+        .fill, .stroke {
           transition: $transition;
         }
       }
@@ -102,8 +102,13 @@ export default {
       &:hover {
         border-color: white;
 
-        .icon path {
-          fill: white;
+        .icon {
+          .stroke {
+            stroke: white;
+          }
+          .fill {
+            fill: white;
+          }
         }
       }
 
@@ -132,7 +137,7 @@ export default {
           height: $space;
         }
 
-        path {
+        .fill {
           fill: white;
         }
       }

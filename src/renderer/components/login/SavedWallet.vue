@@ -2,7 +2,7 @@
   <div id="login--saved-wallet">
     <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
     <aph-input v-if="showPassphrase" v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
-    <div v-if="showButton" class="login">Login</div>
+    <div v-if="showButton" class="login" @click="login">Login</div>
   </div>
 </template>
 
@@ -33,6 +33,12 @@ export default {
         },
       ],
     };
+  },
+
+  methods: {
+    login() {
+      this.$router.push('dashboard');
+    },
   },
 
   watch: {

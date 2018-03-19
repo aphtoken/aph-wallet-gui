@@ -54,7 +54,7 @@
     </div>
     <div class="btn-group">
       <router-link to="#" class="print">Print</router-link>
-      <router-link to="#" class="done">Done</router-link>
+      <router-link to="dashboard" class="done">Done</router-link>
     </div>
   </section>
 </template>

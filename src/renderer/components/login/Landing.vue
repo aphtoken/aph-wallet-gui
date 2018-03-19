@@ -11,7 +11,7 @@
         <p class="">Create Wallet</p>
       </router-link>
     </div>
-    <router-link class="settings-btn" to="/landing">Settings</router-link>
+    <router-link class="settings-btn" to="login">Settings</router-link>
     <!-- <button v-on:click="testCreateWallet">
       Test Create
     </button>
