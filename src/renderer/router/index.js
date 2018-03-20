@@ -43,6 +43,20 @@ export default new Router({
             right: require('@/components/login/SavedWallet').default,
           },
         },
+        {
+          path: 'encrypted-key',
+          components: {
+            left: require('@/components/login/Logo').default,
+            right: require('@/components/login/EncryptedKey').default,
+          },
+        },
+        {
+          path: 'private-key',
+          components: {
+            left: require('@/components/login/Logo').default,
+            right: require('@/components/login/PrivateKey').default,
+          },
+        },
       ],
     },
     {
