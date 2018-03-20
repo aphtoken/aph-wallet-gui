@@ -5,13 +5,17 @@
     <p class="help-text">Choose a passphrase to encrypt your private key:</p>
     <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
     <aph-input v-model="passphraseConfirm" placeholder="Repeat your passphrase here" type="password"></aph-input>
-    <div v-if="showButton" class="create" @click="create">Create</div>
+    <div v-if="showButton" class="create" @click="create">{{ buttonLabel }}</div>
   </div>
 </template>
 
 <script>
 export default {
   computed: {
+    buttonLabel() {
+      return this.creating ? 'Creating...' : 'Create';
+    },
+
     passphrasesMatch() {
       return this.passphrase === this.passphraseConfirm;
     },
@@ -24,6 +28,7 @@ export default {
   data() {
     return {
       creating: false,
+      error: null,
       passphrase: '',
       passphraseConfirm: '',
       walletName: '',
@@ -34,7 +39,8 @@ export default {
     create() {
       this.creating = true;
 
-      this.$services.neo.createWallet(this.walletName, this.passphrase, this.passphraseConfirm)
+      this.$services.neo
+        .createWallet(this.walletName, this.passphrase, this.passphraseConfirm)
         .then((walletName) => {
           this.creating = false;
 
@@ -43,8 +49,9 @@ export default {
             query: { walletName },
           });
         })
-        .catch(() => {
+        .catch((error) => {
           this.creating = false;
+          this.error = error;
         });
     },
   },

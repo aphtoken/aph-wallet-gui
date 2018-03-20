@@ -1,0 +1,23 @@
+%underlined-header {
+  font-family: GilroyMedium;
+  font-size: $font-size-lg;
+  margin: 0 0 $space 0;
+  font-weight: normal;
+
+  &:after {
+    content: "";
+    display: block;
+    height: 3px;
+    background: $purple;
+    width: $space * 2.5;
+    margin-top: $space-sm;
+  }
+}
+
+%small-uppercase-grey-label {
+  color: $grey;
+  font-family: GilroyMedium;
+  font-size: $space * .6;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
