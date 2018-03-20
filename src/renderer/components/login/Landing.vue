@@ -4,11 +4,11 @@
     <div class="btn-group">
       <router-link class="login-btn" to="/login/menu">
         <aph-icon name="wallet"></aph-icon>
-        <p class="">Login</p>
+        <p>Login</p>
       </router-link>
       <router-link class="create-wallet-btn" to="/login/create-wallet">
         <aph-icon name="create"></aph-icon>
-        <p class="">Create Wallet</p>
+        <p>Create Wallet</p>
       </router-link>
     </div>
     <router-link class="settings-btn" to="login">Settings</router-link>
@@ -56,10 +56,6 @@ export default {
     @extend %btn-square;
 
     box-shadow: 0 0 100px 10px rgba($purple, .25);
-
-    svg {
-      height: 3rem;
-    }
   }
 
   .settings-btn {

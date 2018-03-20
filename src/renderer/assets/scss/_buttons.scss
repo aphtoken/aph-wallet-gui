@@ -60,8 +60,18 @@
       flex: 1;
       justify-content: center;
 
-      path {
+      svg {
+        height: 3rem;
+      }
+
+      .fill {
         fill: $purple;
+        transition: $transition;
+      }
+
+      .stroke {
+        stroke: $purple;
+        transition: $transition;
       }
     }
 
@@ -75,8 +85,14 @@
       background: $purple;
       color: white;
 
-      .aph-icon path {
-        fill: white;
+      .aph-icon {
+        .fill {
+          fill: white;
+        }
+
+        .stroke {
+          stroke: white;
+        }
       }
     }
   }

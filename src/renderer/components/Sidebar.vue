@@ -1,7 +1,7 @@
 <template>
   <section id="dashboard--sidebar">
     <div class="header">
-      <aph-icon name="logo"></aph-icon>
+      <aph-icon name="logo-mark"></aph-icon>
     </div>
     <div class="menu link-list">
       <a>
@@ -30,12 +30,12 @@
       </a>
     </div>
     <div class="footer link-list">
-      <a @click="logOut">
+      <router-link to="/login">
         <span class="icon">
           <aph-icon name="back"></aph-icon>
         </span>
         <span class="label">Log Out</span>
-      </a>
+      </router-link>
     </div>
   </section>
 </template>
@@ -58,13 +58,12 @@ export default {
 
   .header {
     flex: none;
-    padding: $space-xl $space-xl $space-lg;
+    padding: $space-xl;
 
-    .logo--mark {
-      fill: white;
-    }
-    .logo--word {
-      display: none;
+    .logo-mark {
+      .fill {
+        fill: white;
+      }
     }
   }
 

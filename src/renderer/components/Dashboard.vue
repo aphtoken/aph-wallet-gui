@@ -1,14 +1,32 @@
 <template>
   <section id="dashboard">
     <sidebar></sidebar>
-    <div class="dashboard-content">
-      <router-view></router-view>
+    <div class="dashboard--content">
+      <router-view name="header"></router-view>
+      <div class="dashboard--grid">
+        <div class="dashboard--grid--row">
+          <div class="dashboard--grid--cell">
+            <router-view name="top-left"></router-view>
+          </div>
+          <div class="dashboard--grid--cell">
+            <router-view name="top-right"></router-view>
+          </div>
+        </div>
+        <div class="dashboard--grid--row">
+          <div class="dashboard--grid--cell">
+            <router-view name="bottom-left"></router-view>
+          </div>
+          <div class="dashboard--grid--cell">
+            <router-view name="bottom-right"></router-view>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </template>
 
 <script>
-import Sidebar from './dashboard/Sidebar';
+import Sidebar from './Sidebar';
 
 export default {
   components: {
@@ -27,8 +45,30 @@ export default {
     width: 17rem;
   }
 
-  .dashboard-content {
+  .dashboard--content {
+    background: $light-grey;
+    display: flex;
+    flex-direction: column;
     flex: 1;
+  }
+
+  .dashboard--grid {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .dashboard--grid--row {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+  }
+
+  .dashboard--grid--cell {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    padding: $space;
   }
 }
 </style>

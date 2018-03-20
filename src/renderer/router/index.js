@@ -48,11 +48,22 @@ export default new Router({
     {
       path: '/dashboard',
       component: require('@/components/Dashboard').default,
-      // children: [],
+      children: [
+        {
+          path: 'home',
+          components: {
+            bottomLeft: null,
+            bottomRight: null,
+            header: require('@/components/PortfolioHeader').default,
+            topLeft: null,
+            topRight: null,
+          },
+        },
+      ],
     },
     {
       path: '*',
-      redirect: '/dashboard',
+      redirect: '/dashboard/home',
     },
   ],
 });
