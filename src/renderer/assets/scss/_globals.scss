@@ -6,12 +6,16 @@
 
 @import 'buttons';
 @import 'fonts';
+@import 'type';
 
 html, body {
   font-family: Gilroy;
   font-size: $font-size;
   height: 100%;
-  letter-spacing: .5px;
+}
+
+* {
+  letter-spacing: $letter-spacing;
 }
 
 a {

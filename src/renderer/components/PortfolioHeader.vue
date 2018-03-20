@@ -1,6 +1,14 @@
 <template>
   <section id="portfolio-header">
-    <div class="ticker"></div>
+    <simple-donut :percent="23"></simple-donut>
+    <div class="ticker">
+      <h1 class="underlined">My Porfolio</h1>
+      <aph-balance amount="57,234.91"></aph-balance>
+      <div class="change">
+        <div class="label">24h change</div>
+        <div class="amount">+$1,234.34</div>
+      </div>
+    </div>
     <div class="btn-group">
       <div class="receive-btn">
         <aph-icon name="receive"></aph-icon>
@@ -15,16 +23,29 @@
 </template>
 
 <script>
-export default {
+import SimpleDonut from './charts/SimpleDonut';
 
+export default {
+  components: {
+    SimpleDonut,
+  },
 };
 </script>
 
 <style lang="scss">
+h1.underlined {
+  @extend %underlined-header;
+}
+
 #portfolio-header {
   display: flex;
   flex-direction: row;
   padding: $space-lg;
+  align-items: center;
+
+  .simple-donut {
+    margin: 0 $space-xl 0 0;
+  }
 
   .btn-group {
     display: flex;
@@ -34,6 +55,22 @@ export default {
 
   .ticker {
     flex: 1;
+
+    .change {
+      align-items: center;
+      display: flex;
+      margin-top: $space;
+
+      .label {
+        @extend %small-uppercase-grey-label;
+      }
+
+      .amount {
+        color: $green;
+        font-size: $font-size-sm;
+        margin-left: $space;
+      }
+    }
   }
 
   .receive-btn, .send-btn {

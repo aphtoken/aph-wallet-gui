@@ -66,11 +66,11 @@ export default new Router({
         {
           path: 'home',
           components: {
-            bottomLeft: null,
-            bottomRight: null,
+            'bottom-left': require('@/components/dashboard/Holdings').default,
+            'bottom-right': require('@/components/dashboard/RecentTransactions').default,
             header: require('@/components/PortfolioHeader').default,
-            topLeft: null,
-            topRight: null,
+            'top-left': require('@/components/dashboard/TokenStats').default,
+            'top-right': require('@/components/dashboard/Price').default,
           },
         },
       ],

@@ -32,7 +32,6 @@ export default {
                 return reject('Please choose a longer passphrase');
             }
 
-
             try {
                 let account = new wallet.Account(wallet.generatePrivateKey());
                 const _encryptedWIF = wallet.encrypt(account.WIF, passphrase);

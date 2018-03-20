@@ -4,19 +4,19 @@
     <div class="dashboard--content">
       <router-view name="header"></router-view>
       <div class="dashboard--grid">
-        <div class="dashboard--grid--row">
-          <div class="dashboard--grid--cell">
+        <div class="dashboard--grid--column">
+          <div class="dashboard--grid--cell top-left">
             <router-view name="top-left"></router-view>
           </div>
-          <div class="dashboard--grid--cell">
-            <router-view name="top-right"></router-view>
-          </div>
-        </div>
-        <div class="dashboard--grid--row">
-          <div class="dashboard--grid--cell">
+          <div class="dashboard--grid--cell bottom-left">
             <router-view name="bottom-left"></router-view>
           </div>
-          <div class="dashboard--grid--cell">
+        </div>
+        <div class="dashboard--grid--column">
+          <div class="dashboard--grid--cell top-right">
+            <router-view name="top-right"></router-view>
+          </div>
+          <div class="dashboard--grid--cell bottom-right">
             <router-view name="bottom-right"></router-view>
           </div>
         </div>
@@ -54,13 +54,14 @@ export default {
 
   .dashboard--grid {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex: 1;
+    padding: $space;
   }
 
-  .dashboard--grid--row {
+  .dashboard--grid--column {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex: 1;
   }
 
@@ -69,6 +70,18 @@ export default {
     flex-direction: row;
     flex: 1;
     padding: $space;
+
+    > * {
+      flex: 1;
+    }
+
+    &.top-left {
+      flex: none;
+    }
+
+    &.bottom-left {
+      flex: 1;
+    }
   }
 }
 </style>
