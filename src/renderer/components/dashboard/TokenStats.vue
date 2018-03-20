@@ -9,15 +9,13 @@
     </div>
     <div class="body">
       <aph-icon name="logo-mark"></aph-icon>
-      <div class="holdings">
+      <div class="balance">
         <div class="title">Aphelion</div>
         <div class="amount">
-          211,414
-          <span class="currency">APH</span>
+          211,414<span class="currency">APH</span>
         </div>
         <div class="value">
-          $325,557.56
-          <span class="currency">USD</span>
+          $325,557.56<span class="currency">USD</span>
         </div>
       </div>
     </div>
@@ -89,7 +87,7 @@ export default {
       }
     }
 
-    .holdings {
+    .balance {
       .title {
         color: $purple;
         font-family: GilroyMedium;
@@ -112,6 +110,10 @@ export default {
       .value {
         font-family: GilroyMedium;
         font-size: $font-size-sm;
+
+        .currency {
+          margin-left: $space-xsm;
+        }
       }
     }
   }

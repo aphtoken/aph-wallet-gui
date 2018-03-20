@@ -1,8 +1,6 @@
 <template>
   <div class="aph-balance">
-    <span class="symbol">$</span>
-    <span class="amount">{{ amount }}</span>
-    <span class="currency">USD</span>
+    <span class="symbol">$</span><span class="amount">{{ amount }}</span><span class="currency">USD</span>
   </div>
 </template>
 
@@ -24,6 +22,7 @@ export default {
 .aph-balance {
   .symbol {
     font-size: $font-size-xl;
+    margin-right: $space-sm;
   }
 
   .amount {
