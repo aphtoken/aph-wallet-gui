@@ -50,11 +50,11 @@ export default {
   border-radius: $border-radius;
   display: flex;
   flex-direction: column;
-  padding: $space;
 
   .header {
     display: flex;
     flex: none;
+    padding: $space;
 
     h1.underlined {
       @extend %underlined-header;
@@ -79,7 +79,7 @@ export default {
     align-items: center;
     display: flex;
     flex: 1;
-    padding: $space-lg 0;
+    padding: $space-lg $space;
 
     .aph-icon {
       padding: 0 $space-lg 0 0;
@@ -119,6 +119,7 @@ export default {
   .footer {
     display: flex;
     flex: none;
+    padding: $space;
 
     > div {
       flex: 1;
