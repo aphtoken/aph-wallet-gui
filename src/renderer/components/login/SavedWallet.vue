@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="Windows-1252"?>
 <template>
   <div id="login--saved-wallet">
     <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
@@ -22,23 +23,24 @@ export default {
     return {
       passphrase: '',
       wallet: null,
-      wallets: [
-        {
-          label: 'Wallet 1',
-          value: 'wallet-1',
-        },
-        {
-          label: 'Wallet 2',
-          value: 'wallet-2',
-        },
-      ],
+      wallets: [],
     };
   },
 
   methods: {
     login() {
-      this.$router.push('dashboard');
+      this.$services.wallets.openSavedWallet(this.wallet.label, this.passphrase)
+        .then(() => {
+          this.$router.push('dashboard');
+        })
+        .catch(() => {
+          this.creating = false;
+        });
     },
+  },
+
+  mounted() {
+    this.wallets = this.$services.wallets.getAll();
   },
 
   watch: {

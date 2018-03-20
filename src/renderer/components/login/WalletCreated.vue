@@ -8,11 +8,11 @@
     </p>
     <div v-if="wallet" class="qr-codes">
       <div class="qr-code">
-        <vue-qrcode :value="wallet._address" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
+        <vue-qrcode :value="wallet.address" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
         <p class="help-text">Public Address</p>
       </div>
       <div class="qr-code">
-        <vue-qrcode :value="wallet._WIF" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
+        <vue-qrcode :value="wallet.wif" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
         <p class="help-text">Encrypted Private Key</p>
       </div>
     </div>
@@ -28,8 +28,8 @@
     <div class="wallet-data public-address">
       <div class="label">Public Address</div>
       <div class="value">
-        <p>{{ wallet._address }}</p>
-        <span class="copy-link" @click="copy(wallet._address)">
+        <p>{{ wallet.address }}</p>
+        <span class="copy-link" @click="copy(wallet.address)">
           <aph-icon name="copy"></aph-icon>
         </span>
       </div>
@@ -37,8 +37,8 @@
     <div class="wallet-data encrypted-key">
       <div class="label">Encrypted Key</div>
       <div class="value">
-        <p>{{ wallet._WIF }}</p>
-        <span class="copy-link" @click="copy(wallet._WIF)">
+        <p>{{ wallet.encryptedWIF }}</p>
+        <span class="copy-link" @click="copy(wallet.encryptedWIF)">
           <aph-icon name="copy"></aph-icon>
         </span>
       </div>
@@ -46,8 +46,8 @@
     <div class="wallet-data private-key">
       <div class="label">Private Key</div>
       <div class="value">
-        <p>{{ wallet._privateKey }}</p>
-        <span class="copy-link" @click="copy(wallet._privateKey)">
+        <p>{{ wallet.privateKey }}</p>
+        <span class="copy-link" @click="copy(wallet.privateKey)">
           <aph-icon name="copy"></aph-icon>
         </span>
       </div>
@@ -77,8 +77,7 @@ export default {
   },
 
   mounted() {
-    // this.wallet = this.$services.wallets.getOne(this.$route.query.walletName);
-    this.wallet = this.$services.wallets.getOne('11111');
+    this.wallet = this.$services.wallets.getCurrent();
   },
 
   components: {

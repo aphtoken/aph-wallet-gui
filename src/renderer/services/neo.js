@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { wallet, Neon, rpc, tx, api } from "@cityofzion/neon-js";
+import { wallet, Neon, rpc, tx, api } from '@cityofzion/neon-js';
 import wallets from './wallets';
 
 export default {
@@ -37,11 +37,16 @@ export default {
                 let account = new wallet.Account(wallet.generatePrivateKey());
                 const _encryptedWIF = wallet.encrypt(account.WIF, passphrase);
 
-                account.label = name;
+                account.label = name;   
+                wallets.add(name, {
+                    label: name,
+                    encryptedWIF: _encryptedWIF,
+                    address: account.address,
+                    scriptHash: account.scriptHash
+                });
 
-                wallets.add(name, _.merge(account, { _encryptedWIF, name, passphrase }));
-
-                resolve(name);
+                wallets.openSavedWallet(name, passphrase);
+                resolve(_.merge(account, { _encryptedWIF, passphrase }));
             }
             catch (e) {
                 return reject('An error occured while trying to generate a new wallet.')

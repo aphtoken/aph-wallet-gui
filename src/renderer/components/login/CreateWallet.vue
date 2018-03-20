@@ -43,8 +43,7 @@ export default {
             query: { walletName },
           });
         })
-        .catch((error) => {
-          console.log(error);
+        .catch(() => {
           this.creating = false;
         });
     },
