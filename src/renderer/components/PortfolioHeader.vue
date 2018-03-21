@@ -52,7 +52,7 @@ h1.underlined {
 #portfolio-header {
   display: flex;
   flex-direction: row;
-  padding: $space-lg;
+  padding: $space-lg $space-lg 0;
   align-items: center;
 
   .simple-donut {
@@ -103,10 +103,6 @@ h1.underlined {
 
         &.decrease {
           color: $red;
-
-          &:before {
-            content: "-";
-          }
         }
       }
     }

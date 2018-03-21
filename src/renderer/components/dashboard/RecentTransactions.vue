@@ -4,19 +4,18 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <div class="transaction" @click="viewTransaction(transaction.txid)" v-for="transaction in transactions">
-        <div class="address">{{transaction.txid}}</div>
-        <div class="currency">{{transaction.asset}}</div>
+      <router-link class="transaction" to="/dashboard/trx/${transaction.hash}" v-for="(transaction, index) in transactions" :key="index">
+        <div class="address">{{ transaction.hash }}</div>
+        <div class="currency">{{ transaction.symbol}}</div>
         <div class="date">{{transaction.block_index}}</div>
-        <div class="amount" v-bind:class="[transaction.direction]">{{transaction.value}}</div>
-      </div>
+        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ formatAmount(transaction) }}</div>
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-
   data() {
     return {
       transactions: [],
@@ -33,8 +32,17 @@ export default {
           console.log(e);
         });
     },
+
     viewTransaction(hash) {
       this.$router.push({ path: `/dashboard/trx/${hash}` });
+    },
+
+    formatAmount({ amount }) {
+      return this.$accounting.formatNumber(amount, 2);
+    },
+
+    formatDate({ timestamp }) {
+      return this.$moment(timestamp, 'X').format(this.$constants.formats.DATE);
     },
   },
 
@@ -54,6 +62,7 @@ export default {
   border-radius: $border-radius;
   display: flex;
   flex-direction: column;
+  padding-bottom: $space;
 
   .header {
     padding: $space;
@@ -67,19 +76,20 @@ export default {
   }
 
   .body {
-    padding: 0 $space $space;
+    padding: 0 $space;
     overflow: auto;
   }
 
   .transaction {
-    align-items: center;
-    border-top: 1px solid $light-grey;
-    cursor: pointer;
-    display: flex;
-    font-family: GilroySemibold;
-    font-size: toRem(12px);
-    justify-content: space-between;
-    padding: $space $space-sm;
+      align-items: center;
+      border-top: 1px solid $light-grey;
+      color: $dark;
+      cursor: pointer;
+      display: flex;
+      font-family: GilroySemibold;
+      font-size: toRem(12px);
+      justify-content: space-between;
+      padding: $space $space-sm;
 
     > * {
       flex: 1;
@@ -107,10 +117,6 @@ export default {
 
       &.sent {
         color: $red;
-
-        &:before {
-          content: "-";
-        }
       }
     }
 

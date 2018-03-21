@@ -81,20 +81,18 @@ export default {
                     for (let t of res) {
                         if (t.neo_sent === true) {
                           splitTransactions.push({
-                            txid: t.txid,
+                            hash: t.txid,
                             block_index: t.block_index,
-                            asset: 'NEO',
-                            value: t.NEO,
-                            direction: t.NEO > 0 ? 'received' : 'sent'
+                            symbol: 'NEO',
+                            value: t.NEO
                           });
                         }
                         if (t.gas_sent === true) {
                           splitTransactions.push({
-                            txid: t.txid,
+                            hash: t.txid,
                             block_index: t.block_index,
-                            asset: 'GAS',
-                            value: t.GAS,
-                            direction: t.GAS > 0 ? 'received' : 'sent'
+                            symbol: 'GAS',
+                            value: t.GAS
                           });
                         }
                     }

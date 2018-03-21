@@ -9,7 +9,6 @@ const loadStates = {
   READY: 'READY',
 };
 
-/* eslint-disable import/prefer-default-export */
 export {
   formats,
   loadStates,
