@@ -23,7 +23,13 @@ export default {
 
   methods: {
     login() {
-      this.$router.push('dashboard/home');
+      this.$services.wallets.openEncryptedKey(this.encryptedKey, this.passphrase)
+        .then(() => {
+          this.$router.push('dashboard');
+        })
+        .catch(() => {
+          this.creating = false;
+        });
     },
   },
 };
