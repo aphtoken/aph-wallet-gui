@@ -6,10 +6,11 @@ import accounting from 'accounting';
 import moment from 'moment';
 
 // Initial Vue Libraries.
+import './libraries';
+import * as mixins from './mixins';
 import App from './App';
 import router from './router';
 import store from './store';
-import * as mixins from './mixins';
 
 // Global Vue Components.
 import Icon from './components/Icon';

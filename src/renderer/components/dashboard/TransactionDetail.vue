@@ -92,39 +92,39 @@
 export default {
   computed: {
     block() {
-      return window.accounting.formatNumber(this.transaction.block);
+      return this.$accounting.formatNumber(this.transaction.block);
     },
 
     confirmations() {
-      return window.accounting.formatNumber(this.transaction.confirmations);
+      return this.$accounting.formatNumber(this.transaction.confirmations);
     },
 
     date() {
-      return window.moment(this.transaction.timestamp, 'X').format('DD-MM-YYYY');
+      return this.$moment(this.transaction.timestamp, 'X').format(this.$constants.formats.DATE);
     },
 
     networkFee() {
-      return `${window.accounting.formatNumber(this.transaction.networkFee)} GAS`;
+      return `${this.$accounting.formatNumber(this.transaction.networkFee)} GAS`;
     },
 
     size() {
-      return `${window.accounting.formatNumber(this.transaction.size)} Bytes`;
+      return `${this.$accounting.formatNumber(this.transaction.size)} Bytes`;
     },
 
     systemFee() {
-      return `${window.accounting.formatNumber(this.transaction.systemFee)} GAS`;
+      return `${this.$accounting.formatNumber(this.transaction.systemFee)} GAS`;
     },
 
     time() {
-      return window.moment(this.transaction.timestamp, 'X').format('LTS');
+      return this.$moment(this.transaction.timestamp, 'X').format(this.$constants.formats.TIME);
     },
 
     token() {
-      return `${window.accounting.formatNumber(this.transaction.block)} ${this.transaction.currency}`;
+      return `${this.$accounting.formatNumber(this.transaction.block)} ${this.transaction.currency}`;
     },
 
     value() {
-      return `${window.accounting.formatMoney(this.transaction.amount)} USD`;
+      return `${this.$accounting.formatMoney(this.transaction.amount)} USD`;
     },
   },
 

@@ -1,3 +1,8 @@
+const formats = {
+  DATE: 'DD-MM-YYYY',
+  TIME: 'LTC',
+};
+
 const loadStates = {
   FAILED: 'FAILED',
   LOADING: 'LOADING',
@@ -6,6 +11,7 @@ const loadStates = {
 
 /* eslint-disable import/prefer-default-export */
 export {
+  formats,
   loadStates,
 };
 

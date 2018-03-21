@@ -4,11 +4,11 @@
     <div class="ticker">
       <h1 class="underlined">My Porfolio</h1>
       <div class="balance">
-        <span class="symbol">$</span><span class="amount">57,234.91</span><span class="currency">USD</span>
+        <span class="symbol">$</span><span class="amount">{{ balance }}</span><span class="currency">USD</span>
       </div>
       <div class="change">
         <div class="label">24h change</div>
-        <div class="amount">+$1,234.34</div>
+        <div class="amount increase">{{ changeUsd }}</div>
       </div>
     </div>
     <div class="btn-group">
@@ -30,6 +30,16 @@ import SimpleDonut from './charts/SimpleDonut';
 export default {
   components: {
     SimpleDonut,
+  },
+
+  computed: {
+    balance() {
+      return this.$accounting.formatNumber(57234.91, 2);
+    },
+
+    changeUsd() {
+      return this.$accounting.formatMoney(1234.34);
+    },
   },
 };
 </script>
@@ -80,9 +90,24 @@ h1.underlined {
       }
 
       .amount {
-        color: $green;
         font-size: toRem(16px);
         margin-left: $space;
+
+        &.increase {
+          color: $green;
+
+          &:before {
+            content: "+";
+            }
+        }
+
+        &.decrease {
+          color: $red;
+
+          &:before {
+            content: "-";
+          }
+        }
       }
     }
   }

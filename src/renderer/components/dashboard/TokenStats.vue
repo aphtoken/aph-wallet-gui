@@ -4,33 +4,33 @@
       <h1 class="underlined">Token Stats</h1>
       <div class="current-value">
         <div class="label">Current Value</div>
-        <div class="amount">$1.54</div>
+        <div class="amount">{{ currentValue }}</div>
       </div>
     </div>
     <div class="body">
       <aph-icon name="logo-mark"></aph-icon>
       <div class="balance">
-        <div class="title">Aphelion</div>
+        <div class="name">{{ this.tokenStats.name }}</div>
         <div class="amount">
-          211,414<span class="currency">APH</span>
+          {{ balance }}<span class="currency">{{ this.tokenStats.smybol }}</span>
         </div>
         <div class="value">
-          $325,557.56<span class="currency">USD</span>
+          {{ balanceValue }}<span class="currency">USD</span>
         </div>
       </div>
     </div>
     <div class="footer">
       <div class="total-supply">
         <div class="label">Total Supply</div>
-        <div class="amount">75,000,000</div>
+        <div class="amount">{{ totalSupply }}</div>
       </div>
       <div class="market-cap">
         <div class="label">Market Cap</div>
-        <div class="amount">$254,045,342</div>
+        <div class="amount">{{ marketCap }}</div>
       </div>
       <div class="change">
         <div class="label">24h Change</div>
-        <div class="amount">+2.77%</div>
+        <div class="amount increase">{{ change }}</div>
       </div>
     </div>
   </div>
@@ -38,7 +38,46 @@
 
 <script>
 export default {
-//
+  computed: {
+    balance() {
+      return this.$accounting.formatNumber(this.tokenStats.balance, 2);
+    },
+
+    balanceValue() {
+      return this.$accounting.formatMoney(this.tokenStats.balanceValue);
+    },
+
+    change() {
+      return this.$accounting.formatNumber(this.tokenStats.change, 2);
+    },
+
+    currentValue() {
+      return this.$accounting.formatMoney(this.tokenStats.tokenValue);
+    },
+
+    marketCap() {
+      return this.$accounting.formatMoney(this.tokenStats.marketCap, '$', 0);
+    },
+
+    totalSupply() {
+      return this.$accounting.formatNumber(this.tokenStats.supply);
+    },
+  },
+
+  data() {
+    return {
+      tokenStats: {
+        tokenValue: 1.54,
+        balance: 211414,
+        balanceValue: 325557.56,
+        name: 'Aphelion',
+        symbol: 'APH',
+        supply: 75000000,
+        marketCap: 254045342,
+        change: 2.77,
+      },
+    };
+  },
 };
 </script>
 
@@ -88,7 +127,7 @@ export default {
     }
 
     .balance {
-      .title {
+      .name {
         color: $purple;
         font-family: GilroyMedium;
         font-size: toRem(23px);
@@ -133,10 +172,28 @@ export default {
     }
 
     .change {
-      color: $green;
-
       .amount {
         font-family: GilroyMedium;
+
+        &:after {
+          content: "%";
+        }
+
+        &.increase {
+          color: $green;
+
+          &:before {
+            content: "+";
+          }
+        }
+
+        &.decrease {
+          color: $red;
+
+          &:before {
+            content: "-";
+          }
+        }
       }
     }
   }
