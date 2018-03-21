@@ -6,8 +6,8 @@
     <div class="body">
       <router-link class="transaction" to="/dashboard/trx/${transaction.hash}" v-for="(transaction, index) in transactions" :key="index">
         <div class="address">{{ transaction.hash }}</div>
-        <div class="currency">{{ transaction.symbol}}</div>
-        <div class="date">{{transaction.block_index}}</div>
+        <div class="currency">{{ transaction.symbol }}</div>
+        <div class="date">{{ transaction.block_index }}</div>
         <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ formatAmount(transaction) }}</div>
       </router-link>
     </div>
@@ -38,7 +38,7 @@ export default {
     },
 
     formatAmount({ amount }) {
-      return this.$accounting.formatNumber(amount, 2);
+      return this.$accounting.formatNumber(amount, 8);
     },
 
     formatDate({ timestamp }) {

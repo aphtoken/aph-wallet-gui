@@ -84,7 +84,7 @@ export default {
                             hash: t.txid,
                             block_index: t.block_index,
                             symbol: 'NEO',
-                            value: t.NEO
+                            amount: t.NEO
                           });
                         }
                         if (t.gas_sent === true) {
@@ -92,7 +92,7 @@ export default {
                             hash: t.txid,
                             block_index: t.block_index,
                             symbol: 'GAS',
-                            value: t.GAS
+                            amount: t.GAS
                           });
                         }
                     }
