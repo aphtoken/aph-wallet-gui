@@ -4,46 +4,67 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <div class="transaction" @click="viewTransaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">APH</div>
-        <div class="date">25-01-2018</div>
-        <div class="amount sent">12,500</div>
-      </div>
-      <div class="transaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">APH</div>
-        <div class="date">23-01-2018</div>
-        <div class="amount sent">6,500</div>
-      </div>
-      <div class="transaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">NEO</div>
-        <div class="date">23-01-2018</div>
-        <div class="amount received">28.3</div>
-      </div>
-      <div class="transaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">GAS</div>
-        <div class="date">23-01-2018</div>
-        <div class="amount sent">5</div>
-      </div>
-      <div class="transaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">APH</div>
-        <div class="date">23-01-2018</div>
-        <div class="amount sent">12,500</div>
-      </div>
+      <router-link class="transaction" to="/dashboard/trx/${transaction.hash}" v-for="(transaction, index) in transactions" :key="index">
+        <div class="address">{{ transaction.hash }}</div>
+        <div class="currency">{{ transaction.symbol}}</div>
+        <div class="date">{{ formatDate(transaction) }}</div>
+        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ formatAmount(transaction) }}</div>
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      transactions: [
+        {
+          address: 'd73b8e0a99f42ebcb02119',
+          amount: 2458,
+          hash: '0x357da56be0d70bdd44d73b8e0a99f42ebcb02119',
+          symbol: 'APH',
+          timestamp: 1521643932,
+        },
+        {
+          address: 'd73b8e0a99f42ebcb02119',
+          amount: -13,
+          hash: '0x357da56be0d70bdd44d73b8e0a99f42ebcb02119',
+          symbol: 'APH',
+          timestamp: 1521643932,
+        },
+        {
+          address: 'd73b8e0a99f42ebcb02119',
+          amount: -25,
+          hash: '0x357da56be0d70bdd44d73b8e0a99f42ebcb02119',
+          symbol: 'NEO',
+          timestamp: 1521643932,
+        },
+        {
+          address: 'd73b8e0a99f42ebcb02119',
+          amount: 101,
+          hash: '0x357da56be0d70bdd44d73b8e0a99f42ebcb02119',
+          symbol: 'GAS',
+          timestamp: 1521643932,
+        },
+        {
+          address: 'd73b8e0a99f42ebcb02119',
+          amount: -1203,
+          hash: '0x357da56be0d70bdd44d73b8e0a99f42ebcb02119',
+          symbol: 'APH',
+          timestamp: 1521643932,
+        },
+      ],
+    };
+  },
+
   methods: {
-    viewTransaction() {
-      const hash = '0x357da56be0d70bdd44d73b8e0a99f42ebcb02119';
-      this.$router.push({ path: `/dashboard/trx/${hash}` });
+    formatAmount({ amount }) {
+      return this.$accounting.formatNumber(amount, 2);
+    },
+
+    formatDate({ timestamp }) {
+      return this.$moment(timestamp, 'X').format(this.$constants.formats.DATE);
     },
   },
 };
@@ -74,14 +95,15 @@ export default {
   }
 
   .transaction {
-    align-items: center;
-    border-top: 1px solid $light-grey;
-    cursor: pointer;
-    display: flex;
-    font-family: GilroySemibold;
-    font-size: toRem(12px);
-    justify-content: space-between;
-    padding: $space $space-sm;
+      align-items: center;
+      border-top: 1px solid $light-grey;
+      color: $dark;
+      cursor: pointer;
+      display: flex;
+      font-family: GilroySemibold;
+      font-size: toRem(12px);
+      justify-content: space-between;
+      padding: $space $space-sm;
 
     > * {
       flex: 1;
@@ -109,10 +131,6 @@ export default {
 
       &.sent {
         color: $red;
-
-        &:before {
-          content: "-";
-        }
       }
     }
 

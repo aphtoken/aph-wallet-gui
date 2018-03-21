@@ -10,7 +10,7 @@ import './libraries';
 import * as mixins from './mixins';
 import App from './App';
 import router from './router';
-import store from './store';
+import { store } from './store';
 
 // Global Vue Components.
 import Icon from './components/Icon';
