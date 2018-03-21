@@ -30,7 +30,7 @@
   border: $border;
   color: white;
   cursor: pointer;
-  font-size: $font-size-sm;
+  font-size: toRem(16px);
   padding: $space * .7 $space * 5;
   text-align: center;
   transition: $transition;
@@ -50,9 +50,9 @@
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    height: $space * 10;
+    height: toRem(175px);
     transition: $transition;
-    width: $space * 10;
+    width: toRem(175px);
 
     .aph-icon {
       align-items: center;
@@ -76,7 +76,7 @@
     }
 
     p {
-      font-size: $font-size-sm;
+      font-size: toRem(16px);
       margin: $space 0;
       text-align: center;
     }

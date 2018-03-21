@@ -17,6 +17,10 @@ export default {
     return lockr.get(STORAGE_KEY, {});
   },
 
+  getAllAsArray() {
+    return _.values(this.getAll());
+  },
+
   getOne(name) {
     return _.get(this.getAll(), name);
   },

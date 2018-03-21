@@ -40,7 +40,7 @@ export default {
   },
 
   mounted() {
-    this.wallets = this.$services.wallets.getAll();
+    this.wallets = this.$services.wallets.getAllAsArray();
   },
 
   watch: {

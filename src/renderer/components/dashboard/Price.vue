@@ -84,7 +84,8 @@ export default {
                 },
                 autoSkip: true,
                 fontColor: '#19193A',
-                fontFamily: 'GilroySemiBold',
+                fontFamily: 'GilroySemibold',
+                fontSize: 12,
                 max: 1.5,
                 maxTicksLimit: 5,
                 min: 1,
@@ -100,7 +101,8 @@ export default {
               },
               ticks: {
                 fontColor: '#B5B5CA',
-                fontFamily: 'GilroySemiBold',
+                fontFamily: 'GilroySemibold',
+                fontSize: 12,
               },
             },
           ],
@@ -161,8 +163,8 @@ export default {
     }
 
     .value {
-      font-family: GilroySemiBold;
-      font-size: $space * .6;
+      font-family: GilroySemibold;
+      font-size: toRem(12px);
     }
   }
 
@@ -185,7 +187,7 @@ export default {
       cursor: pointer;
       flex: 1;
       font-family: GilroyMedium;
-      font-size: $font-size-sm;
+      font-size: toRem(14px);
       padding: $space-sm 0;
       text-align: center;
 

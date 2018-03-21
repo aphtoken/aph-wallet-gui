@@ -68,10 +68,11 @@ export default {
   }
 
   .transaction {
+    align-items: center;
     border-top: 1px solid $light-grey;
     display: flex;
     font-family: GilroySemibold;
-    font-size: $font-size-xsm;
+    font-size: toRem(12px);
     justify-content: space-between;
     padding: $space $space-sm;
 

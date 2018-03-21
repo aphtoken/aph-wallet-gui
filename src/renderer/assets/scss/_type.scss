@@ -1,6 +1,10 @@
+@function fontSize($size) {
+  @return toRem($size);
+}
+
 %underlined-header {
   font-family: GilroyMedium;
-  font-size: $font-size-lg;
+  font-size: toRem(20px);
   margin: 0 0 $space 0;
   font-weight: normal;
 
@@ -17,7 +21,7 @@
 %small-uppercase-grey-label {
   color: $grey;
   font-family: GilroyMedium;
-  font-size: $space * .6;
+  font-size: toRem(12px);
   letter-spacing: 1.5px;
   text-transform: uppercase;
 }

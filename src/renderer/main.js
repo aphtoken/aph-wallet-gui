@@ -11,7 +11,6 @@ import store from './store';
 import * as mixins from './mixins';
 
 // Global Vue Components.
-import Balance from './components/Balance';
 import Icon from './components/Icon';
 import Input from './components/Input';
 import Select from './components/Select';
@@ -35,7 +34,6 @@ _.each(mixins, (mixin) => {
 });
 
 // Register global components.
-Vue.component('aph-balance', Balance);
 Vue.component('aph-icon', Icon);
 Vue.component('aph-select', Select);
 Vue.component('aph-input', Input);

@@ -120,7 +120,7 @@ export default {
   border: $border;
   color: white;
   cursor: pointer;
-  font-size: $font-size-sm;
+  font-size: toRem(16px);
   padding: $space * 0.7 $space * 5;
   text-align: center;
   transition: all .1s linear;
@@ -141,7 +141,7 @@ export default {
 
   > li {
     cursor: pointer;
-    font-size: $font-size-sm;
+    font-size: toRem(16px);
     padding: $space;
     transition: all .1s linear;
 

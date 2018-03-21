@@ -42,7 +42,7 @@ export default {
 
   #dashboard--sidebar {
     flex: none;
-    width: 17rem;
+    width: toRem(300px);
   }
 
   .dashboard--content {

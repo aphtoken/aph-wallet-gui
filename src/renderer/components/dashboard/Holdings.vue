@@ -82,12 +82,15 @@ export default {
         flex: 1;
 
         .name {
-          font-family: GilroySemiBold;
+          font-family: GilroySemibold;
+          font-size: toRem(18px);
           margin-bottom: $space-sm;
         }
 
         .currency {
           @extend %small-uppercase-grey-label;
+
+          font-size: toRem(12px);
         }
       }
 
@@ -98,6 +101,7 @@ export default {
 
         .amount {
           margin-bottom: $space-sm;
+          font-size: toRem(18px);
 
           .currency {
             margin-left: $space-xsm;
@@ -105,7 +109,7 @@ export default {
         }
 
         .change {
-          font-size: $font-size-sm;
+          font-size: toRem(15px);
 
           &.increase {
             color: $green;

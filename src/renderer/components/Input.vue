@@ -65,7 +65,7 @@ export default {
     background: none;
     border: none;
     color: white;
-    font-size: $font-size-sm;
+    font-size: toRem(14px);
     letter-spacing: .5px;
     outline: none;
     width: 100%;

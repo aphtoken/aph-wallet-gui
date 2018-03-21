@@ -77,13 +77,13 @@ export default {
     align-items: center;
     display: flex;
     flex: 1;
-    padding: $space-lg $space;
+    padding: $space;
 
     .aph-icon {
       padding: 0 $space-lg 0 0;
 
       svg {
-        height: $space * 7;
+        height: toRem(150px);
       }
     }
 
@@ -91,25 +91,25 @@ export default {
       .title {
         color: $purple;
         font-family: GilroyMedium;
-        font-size: $font-size-lg;
-        margin-bottom: $space-sm;
+        font-size: toRem(23px);
+        margin-bottom: $space;
       }
 
       .amount {
         font-family: GilroyMedium;
-        font-size: $font-size-xl;
-        margin-bottom: $space-sm;
+        font-size: toRem(38px);
+        margin-bottom: $space;
 
         .currency {
           font-family: Gilroy;
-          font-size: $font-size-lg;
-          margin-left: $space-sm;
+          font-size: toRem(27px);
+          margin-left: $space;
         }
       }
 
       .value {
         font-family: GilroyMedium;
-        font-size: $font-size-sm;
+        font-size: toRem(20px);
 
         .currency {
           margin-left: $space-xsm;
@@ -128,12 +128,16 @@ export default {
     }
 
     .amount {
-      font-family: GilroyMedium;
-      font-size: $font-size-sm;
+      font-family: GilroySemibold;
+      font-size: toRem(18px);
     }
 
     .change {
       color: $green;
+
+      .amount {
+        font-family: GilroyMedium;
+      }
     }
   }
 

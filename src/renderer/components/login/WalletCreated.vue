@@ -93,7 +93,7 @@ export default {
   .help-text {
     color: $purple;
     font-family: GilroySemibold;
-    font-size: small;
+    font-size: toRem(12px);
     line-height: $line-height;
     text-align: center;
     text-transform: uppercase;
@@ -113,10 +113,7 @@ export default {
     text-align: center;
 
     .label {
-      color: $grey;
-      font-family: GilroySemibold;
-      font-size: $font-size-xsm;
-      text-transform: uppercase;
+      @extend %small-uppercase-grey-label;
     }
 
     .value {
@@ -125,7 +122,7 @@ export default {
 
       p {
         color: $dark;
-        font-size: $font-size-sm;
+        font-size: toRem(15px);
         margin: $space-sm 0 $space;
       }
 

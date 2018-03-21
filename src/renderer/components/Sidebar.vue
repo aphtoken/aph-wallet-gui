@@ -77,7 +77,7 @@ export default {
       color: white;
       cursor: pointer;
       display: flex;
-      font-size: $font-size-lg;
+      font-size: toRem(20px);
       padding: $space-sm 0;
       transition: $transition;
 
@@ -86,7 +86,7 @@ export default {
         text-align: center;
 
         svg {
-          height: $space * 2;
+          height: toRem(50px);
         }
 
         .fill, .stroke {
@@ -125,7 +125,7 @@ export default {
     padding-bottom: $space;
 
     a {
-      font-size: $font-size-sm;
+      font-size: toRem(15px);
 
       &:hover {
         border-color: transparent;
@@ -133,7 +133,7 @@ export default {
 
       .icon {
         svg {
-          height: $space;
+          height: toRem(20px);
         }
 
         .fill {

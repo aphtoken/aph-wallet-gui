@@ -60,11 +60,12 @@ export default {
 
 <style lang="scss">
 #login--create-wallet {
-  width: 20rem;
+  width: 50%;
 
   .help-text {
     color: white;
-    font-size: $font-size-xsm;
+    font-family: Gilroy;
+    font-size: toRem(12px);
   }
 
   .aph-text-input {

@@ -3,7 +3,9 @@
     <simple-donut :percent="23"></simple-donut>
     <div class="ticker">
       <h1 class="underlined">My Porfolio</h1>
-      <aph-balance amount="57,234.91"></aph-balance>
+      <div class="balance">
+        <span class="symbol">$</span><span class="amount">57,234.91</span><span class="currency">USD</span>
+      </div>
       <div class="change">
         <div class="label">24h change</div>
         <div class="amount">+$1,234.34</div>
@@ -56,6 +58,21 @@ h1.underlined {
   .ticker {
     flex: 1;
 
+    .balance {
+      .symbol {
+
+      }
+
+      .amount {
+        font-size: toRem(45px);
+        margin: 0 $space 0 $space-sm;
+      }
+
+      .currency, .symbol {
+        font-size: toRem(30px);
+      }
+    }
+
     .change {
       align-items: center;
       display: flex;
@@ -67,7 +84,7 @@ h1.underlined {
 
       .amount {
         color: $green;
-        font-size: $font-size-sm;
+        font-size: toRem(16px);
         margin-left: $space;
       }
     }
