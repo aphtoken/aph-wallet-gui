@@ -55,6 +55,7 @@ export default {
   border-radius: $border-radius;
   display: flex;
   flex-direction: column;
+  padding-bottom: $space;
 
   .header {
     padding: $space;
@@ -68,7 +69,7 @@ export default {
   }
 
   .body {
-    padding: 0 $space $space;
+    padding: 0 $space;
     overflow: auto;
   }
 

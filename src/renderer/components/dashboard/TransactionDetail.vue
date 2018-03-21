@@ -163,19 +163,22 @@ export default {
   border-radius: $border-radius;
   display: flex;
   flex-direction: column;
-  padding: $space;
+  padding-bottom: $space;
 
   .header {
+    padding: $space;
+
     h1.underlined {
       @extend %underlined-header;
 
       flex: 1;
-      margin-bottom: $space-lg;
+      margin-bottom: 0;
     }
   }
 
   .body {
     overflow: auto;
+    padding: $space $space 0 $space;
 
     .section + .section {
       margin-top: $space-lg;
