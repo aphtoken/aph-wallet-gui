@@ -2,6 +2,7 @@
 import { wallet, Neon, rpc, tx, api } from '@cityofzion/neon-js';
 import wallets from './wallets';
 
+const network = 'TestNet';
 export default {
 
     /**
@@ -69,25 +70,43 @@ export default {
     fetchRecentTransactions(name) {
         return new Promise((resolve, reject) => {
 
-            return storage.get('userWallet', (readError, data) => {
-                if (readError) {
-                    console.log(`Error loading wallet: ${readError.message}`);
-                }
-
-                if (typeof data.accounts === 'undefined') {
-                    data.accounts = [];
-                }
-
-                var account = data.accounts.find(e => e.label === name);
-                if (typeof account === 'undefined') {
-                    console.log(`Error opening wallet: '${name}' doesn't exit.`);
-                    return
-                }
-
-                //this isn't working yet
-                api.getBalance('TestNet', account.address)
-                    .then(res => console.log(res));
-            })
+            try {
+              if (_.isUndefined(wallets.currentWallet)) {
+                return
+              }
+              
+              api.neonDB.getTransactionHistory(network, wallets.currentWallet.address)
+                .then(res => {
+                    let splitTransactions = [];
+                    for (let t of res) {
+                        if (t.neo_sent === true) {
+                          splitTransactions.push({
+                            txid: t.txid,
+                            block_index: t.block_index,
+                            asset: 'NEO',
+                            value: t.NEO,
+                            direction: t.NEO > 0 ? 'received' : 'sent'
+                          });
+                        }
+                        if (t.gas_sent === true) {
+                          splitTransactions.push({
+                            txid: t.txid,
+                            block_index: t.block_index,
+                            asset: 'GAS',
+                            value: t.GAS,
+                            direction: t.GAS > 0 ? 'received' : 'sent'
+                          });
+                        }
+                    }
+                    return resolve(splitTransactions);
+                })
+                .catch((e) => {
+                  return reject(e);
+                });
+                
+            } catch (e) {
+              return reject(e);
+            }
         });
     },
 

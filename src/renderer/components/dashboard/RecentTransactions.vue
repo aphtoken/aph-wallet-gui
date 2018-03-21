@@ -4,35 +4,11 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <div class="transaction" @click="viewTransaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">APH</div>
-        <div class="date">25-01-2018</div>
-        <div class="amount sent">12,500</div>
-      </div>
-      <div class="transaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">APH</div>
-        <div class="date">23-01-2018</div>
-        <div class="amount sent">6,500</div>
-      </div>
-      <div class="transaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">NEO</div>
-        <div class="date">23-01-2018</div>
-        <div class="amount received">28.3</div>
-      </div>
-      <div class="transaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">GAS</div>
-        <div class="date">23-01-2018</div>
-        <div class="amount sent">5</div>
-      </div>
-      <div class="transaction">
-        <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
-        <div class="currency">APH</div>
-        <div class="date">23-01-2018</div>
-        <div class="amount sent">12,500</div>
+      <div class="transaction" @click="viewTransaction(transaction.txid)" v-for="transaction in transactions">
+        <div class="address">{{transaction.txid}}</div>
+        <div class="currency">{{transaction.asset}}</div>
+        <div class="date">{{transaction.block_index}}</div>
+        <div class="amount" v-bind:class="[transaction.direction]">{{transaction.value}}</div>
       </div>
     </div>
   </div>
@@ -40,11 +16,34 @@
 
 <script>
 export default {
+
+  data() {
+    return {
+      transactions: [],
+    };
+  },
+
   methods: {
-    viewTransaction() {
-      const hash = '0x357da56be0d70bdd44d73b8e0a99f42ebcb02119';
+    loadTransactions() {
+      this.$services.neo.fetchRecentTransactions()
+        .then((data) => {
+          this.transactions = data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+    viewTransaction(hash) {
       this.$router.push({ path: `/dashboard/trx/${hash}` });
     },
+  },
+
+  mounted() {
+    if (_.isUndefined(this.$services.wallets.currentWallet)) {
+      return;
+    }
+
+    this.loadTransactions();
   },
 };
 </script>
