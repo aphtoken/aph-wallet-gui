@@ -1,31 +1,33 @@
 import Vue from 'vue';
+import VueHighCharts from 'vue-highcharts';
 import _ from 'lodash';
 import axios from 'axios';
-import Chartkick from 'chartkick';
-import VueChartkick from 'vue-chartkick';
-import Highcharts from 'highcharts';
+import accounting from 'accounting';
 
-// Initial Vue Libraries
+// Initial Vue Libraries.
 import App from './App';
 import router from './router';
 import store from './store';
 import * as mixins from './mixins';
 
-// Global Vue Components
+// Global Vue Components.
 import Balance from './components/Balance';
 import Icon from './components/Icon';
 import Input from './components/Input';
 import Select from './components/Select';
 
-// Global Libraries
+// Global Libraries.
 window._ = _;
-window.Highcharts = Highcharts;
+window.accounting = accounting;
+window.axios = axios;
 
-// Setup Vue
+// Setup Vue.
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
-Vue.use(VueChartkick, { Chartkick });
+
+// Vue Plugins.
+Vue.use(VueHighCharts);
 
 // Register global mixins.
 _.each(mixins, (mixin) => {
