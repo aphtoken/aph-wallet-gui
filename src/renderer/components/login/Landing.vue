@@ -12,33 +12,12 @@
       </router-link>
     </div>
     <router-link class="settings-btn" to="login">Settings</router-link>
-    <!-- <button v-on:click="testCreateWallet">
-      Test Create
-    </button>
-    <button v-on:click="testGetBalances">
-      Get Balances
-    </button> -->
   </section>
 </template>
 
 <script>
 export default {
-  methods: {
-    testCreateWallet() {
-      this.$services.neo.createWallet('Test Wallet 9999', 'testing', 'testing')
-        .then((data) => {
-          debugger;
-          return data;
-        })
-        .catch((error) => {
-          debugger;
-          return error;
-        });
-    },
-    testGetBalances() {
-      this.$services.neo.fetchRecentTransactions('Test Wallet 1');
-    },
-  },
+  //
 };
 </script>
 
