@@ -32,6 +32,12 @@ export default {
   components: {
     Sidebar,
   },
+
+  mounted() {
+    if (_.isUndefined(this.$services.wallets.currentWallet)) {
+      this.$router.push('/login');
+    }
+  },
 };
 </script>
 
