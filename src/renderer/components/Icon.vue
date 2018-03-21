@@ -169,6 +169,16 @@
       <polygon class="stroke st1" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 "/>
     </svg>
 
+    <!-- confirmed -->
+    <svg class="icon confirmed" v-if="name === 'confirmed'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
+      <g>
+        <polygon class="stroke st0" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 	"/>
+        <polyline class="stroke st1" points="7.9,12.9 11.9,16.9 19.9,8.9 	"/>
+      </g>
+    </svg>
+
+
   </div>
 </template>
 
@@ -252,7 +262,7 @@ export default {
     }
   }
 
-  .settings, .dashboard, .send, .receive {
+  .settings, .dashboard, .send, .receive, .confirmed {
     .stroke {
       stroke: $dark;
     }

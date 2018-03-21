@@ -13,7 +13,8 @@ module.exports = {
     __static: true,
     _: true,
     accounting: true,
-    axios: true
+    axios: true,
+    moment: true
   },
   plugins: [
     'html'

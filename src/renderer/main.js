@@ -3,6 +3,7 @@ import VueHighCharts from 'vue-highcharts';
 import _ from 'lodash';
 import axios from 'axios';
 import accounting from 'accounting';
+import moment from 'moment';
 
 // Initial Vue Libraries.
 import App from './App';
@@ -19,6 +20,7 @@ import Select from './components/Select';
 window._ = _;
 window.accounting = accounting;
 window.axios = axios;
+window.moment = moment;
 
 // Setup Vue.
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
