@@ -30,12 +30,12 @@
       </router-link>
     </div>
     <div class="footer link-list">
-      <router-link to="/login">
+      <a href="#" @click="logOut">
         <span class="icon">
           <aph-icon name="back"></aph-icon>
         </span>
         <span class="label">Log Out</span>
-      </router-link>
+      </a>
     </div>
   </section>
 </template>
@@ -44,7 +44,8 @@
 export default {
   methods: {
     logOut() {
-      this.$router.push('login');
+      this.$services.wallets.clearCurrentWallet();
+      this.$router.replace('/login');
     },
   },
 };

@@ -4,7 +4,7 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <router-link class="transaction" :to="`/dashboard/trx/${transaction.hash}`" v-for="(transaction, index) in transactions" :key="index">
+      <router-link class="transaction" :to="`/dashboard/trx/${transaction.hash}`" v-for="(transaction, index) in $store.state.recentTransactions" :key="index">
         <div class="address">{{ transaction.hash }}</div>
         <div class="currency">{{ transaction.symbol }}</div>
         <div class="date">{{ transaction.block_index }}</div>
@@ -16,17 +16,11 @@
 
 <script>
 export default {
-  data() {
-    return {
-      transactions: [],
-    };
-  },
-
   methods: {
     loadTransactions() {
       this.$services.neo.fetchRecentTransactions()
         .then((data) => {
-          this.transactions = data;
+          this.$store.commit('setRecentTransactions', data);
         })
         .catch((e) => {
           console.log(e);
@@ -47,10 +41,6 @@ export default {
   },
 
   mounted() {
-    if (_.isUndefined(this.$services.wallets.currentWallet)) {
-      return;
-    }
-
     this.loadTransactions();
   },
 };

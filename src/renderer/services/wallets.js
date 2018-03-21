@@ -1,24 +1,33 @@
 import lockr from 'lockr';
 import { wallet } from '@cityofzion/neon-js';
 
-const STORAGE_KEY = 'aph.wallets';
+const WALLETS_STORAGE_KEY = 'aph.wallets';
+const CURRENT_WALLET_STORAGE_KEY = 'aph.current_wallet';
 
 export default {
 
   add(name, data) {
     const wallets = this.getAll();
 
-    lockr.set(STORAGE_KEY, _.set(wallets, name, data));
+    lockr.set(WALLETS_STORAGE_KEY, _.set(wallets, name, data));
 
     return this;
   },
 
+  clearCurrentWallet() {
+    this.setCurrentWallet(null);
+  },
+
   getAll() {
-    return lockr.get(STORAGE_KEY, {});
+    return lockr.get(WALLETS_STORAGE_KEY, {});
   },
 
   getAllAsArray() {
     return _.values(this.getAll());
+  },
+
+  getCurrentWallet() {
+    return lockr.get(CURRENT_WALLET_STORAGE_KEY);
   },
 
   getOne(name) {
@@ -38,15 +47,17 @@ export default {
         const walletToOpen = this.getOne(name);
         const wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
         const account = new wallet.Account(wif);
-
-        this.currentWallet = {
+        const currentWallet = {
           wif,
           encryptedWIF: walletToOpen.encryptedWIF,
           address: account.address,
           passphrase,
           privateKey: account.privateKey,
         };
-        return resolve(this.currentWallet);
+
+        this.setCurrentWallet(currentWallet);
+
+        return resolve(currentWallet);
       } catch (e) {
         return reject(e);
       }
@@ -58,15 +69,17 @@ export default {
       try {
         const wif = wallet.decrypt(encryptedKey, passphrase);
         const account = new wallet.Account(wif);
-
-        this.currentWallet = {
+        const currentWallet = {
           wif,
           encryptedWIF: encryptedKey,
           address: account.address,
           passphrase,
           privateKey: account.privateKey,
         };
-        return resolve(this.currentWallet);
+
+        this.setCurrentWallet(currentWallet);
+
+        return resolve(currentWallet);
       } catch (e) {
         return reject(e);
       }
@@ -77,21 +90,23 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const account = new wallet.Account(wif);
-
-        this.currentWallet = {
+        const currentWallet = {
           wif,
           address: account.address,
           privateKey: account.privateKey,
         };
-        return resolve(this.currentWallet);
+
+        this.setCurrentWallet(currentWallet);
+
+        return resolve(currentWallet);
       } catch (e) {
         return reject(e);
       }
     });
   },
 
-  getCurrent() {
-    return this.currentWallet;
+  setCurrentWallet(wallet) {
+    return lockr.set(CURRENT_WALLET_STORAGE_KEY, wallet);
   },
 
 };

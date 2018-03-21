@@ -7,14 +7,10 @@ import {
 
 export default {
   computed: mapGetters(
-    _.map(getters, (obj, name) => {
-      return name;
-    })
+    _.map(getters, (obj, name) => name),
   ),
 
   methods: mapMutations(
-    _.map(mutations, (obj, name) => {
-        return name;
-    })
+    _.map(mutations, (obj, name) => name),
   ),
 };

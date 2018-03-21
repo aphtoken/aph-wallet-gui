@@ -77,7 +77,7 @@ export default {
   },
 
   mounted() {
-    this.wallet = this.$services.wallets.getCurrent();
+    this.wallet = this.$services.wallets.getCurrentWallet();
   },
 
   components: {

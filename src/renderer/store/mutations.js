@@ -3,14 +3,24 @@
 // import { store } from './index';
 
 export {
-  clearActiveTransactionHash,
-  setActiveTransactionHash,
+  clearActiveRecentTransaction,
+  clearRecentTransactions,
+  setActiveRecentTransaction,
+  setRecentTransactions,
 };
 
-function clearActiveTransactionHash(state) {
-  state.activeTransactionHash = null;
+function clearActiveRecentTransaction(state) {
+  state.recentTransactions = null;
 }
 
-function setActiveTransactionHash(state, activeTransactionHash) {
-  state.activeTransactionHash = activeTransactionHash;
+function clearRecentTransactions(state) {
+  state.recentTransactions = [];
+}
+
+function setActiveRecentTransaction(state, transaction) {
+  state.recentTransactions = transaction;
+}
+
+function setRecentTransactions(state, transactions) {
+  state.recentTransactions = transactions;
 }

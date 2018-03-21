@@ -1,2 +1,2 @@
-/* eslint-disable */
-export const activeTransactionHash = state => state.activeTransactionHash;
+export const activeRecentTransaction = state => state.activeRecentTransaction;
+export const recentTransactions = state => state.activeTransactionHash;

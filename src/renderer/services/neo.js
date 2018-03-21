@@ -37,7 +37,7 @@ export default {
                 let account = new wallet.Account(wallet.generatePrivateKey());
                 const _encryptedWIF = wallet.encrypt(account.WIF, passphrase);
 
-                account.label = name;   
+                account.label = name;
                 wallets.add(name, {
                     label: name,
                     encryptedWIF: _encryptedWIF,
@@ -71,13 +71,13 @@ export default {
         return new Promise((resolve, reject) => {
 
             try {
-              if (_.isUndefined(wallets.currentWallet)) {
+              if (!wallets.getCurrentWallet()) {
                 return
               }
-              
-              api.neonDB.getTransactionHistory(network, wallets.currentWallet.address)
+
+              api.neonDB.getTransactionHistory(network, wallets.getCurrentWallet().address)
                 .then(res => {
-                    let splitTransactions = [];
+                    const splitTransactions = [];
                     for (let t of res) {
                         if (t.neo_sent === true) {
                           splitTransactions.push({
@@ -101,7 +101,7 @@ export default {
                 .catch((e) => {
                   return reject(e);
                 });
-                
+
             } catch (e) {
               return reject(e);
             }

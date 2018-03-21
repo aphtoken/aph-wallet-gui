@@ -20,6 +20,12 @@ export default {
       return _.kebabCase(this.$route.path);
     },
   },
+
+  mounted() {
+    if (this.$services.wallets.getCurrentWallet()) {
+      this.$router.push('/dashboard');
+    }
+  },
 };
 </script>
 

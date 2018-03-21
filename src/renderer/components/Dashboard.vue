@@ -34,7 +34,7 @@ export default {
   },
 
   mounted() {
-    if (_.isUndefined(this.$services.wallets.currentWallet)) {
+    if (!this.$services.wallets.getCurrentWallet()) {
       this.$router.push('/login');
     }
   },
