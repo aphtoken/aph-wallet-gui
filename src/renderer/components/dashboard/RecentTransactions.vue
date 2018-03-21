@@ -4,7 +4,7 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <router-link class="transaction" to="/dashboard/trx/${transaction.hash}" v-for="(transaction, index) in transactions" :key="index">
+      <router-link class="transaction" :to="`/dashboard/trx/${transaction.hash}`" v-for="(transaction, index) in transactions" :key="index">
         <div class="address">{{ transaction.hash }}</div>
         <div class="currency">{{ transaction.symbol}}</div>
         <div class="date">{{ formatDate(transaction) }}</div>
