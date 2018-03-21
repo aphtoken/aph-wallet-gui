@@ -103,10 +103,6 @@ h1.underlined {
 
         &.decrease {
           color: $red;
-
-          &:before {
-            content: "-";
-          }
         }
       }
     }

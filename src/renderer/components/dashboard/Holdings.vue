@@ -4,34 +4,21 @@
       <h1 class="underlined">My holdings</h1>
     </div>
     <div class="body">
-      <div class="holding active">
+      <div v-for="(holding, index) in holdings" :class="['holding', {active: isActive(holding)}]" :key="index">
         <div class="token-icon">
-          <aph-icon name="logo-mark"></aph-icon>
+          <!-- TODO make this a component probably... -->
+          <img src="~@/assets/img/token-icons/APH.png" v-if="holding.symbol === 'APH'">
+          <img src="~@/assets/img/token-icons/NEO.png" v-if="holding.symbol === 'NEO'">
         </div>
         <div class="token">
-          <div class="name">Aphelion</div>
-          <div class="currency">APH</div>
+          <div class="name">{{ holding.name }}</div>
+          <div class="currency">{{ holding.symbol }}</div>
         </div>
         <div class="balance">
           <div class="amount">
-            211,414<span class="currency">APH</span>
+            {{ formatBalance(holding) }}<span class="currency">{{ holding.symbol }}</span>
           </div>
-          <div class="change increase">2.77</div>
-        </div>
-      </div>
-      <div class="holding">
-        <div class="token-icon">
-          <img src="~@/assets/img/token-icons/neo-logo.png" alt="">
-        </div>
-        <div class="token">
-          <div class="name">Neo</div>
-          <div class="currency">NEO</div>
-        </div>
-        <div class="balance">
-          <div class="amount">
-            324<span class="currency">NEO</span>
-          </div>
-          <div class="change decrease">0.43</div>
+          <div :class="['change', {decrease: holding.change < 0, increase: holding.change > 1}]">{{ formatChange(holding) }}</div>
         </div>
       </div>
     </div>
@@ -40,7 +27,39 @@
 
 <script>
 export default {
+  data() {
+    return {
+      holdings: [
+        {
+          balance: 211414,
+          change: 2.77,
+          name: 'Aphelion',
+          symbol: 'APH',
+        },
+        {
+          balance: 324,
+          change: -0.43,
+          name: 'Neo',
+          symbol: 'NEO',
+        },
+      ],
+    };
+  },
 
+  methods: {
+    formatBalance({ balance }) {
+      return this.$accounting.formatNumber(balance, 2);
+    },
+
+    formatChange({ change }) {
+      return this.$accounting.formatNumber(change, 2);
+    },
+
+    isActive({ symbol }) {
+      // This is just placeholder logic for now..
+      return symbol === 'APH';
+    },
+  },
 };
 </script>
 
@@ -66,11 +85,13 @@ export default {
       background: white;
       border-left: 3px solid transparent;
       border-radius: $border-radius;
+      cursor: pointer;
       display: flex;
       padding: $space;
 
       .token-icon {
         flex: none;
+        font-size: 0;
         padding-right: $space;
 
         img, svg {
@@ -126,10 +147,6 @@ export default {
 
           &.decrease {
             color: $red;
-
-            &:before {
-              content: "-";
-            }
           }
 
           &:after {
@@ -139,7 +156,7 @@ export default {
         }
       }
 
-      &.active {
+      &:hover, &.active {
         border-color: $purple;
       }
 

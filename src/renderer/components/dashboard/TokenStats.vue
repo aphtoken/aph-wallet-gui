@@ -189,10 +189,6 @@ export default {
 
         &.decrease {
           color: $red;
-
-          &:before {
-            content: "-";
-          }
         }
       }
     }
