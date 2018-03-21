@@ -64,7 +64,7 @@ export default new Router({
       component: require('@/components/Dashboard').default,
       children: [
         {
-          path: 'home',
+          path: '',
           components: {
             'bottom-left': require('@/components/dashboard/Holdings').default,
             'bottom-right': require('@/components/dashboard/RecentTransactions').default,
@@ -73,11 +73,22 @@ export default new Router({
             'top-right': require('@/components/dashboard/Price').default,
           },
         },
+        {
+          path: 'trx/:hash',
+          props: { 'top-right': true },
+          components: {
+            'bottom-left': require('@/components/dashboard/Holdings').default,
+            'bottom-right': require('@/components/dashboard/RecentTransactions').default,
+            header: require('@/components/PortfolioHeader').default,
+            'top-left': require('@/components/dashboard/TokenStats').default,
+            'top-right': require('@/components/dashboard/TransactionDetail').default,
+          },
+        },
       ],
     },
     {
       path: '*',
-      redirect: '/dashboard/home',
+      redirect: '/dashboard',
     },
   ],
 });

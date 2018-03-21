@@ -4,7 +4,7 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <div class="transaction">
+      <div class="transaction" @click="viewTransaction">
         <div class="address">0x357da56be0d70bdd44d73b8e0a99f42ebcb02119</div>
         <div class="currency">APH</div>
         <div class="date">25-01-2018</div>
@@ -40,7 +40,12 @@
 
 <script>
 export default {
-
+  methods: {
+    viewTransaction() {
+      const hash = '0x357da56be0d70bdd44d73b8e0a99f42ebcb02119';
+      this.$router.push({ path: `/dashboard/trx/${hash}` });
+    },
+  },
 };
 </script>
 
@@ -70,6 +75,7 @@ export default {
   .transaction {
     align-items: center;
     border-top: 1px solid $light-grey;
+    cursor: pointer;
     display: flex;
     font-family: GilroySemibold;
     font-size: toRem(12px);
