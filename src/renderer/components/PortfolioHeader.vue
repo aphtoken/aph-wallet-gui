@@ -47,6 +47,7 @@ h1.underlined {
 
   .simple-donut {
     margin: 0 $space-xl 0 0;
+    height: toRem(200px);
   }
 
   .btn-group {
@@ -59,10 +60,6 @@ h1.underlined {
     flex: 1;
 
     .balance {
-      .symbol {
-
-      }
-
       .amount {
         font-size: toRem(45px);
         margin: 0 $space 0 $space-sm;
