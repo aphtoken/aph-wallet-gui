@@ -8,6 +8,7 @@
         <div class="token-icon">
           <!-- TODO make this a component probably... -->
           <img src="~@/assets/img/token-icons/APH.png" v-if="holding.symbol === 'APH'">
+          <img src="~@/assets/img/token-icons/NEO.png" v-if="holding.symbol === 'GAS'">
           <img src="~@/assets/img/token-icons/NEO.png" v-if="holding.symbol === 'NEO'">
         </div>
         <div class="token">
@@ -41,6 +42,12 @@ export default {
           change: -0.43,
           name: 'Neo',
           symbol: 'NEO',
+        },
+        {
+          balance: 5.4,
+          change: 1.46,
+          name: 'Gas',
+          symbol: 'GAS',
         },
       ],
     };
@@ -80,6 +87,8 @@ export default {
   }
 
   .body {
+    overflow: auto;
+
     .holding {
       align-items: center;
       background: white;
