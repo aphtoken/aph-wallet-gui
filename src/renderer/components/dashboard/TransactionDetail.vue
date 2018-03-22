@@ -8,7 +8,7 @@
         <div class="row">
           <div class="column">
             <div class="label">Hash</div>
-            <div class="value">{{ transaction.txid }}</div>
+            <div class="value truncate">{{ transaction.hash }}</div>
           </div>
         </div>
         <div class="row">
@@ -188,6 +188,10 @@ export default {
 
           &.red {
             color: $red;
+          }
+
+          &.truncate {
+            @include truncate();
           }
         }
 

@@ -73,26 +73,31 @@ export default {
       color: $dark;
       cursor: pointer;
       display: flex;
+      flex-wrap: wrap;
       font-family: GilroySemibold;
       font-size: toRem(12px);
-      justify-content: space-between;
       padding: $space $space-sm;
+      justify-content: space-between;
 
     > * {
-      flex: 1;
-      text-align: center;
-      white-space: nowrap;
+      @include truncate();
+
+      min-width: 0;
     }
 
     .address {
-      flex: 1.5;
-      overflow: hidden;
       text-align: left;
-      text-overflow: ellipsis;
+      flex: 0 0 40%;
+    }
+
+    .currency {
+      text-align: center;
+      flex: 0 0 10%;
     }
 
     .amount {
       text-align: right;
+      flex: 0 0 20%;
 
       &.received {
         color: $green;
