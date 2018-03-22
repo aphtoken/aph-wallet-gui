@@ -4,9 +4,12 @@ import {
   rpc,
 } from '@cityofzion/neon-js';
 import wallets from './wallets';
+import valuation from './valuation';
 
 const network = 'TestNet';
-const rpcEndpoint = 'http://test1.cityofzion.io:8880';
+const rpcEndpoint = 'http://test1.cityofzion.io:8880'; // todo, an app preference to move between test and main net
+// const network = 'MainNet';
+// const rpcEndpoint = 'http://seed1.aphelion-neo.com:10332'; // todo, multiple options for rpc endpoints
 const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 
@@ -206,15 +209,29 @@ export default {
         return client.query({ method: 'getaccountstate', params: [address] })
           .then((res) => {
             const holdings = [];
+            const valuationPromises = [];
+
             res.result.balances.forEach((b) => {
               const h = {
                 asset: b.asset,
                 balance: b.value,
                 symbol: b.asset === neoAssetId ? 'NEO' : 'GAS',
               };
+
+              valuationPromises.push(valuation.getValuation(h.symbol)
+                .then((val) => {
+                  h.change = val.percent_change_24h;
+                })
+                .catch((e) => {
+                  reject(e);
+                }));
+
               holdings.push(h);
             });
-            return resolve(holdings);
+
+            Promise.all(valuationPromises)
+              .then(() => resolve(holdings))
+              .catch(e => reject(e));
           })
           .catch(e => reject(e));
       } catch (e) {
@@ -223,13 +240,31 @@ export default {
     });
   },
 
-  /**
-   * Fetches locally stored wallets.
-   *
-   * @return Array
-   */
-  fetchWallets() {
-
+  fetchNEP5Balance(address, assetId) {
+    return new Promise((resolve, reject) => {
+      try {
+        const client = rpc.default.create.rpcClient(rpcEndpoint);
+        return client.query({
+          method: 'invokefunction',
+          params: [
+            assetId,
+            'balanceOf',
+            [
+              {
+                type: 'Hash160',
+                value: address,
+              },
+            ],
+          ],
+        })
+          .then((res) => {
+            console.log(res);
+          })
+          .catch(e => reject(e));
+      } catch (e) {
+        return reject(e);
+      }
+    });
   },
 
   /**
