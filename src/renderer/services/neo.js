@@ -59,17 +59,16 @@ export default {
   },
 
   /**
-   * Fetch wallet's recent transactions.
+   * Fetch address's recent transactions.
    *
-   * @param {Object} wallet
+   * @param {String} address
    * @return Promise
    *
-   * Response passed to Promise ideally looks like this:
-   *  {Float} token_count
-   *  {String} from_address
    *  {String} hash
-   *  {String} timestamp
-   *  {String} to_address
+   *  {String} block_index
+   *  {String} symbol
+   *  {String} amount
+   *  {String} block_time
    */
   fetchRecentTransactions(address) {
     return new Promise((resolve, reject) => {
@@ -189,24 +188,39 @@ export default {
 
 
   /**
-   * Fetches wallet contents...
+   * Fetches holdings...
    *
-   * @param {Object} wallet
+   * @param {String} address
    * @return Promise
    *
    * Response passed to Promise ideally looks like this:
-   *  {Array} holdings
-   *    {Float} 24_hour_change_value
-   *    {Float} token_count
+   *    {Float} value
    *    {String} icon_url
    *    {String} name
    *    {String} symbol
-   *  {Float} 24_hour_change_usd
-   *  {Float} value_usd
-   *  {Number} 24_hour_change_percentage
    */
-  fetchWalletContents() {
-
+  fetchHoldings(address) {
+    return new Promise((resolve, reject) => {
+      try {
+        const client = rpc.default.create.rpcClient(rpcEndpoint);
+        return client.query({ method: 'getaccountstate', params: [address] })
+          .then((res) => {
+            const holdings = [];
+            res.result.balances.forEach((b) => {
+              const h = {
+                asset: b.asset,
+                balance: b.value,
+                symbol: b.asset === neoAssetId ? 'NEO' : 'GAS',
+              };
+              holdings.push(h);
+            });
+            return resolve(holdings);
+          })
+          .catch(e => reject(e));
+      } catch (e) {
+        return reject(e);
+      }
+    });
   },
 
   /**

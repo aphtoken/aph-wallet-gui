@@ -27,8 +27,7 @@ export default {
         .then((data) => {
           this.$store.commit('setRecentTransactions', data);
         })
-        .catch((e) => {
-          console.log(e);
+        .catch(() => {
         });
     },
 

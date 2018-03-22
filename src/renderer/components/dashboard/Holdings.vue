@@ -25,32 +25,7 @@
 export default {
   data() {
     return {
-      holdings: [
-        {
-          balance: 211414,
-          change: 2.77,
-          name: 'Aphelion',
-          symbol: 'APH',
-        },
-        {
-          balance: 324,
-          change: -0.43,
-          name: 'Neo',
-          symbol: 'NEO',
-        },
-        {
-          balance: 5.4,
-          change: 1.46,
-          name: 'Gas',
-          symbol: 'GAS',
-        },
-        {
-          balance: 5.454,
-          change: 1.46,
-          name: 'Tron',
-          symbol: 'TRX',
-        },
-      ],
+      holdings: [],
     };
   },
 
@@ -59,6 +34,24 @@ export default {
       // This is just placeholder logic for now..
       return symbol === 'APH';
     },
+
+    loadHoldings() {
+      if (!this.$services.wallets.getCurrentWallet()) {
+        return;
+      }
+
+      this.$services.neo
+        .fetchHoldings(this.$services.wallets.getCurrentWallet().address)
+        .then((data) => {
+          this.holdings = data;
+        })
+        .catch(() => {
+        });
+    },
+  },
+
+  mounted() {
+    this.loadHoldings();
   },
 };
 </script>

@@ -116,8 +116,7 @@ export default {
         .then((data) => {
           this.transaction = data;
         })
-        .catch((e) => {
-          console.log(e);
+        .catch(() => {
         });
     },
 
