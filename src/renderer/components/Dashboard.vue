@@ -68,7 +68,7 @@ export default {
   .dashboard--grid--column {
     display: flex;
     flex-direction: column;
-    flex: 1;
+    flex: 1 0 50%;
   }
 
   .dashboard--grid--cell {
