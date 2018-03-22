@@ -4,7 +4,7 @@
       <h1 class="underlined">Token Stats</h1>
       <div class="current-value">
         <div class="label">Current Value</div>
-        <div class="amount">{{ currentValue }}</div>
+        <div class="amount">{{ $formatMoney(tokenStats.tokenValue) }}</div>
       </div>
     </div>
     <div class="body">
@@ -12,25 +12,25 @@
       <div class="balance">
         <div class="name">{{ this.tokenStats.name }}</div>
         <div class="amount">
-          {{ balance }}<span class="currency">{{ this.tokenStats.symbol }}</span>
+          {{ $formatNumber(tokenStats.balance) }}<span class="currency">{{ this.tokenStats.symbol }}</span>
         </div>
         <div class="value">
-          {{ balanceValue }}<span class="currency">USD</span>
+          {{ $formatMoney(tokenStats.balanceValue) }}<span class="currency">USD</span>
         </div>
       </div>
     </div>
     <div class="footer">
       <div class="total-supply">
         <div class="label">Total Supply</div>
-        <div class="amount">{{ totalSupply }}</div>
+        <div class="amount">{{ $formatNumber(tokenStats.supply) }}</div>
       </div>
       <div class="market-cap">
         <div class="label">Market Cap</div>
-        <div class="amount">{{ marketCap }}</div>
+        <div class="amount">{{ $formatMoney(tokenStats.marketCap) }}</div>
       </div>
       <div class="change">
         <div class="label">24h Change</div>
-        <div class="amount increase">{{ change }}</div>
+        <div class="amount increase">{{ $formatNumber(tokenStats.change) }}</div>
       </div>
     </div>
   </div>
@@ -38,32 +38,6 @@
 
 <script>
 export default {
-  computed: {
-    balance() {
-      return this.$accounting.formatNumber(this.tokenStats.balance, 2);
-    },
-
-    balanceValue() {
-      return this.$accounting.formatMoney(this.tokenStats.balanceValue);
-    },
-
-    change() {
-      return this.$accounting.formatNumber(this.tokenStats.change, 2);
-    },
-
-    currentValue() {
-      return this.$accounting.formatMoney(this.tokenStats.tokenValue);
-    },
-
-    marketCap() {
-      return this.$accounting.formatMoney(this.tokenStats.marketCap, '$', 0);
-    },
-
-    totalSupply() {
-      return this.$accounting.formatNumber(this.tokenStats.supply);
-    },
-  },
-
   data() {
     return {
       tokenStats: {
@@ -170,7 +144,11 @@ export default {
     padding: $space;
 
     > div {
-      flex: 1;
+      flex: none;
+
+      & + div {
+        margin-left: 10%;
+      }
     }
 
     .amount {

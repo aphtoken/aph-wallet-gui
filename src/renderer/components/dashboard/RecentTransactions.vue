@@ -7,8 +7,8 @@
       <router-link class="transaction" :to="`/dashboard/trx/${transaction.hash}`" v-for="(transaction, index) in $store.state.recentTransactions" :key="index">
         <div class="address">{{ transaction.hash }}</div>
         <div class="currency">{{ transaction.symbol }}</div>
-        <div class="date">{{ transaction.block_index }}</div>
-        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ formatAmount(transaction) }}</div>
+        <!-- <div class="date">{{ transaction.block_index }}</div> -->
+        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</div>
       </router-link>
     </div>
   </div>
@@ -30,14 +30,6 @@ export default {
 
     viewTransaction(hash) {
       this.$router.push({ path: `/dashboard/trx/${hash}` });
-    },
-
-    formatAmount({ amount }) {
-      return this.$accounting.formatNumber(amount, 8);
-    },
-
-    formatDate({ timestamp }) {
-      return this.$moment(timestamp, 'X').format(this.$constants.formats.DATE);
     },
   },
 

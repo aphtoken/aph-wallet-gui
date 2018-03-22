@@ -12,9 +12,9 @@
         </div>
         <div class="balance">
           <div class="amount">
-            {{ formatBalance(holding) }}<span class="currency">{{ holding.symbol }}</span>
+            {{ $formatNumber(holding.balance) }}<span class="currency">{{ holding.symbol }}</span>
           </div>
-          <div :class="['change', {decrease: holding.change < 0, increase: holding.change > 1}]">{{ formatChange(holding) }}</div>
+          <div :class="['change', {decrease: holding.change < 0, increase: holding.change > 1}]">{{ $formatNumber(holding.change) }}</div>
         </div>
       </div>
     </div>
@@ -45,7 +45,7 @@ export default {
           symbol: 'GAS',
         },
         {
-          balance: 5.4,
+          balance: 5.454,
           change: 1.46,
           name: 'Tron',
           symbol: 'TRX',
@@ -55,14 +55,6 @@ export default {
   },
 
   methods: {
-    formatBalance({ balance }) {
-      return this.$accounting.formatNumber(balance, 2);
-    },
-
-    formatChange({ change }) {
-      return this.$accounting.formatNumber(change, 2);
-    },
-
     isActive({ symbol }) {
       // This is just placeholder logic for now..
       return symbol === 'APH';

@@ -18,6 +18,7 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
+    titleBarStyle: 'hidden',
     height: 563,
     title: 'Aphelion Desktop Wallet',
     useContentSize: true,

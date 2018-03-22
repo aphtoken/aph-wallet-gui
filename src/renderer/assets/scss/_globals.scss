@@ -13,6 +13,7 @@ html, body {
   font-size: $font-size;
   height: 100%;
   line-height: 1;
+  -webkit-app-region: drag;
 }
 
 ::-webkit-scrollbar {

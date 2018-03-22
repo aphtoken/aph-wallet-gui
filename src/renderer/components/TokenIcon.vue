@@ -38,7 +38,7 @@ export default {
     color: white;
     display: flex;
     justify-content: center;
-    font-size: toRem(14px);
+    font-size: toRem(12px);
     font-family: GilroyMedium;
 
     > * {

@@ -14,11 +14,11 @@
         <div class="row">
           <div class="column">
             <div class="label">Date</div>
-            <div class="value">{{ date }}</div>
+            <div class="value">{{ $formatDate(transaction.timestamp) }}</div>
           </div>
           <div class="column">
             <div class="label">Time</div>
-            <div class="value">{{ time }}</div>
+            <div class="value">{{ $formatTime(transaction.timestamp) }}</div>
           </div>
         </div>
       </div>
@@ -26,17 +26,17 @@
         <div class="row">
           <div class="column">
             <div class="label">Token</div>
-            <div class="value red">{{ token }}</div>
+            <div class="value red">{{ $formatNumber(transaction.amount) }} {{ transaction.currency }}</div>
           </div>
           <div class="column">
             <div class="label">Value</div>
-            <div class="value">{{ value }}</div>
+            <div class="value">{{ $formatMoney(transaction.usd) }} USD</div>
           </div>
         </div>
         <div class="row">
           <div class="column">
             <div class="label">Block</div>
-            <div class="value purple">{{ block }}</div>
+            <div class="value purple">{{ $formatNumber(transaction.block) }}</div>
           </div>
           <div class="column">
             <div class="label">Status</div>
@@ -62,21 +62,21 @@
         <div class="row">
           <div class="column">
             <div class="label">Network Fee</div>
-            <div class="value">{{ networkFee }}</div>
+            <div class="value">{{ $formatNumber(transaction.networkFee) }} GAS</div>
           </div>
           <div class="column">
             <div class="label">System Fee</div>
-            <div class="value">{{ systemFee }}</div>
+            <div class="value">{{ $formatNumber(transaction.networkFee) }} GAS</div>
           </div>
           <div class="column">
             <div class="label">Size</div>
-            <div class="value">{{ size }}</div>
+            <div class="value">{{ $formatNumber(transaction.size) }} Bytes</div>
           </div>
         </div>
         <div class="row has-equal-columns">
           <div class="column">
             <div class="label">Confirmations</div>
-            <div class="value">{{ confirmations }}</div>
+            <div class="value">{{ $formatNumber(transaction.confirmations) }}</div>
           </div>
           <div class="column confirmed" v-if="this.transaction.confirmed">
             <aph-icon name="confirmed"></aph-icon>
@@ -90,44 +90,6 @@
 
 <script>
 export default {
-  computed: {
-    block() {
-      return this.$accounting.formatNumber(this.transaction.block);
-    },
-
-    confirmations() {
-      return this.$accounting.formatNumber(this.transaction.confirmations);
-    },
-
-    date() {
-      return this.$moment(this.transaction.timestamp, 'X').format(this.$constants.formats.DATE);
-    },
-
-    networkFee() {
-      return `${this.$accounting.formatNumber(this.transaction.networkFee)} GAS`;
-    },
-
-    size() {
-      return `${this.$accounting.formatNumber(this.transaction.size)} Bytes`;
-    },
-
-    systemFee() {
-      return `${this.$accounting.formatNumber(this.transaction.systemFee)} GAS`;
-    },
-
-    time() {
-      return this.$moment(this.transaction.timestamp, 'X').format(this.$constants.formats.TIME);
-    },
-
-    token() {
-      return `${this.$accounting.formatNumber(this.transaction.block)} ${this.transaction.currency}`;
-    },
-
-    value() {
-      return `${this.$accounting.formatMoney(this.transaction.amount)} USD`;
-    },
-  },
-
   data() {
     return {
       transaction: {

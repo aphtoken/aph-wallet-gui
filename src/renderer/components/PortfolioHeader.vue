@@ -1,14 +1,14 @@
 <template>
   <section id="portfolio-header">
-    <simple-donut :percent="23"></simple-donut>
+    <simple-donut :percent="portfolio.changePercent"></simple-donut>
     <div class="ticker">
       <h1 class="underlined">My Porfolio</h1>
       <div class="balance">
-        <span class="symbol">$</span><span class="amount">{{ balance }}</span><span class="currency">USD</span>
+        <span class="symbol">$</span><span class="amount">{{ $formatNumber(portfolio.balance) }}</span><span class="currency">USD</span>
       </div>
       <div class="change">
         <div class="label">24h change</div>
-        <div class="amount increase">{{ changeUsd }}</div>
+        <div class="amount increase">{{ $formatMoney(portfolio.changeUsd) }}</div>
       </div>
     </div>
     <div class="btn-group">
@@ -32,14 +32,14 @@ export default {
     SimpleDonut,
   },
 
-  computed: {
-    balance() {
-      return this.$accounting.formatNumber(57234.91, 2);
-    },
-
-    changeUsd() {
-      return this.$accounting.formatMoney(1234.34);
-    },
+  data() {
+    return {
+      portfolio: {
+        balance: 57234.91,
+        changeUsd: 1316.4,
+        changePercent: 2.3,
+      },
+    };
   },
 };
 </script>
