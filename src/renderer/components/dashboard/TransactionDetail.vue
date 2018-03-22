@@ -8,7 +8,7 @@
         <div class="row">
           <div class="column">
             <div class="label">Hash</div>
-            <div class="value truncate">{{ transaction.hash }}</div>
+            <div class="value truncate">{{ transaction.txid }}</div>
           </div>
         </div>
         <div class="row">
