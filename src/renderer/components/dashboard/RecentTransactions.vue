@@ -18,7 +18,8 @@
 export default {
   methods: {
     loadTransactions() {
-      this.$services.neo.fetchRecentTransactions()
+      this.$services.neo
+        .fetchRecentTransactions(this.$services.wallets.getCurrentWallet().address)
         .then((data) => {
           this.$store.commit('setRecentTransactions', data);
         })
