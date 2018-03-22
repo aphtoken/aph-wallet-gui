@@ -18,6 +18,10 @@
 export default {
   methods: {
     loadTransactions() {
+      if (!this.$services.wallets.getCurrentWallet()) {
+        return;
+      }
+
       this.$services.neo
         .fetchRecentTransactions(this.$services.wallets.getCurrentWallet().address)
         .then((data) => {

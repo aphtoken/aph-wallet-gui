@@ -1,10 +1,6 @@
-/* eslint-disable */
 import {
   wallet,
-  Neon,
-  rpc,
-  tx,
-  api
+  api,
 } from '@cityofzion/neon-js';
 import wallets from './wallets';
 
@@ -38,24 +34,21 @@ export default {
       }
 
       try {
-        let account = new wallet.Account(wallet.generatePrivateKey());
-        const _encryptedWIF = wallet.encrypt(account.WIF, passphrase);
+        const account = new wallet.Account(wallet.generatePrivateKey());
+        const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
 
         account.label = name;
         wallets.add(name, {
           label: name,
-          encryptedWIF: _encryptedWIF,
+          encryptedWIF,
           address: account.address,
           scriptHash: account.scriptHash,
         });
 
         wallets.openSavedWallet(name, passphrase);
-        resolve(_.merge(account, {
-          _encryptedWIF,
-          passphrase,
-        }));
+        return resolve(_.merge(account, { encryptedWIF, passphrase }));
       } catch (e) {
-        return reject('An error occured while trying to generate a new wallet.')
+        return reject('An error occured while trying to generate a new wallet.');
       }
     });
   },
@@ -76,10 +69,10 @@ export default {
   fetchRecentTransactions(address) {
     return new Promise((resolve, reject) => {
       try {
-        api.neonDB.getTransactionHistory(network, address)
-          .then(res => {
+        return api.neonDB.getTransactionHistory(network, address)
+          .then((res) => {
             const splitTransactions = [];
-            for (let t of res) {
+            res.forEach((t) => {
               if (t.neo_sent === true) {
                 splitTransactions.push({
                   hash: t.txid,
@@ -96,13 +89,10 @@ export default {
                   amount: t.GAS,
                 });
               }
-            }
+            });
             return resolve(splitTransactions);
           })
-          .catch((e) => {
-            return reject(e);
-          });
-
+          .catch(e => reject(e));
       } catch (e) {
         return reject(e);
       }
@@ -130,7 +120,7 @@ export default {
    *  {String} timestamp
    *  {String} to_address
    */
-  fetchTransaction(wallet) {
+  fetchTransaction() {
 
   },
 
@@ -151,7 +141,7 @@ export default {
    *  {Float} value_usd
    *  {Number} 24_hour_change_percentage
    */
-  fetchWalletContents(wallet) {
+  fetchWalletContents() {
 
   },
 
@@ -165,41 +155,9 @@ export default {
   },
 
   /**
-   * Logs in with encrypted key.
-   *
-   * @param {String} passphrase
-   * @param {String} encryptedKey
-   * @return Promise
-   */
-  loginWithEncryptedKey(passphrase, encryptedKey) {
-
-  },
-
-  /**
-   * Logs in with wallet.
-   *
-   * @param {Object} wallet
-   * @param {String} passphrase
-   * @return Promise
-   */
-  loginWithWallet(wallet, passphrase) {
-
-  },
-
-  /**
    * @return Promise
    */
   sendFunds() {
-
-  },
-
-  /**
-   * Stores wallet locally.
-   *
-   * @param {String} name
-   * @param {Object} wallet
-   */
-  storeWallet(name, wallet) {
 
   },
 
