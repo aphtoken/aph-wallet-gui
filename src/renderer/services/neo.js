@@ -114,25 +114,21 @@ export default {
   },
 
   /**
-   * Fetches single wallet transaction.
+   * Fetches transaction details for the given hash
    *
-   * @param {Object} wallet
+   * @param string hash
    * @return Promise
    *
-   * Response passed to Promise ideally looks like this:
-   *  {Boolean} comfirmed
-   *  {Float} network_fee
-   *  {Float} system_fee
-   *  {Float} token_count
-   *  {Float} value_usd
+   *  {String} txid
+   *  {Float} net_fee
+   *  {Float} sys_fee
    *  {Number} block
-   *  {Number} bytes
+   *  {Number} size
    *  {Number} confirmations
-   *  {String} from_address
-   *  {String} from_address
-   *  {String} status
-   *  {String} timestamp
-   *  {String} to_address
+   *  {Array} vin
+   *  {Array} vout
+   *  {Boolean} confirmed
+   *  {Integer} blocktime
    */
   fetchTransactionDetails(hash) {
     return new Promise((resolve, reject) => {
@@ -145,9 +141,12 @@ export default {
               .then((transaction) => {
                 transaction.currentBlockHeight = blockCount;
                 if (transaction.confirmations > 0) {
-                  transaction.status = 'Confirmed';
+                  transaction.confirmed = true;
                   transaction.block = blockCount - transaction.confirmations;
+                } else {
+                  transaction.confirmed = false;
                 }
+
 
                 // set output symbols based on asset ids
                 transaction.vout.forEach((output) => {

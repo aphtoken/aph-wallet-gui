@@ -20,6 +20,10 @@
             <div class="label">Time</div>
             <div class="value">{{ $formatTime(transaction.blocktime) }}</div>
           </div>
+          <div class="column">
+            <div class="label">Block</div>
+            <div class="value purple">{{ $formatNumber(transaction.block) }}</div>
+          </div>
         </div>
       </div>
       <div class="section">
@@ -35,18 +39,7 @@
             <div class="value">{{ $formatMoney(transaction.usd) }} USD</div>
           </div>
         </div>
-        -->
-        
-        <div class="row">
-          <div class="column">
-            <div class="label">Block</div>
-            <div class="value purple">{{ $formatNumber(transaction.block) }}</div>
-          </div>
-          <div class="column">
-            <div class="label">Status</div>
-            <div class="value red">{{ transaction.status }}</div>
-          </div>
-        </div>
+        -->        
       </div>
       <div class="section">
         <!-- UI for inputs and outputs needs some improvement to reflect multiple values and the 3 different attributes (address, symbol, value) -->
@@ -83,7 +76,7 @@
           </div>
         </div>
         <div class="row has-equal-columns">
-          <div class="column">
+          <div class="column" v-if="this.transaction.confirmed">
             <div class="label">Confirmations</div>
             <div class="value">{{ $formatNumber(transaction.confirmations) }}</div>
           </div>
