@@ -7,7 +7,7 @@
       <router-link class="transaction" :to="`/dashboard/trx/${transaction.hash}`" v-for="(transaction, index) in $store.state.recentTransactions" :key="index">
         <div class="address">{{ transaction.hash }}</div>
         <div class="currency">{{ transaction.symbol }}</div>
-        <!-- <div class="date">{{ transaction.block_index }}</div> -->
+        <div class="date">{{ $formatDate(transaction.block_time) }}</div>
         <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</div>
       </router-link>
     </div>

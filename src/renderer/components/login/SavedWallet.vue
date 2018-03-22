@@ -29,13 +29,18 @@ export default {
 
   methods: {
     login() {
-      this.$services.wallets.openSavedWallet(this.wallet.label, this.passphrase)
-        .then(() => {
-          this.$router.push('dashboard');
-        })
-        .catch(() => {
-          this.creating = false;
-        });
+      setTimeout(() => {
+        /* don't know how to make this behave using async/await as you described,
+        how to we get back the error messages?
+        Still not sure why the Promise model would freeze the UI */
+        this.$services.wallets.openSavedWallet(this.wallet.label, this.passphrase)
+          .then(() => {
+            this.$router.push('dashboard');
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }, 1000);
     },
   },
 

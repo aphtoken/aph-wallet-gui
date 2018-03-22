@@ -8,21 +8,23 @@
         <div class="row">
           <div class="column">
             <div class="label">Hash</div>
-            <div class="value">{{ transaction.hash }}</div>
+            <div class="value">{{ transaction.txid }}</div>
           </div>
         </div>
         <div class="row">
           <div class="column">
             <div class="label">Date</div>
-            <div class="value">{{ $formatDate(transaction.timestamp) }}</div>
+            <div class="value">{{ $formatDate(transaction.blocktime) }}</div>
           </div>
           <div class="column">
             <div class="label">Time</div>
-            <div class="value">{{ $formatTime(transaction.timestamp) }}</div>
+            <div class="value">{{ $formatTime(transaction.blocktime) }}</div>
           </div>
         </div>
       </div>
       <div class="section">
+        <!-- these need to be re-thought, where does the value come from? the fiat value at the time of the transaction?
+            also a single transaction can transfer more than one asset, should these be a list, like inputs/outputs?
         <div class="row">
           <div class="column">
             <div class="label">Token</div>
@@ -33,6 +35,8 @@
             <div class="value">{{ $formatMoney(transaction.usd) }} USD</div>
           </div>
         </div>
+        -->
+        
         <div class="row">
           <div class="column">
             <div class="label">Block</div>
@@ -45,16 +49,21 @@
         </div>
       </div>
       <div class="section">
+        <!-- UI for inputs and outputs needs some improvement to reflect multiple values and the 3 different attributes (address, symbol, value) -->
         <div class="row">
           <div class="column">
             <div class="label">From</div>
-            <div class="value">{{ transaction.fromHash }}</div>
+            <div class="value" v-for="(input, index) in transaction.vin">
+              {{ input.address }} {{input.symbol}} {{input.value}}
+            </div>
           </div>
         </div>
         <div class="row">
           <div class="column">
             <div class="label">To</div>
-            <div class="value purple">{{ transaction.toHash }}</div>
+            <div class="value purple" v-for="(output, index) in transaction.vout">
+              {{ output.address }} {{output.symbol}} {{output.value}}
+            </div>
           </div>
         </div>
       </div>
@@ -62,11 +71,11 @@
         <div class="row">
           <div class="column">
             <div class="label">Network Fee</div>
-            <div class="value">{{ $formatNumber(transaction.networkFee) }} GAS</div>
+            <div class="value">{{ $formatNumber(transaction.net_fee) }} GAS</div>
           </div>
           <div class="column">
             <div class="label">System Fee</div>
-            <div class="value">{{ $formatNumber(transaction.networkFee) }} GAS</div>
+            <div class="value">{{ $formatNumber(transaction.sys_fee) }} GAS</div>
           </div>
           <div class="column">
             <div class="label">Size</div>
@@ -92,22 +101,7 @@
 export default {
   data() {
     return {
-      transaction: {
-        amount: 6000,
-        block: 1864638,
-        confirmations: 48754,
-        confirmed: true,
-        currency: 'APH',
-        fromHash: '1FeexV6bAHb8ybZjqQMjJrcCrHGW9sb6uF',
-        hash: this.hash,
-        networkFee: 0,
-        size: 219,
-        status: 'Sent',
-        systemFee: 0,
-        timestamp: 1521643932,
-        toHash: '1AZkUjL1rMUeqKsZfNf4cgrtUCqhCborz9',
-        usd: 6000,
-      },
+      transaction: { },
     };
   },
 
@@ -115,6 +109,32 @@ export default {
     hash: {
       type: String,
     },
+  },
+
+
+  methods: {
+    loadTransactionDetails() {
+      if (!this.hash) {
+        return;
+      }
+
+      this.$services.neo
+        .fetchTransactionDetails(this.hash)
+        .then((data) => {
+          this.transaction = data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    viewTransaction(hash) {
+      this.$router.push({ path: `/dashboard/trx/${hash}` });
+    },
+  },
+
+  mounted() {
+    this.loadTransactionDetails();
   },
 };
 </script>
