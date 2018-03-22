@@ -16,6 +16,7 @@ import { store } from './store';
 import Icon from './components/Icon';
 import Input from './components/Input';
 import Select from './components/Select';
+import TokenIcon from './components/TokenIcon';
 
 // Global Libraries.
 window._ = _;
@@ -40,6 +41,7 @@ _.each(mixins, (mixin) => {
 Vue.component('aph-icon', Icon);
 Vue.component('aph-select', Select);
 Vue.component('aph-input', Input);
+Vue.component('token-icon', TokenIcon);
 
 /* eslint-disable no-new */
 new Vue({

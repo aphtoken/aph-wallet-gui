@@ -5,12 +5,7 @@
     </div>
     <div class="body">
       <div v-for="(holding, index) in holdings" :class="['holding', {active: isActive(holding)}]" :key="index">
-        <div class="token-icon">
-          <!-- TODO make this a component probably... -->
-          <img src="~@/assets/img/token-icons/APH.png" v-if="holding.symbol === 'APH'">
-          <img src="~@/assets/img/token-icons/NEO.png" v-if="holding.symbol === 'GAS'">
-          <img src="~@/assets/img/token-icons/NEO.png" v-if="holding.symbol === 'NEO'">
-        </div>
+        <token-icon :symbol="holding.symbol"></token-icon>
         <div class="token">
           <div class="name">{{ holding.name }}</div>
           <div class="currency">{{ holding.symbol }}</div>
@@ -48,6 +43,12 @@ export default {
           change: 1.46,
           name: 'Gas',
           symbol: 'GAS',
+        },
+        {
+          balance: 5.4,
+          change: 1.46,
+          name: 'Tron',
+          symbol: 'TRX',
         },
       ],
     };
@@ -100,12 +101,7 @@ export default {
 
       .token-icon {
         flex: none;
-        font-size: 0;
         padding-right: $space;
-
-        img, svg {
-          width: $space * 3;
-        }
       }
 
       .token {

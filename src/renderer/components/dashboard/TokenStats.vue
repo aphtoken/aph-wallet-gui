@@ -8,11 +8,11 @@
       </div>
     </div>
     <div class="body">
-      <aph-icon name="logo-mark"></aph-icon>
+      <token-icon :symbol="this.tokenStats.symbol"></token-icon>
       <div class="balance">
         <div class="name">{{ this.tokenStats.name }}</div>
         <div class="amount">
-          {{ balance }}<span class="currency">{{ this.tokenStats.smybol }}</span>
+          {{ balance }}<span class="currency">{{ this.tokenStats.symbol }}</span>
         </div>
         <div class="value">
           {{ balanceValue }}<span class="currency">USD</span>
@@ -118,11 +118,18 @@ export default {
     flex: 1;
     padding: $space;
 
-    .aph-icon {
+    .token-icon {
+      $width: toRem(150px);
+
       padding: 0 $space-lg 0 0;
 
-      svg {
-        height: toRem(150px);
+      img, .placeholder {
+        height: $width;
+        width: $width;
+      }
+
+      .placeholder {
+        font-size: toRem(30px);
       }
     }
 
