@@ -10,8 +10,8 @@ export default {
           .then((res) => {
             resolve(res.data[0]);
           })
-          .catch((e) => {
-            this.errors.push(e);
+          .catch(() => {
+            resolve(0);
           });
       } catch (e) {
         return reject(e);

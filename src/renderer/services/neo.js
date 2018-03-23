@@ -6,12 +6,20 @@ import {
 import wallets from './wallets';
 import valuation from './valuation';
 
-const network = 'TestNet';
-const rpcEndpoint = 'http://test1.cityofzion.io:8880'; // todo, an app preference to move between test and main net
-// const network = 'MainNet';
-// const rpcEndpoint = 'http://seed1.aphelion-neo.com:10332'; // todo, multiple options for rpc endpoints
 const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
+
+// const network = 'MainNet';
+// const rpcEndpoint = 'http://seed1.aphelion-neo.com:10332'; // todo, multiple options for rpc endpoints
+/* const nep5TokenIds = [
+  'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
+]; */
+
+const network = 'TestNet';
+const rpcEndpoint = 'http://test3.cityofzion.io:8880'; // todo, an app preference to move between test and main net
+const nep5TokenIds = [
+  '591eedcd379a8981edeefe04ef26207e1391904a',
+];
 
 export default {
 
@@ -209,28 +217,56 @@ export default {
         return client.query({ method: 'getaccountstate', params: [address] })
           .then((res) => {
             const holdings = [];
-            const valuationPromises = [];
 
             res.result.balances.forEach((b) => {
               const h = {
                 asset: b.asset,
                 balance: b.value,
                 symbol: b.asset === neoAssetId ? 'NEO' : 'GAS',
+                name: b.asset === neoAssetId ? 'NEO' : 'GAS',
               };
-
-              valuationPromises.push(valuation.getValuation(h.symbol)
-                .then((val) => {
-                  h.change = val.percent_change_24h;
-                })
-                .catch((e) => {
-                  reject(e);
-                }));
 
               holdings.push(h);
             });
 
-            Promise.all(valuationPromises)
-              .then(() => resolve(holdings))
+            const nep5Promises = [];
+            nep5TokenIds.forEach((nep5) => {
+              nep5Promises.push(this.fetchNEP5Balance(address, nep5)
+                .then((val) => {
+                  if (val.balance > 0) {
+                    const h = {
+                      asset: nep5,
+                      balance: val.balance,
+                      symbol: val.symbol,
+                      name: val.name,
+                    };
+
+                    holdings.push(h);
+                  }
+                })
+                .catch((e) => {
+                  reject(e);
+                }));
+            });
+
+            return Promise.all(nep5Promises)
+              .then(() => {
+                const valuationsPromises = [];
+                holdings.forEach((h) => {
+                  valuationsPromises.push(valuation.getValuation(h.symbol)
+                    .then((val) => {
+                      console.log(h);
+                      h.change = val.percent_change_24h;
+                    })
+                    .catch((e) => {
+                      console.log(e);
+                    }));
+                });
+
+                return Promise.all(valuationsPromises)
+                  .then(() => resolve(holdings))
+                  .catch(e => reject(e));
+              })
               .catch(e => reject(e));
           })
           .catch(e => reject(e));
@@ -243,22 +279,19 @@ export default {
   fetchNEP5Balance(address, assetId) {
     return new Promise((resolve, reject) => {
       try {
-        const client = rpc.default.create.rpcClient(rpcEndpoint);
-        return client.query({
-          method: 'invokefunction',
-          params: [
-            assetId,
-            'balanceOf',
-            [
-              {
-                type: 'Hash160',
-                value: address,
-              },
-            ],
-          ],
-        })
-          .then((res) => {
-            console.log(res);
+        return api.nep5.getToken(rpcEndpoint, assetId, address)
+          .then((token) => {
+            api.nep5.getTokenBalance(rpcEndpoint, assetId, address)
+              .then((res) => {
+                resolve({
+                  name: token.name,
+                  symbol: token.symbol,
+                  decimals: token.decimals,
+                  totalSupply: token.totalSupply,
+                  balance: res,
+                });
+              })
+              .catch(e => reject(e));
           })
           .catch(e => reject(e));
       } catch (e) {
