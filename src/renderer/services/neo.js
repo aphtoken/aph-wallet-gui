@@ -224,6 +224,7 @@ export default {
                 balance: b.value,
                 symbol: b.asset === neoAssetId ? 'NEO' : 'GAS',
                 name: b.asset === neoAssetId ? 'NEO' : 'GAS',
+                isNep5: false,
               };
 
               holdings.push(h);
@@ -239,6 +240,7 @@ export default {
                       balance: val.balance,
                       symbol: val.symbol,
                       name: val.name,
+                      isNep5: true,
                     };
 
                     holdings.push(h);
@@ -255,7 +257,6 @@ export default {
                 holdings.forEach((h) => {
                   valuationsPromises.push(valuation.getValuation(h.symbol)
                     .then((val) => {
-                      console.log(h);
                       h.change = val.percent_change_24h;
                     })
                     .catch((e) => {
