@@ -257,7 +257,12 @@ export default {
                 holdings.forEach((h) => {
                   valuationsPromises.push(valuation.getValuation(h.symbol)
                     .then((val) => {
-                      h.change = val.percent_change_24h;
+                      h.change24hrPercent = val.percent_change_24h;
+                      h.unitValue = val.price_usd;
+                      h.unitValue24hrAgo = h.unitValue / (1 + (h.change24hrPercent / 100.0));
+                      h.change24hrValue = (h.unitValue * h.balance)
+                        - (h.unitValue24hrAgo * h.balance);
+                      h.totalValue = h.unitValue * h.balance;
                     })
                     .catch((e) => {
                       console.log(e);
@@ -265,7 +270,26 @@ export default {
                 });
 
                 return Promise.all(valuationsPromises)
-                  .then(() => resolve(holdings))
+                  .then(() => {
+                    const res = { };
+
+                    res.holdings = holdings.sort((a, b) => {
+                      if (a.symbol > b.symbol) {
+                        return 1;
+                      }
+                      return -1;
+                    });
+
+                    res.totalBalance = 0;
+                    res.change24hrValue = 0;
+                    holdings.forEach((h) => {
+                      res.totalBalance += h.totalValue;
+                      res.change24hrValue += h.change24hrValue;
+                    });
+                    res.change24hrPercent = Math.round(10000 * (res.change24hrValue
+                      / (res.totalBalance - res.change24hrValue))) / 100.0;
+                    resolve(res);
+                  })
                   .catch(e => reject(e));
               })
               .catch(e => reject(e));
@@ -282,17 +306,13 @@ export default {
       try {
         return api.nep5.getToken(rpcEndpoint, assetId, address)
           .then((token) => {
-            api.nep5.getTokenBalance(rpcEndpoint, assetId, address)
-              .then((res) => {
-                resolve({
-                  name: token.name,
-                  symbol: token.symbol,
-                  decimals: token.decimals,
-                  totalSupply: token.totalSupply,
-                  balance: res,
-                });
-              })
-              .catch(e => reject(e));
+            resolve({
+              name: token.name,
+              symbol: token.symbol,
+              decimals: token.decimals,
+              totalSupply: token.totalSupply,
+              balance: token.balance,
+            });
           })
           .catch(e => reject(e));
       } catch (e) {
