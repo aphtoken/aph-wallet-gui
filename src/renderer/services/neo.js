@@ -87,12 +87,7 @@ export default {
         return api.neonDB.getTransactionHistory(network, address)
           .then((res) => {
             const splitTransactions = [];
-            res.sort((a, b) => {
-              if (a.block_index > b.block_index) {
-                return 1;
-              }
-              return -1;
-            }).forEach((t) => {
+            res.forEach((t) => {
               const transactions = [];
               if (t.neo_sent === true) {
                 transactions.push({
@@ -119,7 +114,14 @@ export default {
                   });
                 });
             });
-            return resolve(splitTransactions);
+            return resolve(splitTransactions.sort((a, b) => {
+              if (a.block_time > b.block_time) {
+                return 1;
+              } else if (a.block_time < b.block_time) {
+                return -1;
+              }
+              return 0;
+            }));
           })
           .catch(e => reject(e));
       } catch (e) {
@@ -329,8 +331,67 @@ export default {
   /**
    * @return Promise
    */
-  sendFunds() {
+  sendFunds(toAddress, assetId, amount, isNep5) {
+    return new Promise((resolve, reject) => {
+      try {
+        if (isNep5 === false) {
+          if (assetId === neoAssetId) {
+            return this.sendSystemAsset(toAddress, amount, 0);
+          } else if (assetId === gasAssetId) {
+            return this.sendSystemAsset(toAddress, 0, amount);
+          }
+        } else if (isNep5 === true) {
+          return this.sendNep5Transfer(toAddress, assetId, amount);
+        }
 
+        return reject('Invalid system asset id');
+      } catch (e) {
+        return reject(e);
+      }
+    });
+  },
+
+  sendSystemAsset(toAddress, neoAmount, gasAmount) {
+    const intentAmounts = {};
+    if (neoAmount > 0) {
+      intentAmounts.NEO = neoAmount;
+    }
+    if (gasAmount > 0) {
+      intentAmounts.GAS = gasAmount;
+    }
+
+    const config = {
+      net: network,
+      address: toAddress,
+      privateKey: wallets.getCurrentWallet().privateKey,
+      intents: api.makeIntent(intentAmounts, wallets.getCurrentWallet().address),
+    };
+    console.log(config);
+    return api.sendAsset(config)
+      .then((res) => {
+        console.log(res);
+        return res;
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  },
+
+  sendNep5Transfer(toAddress, assetId, amount) {
+    return new Promise((resolve, reject) => {
+      try {
+        console.log(wallets.getCurrentWallet().wif);
+        return api.nep5.doTransferToken(network, assetId,
+          wallets.getCurrentWallet().wif, toAddress, amount)
+          .then((res) => {
+            console.log(res);
+            return res;
+          })
+          .catch(e => reject(e));
+      } catch (e) {
+        return reject(e);
+      }
+    });
   },
 
 };
