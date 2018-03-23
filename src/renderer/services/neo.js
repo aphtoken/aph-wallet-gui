@@ -87,7 +87,12 @@ export default {
         return api.neonDB.getTransactionHistory(network, address)
           .then((res) => {
             const splitTransactions = [];
-            res.forEach((t) => {
+            res.sort((a, b) => {
+              if (a.block_index > b.block_index) {
+                return 1;
+              }
+              return -1;
+            }).forEach((t) => {
               const transactions = [];
               if (t.neo_sent === true) {
                 transactions.push({
