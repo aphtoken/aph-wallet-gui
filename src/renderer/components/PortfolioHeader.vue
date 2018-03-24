@@ -35,11 +35,33 @@ export default {
   data() {
     return {
       portfolio: {
-        balance: 57234.91,
-        changeUsd: 1316.4,
-        changePercent: 2.3,
+        balance: 0,
+        changeUsd: 0,
+        changePercent: 0,
       },
     };
+  },
+
+  methods: {
+    loadHoldings() {
+      if (!this.$services.wallets.getCurrentWallet()) {
+        return;
+      }
+
+      this.$services.neo
+        .fetchHoldings(this.$services.wallets.getCurrentWallet().address)
+        .then((data) => {
+          this.portfolio.balance = data.totalBalance;
+          this.portfolio.changeUsd = data.change24hrValue;
+          this.portfolio.changePercent = data.change24hrPercent;
+        })
+        .catch(() => {
+        });
+    },
+  },
+
+  mounted() {
+    this.loadHoldings();
   },
 };
 </script>

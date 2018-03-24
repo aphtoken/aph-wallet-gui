@@ -114,7 +114,14 @@ export default {
                   });
                 });
             });
-            return resolve(splitTransactions);
+            return resolve(splitTransactions.sort((a, b) => {
+              if (a.block_time > b.block_time) {
+                return 1;
+              } else if (a.block_time < b.block_time) {
+                return -1;
+              }
+              return 0;
+            }));
           })
           .catch(e => reject(e));
       } catch (e) {
@@ -257,7 +264,12 @@ export default {
                 holdings.forEach((h) => {
                   valuationsPromises.push(valuation.getValuation(h.symbol)
                     .then((val) => {
-                      h.change = val.percent_change_24h;
+                      h.change24hrPercent = val.percent_change_24h;
+                      h.unitValue = val.price_usd;
+                      h.unitValue24hrAgo = h.unitValue / (1 + (h.change24hrPercent / 100.0));
+                      h.change24hrValue = (h.unitValue * h.balance)
+                        - (h.unitValue24hrAgo * h.balance);
+                      h.totalValue = h.unitValue * h.balance;
                     })
                     .catch((e) => {
                       console.log(e);
@@ -265,7 +277,26 @@ export default {
                 });
 
                 return Promise.all(valuationsPromises)
-                  .then(() => resolve(holdings))
+                  .then(() => {
+                    const res = { };
+
+                    res.holdings = holdings.sort((a, b) => {
+                      if (a.symbol > b.symbol) {
+                        return 1;
+                      }
+                      return -1;
+                    });
+
+                    res.totalBalance = 0;
+                    res.change24hrValue = 0;
+                    holdings.forEach((h) => {
+                      res.totalBalance += h.totalValue;
+                      res.change24hrValue += h.change24hrValue;
+                    });
+                    res.change24hrPercent = Math.round(10000 * (res.change24hrValue
+                      / (res.totalBalance - res.change24hrValue))) / 100.0;
+                    resolve(res);
+                  })
                   .catch(e => reject(e));
               })
               .catch(e => reject(e));
@@ -282,17 +313,13 @@ export default {
       try {
         return api.nep5.getToken(rpcEndpoint, assetId, address)
           .then((token) => {
-            api.nep5.getTokenBalance(rpcEndpoint, assetId, address)
-              .then((res) => {
-                resolve({
-                  name: token.name,
-                  symbol: token.symbol,
-                  decimals: token.decimals,
-                  totalSupply: token.totalSupply,
-                  balance: res,
-                });
-              })
-              .catch(e => reject(e));
+            resolve({
+              name: token.name,
+              symbol: token.symbol,
+              decimals: token.decimals,
+              totalSupply: token.totalSupply,
+              balance: token.balance,
+            });
           })
           .catch(e => reject(e));
       } catch (e) {
@@ -304,8 +331,67 @@ export default {
   /**
    * @return Promise
    */
-  sendFunds() {
+  sendFunds(toAddress, assetId, amount, isNep5) {
+    return new Promise((resolve, reject) => {
+      try {
+        if (isNep5 === false) {
+          if (assetId === neoAssetId) {
+            return this.sendSystemAsset(toAddress, amount, 0);
+          } else if (assetId === gasAssetId) {
+            return this.sendSystemAsset(toAddress, 0, amount);
+          }
+        } else if (isNep5 === true) {
+          return this.sendNep5Transfer(toAddress, assetId, amount);
+        }
 
+        return reject('Invalid system asset id');
+      } catch (e) {
+        return reject(e);
+      }
+    });
+  },
+
+  sendSystemAsset(toAddress, neoAmount, gasAmount) {
+    const intentAmounts = {};
+    if (neoAmount > 0) {
+      intentAmounts.NEO = neoAmount;
+    }
+    if (gasAmount > 0) {
+      intentAmounts.GAS = gasAmount;
+    }
+
+    const config = {
+      net: network,
+      address: toAddress,
+      privateKey: wallets.getCurrentWallet().privateKey,
+      intents: api.makeIntent(intentAmounts, wallets.getCurrentWallet().address),
+    };
+    console.log(config);
+    return api.sendAsset(config)
+      .then((res) => {
+        console.log(res);
+        return res;
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  },
+
+  sendNep5Transfer(toAddress, assetId, amount) {
+    return new Promise((resolve, reject) => {
+      try {
+        console.log(wallets.getCurrentWallet().wif);
+        return api.nep5.doTransferToken(network, assetId,
+          wallets.getCurrentWallet().wif, toAddress, amount)
+          .then((res) => {
+            console.log(res);
+            return res;
+          })
+          .catch(e => reject(e));
+      } catch (e) {
+        return reject(e);
+      }
+    });
   },
 
 };

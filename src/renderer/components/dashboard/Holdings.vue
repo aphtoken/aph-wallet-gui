@@ -14,7 +14,7 @@
           <div class="amount">
             {{ $formatNumber(holding.balance) }}<span class="currency">{{ holding.symbol }}</span>
           </div>
-          <div :class="['change', {decrease: holding.change < 0, increase: holding.change > 1}]">{{ $formatNumber(holding.change) }}</div>
+          <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 1}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
         </div>
       </div>
     </div>
