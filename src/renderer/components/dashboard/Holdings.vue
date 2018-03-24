@@ -4,7 +4,7 @@
       <h1 class="underlined">My holdings</h1>
     </div>
     <div class="body">
-      <div v-for="(holding, index) in holdings" :class="['holding', {active: isActive(holding)}]" :key="index">
+      <div v-for="(holding, index) in $store.state.holdings" :class="['holding', {active: isActive(holding)}]" :key="index">
         <token-icon :symbol="holding.symbol"></token-icon>
         <div class="token">
           <div class="name">{{ holding.name }}</div>
@@ -23,12 +23,6 @@
 
 <script>
 export default {
-  data() {
-    return {
-      holdings: [],
-    };
-  },
-
   methods: {
     isActive({ symbol }) {
       // This is just placeholder logic for now..
@@ -43,7 +37,7 @@ export default {
       this.$services.neo
         .fetchHoldings(this.$services.wallets.getCurrentWallet().address)
         .then((data) => {
-          this.holdings = data;
+          this.$store.commit('setHoldings', data);
         })
         .catch(() => {
         });

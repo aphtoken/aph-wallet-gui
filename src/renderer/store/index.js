@@ -7,6 +7,7 @@ Vue.use(Vuex);
 
 const state = {
   activeRecentTransaction: null,
+  holdings: [],
   recentTransactions: [],
 };
 

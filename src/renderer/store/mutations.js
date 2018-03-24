@@ -6,6 +6,7 @@ export {
   clearActiveRecentTransaction,
   clearRecentTransactions,
   setActiveRecentTransaction,
+  setHoldings,
   setRecentTransactions,
 };
 
@@ -19,6 +20,10 @@ function clearRecentTransactions(state) {
 
 function setActiveRecentTransaction(state, transaction) {
   state.recentTransactions = transaction;
+}
+
+function setHoldings(state, holdings) {
+  state.holdings = holdings;
 }
 
 function setRecentTransactions(state, transactions) {

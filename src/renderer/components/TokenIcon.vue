@@ -22,13 +22,13 @@ export default {
 
 <style lang="scss">
 .token-icon {
-  $width: toRem(50px);
+  $iconWidth: toRem(50px);
 
   font-size: 0;
 
   img, .placeholder {
-      height: $width;
-      width: $width;
+      height: $iconWidth;
+      width: $iconWidth;
   }
 
   .placeholder {
