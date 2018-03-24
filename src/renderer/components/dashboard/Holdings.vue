@@ -37,7 +37,8 @@ export default {
       this.$services.neo
         .fetchHoldings(this.$services.wallets.getCurrentWallet().address)
         .then((data) => {
-          this.$store.commit('setHoldings', data);
+          this.$store.commit('setHoldings', data.holdings);
+          // this.holdings = data.holdings;
         })
         .catch(() => {
         });

@@ -17,6 +17,10 @@ export default {
       return numeral(value).format(formats.NUMBER);
     },
 
+    $formatNumberShort(value) {
+      return numeral(value).format(formats.NUMBER_SHORT);
+    },
+
     $formatTime(timestamp) {
       return moment(timestamp, 'X').format(formats.TIME);
     },
