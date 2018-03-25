@@ -38,7 +38,6 @@ export default {
         .fetchHoldings(this.$services.wallets.getCurrentWallet().address)
         .then((data) => {
           this.$store.commit('setHoldings', data.holdings);
-          // this.holdings = data.holdings;
         })
         .catch(() => {
         });

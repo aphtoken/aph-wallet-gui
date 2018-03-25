@@ -3,26 +3,26 @@
     <div class="header">
       <h1 class="underlined">Transaction</h1>
     </div>
-    <div class="body">
+    <div class="body" v-if="$store.state.activeRecentTransaction">
       <div class="section">
         <div class="row">
           <div class="column">
             <div class="label">Hash</div>
-            <div class="value truncate">{{ transaction.txid }}</div>
+            <div class="value truncate">{{ $store.state.activeRecentTransaction.txid }}</div>
           </div>
         </div>
         <div class="row">
           <div class="column">
             <div class="label">Date</div>
-            <div class="value">{{ $formatDate(transaction.blocktime) }}</div>
+            <div class="value">{{ $formatDate($store.state.activeRecentTransaction.blocktime) }}</div>
           </div>
           <div class="column">
             <div class="label">Time</div>
-            <div class="value">{{ $formatTime(transaction.blocktime) }}</div>
+            <div class="value">{{ $formatTime($store.state.activeRecentTransaction.blocktime) }}</div>
           </div>
           <div class="column">
             <div class="label">Block</div>
-            <div class="value purple">{{ $formatNumber(transaction.block) }}</div>
+            <div class="value purple">{{ $formatNumber($store.state.activeRecentTransaction.block) }}</div>
           </div>
         </div>
       </div>
@@ -39,14 +39,14 @@
             <div class="value">{{ $formatMoney(transaction.usd) }} USD</div>
           </div>
         </div>
-        -->        
+        -->
       </div>
       <div class="section">
         <!-- UI for inputs and outputs needs some improvement to reflect multiple values and the 3 different attributes (address, symbol, value) -->
         <div class="row">
           <div class="column">
             <div class="label">From</div>
-            <div class="value" v-for="(input, index) in transaction.vin">
+            <div class="value" v-for="(input, index) in $store.state.activeRecentTransaction.vin" :key="index">
               {{ input.address }} {{input.symbol}} {{input.value}}
             </div>
           </div>
@@ -54,7 +54,7 @@
         <div class="row">
           <div class="column">
             <div class="label">To</div>
-            <div class="value purple" v-for="(output, index) in transaction.vout">
+            <div class="value purple" v-for="(output, index) in $store.state.activeRecentTransaction.vout" :key="index">
               {{ output.address }} {{output.symbol}} {{output.value}}
             </div>
           </div>
@@ -64,23 +64,23 @@
         <div class="row">
           <div class="column">
             <div class="label">Network Fee</div>
-            <div class="value">{{ $formatNumber(transaction.net_fee) }} GAS</div>
+            <div class="value">{{ $formatNumber($store.state.activeRecentTransaction.net_fee) }} GAS</div>
           </div>
           <div class="column">
             <div class="label">System Fee</div>
-            <div class="value">{{ $formatNumber(transaction.sys_fee) }} GAS</div>
+            <div class="value">{{ $formatNumber($store.state.activeRecentTransaction.sys_fee) }} GAS</div>
           </div>
           <div class="column">
             <div class="label">Size</div>
-            <div class="value">{{ $formatNumber(transaction.size) }} Bytes</div>
+            <div class="value">{{ $formatNumber($store.state.activeRecentTransaction.size) }} Bytes</div>
           </div>
         </div>
         <div class="row has-equal-columns">
-          <div class="column" v-if="this.transaction.confirmed">
+          <div class="column" v-if="this.$store.state.activeRecentTransaction.confirmed">
             <div class="label">Confirmations</div>
-            <div class="value">{{ $formatNumber(transaction.confirmations) }}</div>
+            <div class="value">{{ $formatNumber($store.state.activeRecentTransaction.confirmations) }}</div>
           </div>
-          <div class="column confirmed" v-if="this.transaction.confirmed">
+          <div class="column confirmed" v-if="this.$store.state.activeRecentTransaction.confirmed">
             <aph-icon name="confirmed"></aph-icon>
             <div class="label">Confirmed</div>
           </div>
@@ -92,12 +92,6 @@
 
 <script>
 export default {
-  data() {
-    return {
-      transaction: { },
-    };
-  },
-
   props: {
     hash: {
       type: String,
@@ -114,7 +108,7 @@ export default {
       this.$services.neo
         .fetchTransactionDetails(this.hash)
         .then((data) => {
-          this.transaction = data;
+          this.$store.commit('setActiveRecentTransaction', data);
         })
         .catch(() => {
         });

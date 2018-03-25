@@ -4,12 +4,19 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <router-link class="transaction" :to="`/dashboard/trx/${transaction.hash}`" v-for="(transaction, index) in $store.state.recentTransactions" :key="index">
-        <div class="address">{{ transaction.hash }}</div>
-        <div class="currency">{{ transaction.symbol }}</div>
-        <div class="date">{{ $formatDate(transaction.block_time) }}</div>
-        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</div>
-      </router-link>
+      <table class="table">
+        <tr @click="viewTransaction(transaction)" v-for="(transaction, index) in $store.state.recentTransactions" :key="index">
+          <td width="40%">
+            <div class="address">{{ transaction.hash }}</div>
+          </td>
+          <td>
+            <div class="currency">{{ transaction.symbol }}</div>
+          </td>
+          <td>
+            <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</div>
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
 </template>
@@ -31,7 +38,7 @@ export default {
         });
     },
 
-    viewTransaction(hash) {
+    viewTransaction({ hash }) {
       this.$router.push({ path: `/dashboard/trx/${hash}` });
     },
   },
@@ -50,43 +57,14 @@ export default {
   flex-direction: column;
   padding-bottom: $space;
 
-  .header {
-    padding: $space;
-
-    h1.underlined {
-      @extend %underlined-header;
-
-      flex: 1;
-      margin-bottom: 0;
-    }
-  }
-
-  .body {
-    padding: 0 $space;
-    overflow: auto;
-  }
-
-  .transaction {
-      align-items: center;
-      border-top: 1px solid $light-grey;
-      color: $dark;
-      cursor: pointer;
-      display: flex;
-      flex-wrap: wrap;
-      font-family: GilroySemibold;
-      font-size: toRem(12px);
-      padding: $space $space-sm;
-      justify-content: space-between;
-
-    > * {
-      @include truncate();
-
-      min-width: 0;
-    }
+  .table {
+    font-family: GilroySemibold;
+    font-size: toRem(12px);
+    table-layout: fixed;
+    width: 100%;
 
     .address {
-      text-align: left;
-      flex: 0 0 40%;
+      @include truncate();
     }
 
     .currency {
@@ -111,10 +89,35 @@ export default {
       }
     }
 
-    &:hover, &.active {
-      background: #F9F9FD;
-      color: $purple;
+    td {
+      border-top: 1px solid $light-grey;
+      padding: $space $space-sm;
     }
+
+    tr {
+      cursor: pointer;
+
+      &:hover, &.active {
+        background: #F9F9FD;
+        color: $purple;
+      }
+    }
+  }
+
+  .header {
+    padding: $space;
+
+    h1.underlined {
+      @extend %underlined-header;
+
+      flex: 1;
+      margin-bottom: 0;
+    }
+  }
+
+  .body {
+    padding: 0 $space;
+    overflow: auto;
   }
 }
 </style>
