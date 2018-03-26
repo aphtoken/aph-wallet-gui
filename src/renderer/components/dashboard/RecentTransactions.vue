@@ -25,7 +25,14 @@ export default {
       this.$services.neo
         .fetchRecentTransactions(this.$services.wallets.getCurrentWallet().address)
         .then((data) => {
-          this.$store.commit('setRecentTransactions', data);
+          this.$store.commit('setRecentTransactions', data.sort((a, b) => {
+            if (a.block_time > b.block_time) {
+              return 1;
+            } else if (a.block_time < b.block_time) {
+              return -1;
+            }
+            return 0;
+          }));
         })
         .catch(() => {
         });
@@ -38,6 +45,10 @@ export default {
 
   mounted() {
     this.loadTransactions();
+
+    setInterval(() => {
+      this.loadTransactions();
+    }, 15000);
   },
 };
 </script>

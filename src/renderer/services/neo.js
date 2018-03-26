@@ -114,14 +114,7 @@ export default {
                   });
                 });
             });
-            return resolve(splitTransactions.sort((a, b) => {
-              if (a.block_time > b.block_time) {
-                return 1;
-              } else if (a.block_time < b.block_time) {
-                return -1;
-              }
-              return 0;
-            }));
+            return resolve(splitTransactions);
           })
           .catch(e => reject(e));
       } catch (e) {
@@ -217,7 +210,7 @@ export default {
    *    {String} name
    *    {String} symbol
    */
-  fetchHoldings(address) {
+  fetchHoldings(address, restrictToSymbol) {
     return new Promise((resolve, reject) => {
       try {
         const client = rpc.default.create.rpcClient(rpcEndpoint);
@@ -233,7 +226,9 @@ export default {
                 name: b.asset === neoAssetId ? 'NEO' : 'GAS',
                 isNep5: false,
               };
-
+              if (restrictToSymbol && h.symbol !== restrictToSymbol) {
+                return;
+              }
               holdings.push(h);
             });
 
@@ -249,6 +244,10 @@ export default {
                       name: val.name,
                       isNep5: true,
                     };
+
+                    if (restrictToSymbol && h.symbol !== restrictToSymbol) {
+                      return;
+                    }
 
                     holdings.push(h);
                   }
@@ -334,17 +333,29 @@ export default {
   sendFunds(toAddress, assetId, amount, isNep5) {
     return new Promise((resolve, reject) => {
       try {
+        let sendPromise = null;
         if (isNep5 === false) {
           if (assetId === neoAssetId) {
-            return this.sendSystemAsset(toAddress, amount, 0);
+            sendPromise = this.sendSystemAsset(toAddress, amount, 0);
           } else if (assetId === gasAssetId) {
-            return this.sendSystemAsset(toAddress, 0, amount);
+            sendPromise = this.sendSystemAsset(toAddress, 0, amount);
+          } else {
+            return reject('Invalid system asset id');
           }
         } else if (isNep5 === true) {
-          return this.sendNep5Transfer(toAddress, assetId, amount);
+          sendPromise = this.sendNep5Transfer(toAddress, assetId, amount);
         }
 
-        return reject('Invalid system asset id');
+        if (!sendPromise) {
+          return reject('Unable to send transaction.');
+        }
+
+        sendPromise
+          .then((res) => {
+            this.monitorTransactionConfirmation(res.tx.hash);
+          });
+
+        return sendPromise;
       } catch (e) {
         return reject(e);
       }
@@ -366,12 +377,8 @@ export default {
       privateKey: wallets.getCurrentWallet().privateKey,
       intents: api.makeIntent(intentAmounts, wallets.getCurrentWallet().address),
     };
-    console.log(config);
     return api.sendAsset(config)
-      .then((res) => {
-        console.log(res);
-        return res;
-      })
+      .then(res => res)
       .catch((e) => {
         console.log(e);
       });
@@ -383,15 +390,54 @@ export default {
         console.log(wallets.getCurrentWallet().wif);
         return api.nep5.doTransferToken(network, assetId,
           wallets.getCurrentWallet().wif, toAddress, amount)
-          .then((res) => {
-            console.log(res);
-            return res;
-          })
+          .then(res => res)
           .catch(e => reject(e));
       } catch (e) {
         return reject(e);
       }
     });
+  },
+
+  monitorTransactionConfirmation(hash) {
+    const interval = setInterval(() => {
+      this.fetchTransactionDetails(hash)
+        .then((res) => {
+          if (res.confirmed === true) {
+            console.log(`TX: ${hash} CONFIRMED`);
+            clearInterval(interval);
+          }
+          return res;
+        })
+        .catch(e => console.log(e));
+    }, 5000);
+  },
+
+  claimGas() {
+    const config = {
+      net: network,
+      address: wallets.getCurrentWallet().address,
+      privateKey: wallets.getCurrentWallet().privateKey,
+    };
+
+    return this.fetchHoldings(wallets.getCurrentWallet().address, 'NEO')
+      .then((h) => {
+        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
+          return;
+        }
+
+        const neoAmount = h.holdings[0].balance;
+        this.sendFunds(wallets.getCurrentWallet().address, neoAssetId, neoAmount, false);
+        api.claimGas(config)
+          .then((res) => {
+            console.log(res);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   },
 
 };

@@ -47,6 +47,10 @@ export default {
 
   mounted() {
     this.loadHoldings();
+
+    setInterval(() => {
+      this.loadHoldings();
+    }, 15000);
   },
 };
 </script>
