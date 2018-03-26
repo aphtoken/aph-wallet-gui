@@ -14,6 +14,12 @@ export default {
     return this;
   },
 
+  remove(name) {
+    const wallets = this.getAll();
+    lockr.set(WALLETS_STORAGE_KEY, _.omit(wallets, name));
+    return this;
+  },
+
   clearCurrentWallet() {
     this.setCurrentWallet(null);
   },
