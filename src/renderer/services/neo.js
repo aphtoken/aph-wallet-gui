@@ -427,13 +427,15 @@ export default {
 
         const neoAmount = h.holdings[0].balance;
         this.sendFunds(wallets.getCurrentWallet().address, neoAssetId, neoAmount, false);
-        api.claimGas(config)
-          .then((res) => {
-            console.log(res);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
+        setTimeout(() => {
+          api.claimGas(config)
+            .then((res) => {
+              console.log(res);
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+        }, 15000);
       })
       .catch((e) => {
         console.log(e);
