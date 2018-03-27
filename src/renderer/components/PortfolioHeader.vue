@@ -4,11 +4,11 @@
     <div class="ticker">
       <h1 class="underlined">My Porfolio</h1>
       <div class="balance">
-        <span class="symbol">$</span><span class="amount">{{ $formatNumber(portfolio.balance) }}</span><span class="currency">USD</span>
+        <span class="symbol">$</span><span class="amount">{{ $formatNumberShort(portfolio.balance) }}</span><span class="currency">USD</span>
       </div>
       <div class="change">
         <div class="label">24h change</div>
-        <div class="amount increase">{{ $formatMoney(portfolio.changeUsd) }}</div>
+        <div :class="['amount', {increase: portfolio.changeUsd > 0, decrease: portfolio.changeUsd < 0}]">{{ $formatMoney(portfolio.changeUsd, '0,0[.]0') }}</div>
       </div>
     </div>
     <div class="btn-group">

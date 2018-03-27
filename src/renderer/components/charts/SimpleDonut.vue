@@ -1,10 +1,10 @@
 <template>
   <svg class="simple-donut" viewBox="0 0 150 150">
     <circle class="base-circle" cx="75" cy="75" :r="radius" stroke-width="5" fill="none" />
-    <circle class="value-circle" cx="75" cy="75" :r="radius" stroke-width="5" fill="none" :stroke-dasharray="strokeDashArray" />
+    <circle :class="['value-circle', {increase: percent > 0, decrease: percent < 0}]" cx="75" cy="75" :r="radius" stroke-width="5" fill="none" :stroke-dasharray="strokeDashArray" />
     <g class="info">
       <text x="75" y="55" alignment-baseline="central" text-anchor="middle" class="label">{{ label }}</text>
-      <text x="75" y="85" alignment-baseline="central" text-anchor="middle" class="percent">+{{ percent }}%</text>
+      <text x="75" y="85" alignment-baseline="central" text-anchor="middle" :class="['percent', {increase: percent > 0, decrease: percent < 0}]">{{ formattedPercent }}%</text>
     </g>
   </svg>
 </template>
@@ -18,12 +18,16 @@ export default {
       return Math.round(2 * this.radius * PI);
     },
 
+    formattedPercent() {
+      return this.percent > 0 ? `+${this.$formatNumber(this.percent, '0,0[.]0')}` : this.$formatNumber(this.percent, '0,0[.]0');
+    },
+
     strokeDashArray() {
       return `${this.strokeLength},${this.circumference}`;
     },
 
     strokeLength() {
-      return Math.round(this.circumference * (this.percent / 100));
+      return Math.round(this.circumference * (Math.abs(this.percent) / 100));
     },
   },
 
@@ -55,9 +59,16 @@ export default {
   }
 
   .value-circle {
-    stroke: $green;
     transform-origin: center;
     transform: rotate(-90deg);
+
+    &.decrease {
+      stroke: $red;
+    }
+
+    &.increase {
+      stroke: $green;
+    }
   }
 
   .label {
@@ -68,9 +79,16 @@ export default {
   }
 
   .percent {
-    fill: $green;
     font-size: toRem(30px);
     font-family: GilroyMedium;
+
+    &.decrease {
+      fill: $red;
+    }
+
+    &.increase {
+      fill: $green;
+    }
   }
 }
 </style>

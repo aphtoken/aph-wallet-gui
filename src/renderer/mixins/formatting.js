@@ -13,8 +13,8 @@ export default {
       return accounting.formatMoney(value);
     },
 
-    $formatNumber(value) {
-      return numeral(value).format(formats.NUMBER);
+    $formatNumber(value, format = formats.NUMBER) {
+      return numeral(value).format(format || formats);
     },
 
     $formatNumberShort(value) {

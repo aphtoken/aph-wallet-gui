@@ -46,17 +46,13 @@
         <div class="row">
           <div class="column">
             <div class="label">From</div>
-            <div class="value" v-for="(input, index) in $store.state.activeRecentTransaction.vin" :key="index">
-              {{ input.address }} {{input.symbol}} {{input.value}}
-            </div>
+            <aph-simple-transactions :transactions="fromTransactions"></aph-simple-transactions>
           </div>
         </div>
         <div class="row">
           <div class="column">
             <div class="label">To</div>
-            <div class="value purple" v-for="(output, index) in $store.state.activeRecentTransaction.vout" :key="index">
-              {{ output.address }} {{output.symbol}} {{output.value}}
-            </div>
+            <aph-simple-transactions :transactions="toTransactions"></aph-simple-transactions>
           </div>
         </div>
       </div>
@@ -92,12 +88,15 @@
 
 <script>
 export default {
-  props: {
-    hash: {
-      type: String,
+  computed: {
+    fromTransactions() {
+      return this.$store.state.activeRecentTransaction.vin.map(transaction => _.set(transaction, 'amount', transaction.value));
+    },
+
+    toTransactions() {
+      return this.$store.state.activeRecentTransaction.vout.map(transaction => _.set(transaction, 'amount', transaction.value));
     },
   },
-
 
   methods: {
     loadTransactionDetails() {
@@ -121,6 +120,12 @@ export default {
 
   mounted() {
     this.loadTransactionDetails();
+  },
+
+  props: {
+    hash: {
+      type: String,
+    },
   },
 };
 </script>
@@ -147,6 +152,13 @@ export default {
   .body {
     overflow: auto;
     padding: $space $space 0 $space;
+
+    .transactions-table {
+      td {
+        border: none;
+        padding: $space-sm 0;
+      }
+    }
 
     .section + .section {
       margin-top: $space-lg;

@@ -5,7 +5,7 @@
     </div>
     <div class="body">
       <div v-for="(holding, index) in $store.state.holdings" :class="['holding', {active: isActive(holding)}]" :key="index">
-        <token-icon :symbol="holding.symbol"></token-icon>
+        <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
         <div class="token">
           <div class="name">{{ holding.name }}</div>
           <div class="currency">{{ holding.symbol }}</div>
@@ -78,7 +78,7 @@ export default {
       display: flex;
       padding: $space;
 
-      .token-icon {
+      .aph-token-icon {
         flex: none;
         padding-right: $space;
       }

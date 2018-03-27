@@ -8,7 +8,7 @@
       </div>
     </div>
     <div class="body">
-      <token-icon :symbol="this.tokenStats.symbol"></token-icon>
+      <aph-token-icon :symbol="this.tokenStats.symbol"></aph-token-icon>
       <div class="balance">
         <div class="name">{{ this.tokenStats.name }}</div>
         <div class="amount">
@@ -92,7 +92,7 @@ export default {
     flex: 1;
     padding: $space;
 
-    .token-icon {
+    .aph-token-icon {
       $width: toRem(150px);
 
       padding: 0 $space-lg 0 0;

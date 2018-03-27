@@ -11,7 +11,7 @@ export {
 };
 
 function clearActiveRecentTransaction(state) {
-  state.recentTransactions = null;
+  state.activeRecentTransaction = null;
 }
 
 function clearRecentTransactions(state) {
@@ -19,7 +19,7 @@ function clearRecentTransactions(state) {
 }
 
 function setActiveRecentTransaction(state, transaction) {
-  state.recentTransactions = transaction;
+  state.activeRecentTransaction = transaction;
 }
 
 function setHoldings(state, holdings) {
