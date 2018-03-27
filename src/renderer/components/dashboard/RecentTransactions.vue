@@ -10,7 +10,21 @@
 </template>
 
 <script>
+let loadTransactionsIntervalId;
+
 export default {
+  beforeDestroy() {
+    clearInterval(loadTransactionsIntervalId);
+  },
+
+  beforeMount() {
+    this.loadTransactions();
+
+    loadTransactionsIntervalId = setInterval(() => {
+      this.loadTransactions();
+    }, this.$constants.intervals.POLLING);
+  },
+
   methods: {
     transactions() {
       return this.$store.state.recentTransactions.map(transaction => _.set(transaction, 'address', transaction.hash));
@@ -24,30 +38,16 @@ export default {
       this.$services.neo
         .fetchRecentTransactions(this.$services.wallets.getCurrentWallet().address)
         .then((data) => {
-          this.$store.commit('setRecentTransactions', data.sort((a, b) => {
-            if (a.block_time > b.block_time) {
-              return 1;
-            } else if (a.block_time < b.block_time) {
-              return -1;
-            }
-            return 0;
-          }));
+          this.$store.commit('setRecentTransactions', data);
         })
-        .catch(() => {
+        .catch((e) => {
+          console.log(e);
         });
     },
 
     viewTransaction({ hash }) {
       this.$router.push({ path: `/dashboard/trx/${hash}` });
     },
-  },
-
-  mounted() {
-    this.loadTransactions();
-
-    setInterval(() => {
-      this.loadTransactions();
-    }, 15000);
   },
 };
 </script>

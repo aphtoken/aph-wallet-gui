@@ -6,6 +6,10 @@ const formats = {
   TIME: 'LTC',
 };
 
+const intervals = {
+  POLLING: 15000,
+};
+
 const loadStates = {
   FAILED: 'FAILED',
   LOADING: 'LOADING',
@@ -14,6 +18,7 @@ const loadStates = {
 
 export {
   formats,
+  intervals,
   loadStates,
 };
 
