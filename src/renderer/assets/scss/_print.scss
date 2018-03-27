@@ -1,0 +1,14 @@
+@media print {
+
+  #login {
+    .left {
+      display: none;
+    }
+  }
+  .copy-link {
+    display: none;
+  }
+  .btn-group {
+    display: none!important;
+  }
+}

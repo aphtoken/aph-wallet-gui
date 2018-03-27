@@ -1,10 +1,10 @@
 <template>
   <section id="login--wallet-created" v-if="wallet">
     <p class="help-text">
-      You must save and backup the keys below. If you lose them, you lose access to your assets. You can click "Save Key" to save the encrypted key in local application storage.
+      Your keys are now encrypted and saved in your local application storage.
     </p>
     <p class="help-text">
-      Verify that you can log in to the account and see the correct public address before sending anything to the address below!
+      You must save and backup the keys below. If you lose them, you lose access to your assets.
     </p>
     <div v-if="wallet" class="qr-codes">
       <div class="qr-code">
@@ -53,8 +53,10 @@
       </div>
     </div>
     <div class="btn-group">
-      <router-link to="#" class="print">Print</router-link>
-      <router-link to="dashboard" class="done">Done</router-link>
+      <div @click="print()" class="btn print">Print</div>
+    </div>
+    <div class="btn-group">
+      <router-link to="dashboard" class="done">Go To My Wallet</router-link>
     </div>
   </section>
 </template>
@@ -73,6 +75,9 @@ export default {
   methods: {
     copy(text) {
       clipboard.writeText(text);
+    },
+    print() {
+      window.print();
     },
   },
 
@@ -163,13 +168,13 @@ export default {
     justify-content: center;
     margin-top: $space-lg;
 
-    a {
+    a, div {
       @extend %btn-outline;
 
       &.print, &.done {
         background: $purple;
       }
-
+      
       & + a {
         margin-left: $space-lg;
       }

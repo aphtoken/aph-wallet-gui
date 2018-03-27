@@ -14,6 +14,12 @@ export default {
     return this;
   },
 
+  remove(name) {
+    const wallets = this.getAll();
+    lockr.set(WALLETS_STORAGE_KEY, _.omit(wallets, name));
+    return this;
+  },
+
   clearCurrentWallet() {
     this.setCurrentWallet(null);
   },
@@ -23,7 +29,14 @@ export default {
   },
 
   getAllAsArray() {
-    return _.values(this.getAll());
+    return _.values(this.getAll()).sort((a, b) => {
+      if (a.label > b.label) {
+        return 1;
+      } else if (a.label < b.label) {
+        return -1;
+      }
+      return 0;
+    });
   },
 
   getCurrentWallet() {
