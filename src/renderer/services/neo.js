@@ -3,6 +3,7 @@ import {
   api,
   rpc,
 } from '@cityofzion/neon-js';
+import BigDecimal from 'bignumber.js';
 import wallets from './wallets';
 import valuation from './valuation';
 
@@ -88,35 +89,57 @@ export default {
           .then((res) => {
             const splitTransactions = [];
             res.forEach((t) => {
-              const transactions = [];
-              if (t.neo_sent === true) {
-                transactions.push({
-                  hash: t.txid,
-                  block_index: t.block_index,
-                  symbol: 'NEO',
-                  amount: t.NEO,
-                });
-              }
-              if (t.gas_sent === true) {
-                transactions.push({
-                  hash: t.txid,
-                  block_index: t.block_index,
-                  symbol: 'GAS',
-                  amount: t.GAS,
-                });
-              }
-
               this.fetchTransactionDetails(t.txid)
                 .then((transactionDetails) => {
-                  transactions.forEach((t) => {
-                    t.block_time = transactionDetails.blocktime;
-                    splitTransactions.push(t);
+                  let outNEO = new BigDecimal(0);
+                  let outGAS = new BigDecimal(0);
+
+                  transactionDetails.vin.forEach((i) => {
+                    if (i.address === address && i.symbol === 'NEO') {
+                      outNEO = outNEO.plus(i.value);
+                    }
+                    if (i.address === address && i.symbol === 'GAS') {
+                      outGAS = outGAS.plus(i.value);
+                    }
                   });
+
+                  let inNEO = new BigDecimal(0);
+                  let inGAS = new BigDecimal(0);
+                  transactionDetails.vout.forEach((o) => {
+                    if (o.address === address && o.symbol === 'NEO') {
+                      inNEO = inNEO.plus(o.value);
+                    }
+                    if (o.address === address && o.symbol === 'GAS') {
+                      inGAS = inGAS.plus(o.value);
+                    }
+                  });
+
+                  const neoChange = inNEO.minus(outNEO);
+                  const gasChange = inGAS.minus(outGAS);
+                  if (neoChange.isZero() === false) {
+                    splitTransactions.push({
+                      hash: t.txid,
+                      block_index: transactionDetails.block,
+                      symbol: 'NEO',
+                      amount: neoChange,
+                      block_time: transactionDetails.blocktime,
+                    });
+                  }
+
+                  if (gasChange.isZero() === false) {
+                    splitTransactions.push({
+                      hash: t.txid,
+                      block_index: transactionDetails.block,
+                      symbol: 'GAS',
+                      amount: gasChange,
+                      block_time: transactionDetails.blocktime,
+                    });
+                  }
                 });
             });
             return resolve(splitTransactions);
           })
-          .catch(e => reject(e));
+          .catch(e => console.log(e));
       } catch (e) {
         return reject(e);
       }

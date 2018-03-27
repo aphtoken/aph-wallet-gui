@@ -8,7 +8,7 @@
         <div class="address">{{ transaction.hash }}</div>
         <div class="currency">{{ transaction.symbol }}</div>
         <div class="date">{{ $formatDate(transaction.block_time) }}</div>
-        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</div>
+        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumberShort(transaction.amount) }}</div>
       </router-link>
     </div>
   </div>
