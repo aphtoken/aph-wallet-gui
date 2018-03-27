@@ -16,6 +16,10 @@ html, body {
   line-height: 1;
 }
 
+::-webkit-scrollbar {
+  width: 3px;
+}
+
 ::-webkit-scrollbar-thumb:vertical {
   background: $purple;
 }
