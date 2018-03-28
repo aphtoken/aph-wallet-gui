@@ -1,13 +1,13 @@
 <template>
   <table class="transactions-table" :class="{'is-clickable': isClickable}">
     <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)">
-      <td width="40%">
+      <td>
         <div class="address">{{ transaction.address }}</div>
       </td>
-      <td>
+      <td width="15%">
         <div class="currency">{{ transaction.symbol }}</div>
       </td>
-      <td>
+      <td width="15%">
         <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</div>
       </td>
     </tr>
