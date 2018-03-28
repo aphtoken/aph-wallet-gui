@@ -60,14 +60,15 @@ export default {
 
   .value-circle {
     transform-origin: center;
-    transform: rotate(-90deg);
 
     &.decrease {
       stroke: $red;
+      transform: rotate(-90deg) scale(1,-1);
     }
 
     &.increase {
       stroke: $green;
+      transform: rotate(-90deg);
     }
   }
 
