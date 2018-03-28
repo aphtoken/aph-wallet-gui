@@ -18,11 +18,13 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    titleBarStyle: 'hidden',
-    height: 563,
+    height: 800,
+    minHeight: 800,
+    minWidth: 1550,
     title: 'Aphelion Desktop Wallet',
+    titleBarStyle: 'hidden',
     useContentSize: true,
-    width: 1000,
+    width: 1550,
   });
 
   mainWindow.loadURL(winURL);

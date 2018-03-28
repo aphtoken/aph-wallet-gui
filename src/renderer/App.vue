@@ -1,5 +1,6 @@
 <template>
   <div id="app" v-cloak>
+    <div class="drag-area"></div>
     <router-view></router-view>
   </div>
 </template>
@@ -38,4 +39,13 @@ export default {
   height: 100%;
 }
 
+.drag-area {
+  -webkit-app-region: drag;
+  background:transparent;
+  height: $space-lg !important;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
 </style>

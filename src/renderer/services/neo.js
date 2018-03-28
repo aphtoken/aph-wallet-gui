@@ -137,7 +137,7 @@ export default {
                   }
                 });
             });
-            return resolve(splitTransactions);
+            return resolve(this._sortRecentTransactions(splitTransactions));
           })
           .catch(e => console.log(e));
       } catch (e) {
@@ -463,6 +463,20 @@ export default {
       .catch((e) => {
         console.log(e);
       });
+  },
+
+  _sortRecentTransactions(transactions) {
+    return transactions.sort((a, b) => {
+      if (a.block_time > b.block_time) {
+        return 1;
+      }
+
+      if (a.block_time < b.block_time) {
+        return -1;
+      }
+
+      return 0;
+    });
   },
 
 };

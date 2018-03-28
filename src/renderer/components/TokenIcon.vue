@@ -1,5 +1,5 @@
 <template>
-  <div class="token-icon">
+  <div class="aph-token-icon">
     <img src="~@/assets/img/token-icons/APH.png" v-if="symbol === 'APH'">
     <img src="~@/assets/img/token-icons/GAS.png" v-else-if="symbol === 'GAS'">
     <img src="~@/assets/img/token-icons/NEO.png" v-else-if="symbol === 'NEO'">
@@ -21,7 +21,7 @@ export default {
 
 
 <style lang="scss">
-.token-icon {
+.aph-token-icon {
   $iconWidth: toRem(50px);
 
   font-size: 0;

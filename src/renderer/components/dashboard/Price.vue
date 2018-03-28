@@ -24,14 +24,14 @@
     <div class="body">
       <line-chart :chart-data="chartData" :options="chartOptions"></line-chart>
     </div>
-    <div class="footer">
+    <!-- <div class="footer">
       <div class="option">H</div>
       <div class="option">D</div>
       <div class="option active">W</div>
       <div class="option">M</div>
       <div class="option">6M</div>
       <div class="option">Y</div>
-    </div>
+    </div> -->
   </div>
 </template>
 

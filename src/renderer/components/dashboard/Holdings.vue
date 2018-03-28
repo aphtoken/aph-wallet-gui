@@ -4,8 +4,8 @@
       <h1 class="underlined">My holdings</h1>
     </div>
     <div class="body">
-      <div v-for="(holding, index) in $store.state.holdings" :class="['holding', {active: isActive(holding)}]" :key="index">
-        <token-icon :symbol="holding.symbol"></token-icon>
+      <div v-for="(holding, index) in $store.state.holdings" :class="['holding', {active: isActive(holding)}]" :key="index" @click="viewHoldingDetail(holding)">
+        <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
         <div class="token">
           <div class="name">{{ holding.name }}</div>
           <div class="currency">{{ holding.symbol }}</div>
@@ -38,10 +38,13 @@ export default {
         .fetchHoldings(this.$services.wallets.getCurrentWallet().address)
         .then((data) => {
           this.$store.commit('setHoldings', data.holdings);
-          // this.holdings = data.holdings;
         })
         .catch(() => {
         });
+    },
+
+    viewHoldingDetail(holding) {
+      this.$store.commit('setStatsToken', holding);
     },
   },
 
@@ -83,7 +86,7 @@ export default {
       display: flex;
       padding: $space;
 
-      .token-icon {
+      .aph-token-icon {
         flex: none;
         padding-right: $space;
       }

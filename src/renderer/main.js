@@ -16,6 +16,7 @@ import { store } from './store';
 import Icon from './components/Icon';
 import Input from './components/Input';
 import Select from './components/Select';
+import SimpleTransactions from './components/SimpleTransactions';
 import TokenIcon from './components/TokenIcon';
 
 // Global Libraries.
@@ -39,9 +40,10 @@ _.each(mixins, (mixin) => {
 
 // Register global components.
 Vue.component('aph-icon', Icon);
-Vue.component('aph-select', Select);
 Vue.component('aph-input', Input);
-Vue.component('token-icon', TokenIcon);
+Vue.component('aph-select', Select);
+Vue.component('aph-simple-transactions', SimpleTransactions);
+Vue.component('aph-token-icon', TokenIcon);
 
 /* eslint-disable no-new */
 new Vue({
