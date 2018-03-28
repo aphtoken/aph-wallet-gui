@@ -9,6 +9,7 @@ const state = {
   activeRecentTransaction: null,
   holdings: [],
   recentTransactions: [],
+  statsToken: null,
 };
 
 const store = new Vuex.Store({

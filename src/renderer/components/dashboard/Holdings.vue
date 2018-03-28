@@ -4,7 +4,7 @@
       <h1 class="underlined">My holdings</h1>
     </div>
     <div class="body">
-      <div v-for="(holding, index) in $store.state.holdings" :class="['holding', {active: isActive(holding)}]" :key="index">
+      <div v-for="(holding, index) in $store.state.holdings" :class="['holding', {active: isActive(holding)}]" :key="index" @click="viewHoldingDetail(holding)">
         <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
         <div class="token">
           <div class="name">{{ holding.name }}</div>
@@ -41,6 +41,10 @@ export default {
         })
         .catch(() => {
         });
+    },
+
+    viewHoldingDetail(holding) {
+      this.$store.commit('setStatsToken', holding);
     },
   },
 

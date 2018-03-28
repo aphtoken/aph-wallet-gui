@@ -8,6 +8,7 @@ export {
   setActiveRecentTransaction,
   setHoldings,
   setRecentTransactions,
+  setStatsToken,
 };
 
 function clearActiveRecentTransaction(state) {
@@ -24,8 +25,16 @@ function setActiveRecentTransaction(state, transaction) {
 
 function setHoldings(state, holdings) {
   state.holdings = holdings;
+
+  if (!state.statsToken && holdings.length) {
+    state.statsToken = holdings[0];
+  }
 }
 
 function setRecentTransactions(state, transactions) {
   state.recentTransactions = transactions;
+}
+
+function setStatsToken(state, token) {
+  state.statsToken = token;
 }

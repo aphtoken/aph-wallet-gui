@@ -1,5 +1,5 @@
 <template>
-  <div class="token-stats">
+  <div class="token-stats" v-if="$store.state.statsToken">
     <div class="header">
       <h1 class="underlined">Token Stats</h1>
       <div class="current-value">
@@ -8,11 +8,11 @@
       </div>
     </div>
     <div class="body">
-      <aph-token-icon :symbol="this.tokenStats.symbol"></aph-token-icon>
+      <aph-token-icon :symbol="$store.state.statsToken.symbol"></aph-token-icon>
       <div class="balance">
-        <div class="name">{{ this.tokenStats.name }}</div>
+        <div class="name">{{ $store.state.statsToken.name }}</div>
         <div class="amount">
-          {{ $formatNumber(tokenStats.balance) }}<span class="currency">{{ this.tokenStats.symbol }}</span>
+          {{ $formatNumber($store.state.statsToken.balance) }}<span class="currency">{{ $store.state.statsToken.symbol }}</span>
         </div>
         <div class="value">
           {{ $formatMoney(tokenStats.balanceValue) }}<span class="currency">USD</span>
@@ -30,7 +30,7 @@
       </div>
       <div class="change">
         <div class="label">24h Change</div>
-        <div class="amount increase">{{ $formatNumber(tokenStats.change) }}</div>
+        <div :class="['amount', {increase: $store.state.statsToken.change24hrPercent > 0, decrease: $store.state.statsToken.change24hrPercent < 0}]">{{ $formatNumber($store.state.statsToken.change24hrPercent) }}</div>
       </div>
     </div>
   </div>

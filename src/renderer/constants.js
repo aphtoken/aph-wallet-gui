@@ -1,7 +1,7 @@
 const formats = {
   DATE: 'DD-MM-YYYY',
   MONEY: '$0,0.00',
-  NUMBER: '0,0[.]0[0000000000]',
+  NUMBER: '0,0[.]0[00000]',
   NUMBER_SHORT: '0,0[.]0[0]',
   TIME: 'LTC',
 };
