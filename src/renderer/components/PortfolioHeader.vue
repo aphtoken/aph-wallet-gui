@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="btn-group">
-      <div class="receive-btn">
+      <div class="receive-btn" @click="showSendAddressModal">
         <aph-icon name="receive"></aph-icon>
         <p>Receive</p>
       </div>
@@ -43,6 +43,10 @@ export default {
   },
 
   methods: {
+    showSendAddressModal() {
+      this.$store.commit('setShowSendAddressModal', true);
+    },
+
     loadHoldings() {
       if (!this.$services.wallets.getCurrentWallet()) {
         return;

@@ -22,6 +22,7 @@
         </div>
       </div>
     </div>
+    <aph-address-modal v-if="this.$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></aph-address-modal>
   </section>
 </template>
 
@@ -31,6 +32,16 @@ import Sidebar from './Sidebar';
 export default {
   components: {
     Sidebar,
+  },
+
+  methods: {
+    getCurrentWalletAddress() {
+      return this.$services.wallets.getCurrentWallet().address;
+    },
+
+    hideSendAddressModal() {
+      this.$store.commit('setShowSendAddressModal', false);
+    },
   },
 
   mounted() {

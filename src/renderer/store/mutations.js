@@ -2,11 +2,14 @@
 export {
   clearActiveRecentTransaction,
   clearActiveTransactionHash,
+  clearActiveTransactionToken,
   clearRecentTransactions,
   setActiveRecentTransaction,
   setActiveTransactionHash,
+  setActiveTransactionToken,
   setHoldings,
   setRecentTransactions,
+  setShowSendAddressModal,
   setStatsToken,
 };
 
@@ -16,6 +19,10 @@ function clearActiveRecentTransaction(state) {
 
 function clearActiveTransactionHash(state) {
   state.activeTransactionHash = null;
+}
+
+function clearActiveTransactionToken(state) {
+  state.activeTransactionToken = null;
 }
 
 function clearRecentTransactions(state) {
@@ -31,6 +38,11 @@ function setActiveTransactionHash(state, hash) {
   state.showPriceTile = false;
 }
 
+function setActiveTransactionToken(state, token) {
+  state.activeTransactionToken = token;
+  state.showPriceTile = false;
+}
+
 function setHoldings(state, holdings) {
   state.holdings = holdings;
 
@@ -41,6 +53,10 @@ function setHoldings(state, holdings) {
 
 function setRecentTransactions(state, transactions) {
   state.recentTransactions = transactions;
+}
+
+function setShowSendAddressModal(state, value) {
+  state.showSendAddressModal = value;
 }
 
 function setStatsToken(state, token) {

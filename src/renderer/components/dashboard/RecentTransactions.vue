@@ -20,16 +20,19 @@ export default {
   beforeMount() {
     this.loadTransactions();
 
-    loadTransactionsIntervalId = setInterval(() => {
-      this.loadTransactions();
-    }, this.$constants.intervals.POLLING);
+    // loadTransactionsIntervalId = setInterval(() => {
+    //   this.loadTransactions();
+    // }, this.$constants.intervals.POLLING);
   },
 
   methods: {
     transactions() {
       return this.$store.state.recentTransactions.map((transaction) => {
+        const active = transaction.hash === this.$store.state.activeTransactionHash
+          && transaction.symbol === this.$store.state.activeTransactionToken;
+
         return _.merge(transaction, {
-          active: transaction.hash === this.$store.state.activeTransactionHash,
+          active,
           address: transaction.hash,
         });
       });
@@ -39,8 +42,9 @@ export default {
       this.$store.dispatch('fetchRecentTransactions');
     },
 
-    viewTransaction({ hash }) {
+    viewTransaction({ hash, symbol }) {
       this.$store.commit('setActiveTransactionHash', hash);
+      this.$store.commit('setActiveTransactionToken', symbol);
     },
   },
 };

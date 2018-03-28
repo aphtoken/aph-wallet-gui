@@ -9,8 +9,10 @@ Vue.use(Vuex);
 const state = {
   activeRecentTransaction: null,
   activeTransactionHash: null,
+  activeTransactionToken: null,
   holdings: [],
   recentTransactions: [],
+  showSendAddressModal: false,
   showPriceTile: true,
   statsToken: null,
 };
