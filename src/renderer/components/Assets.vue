@@ -16,22 +16,35 @@
               <aph-icon name="create"></aph-icon>
               <p>Add token</p>
             </div>
-            <div class="btn-circle">
+            <div class="btn-circle" @click="showAddTokenModal">
               <aph-icon name="show"></aph-icon>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <aph-add-token-modal v-if="$store.state.showAddTokenModal" :onCancel="hideAddTokenModal"></aph-add-token-modal>
   </section>
 </template>
 
 <script>
 import Sidebar from './Sidebar';
+import AphAddTokenModal from './assets/AddTokenModal';
 
 export default {
   components: {
+    AphAddTokenModal,
     Sidebar,
+  },
+
+  methods: {
+    hideAddTokenModal() {
+      this.$store.commit('setShowAddTokenModal', false);
+    },
+
+    showAddTokenModal() {
+      this.$store.commit('setShowAddTokenModal', true);
+    },
   },
 };
 </script>

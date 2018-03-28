@@ -9,6 +9,7 @@ export {
   setActiveTransactionToken,
   setHoldings,
   setRecentTransactions,
+  setShowAddTokenModal,
   setShowSendAddressModal,
   setStatsToken,
 };
@@ -53,6 +54,10 @@ function setHoldings(state, holdings) {
 
 function setRecentTransactions(state, transactions) {
   state.recentTransactions = transactions;
+}
+
+function setShowAddTokenModal(state, value) {
+  state.showAddTokenModal = value;
 }
 
 function setShowSendAddressModal(state, value) {
