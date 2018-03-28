@@ -27,7 +27,12 @@ export default {
 
   methods: {
     transactions() {
-      return this.$store.state.recentTransactions.map(transaction => _.set(transaction, 'address', transaction.hash));
+      return this.$store.state.recentTransactions.map((transaction) => {
+        return _.merge(transaction, {
+          active: transaction.hash === this.$store.state.activeTransactionHash,
+          address: transaction.hash,
+        });
+      });
     },
 
     loadTransactions() {

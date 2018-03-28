@@ -1,6 +1,6 @@
 <template>
   <table class="transactions-table" :class="{'is-clickable': isClickable}">
-    <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)">
+    <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)" :class="[{active: transaction.active}]">
       <td>
         <div class="address">{{ transaction.address }}</div>
       </td>

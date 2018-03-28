@@ -31,6 +31,7 @@ module.exports = {
     'import/prefer-default-export': 0,
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
-    'no-underscore-dangle': 0
+    'no-underscore-dangle': 0,
+    'arrow-body-style': 0
   }
 }
