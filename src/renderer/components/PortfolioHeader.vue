@@ -2,7 +2,7 @@
   <section id="portfolio-header">
     <simple-donut :percent="portfolio.changePercent"></simple-donut>
     <div class="ticker">
-      <h1 class="underlined" @click="testClaimGas()">My Porfolio</h1>
+      <h1 class="underlined">My Porfolio</h1>
       <div class="balance">
         <span class="symbol">$</span><span class="amount">{{ $formatNumber(portfolio.balance) }}</span><span class="currency">USD</span>
       </div>
@@ -59,15 +59,10 @@ export default {
         });
     },
 
-    testClaimGas() {
-      this.$services.neo.claimGas();
-    },
-
   },
 
   mounted() {
     this.loadHoldings();
-
     setInterval(() => {
       this.loadHoldings();
     }, 15000);
