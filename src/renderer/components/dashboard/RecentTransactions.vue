@@ -52,8 +52,8 @@ export default {
 
 <style lang="scss">
 .recent-transactions {
-  background: white;
-  border-radius: $border-radius;
+  @extend %tile-light;
+
   display: flex;
   flex-direction: column;
   padding-bottom: $space;

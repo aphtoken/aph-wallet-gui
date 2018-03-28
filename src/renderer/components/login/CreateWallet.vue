@@ -68,7 +68,7 @@ export default {
     font-size: toRem(12px);
   }
 
-  .aph-text-input {
+  .aph-input {
     margin-top: $space-lg;
 
     & + .help-text {

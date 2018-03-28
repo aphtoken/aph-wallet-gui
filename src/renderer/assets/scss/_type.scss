@@ -5,16 +5,16 @@
 %underlined-header {
   font-family: GilroyMedium;
   font-size: toRem(20px);
-  margin: 0 0 $space 0;
   font-weight: normal;
+  margin: 0 0 $space 0;
 
   &:after {
+    background: $purple;
     content: "";
     display: block;
     height: 3px;
-    background: $purple;
-    width: $space * 2.5;
     margin-top: $space-sm;
+    width: toRem(55px);
   }
 }
 

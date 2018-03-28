@@ -57,8 +57,8 @@ export default {
 
 <style lang="scss">
 .token-stats {
-  background: white;
-  border-radius: $border-radius;
+  @extend %tile-light;
+
   display: flex;
   flex-direction: column;
 

@@ -1,7 +1,7 @@
 <template>
-  <div :class="['aph-select', {'is-open': isOpen}]">
-    <div class="aph-select--label" @click="toggleOpen">{{ label }}</div>
-    <ul class="aph-select--dropdown" v-if="isOpen">
+  <div :class="['aph-select', {'is-open': isOpen, 'is-light': light}]">
+    <div class="label" @click="toggleOpen">{{ label }}</div>
+    <ul class="dropdown" v-if="isOpen">
       <li :class="{selected: isSelected(option)}" v-for="(option, index) in options" :key="index" @click="toggleSelectedOption(option)">{{ option.label }}</li>
     </ul>
     <aph-icon :name="iconName"></aph-icon>
@@ -60,6 +60,11 @@ export default {
   },
 
   props: {
+    light: {
+      default: false,
+      type: Boolean,
+    },
+
     options: {
       default() {
         return [];
@@ -113,52 +118,84 @@ export default {
       }
     }
   }
-}
 
-.aph-select--label {
-  border-radius: $border-radius;
-  border: $border;
-  color: white;
-  cursor: pointer;
-  font-size: toRem(16px);
-  padding: $space * 0.7 $space * 5;
-  text-align: center;
-  transition: all .1s linear;
-  white-space: nowrap;
-}
-
-.aph-select--dropdown {
-  background: white;
-  border-radius: $border-radius;
-  left: 0;
-  list-style-type: none;
-  margin: $space-lg 0 0;
-  padding: 0;
-  position: absolute;
-  top: 100%;
-  width: 100%;
-  z-index: 100;
-
-  > li {
+  .label {
+    border-radius: $border-radius;
+    border: $border;
+    color: white;
     cursor: pointer;
+    font-family: GilroyMedium;
     font-size: toRem(16px);
-    padding: $space;
+    height: $input-height;
+    line-height: $input-height;
+    padding: 0 $space * 5;
+    text-align: center;
     transition: all .1s linear;
+    white-space: nowrap;
+  }
 
-    &:hover,
-    &.selected {
-      background: #f4f4fc;
-      color: $purple;
+  .dropdown {
+    background: white;
+    border-radius: $border-radius;
+    left: 0;
+    list-style-type: none;
+    margin: $space-lg 0 0;
+    padding: 0;
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    z-index: 100;
+
+    > li {
+      cursor: pointer;
+      font-size: toRem(16px);
+      height: $button-height;
+      line-height: $button-height;
+      padding: 0 $space;
+      transition: all .1s linear;
+
+      &:hover,
+      &.selected {
+        background: #f4f4fc;
+        color: $purple;
+      }
+
+      &:first-child {
+        border-top-left-radius: $border-radius;
+        border-top-right-radius: $border-radius;
+      }
+
+      &:last-child {
+        border-bottom-left-radius: $border-radius;
+        border-bottom-right-radius: $border-radius;
+      }
+    }
+  }
+
+  &.is-light {
+    .label {
+      background: $light-grey;
+      border: none;
+      color: $dark;
+      text-align: left;
+      padding: 0 $space;
     }
 
-    &:first-child {
-      border-top-left-radius: $border-radius;
-      border-top-right-radius: $border-radius;
+    .aph-icon .fill {
+      fill: $dark;
     }
 
-    &:last-child {
-      border-bottom-left-radius: $border-radius;
-      border-bottom-right-radius: $border-radius;
+    .dropdown {
+      background: $light-grey;
+      margin: $space 0 0;
+
+      > li {
+        &:hover,
+        &.selected {
+          background: $purple;
+          color: white;
+        }
+      }
     }
   }
 }

@@ -16,10 +16,10 @@
         <aph-icon name="receive"></aph-icon>
         <p>Receive</p>
       </div>
-      <div class="send-btn">
+      <router-link class="send-btn" to="/dashboard/send">
         <aph-icon name="send"></aph-icon>
         <p>Send</p>
-      </div>
+      </router-link>
     </div>
   </section>
 </template>
@@ -141,6 +141,7 @@ h1.underlined {
   .receive-btn, .send-btn {
     @extend %btn-square;
 
+    box-shadow: $box-shadow-light;
     height: $space * 9;
 
     .aph-icon {

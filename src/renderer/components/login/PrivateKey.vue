@@ -37,7 +37,7 @@ export default {
 #login--saved-wallet {
   width: 20rem;
 
-  .aph-text-input {
+  .aph-input {
     margin-top: $space-lg;
   }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="price">
+  <div id="price">
     <div class="header">
       <h1 class="underlined">Price</h1>
       <div class="current-value">
@@ -131,9 +131,9 @@ export default {
 </script>
 
 <style lang="scss">
-.price {
-  background: white;
-  border-radius: $border-radius;
+#price {
+  @extend %tile-light;
+
   display: flex;
   flex-direction: column;
 

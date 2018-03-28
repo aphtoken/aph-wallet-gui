@@ -11,6 +11,7 @@ $border: 2px solid $purple;
 $border-radius: 4px;
 
 $box-shadow: 0px 0px 20px 5px rgba($purple, .30);
+$box-shadow-light: 0px 0px 20px 10px rgba($purple, .10);
 
 $font-size: 14px;
 
@@ -24,3 +25,6 @@ $space-lg: $space * 2;
 $space-xl: $space * 4;
 
 $transition: all .1s linear;
+
+$button-height: $space * 3;
+$input-height: $space * 3;

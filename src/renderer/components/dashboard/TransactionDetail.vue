@@ -112,8 +112,8 @@ export default {
 
 <style lang="scss">
 .transaction-detail {
-  background: white;
-  border-radius: $border-radius;
+  @extend %tile-light;
+
   display: flex;
   flex-direction: column;
   padding-bottom: $space;

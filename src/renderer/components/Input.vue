@@ -1,5 +1,5 @@
 <template>
-  <div class="aph-text-input">
+  <div class="aph-input">
     <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value" />
 
     <div v-if="type === 'password'" class="visibility-toggle" @click="toggleIsVisible">
@@ -56,9 +56,12 @@ export default {
 </script>
 
 <style lang="scss">
-.aph-text-input {
+.aph-input {
+  align-items: center;
   border-bottom: $border;
-  padding: $space * .7 0;
+  display: flex;
+  height: $input-height;
+  line-height: $input-height;
   position: relative;
 
   input {

@@ -31,7 +31,9 @@
   color: white;
   cursor: pointer;
   font-size: toRem(16px);
-  padding: $space * .7 $space * 5;
+  height: $button-height;
+  line-height: $button-height;
+  padding: 0 $space * 5;
   text-align: center;
   transition: $transition;
 
@@ -50,6 +52,7 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  font-family: GilroyMedium;
   height: toRem(175px);
   transition: $transition;
   width: toRem(175px);
@@ -101,8 +104,18 @@
   background: $purple;
   color: white;
   cursor: pointer;
+  font-family: GilroyMedium;
   font-size: toRem(16px);
-  padding: $space * 1.2;
+  height: $button-height;
+  line-height: $button-height;
+  padding: 0 $space * 1.2;
   text-align: center;
   transition: $transition;
-  }
+}
+
+%btn-footer-light {
+  @extend %btn-footer;
+
+  background: $light-grey;
+  color: $dark;
+}

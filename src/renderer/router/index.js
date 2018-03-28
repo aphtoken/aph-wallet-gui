@@ -73,6 +73,16 @@ export default new Router({
             'top-right': require('@/components/dashboard/TopRightTile').default,
           },
         },
+        {
+          path: 'send',
+          components: {
+            'bottom-left': require('@/components/dashboard/Holdings').default,
+            'bottom-right': require('@/components/dashboard/RecentTransactions').default,
+            header: require('@/components/PortfolioHeader').default,
+            'top-left': require('@/components/dashboard/TokenStats').default,
+            'top-right': require('@/components/dashboard/Send').default,
+          },
+        },
       ],
     },
     {
