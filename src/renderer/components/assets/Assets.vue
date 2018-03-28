@@ -1,13 +1,38 @@
 <template>
   <section id="assets--assets">
-    <div class="header">
-      <h1 class="underlined">Assets</h1>
-    </div>
     <div class="search">
       <!-- <aph-icon name="wallet"></aph-icon> -->
       <input placeholder="Search" v-model="searchBy">
     </div>
     <div class="holdings">
+      <div v-for="(holding, index) in filteredHoldings" class="holding" :key="index">
+        <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
+        <div class="left">
+          <div class="currency">{{ holding.name }}</div>
+          <div class="meta">
+            <div class="symbol">{{ holding.symbol }}</div>
+            <div :class="['change', 'increase']">3.45%</div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="amount">{{ $formatNumber(holding.balance) }} {{ holding.symbol }}</div>
+          <div class="value">{{ $formatMoney(holding.value) }} USD</div>
+        </div>
+      </div>
+      <div v-for="(holding, index) in filteredHoldings" class="holding" :key="index">
+        <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
+        <div class="left">
+          <div class="currency">{{ holding.name }}</div>
+          <div class="meta">
+            <div class="symbol">{{ holding.symbol }}</div>
+            <div :class="['change', 'increase']">3.45%</div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="amount">{{ $formatNumber(holding.balance) }} {{ holding.symbol }}</div>
+          <div class="value">{{ $formatMoney(holding.value) }} USD</div>
+        </div>
+      </div>
       <div v-for="(holding, index) in filteredHoldings" class="holding" :key="index">
         <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
         <div class="left">
@@ -62,22 +87,17 @@ export default {
 
 <style lang="scss">
 #assets--assets {
-  .header {
-    padding: $space;
-
-    h1.underlined {
-      @extend %underlined-header;
-
-      flex: 1;
-      margin-bottom: 0;
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 
   .search {
     border-bottom: $border;
     border-color: $grey;
     display: flex;
-    margin: $space;
+    flex: none;
+    margin: 0 $space $space-lg 0;
     padding: $space 0;
 
     .aph-icon {
@@ -106,7 +126,9 @@ export default {
   }
 
   .holdings {
-    padding: $space;
+    flex: 1;
+    overflow: auto;
+    padding: 0 $space 0 0;
 
     .holding {
       align-items: center;
@@ -127,7 +149,6 @@ export default {
 
       .left {
         flex: 1;
-        margin-right: $space;
 
         .currency {
           font-family: GilroySemibold;
