@@ -1,6 +1,6 @@
 <template>
-  <table class="transactions-table">
-    <tr v-for="(transaction, index) in transactions" :key="index" @click="onClick(transaction)">
+  <table class="transactions-table" :class="{'is-clickable': isClickable}">
+    <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)">
       <td width="40%">
         <div class="address">{{ transaction.address }}</div>
       </td>
@@ -16,11 +16,22 @@
 
 <script>
 export default {
+  computed: {
+    isClickable() {
+      return _.isFunction(this.onClick);
+    },
+  },
+
+  methods: {
+    handleOnClick(transaction) {
+      if (this.onClick) {
+        this.onClick(transaction);
+      }
+    },
+  },
+
   props: {
     onClick: {
-      default() {
-        return _.noop;
-      },
       type: Function,
     },
 
@@ -73,12 +84,14 @@ export default {
     padding: $space $space-sm;
   }
 
-  tr {
-    cursor: pointer;
+  &.is-clickable {
+    tr {
+      cursor: pointer;
 
-    &:hover, &.active {
-      background: #F9F9FD;
-      color: $purple;
+      &:hover, &.active {
+        background: #F9F9FD;
+        color: $purple;
+      }
     }
   }
 }

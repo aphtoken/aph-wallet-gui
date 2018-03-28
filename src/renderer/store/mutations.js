@@ -4,8 +4,10 @@
 
 export {
   clearActiveRecentTransaction,
+  clearActiveTransactionHash,
   clearRecentTransactions,
   setActiveRecentTransaction,
+  setActiveTransactionHash,
   setHoldings,
   setRecentTransactions,
   setStatsToken,
@@ -15,12 +17,21 @@ function clearActiveRecentTransaction(state) {
   state.activeRecentTransaction = null;
 }
 
+function clearActiveTransactionHash(state) {
+  state.activeTransactionHash = null;
+}
+
 function clearRecentTransactions(state) {
   state.recentTransactions = [];
 }
 
 function setActiveRecentTransaction(state, transaction) {
   state.activeRecentTransaction = transaction;
+}
+
+function setActiveTransactionHash(state, hash) {
+  state.activeTransactionHash = hash;
+  state.showPriceTile = false;
 }
 
 function setHoldings(state, holdings) {
@@ -37,4 +48,5 @@ function setRecentTransactions(state, transactions) {
 
 function setStatsToken(state, token) {
   state.statsToken = token;
+  state.showPriceTile = true;
 }

@@ -46,7 +46,7 @@ export default {
     },
 
     viewTransaction({ hash }) {
-      this.$router.push({ path: `/dashboard/trx/${hash}` });
+      this.$store.commit('setActiveTransactionHash', hash);
     },
   },
 };

@@ -100,32 +100,18 @@ export default {
 
   methods: {
     loadTransactionDetails() {
-      if (!this.hash) {
-        return;
-      }
-
       this.$services.neo
-        .fetchTransactionDetails(this.hash)
+        .fetchTransactionDetails(this.$store.state.activeTransactionHash)
         .then((data) => {
           this.$store.commit('setActiveRecentTransaction', data);
         })
         .catch(() => {
         });
     },
-
-    viewTransaction(hash) {
-      this.$router.push({ path: `/dashboard/trx/${hash}` });
-    },
   },
 
   mounted() {
     this.loadTransactionDetails();
-  },
-
-  props: {
-    hash: {
-      type: String,
-    },
   },
 };
 </script>
@@ -195,10 +181,6 @@ export default {
 
         & + .column {
           margin-left: $space-xl;
-        }
-
-        &:last-child {
-          flex: 3;
         }
 
         &.confirmed {
