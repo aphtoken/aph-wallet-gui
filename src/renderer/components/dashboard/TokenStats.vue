@@ -4,7 +4,7 @@
       <h1 class="underlined">Token Stats</h1>
       <div class="current-value">
         <div class="label">Current Value</div>
-        <div class="amount">{{ $formatMoney(tokenStats.tokenValue) }}</div>
+        <div class="amount">{{ $formatMoney($store.state.statsToken.unitValue) }}</div>
       </div>
     </div>
     <div class="body">
@@ -15,18 +15,18 @@
           {{ $formatNumber($store.state.statsToken.balance) }}<span class="currency">{{ $store.state.statsToken.symbol }}</span>
         </div>
         <div class="value">
-          {{ $formatMoney(tokenStats.balanceValue) }}<span class="currency">USD</span>
+          {{ $formatMoney($store.state.statsToken.totalValue) }}<span class="currency">USD</span>
         </div>
       </div>
     </div>
     <div class="footer">
       <div class="total-supply">
         <div class="label">Total Supply</div>
-        <div class="amount">{{ $formatNumber(tokenStats.supply) }}</div>
+        <div class="amount">{{ $formatNumber($store.state.statsToken.totalSupply) }}</div>
       </div>
       <div class="market-cap">
         <div class="label">Market Cap</div>
-        <div class="amount">{{ $formatMoney(tokenStats.marketCap) }}</div>
+        <div class="amount">{{ $formatMoney($store.state.statsToken.marketCap) }}</div>
       </div>
       <div class="change">
         <div class="label">24h Change</div>
@@ -38,20 +38,6 @@
 
 <script>
 export default {
-  data() {
-    return {
-      tokenStats: {
-        tokenValue: 1.54,
-        balance: 211414,
-        balanceValue: 325557.56,
-        name: 'Aphelion',
-        symbol: 'APH',
-        supply: 75000000,
-        marketCap: 254045342,
-        change: 2.77,
-      },
-    };
-  },
 };
 </script>
 

@@ -287,6 +287,9 @@ export default {
                 holdings.forEach((h) => {
                   valuationsPromises.push(valuation.getValuation(h.symbol)
                     .then((val) => {
+                      console.log(val);
+                      h.totalSupply = val.total_supply;
+                      h.marketCap = val.market_cap_usd;
                       h.change24hrPercent = val.percent_change_24h;
                       h.unitValue = val.price_usd;
                       h.unitValue24hrAgo = h.unitValue / (1 + (h.change24hrPercent / 100.0));
@@ -376,8 +379,6 @@ export default {
 
         sendPromise
           .then((res) => {
-            console.log('Transaction Response:');
-            console.log(res);
             this.monitorTransactionConfirmation(res.tx.hash);
           })
           .catch((e) => {
