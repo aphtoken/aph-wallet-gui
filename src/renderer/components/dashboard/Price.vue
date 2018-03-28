@@ -41,20 +41,37 @@ import LineChart from '../charts/LineChart';
 export default {
   components: { LineChart },
 
-  computed: {
-    chartData() {
-      return {
-        labels: ['20-01', '21-01', '22-01', '23-01', '24-01', '25-01'],
+  data() {
+    return {
+      chartData: [],
+    };
+  },
+
+  mounted() {
+    this.loadPriceData();
+    setInterval(() => {
+      this.loadPriceData();
+    }, 60000);
+  },
+
+  methods: {
+    loadPriceData() {
+      const priceData = this.$services.valuation.getHistorical('NEO', 24 * 30, 10);
+      this.chartData = {
+        labels: priceData.dates,
         datasets: [
           {
             backgroundColor: 'transparent',
             borderColor: '#742BF0',
-            data: [1.12, 1.34, 1.35, 1.13, 1.2, 1.32],
+            data: priceData.prices,
             pointRadius: 0,
           },
         ],
       };
     },
+  },
+
+  computed: {
 
     chartOptions() {
       return {

@@ -34,4 +34,36 @@ export default {
     });
   },
 
+  getHistorical(symbol, hoursBack, points) {
+    return new Promise((resolve, reject) => {
+      try {
+        return axios.get(`https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=USD&limit=${hoursBack}&aggregate=3&e=CCCAGG`)
+          .then((res) => {
+            const mod = Math.round(res.data.Data.length / points);
+            let i = 0;
+            const returnData = {
+              dates: [],
+              prices: [],
+            };
+            res.data.Data.forEach((d) => {
+              if (i % mod === 0) {
+                returnData.dates.push(d.time);
+                returnData.prices.push(d.close);
+              }
+              i += 1;
+            });
+            console.log(returnData);
+            resolve(returnData);
+          })
+          .catch((e) => {
+            console.log(e);
+            resolve([]);
+          });
+      } catch (e) {
+        console.log(e);
+        return reject(e);
+      }
+    });
+  },
+
 };
