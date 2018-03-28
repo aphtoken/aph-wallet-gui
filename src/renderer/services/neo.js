@@ -2,6 +2,7 @@ import {
   wallet,
   api,
   rpc,
+  u,
 } from '@cityofzion/neon-js';
 import BigDecimal from 'bignumber.js';
 import wallets from './wallets';
@@ -375,9 +376,12 @@ export default {
 
         sendPromise
           .then((res) => {
+            console.log(res);
             this.monitorTransactionConfirmation(res.tx.hash);
+          })
+          .catch((e) => {
+            console.log(e);
           });
-
         return sendPromise;
       } catch (e) {
         return reject(e);
@@ -394,14 +398,21 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    const config = {
-      net: network,
-      address: toAddress,
-      privateKey: wallets.getCurrentWallet().privateKey,
-      intents: api.makeIntent(intentAmounts, wallets.getCurrentWallet().address),
-    };
-    return api.sendAsset(config)
-      .then(res => res)
+    return api.neonDB.getBalance(network, wallets.getCurrentWallet().address)
+      .then((balance) => {
+        const config = {
+          net: network,
+          address: wallets.getCurrentWallet().address,
+          privateKey: wallets.getCurrentWallet().privateKey,
+          balance,
+          intents: api.makeIntent(intentAmounts, toAddress),
+        };
+        return api.sendAsset(config)
+          .then(res => res)
+          .catch((e) => {
+            console.log(e);
+          });
+      })
       .catch((e) => {
         console.log(e);
       });
@@ -410,9 +421,32 @@ export default {
   sendNep5Transfer(toAddress, assetId, amount) {
     return new Promise((resolve, reject) => {
       try {
-        console.log(wallets.getCurrentWallet().wif);
-        return api.nep5.doTransferToken(network, assetId,
+        console.log(toAddress);
+        console.log(wallet.getScriptHashFromAddress(toAddress));
+        console.log(assetId);
+        console.log(new u.Fixed8(amount));
+        console.log(new u.Fixed8(amount).toReverseHex());
+        /* return api.nep5.doTransferToken(network, assetId,
           wallets.getCurrentWallet().wif, toAddress, amount)
+          .then(res => res)
+          .catch(e => reject(e)); */
+        const config = {
+          net: network,
+          account: new wallet.Account(wallets.getCurrentWallet().wif),
+          intents: api.makeIntent({ GAS: 0.00000001 }, wallets.getCurrentWallet().address),
+          script: {
+            scriptHash: assetId,
+            operation: 'transfer',
+            args: [
+              u.reverseHex(wallet.getScriptHashFromAddress(wallets.getCurrentWallet().address)),
+              u.reverseHex(wallet.getScriptHashFromAddress(toAddress)),
+              new u.Fixed8(amount).toReverseHex(),
+            ],
+          },
+          gas: 0,
+        };
+        console.log(config);
+        return api.doInvoke(config)
           .then(res => res)
           .catch(e => reject(e));
       } catch (e) {
@@ -423,6 +457,7 @@ export default {
 
   monitorTransactionConfirmation(hash) {
     const interval = setInterval(() => {
+      console.log(`Checking TX: ${hash}`);
       this.fetchTransactionDetails(hash)
         .then((res) => {
           if (res.confirmed === true) {

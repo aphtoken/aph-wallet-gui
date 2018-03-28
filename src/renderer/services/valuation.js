@@ -52,7 +52,6 @@ export default {
               }
               i += 1;
             });
-            console.log(returnData);
             resolve(returnData);
           })
           .catch((e) => {

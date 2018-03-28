@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="Windows-1252"?>
 <template>
   <div id="login--saved-wallet">
     <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
