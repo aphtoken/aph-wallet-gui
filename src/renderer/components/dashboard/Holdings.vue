@@ -33,7 +33,6 @@ export default {
     },
 
     viewHoldingDetail(holding) {
-      console.log(holding);
       this.$store.commit('setStatsToken', holding);
     },
   },

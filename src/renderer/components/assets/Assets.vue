@@ -12,7 +12,7 @@
           <div class="currency">{{ holding.name }}</div>
           <div class="meta">
             <div class="symbol">{{ holding.symbol }}</div>
-            <div :class="['change', 'increase']">3.45%</div>
+            <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 1}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
           </div>
         </div>
         <div class="right">

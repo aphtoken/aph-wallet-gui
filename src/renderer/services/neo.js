@@ -6,6 +6,7 @@ import {
 } from '@cityofzion/neon-js';
 import BigDecimal from 'bignumber.js';
 import wallets from './wallets';
+import tokens from './tokens';
 import valuation from './valuation';
 
 const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
@@ -19,12 +20,9 @@ const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969
 
 const network = 'TestNet';
 const rpcEndpoint = 'http://test3.cityofzion.io:8880'; // todo, an app preference to move between test and main net
-const nep5TokenIds = [
-  '591eedcd379a8981edeefe04ef26207e1391904a',
-];
+const aphApiBaseUrl = 'http://localhost:62433/api';
 
 export default {
-
   /**
    * @param {String} passphrase
    * @param {String} passphraseConfirm
@@ -257,12 +255,12 @@ export default {
             });
 
             const nep5Promises = [];
-            nep5TokenIds.forEach((nep5) => {
-              nep5Promises.push(this.fetchNEP5Balance(address, nep5)
+            tokens.getAllAsArray().forEach((nep5) => {
+              nep5Promises.push(this.fetchNEP5Balance(address, nep5.assetId)
                 .then((val) => {
-                  if (val.balance > 0) {
+                  if (val.balance > 0 || nep5.isCustom === true) {
                     const h = {
-                      asset: nep5,
+                      asset: nep5.assetId,
                       balance: val.balance,
                       symbol: val.symbol,
                       name: val.name,
@@ -287,7 +285,6 @@ export default {
                 holdings.forEach((h) => {
                   valuationsPromises.push(valuation.getValuation(h.symbol)
                     .then((val) => {
-                      console.log(val);
                       h.totalSupply = val.total_supply;
                       h.marketCap = val.market_cap_usd;
                       h.change24hrPercent = val.percent_change_24h;
@@ -328,6 +325,42 @@ export default {
               .catch(e => reject(e));
           })
           .catch(e => reject(e));
+      } catch (e) {
+        return reject(e);
+      }
+    });
+  },
+
+  fetchNEP5Tokens() {
+    return new Promise((resolve, reject) => {
+      try {
+        const defaultList = [{
+          symbol: 'APH',
+          assetId: '591eedcd379a8981edeefe04ef26207e1391904a',
+          isCustom: true, // always show even if 0 balance
+        }];
+
+        defaultList.forEach((t) => {
+          tokens.add(t.symbol, t);
+        });
+
+        try {
+          return axios.get(`${aphApiBaseUrl}/tokens`)
+            .then((res) => {
+              res.data.tokens.forEach((t) => {
+                tokens.add(t.symbol, {
+                  symbol: t.symbol,
+                  assetId: t.scriptHash.replace('0x', ''),
+                  isCustom: false,
+                });
+              });
+            })
+            .catch((e) => {
+              console.log(e);
+            });
+        } catch (e) {
+          return reject(e);
+        }
       } catch (e) {
         return reject(e);
       }

@@ -68,15 +68,16 @@
 export default {
   computed: {
     currencies() {
-      return this.$store.state.holdings.map(({ name, symbol, asset, isNep5, unitValue }) => {
-        return {
-          label: name,
-          value: symbol,
-          asset,
-          isNep5,
-          unitValue,
-        };
-      });
+      return this.$store.state.holdings.map(
+        ({ name, symbol, asset, isNep5, unitValue, balance }) => {
+          return {
+            label: `${name}   Balance: ${balance}`,
+            value: symbol,
+            asset,
+            isNep5,
+            unitValue,
+          };
+        });
     },
 
     showNextButton() {
