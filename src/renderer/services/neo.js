@@ -376,6 +376,7 @@ export default {
 
         sendPromise
           .then((res) => {
+            console.log('Transaction Response:');
             console.log(res);
             this.monitorTransactionConfirmation(res.tx.hash);
           })
@@ -419,40 +420,27 @@ export default {
   },
 
   sendNep5Transfer(toAddress, assetId, amount) {
-    return new Promise((resolve, reject) => {
-      try {
-        console.log(toAddress);
-        console.log(wallet.getScriptHashFromAddress(toAddress));
-        console.log(assetId);
-        console.log(new u.Fixed8(amount));
-        console.log(new u.Fixed8(amount).toReverseHex());
-        /* return api.nep5.doTransferToken(network, assetId,
-          wallets.getCurrentWallet().wif, toAddress, amount)
-          .then(res => res)
-          .catch(e => reject(e)); */
-        const config = {
-          net: network,
-          account: new wallet.Account(wallets.getCurrentWallet().wif),
-          intents: api.makeIntent({ GAS: 0.00000001 }, wallets.getCurrentWallet().address),
-          script: {
-            scriptHash: assetId,
-            operation: 'transfer',
-            args: [
-              u.reverseHex(wallet.getScriptHashFromAddress(wallets.getCurrentWallet().address)),
-              u.reverseHex(wallet.getScriptHashFromAddress(toAddress)),
-              new u.Fixed8(amount).toReverseHex(),
-            ],
-          },
-          gas: 0,
-        };
-        console.log(config);
-        return api.doInvoke(config)
-          .then(res => res)
-          .catch(e => reject(e));
-      } catch (e) {
-        return reject(e);
-      }
-    });
+    const config = {
+      net: network,
+      account: new wallet.Account(wallets.getCurrentWallet().wif),
+      intents: api.makeIntent({ GAS: 0.00000001 }, wallets.getCurrentWallet().address),
+      script: {
+        scriptHash: assetId,
+        operation: 'transfer',
+        args: [
+          u.reverseHex(wallet.getScriptHashFromAddress(wallets.getCurrentWallet().address)),
+          u.reverseHex(wallet.getScriptHashFromAddress(toAddress)),
+          new u.Fixed8(amount).toReverseHex(),
+        ],
+      },
+      gas: 0,
+    };
+
+    return api.doInvoke(config)
+      .then(res => res)
+      .catch((e) => {
+        console.log(e);
+      });
   },
 
   monitorTransactionConfirmation(hash) {
