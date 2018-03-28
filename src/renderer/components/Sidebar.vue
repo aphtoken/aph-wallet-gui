@@ -4,25 +4,25 @@
       <aph-icon name="logo-mark"></aph-icon>
     </div>
     <div class="menu link-list">
-      <router-link to="/dashboard" class="active">
+      <router-link to="/dashboard">
         <span class="icon">
           <aph-icon name="dashboard"></aph-icon>
         </span>
         <span class="label">Dashboard</span>
       </router-link>
-      <router-link to="/dashboard">
+      <router-link to="/assets">
         <span class="icon">
           <aph-icon name="wallet"></aph-icon>
         </span>
         <span class="label">Assets</span>
       </router-link>
-      <router-link to="/dashboard">
+      <router-link to="/history">
         <span class="icon">
           <aph-icon name="history"></aph-icon>
         </span>
         <span class="label">History</span>
       </router-link>
-      <router-link to="/dashboard">
+      <router-link to="/settings">
         <span class="icon">
           <aph-icon name="settings"></aph-icon>
         </span>
@@ -99,7 +99,7 @@ export default {
         flex: 1.75;
       }
 
-      &:hover, &.active {
+      &:hover, &.router-link-active {
         border-color: white;
 
         .icon {

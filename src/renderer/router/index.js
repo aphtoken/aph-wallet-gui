@@ -86,6 +86,19 @@ export default new Router({
       ],
     },
     {
+      path: '/assets',
+      component: require('@/components/Assets').default,
+      children: [
+        {
+          path: '',
+          components: {
+            header: require('@/components/PortfolioHeader').default,
+            left: require('@/components/assets/Assets').default,
+          },
+        },
+      ],
+    },
+    {
       path: '*',
       redirect: '/dashboard',
     },
