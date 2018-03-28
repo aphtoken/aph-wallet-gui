@@ -4,35 +4,8 @@
       <!-- <aph-icon name="wallet"></aph-icon> -->
       <input placeholder="Search" v-model="searchBy">
     </div>
+    <div class="add-token-btn" v-if="$store.state.holdings.length === 0">Add token</div>
     <div class="holdings">
-      <div v-for="(holding, index) in filteredHoldings" class="holding" :key="index">
-        <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
-        <div class="left">
-          <div class="currency">{{ holding.name }}</div>
-          <div class="meta">
-            <div class="symbol">{{ holding.symbol }}</div>
-            <div :class="['change', 'increase']">3.45%</div>
-          </div>
-        </div>
-        <div class="right">
-          <div class="amount">{{ $formatNumber(holding.balance) }} {{ holding.symbol }}</div>
-          <div class="value">{{ $formatMoney(holding.value) }} USD</div>
-        </div>
-      </div>
-      <div v-for="(holding, index) in filteredHoldings" class="holding" :key="index">
-        <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
-        <div class="left">
-          <div class="currency">{{ holding.name }}</div>
-          <div class="meta">
-            <div class="symbol">{{ holding.symbol }}</div>
-            <div :class="['change', 'increase']">3.45%</div>
-          </div>
-        </div>
-        <div class="right">
-          <div class="amount">{{ $formatNumber(holding.balance) }} {{ holding.symbol }}</div>
-          <div class="value">{{ $formatMoney(holding.value) }} USD</div>
-        </div>
-      </div>
       <div v-for="(holding, index) in filteredHoldings" class="holding" :key="index">
         <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
         <div class="left">
@@ -123,6 +96,13 @@ export default {
         color: $grey;
       }
     }
+  }
+
+  .add-token-btn {
+    @extend %btn-outline;
+
+    color: $purple;
+    margin-right: $space;
   }
 
   .holdings {
