@@ -25,8 +25,7 @@
 export default {
   methods: {
     isActive({ symbol }) {
-      // This is just placeholder logic for now..
-      return symbol === 'APH';
+      return _.get(this.$store.state.statsToken, 'symbol') === symbol;
     },
 
     loadHoldings() {
