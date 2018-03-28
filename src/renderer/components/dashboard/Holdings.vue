@@ -29,17 +29,7 @@ export default {
     },
 
     loadHoldings() {
-      if (!this.$services.wallets.getCurrentWallet()) {
-        return;
-      }
-
-      this.$services.neo
-        .fetchHoldings(this.$services.wallets.getCurrentWallet().address)
-        .then((data) => {
-          this.$store.commit('setHoldings', data.holdings);
-        })
-        .catch(() => {
-        });
+      this.$store.dispatch('fetchHoldings');
     },
 
     viewHoldingDetail(holding) {

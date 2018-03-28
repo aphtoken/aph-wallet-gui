@@ -31,18 +31,7 @@ export default {
     },
 
     loadTransactions() {
-      if (!this.$services.wallets.getCurrentWallet()) {
-        return;
-      }
-
-      this.$services.neo
-        .fetchRecentTransactions(this.$services.wallets.getCurrentWallet().address)
-        .then((data) => {
-          this.$store.commit('setRecentTransactions', data);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      this.$store.dispatch('fetchRecentTransactions');
     },
 
     viewTransaction({ hash }) {

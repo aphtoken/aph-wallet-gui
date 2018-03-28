@@ -1,7 +1,4 @@
 /* eslint-disable no-use-before-define */
-// import Vue from 'vue';
-// import { store } from './index';
-
 export {
   clearActiveRecentTransaction,
   clearActiveTransactionHash,

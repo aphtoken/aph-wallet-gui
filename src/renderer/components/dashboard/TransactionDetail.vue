@@ -100,13 +100,7 @@ export default {
 
   methods: {
     loadTransactionDetails() {
-      this.$services.neo
-        .fetchTransactionDetails(this.$store.state.activeTransactionHash)
-        .then((data) => {
-          this.$store.commit('setActiveRecentTransaction', data);
-        })
-        .catch(() => {
-        });
+      this.$store.dispatch('fetchActiveTransactionDetails');
     },
   },
 

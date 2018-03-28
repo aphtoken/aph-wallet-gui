@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import * as actions from './actions';
 import * as getters from './getters';
 import * as mutations from './mutations';
 
@@ -15,12 +16,14 @@ const state = {
 };
 
 const store = new Vuex.Store({
+  actions,
   getters,
   mutations,
   state,
 });
 
 export {
+  actions,
   getters,
   mutations,
   state,
