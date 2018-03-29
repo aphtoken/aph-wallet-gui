@@ -45,10 +45,10 @@
           <aph-select :options="currencies" :light="true" placeholder="Select a currency" v-model="currency"></aph-select>
         </div>
         <div class="address">
-          <aph-input placeholder="Enter Send to Address" v-model="address"></aph-input>
+          <aph-input placeholder="Enter Send to Address" v-model="address" @enter="next"></aph-input>
         </div>
         <div class="amount">
-          <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
+          <aph-input placeholder="Enter Amount" v-model="amount" @enter="next"></aph-input>
           <div class="symbol">{{ currency ? currency.value : '' }}</div>
         </div>
         <div class="estimated-value">
@@ -58,7 +58,7 @@
       </div>
       <div class="footer">
         <router-link class="cancel-btn" to="/dashboard">Cancel</router-link>
-        <div class="next-btn" v-if="showNextButton" @click="showConfirmation = true">Next</div>
+        <div class="next-btn" v-if="showNextButton" @click="next">Next</div>
       </div>
     </template>
   </section>
@@ -86,6 +86,14 @@ export default {
   },
 
   methods: {
+    next() {
+      if (!(this.address && this.amount && parseFloat(this.amount) && this.currency)) {
+        return;
+      }
+
+      this.showConfirmation = true;
+    },
+
     send() {
       this.$services.neo.sendFunds(this.address, this.currency.asset,
         this.amount, this.currency.isNep5);

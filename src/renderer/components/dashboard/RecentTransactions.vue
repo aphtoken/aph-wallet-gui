@@ -20,9 +20,9 @@ export default {
   beforeMount() {
     this.loadTransactions();
 
-    // loadTransactionsIntervalId = setInterval(() => {
-    //   this.loadTransactions();
-    // }, this.$constants.intervals.POLLING);
+    loadTransactionsIntervalId = setInterval(() => {
+      this.loadTransactions();
+    }, this.$constants.intervals.POLLING);
   },
 
   methods: {

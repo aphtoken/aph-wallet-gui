@@ -1,7 +1,7 @@
 <template>
   <div id="login--saved-wallet">
     <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
-    <aph-input v-if="showPassphrase" v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
+    <aph-input v-if="showPassphrase" v-model="passphrase" placeholder="Enter your passphrase here" type="password" @enter="login"></aph-input>
     <div v-if="showButton" class="login" @click="login">Login</div>
   </div>
 </template>
@@ -28,6 +28,10 @@ export default {
 
   methods: {
     login() {
+      if (_.isNull(this.wallet)) {
+        return;
+      }
+
       setTimeout(() => {
         /* don't know how to make this behave using async/await as you described,
         how to we get back the error messages?

@@ -447,10 +447,18 @@ export default {
           })
           .catch((e) => {
             console.log(e);
-            resolve([]);
+            resolve({
+              data: {
+                transfers: [],
+              },
+            });
           });
       } catch (e) {
-        return resolve([]);
+        return resolve({
+          data: {
+            transfers: [],
+          },
+        });
       }
     });
   },

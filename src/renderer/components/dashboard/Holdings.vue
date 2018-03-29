@@ -22,6 +22,7 @@
 </template>
 
 <script>
+let loadHoldingsIntervalId;
 export default {
   methods: {
     isActive({ symbol }) {
@@ -40,9 +41,13 @@ export default {
   mounted() {
     this.loadHoldings();
 
-    setInterval(() => {
+    loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldings();
-    }, 15000);
+    }, this.$constants.intervals.POLLING);
+  },
+
+  beforeDestroy() {
+    clearInterval(loadHoldingsIntervalId);
   },
 };
 </script>
