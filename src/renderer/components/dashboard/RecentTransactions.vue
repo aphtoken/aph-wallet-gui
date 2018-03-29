@@ -4,7 +4,7 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <aph-simple-transactions :transactions="transactions()" :onClick="viewTransaction"></aph-simple-transactions>
+      <aph-recent-transaction :transactions="transactions()" :onClick="viewTransaction"></aph-recent-transaction>
     </div>
   </div>
 </template>
@@ -42,9 +42,11 @@ export default {
       this.$store.dispatch('fetchRecentTransactions');
     },
 
-    viewTransaction({ hash, symbol }) {
-      this.$store.commit('setActiveTransactionHash', hash);
-      this.$store.commit('setActiveTransactionToken', symbol);
+    viewTransaction(transaction) {
+      this.$store.commit('clearActiveTransaction');
+      setTimeout(() => {
+        this.$store.commit('setActiveTransaction', transaction.details);
+      }, 10);
     },
   },
 };

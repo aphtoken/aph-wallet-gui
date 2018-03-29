@@ -3,26 +3,26 @@
     <div class="header">
       <h1 class="underlined">Transaction</h1>
     </div>
-    <div class="body" v-if="$store.state.activeRecentTransaction">
+    <div class="body" v-if="$store.state.activeTransaction">
       <div class="section">
         <div class="row">
           <div class="column">
             <div class="label">Hash</div>
-            <div class="value truncate">{{ $store.state.activeRecentTransaction.txid }}</div>
+            <div class="value truncate">{{ $store.state.activeTransaction.txid }}</div>
           </div>
         </div>
         <div class="row">
           <div class="column">
             <div class="label">Date</div>
-            <div class="value">{{ $formatDate($store.state.activeRecentTransaction.blocktime) }}</div>
+            <div class="value">{{ $formatDate($store.state.activeTransaction.blocktime) }}</div>
           </div>
           <div class="column">
             <div class="label">Time</div>
-            <div class="value">{{ $formatTime($store.state.activeRecentTransaction.blocktime) }}</div>
+            <div class="value">{{ $formatTime($store.state.activeTransaction.blocktime) }}</div>
           </div>
           <div class="column">
             <div class="label">Block</div>
-            <div class="value purple">{{ $formatNumber($store.state.activeRecentTransaction.block) }}</div>
+            <div class="value purple">{{ $formatNumber($store.state.activeTransaction.block) }}</div>
           </div>
         </div>
       </div>
@@ -60,23 +60,23 @@
         <div class="row">
           <div class="column">
             <div class="label">Network Fee</div>
-            <div class="value">{{ $formatNumber($store.state.activeRecentTransaction.net_fee) }} GAS</div>
+            <div class="value">{{ $formatNumber($store.state.activeTransaction.net_fee) }} GAS</div>
           </div>
           <div class="column">
             <div class="label">System Fee</div>
-            <div class="value">{{ $formatNumber($store.state.activeRecentTransaction.sys_fee) }} GAS</div>
+            <div class="value">{{ $formatNumber($store.state.activeTransaction.sys_fee) }} GAS</div>
           </div>
           <div class="column">
             <div class="label">Size</div>
-            <div class="value">{{ $formatNumber($store.state.activeRecentTransaction.size) }} Bytes</div>
+            <div class="value">{{ $formatNumber($store.state.activeTransaction.size) }} Bytes</div>
           </div>
         </div>
         <div class="row has-equal-columns">
-          <div class="column" v-if="this.$store.state.activeRecentTransaction.confirmed">
+          <div class="column" v-if="this.$store.state.activeTransaction.confirmed">
             <div class="label">Confirmations</div>
-            <div class="value">{{ $formatNumber($store.state.activeRecentTransaction.confirmations) }}</div>
+            <div class="value">{{ $formatNumber($store.state.activeTransaction.confirmations) }}</div>
           </div>
-          <div class="column confirmed" v-if="this.$store.state.activeRecentTransaction.confirmed">
+          <div class="column confirmed" v-if="this.$store.state.activeTransaction.confirmed">
             <aph-icon name="confirmed"></aph-icon>
             <div class="label">Confirmed</div>
           </div>
@@ -90,22 +90,15 @@
 export default {
   computed: {
     fromTransactions() {
-      return this.$store.state.activeRecentTransaction.vin.map(transaction => _.set(transaction, 'amount', transaction.value));
+      return this.$store.state.activeTransaction.vin.map(transaction => _.set(transaction, 'amount', transaction.value));
     },
 
     toTransactions() {
-      return this.$store.state.activeRecentTransaction.vout.map(transaction => _.set(transaction, 'amount', transaction.value));
-    },
-  },
-
-  methods: {
-    loadTransactionDetails() {
-      this.$store.dispatch('fetchActiveTransactionDetails');
+      return this.$store.state.activeTransaction.vout.map(transaction => _.set(transaction, 'amount', transaction.value));
     },
   },
 
   mounted() {
-    this.loadTransactionDetails();
   },
 };
 </script>

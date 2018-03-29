@@ -5,10 +5,13 @@
         <div class="address">{{ transaction.address }}</div>
       </td>
       <td width="15%">
+        <div class="currency">{{ $formatDate(transaction.block_time) }}</div>
+      </td>
+      <td width="15%">
         <div class="currency">{{ transaction.symbol }}</div>
       </td>
       <td width="15%">
-        <div class="amount">{{ transaction.amount }}</div>
+        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</div>
       </td>
     </tr>
   </table>

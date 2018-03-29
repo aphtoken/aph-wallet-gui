@@ -86,57 +86,99 @@ export default {
       try {
         return api.neonDB.getTransactionHistory(network, address)
           .then((res) => {
-            const splitTransactions = [];
-            res.forEach((t) => {
-              this.fetchTransactionDetails(t.txid)
-                .then((transactionDetails) => {
-                  let outNEO = new BigDecimal(0);
-                  let outGAS = new BigDecimal(0);
-
-                  transactionDetails.vin.forEach((i) => {
-                    if (i.address === address && i.symbol === 'NEO') {
-                      outNEO = outNEO.plus(i.value);
-                    }
-                    if (i.address === address && i.symbol === 'GAS') {
-                      outGAS = outGAS.plus(i.value);
-                    }
+            this.fetchNEP5Transfers(address)
+              .then((nep5) => {
+                const splitTransactions = [];
+                nep5.data.transfers.forEach((t) => {
+                  res.push({
+                    txid: t.transactionHash,
+                    symbol: t.symbol,
+                    amount: t.received - t.sent,
+                    block_index: t.blockIndex,
+                    block_time: t.blockTime,
+                    isNep5: true,
+                    vin: [{
+                      address: t.fromAddress,
+                      symbol: t.symbol,
+                      value: Math.abs(t.received - t.sent),
+                    }],
+                    vout: [{
+                      address: t.toAddress,
+                      symbol: t.symbol,
+                      value: Math.abs(t.received - t.sent),
+                    }],
                   });
-
-                  let inNEO = new BigDecimal(0);
-                  let inGAS = new BigDecimal(0);
-                  transactionDetails.vout.forEach((o) => {
-                    if (o.address === address && o.symbol === 'NEO') {
-                      inNEO = inNEO.plus(o.value);
-                    }
-                    if (o.address === address && o.symbol === 'GAS') {
-                      inGAS = inGAS.plus(o.value);
-                    }
-                  });
-
-                  const neoChange = inNEO.minus(outNEO);
-                  const gasChange = inGAS.minus(outGAS);
-                  if (neoChange.isZero() === false) {
-                    splitTransactions.push({
-                      hash: t.txid,
-                      block_index: transactionDetails.block,
-                      symbol: 'NEO',
-                      amount: neoChange,
-                      block_time: transactionDetails.blocktime,
-                    });
-                  }
-
-                  if (gasChange.isZero() === false) {
-                    splitTransactions.push({
-                      hash: t.txid,
-                      block_index: transactionDetails.block,
-                      symbol: 'GAS',
-                      amount: gasChange,
-                      block_time: transactionDetails.blocktime,
-                    });
-                  }
                 });
-            });
-            return resolve(this._sortRecentTransactions(splitTransactions));
+
+                res.forEach((t) => {
+                  this.fetchTransactionDetails(t.txid)
+                    .then((transactionDetails) => {
+                      if (t.isNep5 !== true) {
+                        let outNEO = new BigDecimal(0);
+                        let outGAS = new BigDecimal(0);
+
+                        transactionDetails.vin.forEach((i) => {
+                          if (i.address === address && i.symbol === 'NEO') {
+                            outNEO = outNEO.plus(i.value);
+                          }
+                          if (i.address === address && i.symbol === 'GAS') {
+                            outGAS = outGAS.plus(i.value);
+                          }
+                        });
+
+                        let inNEO = new BigDecimal(0);
+                        let inGAS = new BigDecimal(0);
+                        transactionDetails.vout.forEach((o) => {
+                          if (o.address === address && o.symbol === 'NEO') {
+                            inNEO = inNEO.plus(o.value);
+                          }
+                          if (o.address === address && o.symbol === 'GAS') {
+                            inGAS = inGAS.plus(o.value);
+                          }
+                        });
+
+                        const neoChange = inNEO.minus(outNEO);
+                        const gasChange = inGAS.minus(outGAS);
+                        if (neoChange.isZero() === false) {
+                          splitTransactions.push({
+                            hash: t.txid,
+                            block_index: transactionDetails.block,
+                            symbol: 'NEO',
+                            amount: neoChange,
+                            block_time: transactionDetails.blocktime,
+                            isNep5: false,
+                          });
+                        }
+
+                        if (gasChange.isZero() === false) {
+                          splitTransactions.push({
+                            hash: t.txid,
+                            block_index: transactionDetails.block,
+                            symbol: 'GAS',
+                            amount: gasChange,
+                            block_time: transactionDetails.blocktime,
+                            details: transactionDetails,
+                          });
+                        }
+                      } else {
+                        transactionDetails.vout = t.vout;
+                        transactionDetails.vin = t.vin;
+                        splitTransactions.push({
+                          hash: t.txid,
+                          block_index: transactionDetails.block,
+                          symbol: t.symbol,
+                          amount: t.amount,
+                          block_time: transactionDetails.blocktime,
+                          details: transactionDetails,
+                        });
+                      }
+                    });
+                });
+                return resolve(this._sortRecentTransactions(splitTransactions));
+              })
+              .catch((e) => {
+                console.log(e);
+              });
           })
           .catch(e => console.log(e));
       } catch (e) {
@@ -275,6 +317,7 @@ export default {
                   }
                 })
                 .catch((e) => {
+                  console.log(e);
                   reject(e);
                 }));
             });
@@ -368,7 +411,7 @@ export default {
   },
 
   fetchNEP5Balance(address, assetId) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       try {
         return api.nep5.getToken(rpcEndpoint, assetId, address)
           .then((token) => {
@@ -380,9 +423,30 @@ export default {
               balance: token.balance,
             });
           })
-          .catch(e => reject(e));
+          .catch((e) => {
+            console.log(e);
+            resolve({ balance: 0 });
+          });
       } catch (e) {
-        return reject(e);
+        console.log(e);
+        return resolve({ balance: 0 });
+      }
+    });
+  },
+
+  fetchNEP5Transfers(address) {
+    return new Promise((resolve) => {
+      try {
+        return axios.get(`${aphApiBaseUrl}/transfers/${address}`)
+          .then((res) => {
+            resolve(res);
+          })
+          .catch((e) => {
+            console.log(e);
+            resolve([]);
+          });
+      } catch (e) {
+        return resolve([]);
       }
     });
   },
@@ -524,11 +588,11 @@ export default {
 
   _sortRecentTransactions(transactions) {
     return transactions.sort((a, b) => {
-      if (a.block_time > b.block_time) {
+      if (a.block_time < b.block_time) {
         return 1;
       }
 
-      if (a.block_time < b.block_time) {
+      if (a.block_time > b.block_time) {
         return -1;
       }
 

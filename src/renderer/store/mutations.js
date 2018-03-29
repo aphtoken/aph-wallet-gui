@@ -1,11 +1,9 @@
 /* eslint-disable no-use-before-define */
 export {
-  clearActiveRecentTransaction,
-  clearActiveTransactionHash,
+  clearActiveTransaction,
   clearActiveTransactionToken,
   clearRecentTransactions,
-  setActiveRecentTransaction,
-  setActiveTransactionHash,
+  setActiveTransaction,
   setActiveTransactionToken,
   setHoldings,
   setRecentTransactions,
@@ -14,12 +12,9 @@ export {
   setStatsToken,
 };
 
-function clearActiveRecentTransaction(state) {
-  state.activeRecentTransaction = null;
-}
-
-function clearActiveTransactionHash(state) {
+function clearActiveTransaction(state) {
   state.activeTransactionHash = null;
+  state.showPriceTile = true;
 }
 
 function clearActiveTransactionToken(state) {
@@ -30,12 +25,8 @@ function clearRecentTransactions(state) {
   state.recentTransactions = [];
 }
 
-function setActiveRecentTransaction(state, transaction) {
-  state.activeRecentTransaction = transaction;
-}
-
-function setActiveTransactionHash(state, hash) {
-  state.activeTransactionHash = hash;
+function setActiveTransaction(state, transaction) {
+  state.activeTransaction = transaction;
   state.showPriceTile = false;
 }
 
