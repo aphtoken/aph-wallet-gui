@@ -91,7 +91,7 @@ export default {
                 const splitTransactions = [];
                 nep5.data.transfers.forEach((t) => {
                   res.push({
-                    txid: t.transactionHash,
+                    txid: t.transactionHash.replace('0x', ''),
                     symbol: t.symbol,
                     amount: t.received - t.sent,
                     block_index: t.blockIndex,
@@ -110,8 +110,9 @@ export default {
                   });
                 });
 
+                const promises = [];
                 res.forEach((t) => {
-                  this.fetchTransactionDetails(t.txid)
+                  promises.push(this.fetchTransactionDetails(t.txid)
                     .then((transactionDetails) => {
                       if (t.isNep5 !== true) {
                         let outNEO = new BigDecimal(0);
@@ -172,9 +173,12 @@ export default {
                           details: transactionDetails,
                         });
                       }
-                    });
+                    }));
                 });
-                return resolve(this._sortRecentTransactions(splitTransactions));
+
+                Promise.all(promises)
+                  .then(() => resolve(this._sortRecentTransactions(splitTransactions)))
+                  .catch(e => reject(e));
               })
               .catch((e) => {
                 console.log(e);
