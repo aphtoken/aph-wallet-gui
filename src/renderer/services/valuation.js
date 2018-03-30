@@ -1,3 +1,6 @@
+import moment from 'moment';
+import { formats } from '../constants';
+
 const fiatCurrency = 'USD'; // todo, pull from app settings
 const cmcBaseUrl = 'https://api.coinmarketcap.com/v1/';
 
@@ -39,16 +42,32 @@ export default {
       try {
         return axios.get(`https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=USD&limit=${hoursBack}&aggregate=3&e=CCCAGG`)
           .then((res) => {
+            console.log(res);
             const mod = Math.round(res.data.Data.length / points);
             let i = 0;
             const returnData = {
+              high: 0,
+              low: 999999999,
+              volume: 0,
+              last: 0,
               dates: [],
               prices: [],
             };
             res.data.Data.forEach((d) => {
               if (i % mod === 0) {
-                returnData.dates.push(d.time);
+                returnData.dates.push(moment(d.time, 'X').format(formats.DATE_SHORT));
                 returnData.prices.push(d.close);
+              }
+
+              if (d.high > returnData.high) {
+                returnData.high = d.high;
+              }
+              if (d.low < returnData.low) {
+                returnData.low = d.low;
+              }
+              returnData.volume += d.volumeto;
+              if (i === res.data.Data.length - 1) {
+                returnData.last = d.close;
               }
               i += 1;
             });

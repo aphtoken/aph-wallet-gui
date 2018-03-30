@@ -3,35 +3,27 @@
     <div class="header">
       <h1 class="underlined">Price</h1>
       <div class="current-value">
-        <div class="label">Tue Mar 20</div>
-        <div class="amount">$1.43</div>
+        <div class="label">{{ $formatDate(date) }}</div>
+        <div class="amount">{{ $store.state.statsToken.symbol }} {{ $formatMoney(current) }}</div>
       </div>
     </div>
     <div class="sub-header">
       <div class="volume">
         <div class="label">Volume</div>
-        <div class="value">$1,542,207</div>
+        <div class="value">{{ $formatMoney(volume) }}</div>
       </div>
       <div class="low">
         <div class="label">Low</div>
-        <div class="value">$1.12</div>
+        <div class="value">{{ $formatMoney(low) }}</div>
       </div>
       <div class="high">
         <div class="label">High</div>
-        <div class="value">$1.35</div>
+        <div class="value">{{ $formatMoney(high) }}</div>
       </div>
     </div>
     <div class="body">
-      <line-chart :chart-data="chartData" :options="chartOptions"></line-chart>
+      <line-chart ref="chart" :chart-data="chartData" :options="chartOptions"></line-chart>
     </div>
-    <!-- <div class="footer">
-      <div class="option">H</div>
-      <div class="option">D</div>
-      <div class="option active">W</div>
-      <div class="option">M</div>
-      <div class="option">6M</div>
-      <div class="option">Y</div>
-    </div> -->
   </div>
 </template>
 
@@ -43,7 +35,13 @@ export default {
 
   data() {
     return {
-      chartData: [],
+      date: null,
+      chartData: null,
+      chartOptions: null,
+      high: 0,
+      low: 0,
+      volume: 0,
+      current: 0,
     };
   },
 
@@ -52,79 +50,101 @@ export default {
     setInterval(() => {
       this.loadPriceData();
     }, 60000);
+
+    this.$store.watch(
+      () => {
+        return this.$store.state.statsToken;
+      }, () => {
+        this.loadPriceData();
+      });
   },
 
   methods: {
     loadPriceData() {
-      const priceData = this.$services.valuation.getHistorical('NEO', 24 * 30, 10);
-      this.chartData = {
-        labels: priceData.dates,
-        datasets: [
-          {
-            backgroundColor: 'transparent',
-            borderColor: '#742BF0',
-            data: priceData.prices,
-            pointRadius: 0,
-          },
-        ],
-      };
-    },
-  },
+      if (!this.$store.state.statsToken) {
+        return;
+      }
 
-  computed: {
+      this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol, 24 * 30, 10)
+        .then((priceData) => {
+          console.log(priceData);
 
-    chartOptions() {
-      return {
-        legend: {
-          display: false,
-        },
-        maintainAspectRatio: false,
-        padding: {
-          top: 50,
-        },
-        responsive: true,
-        scales: {
-          yAxes: [
-            {
-              gridLines: {
-                display: false,
-                drawBorder: false,
-                tickMarkLength: 40,
-              },
-              margins: {
-                right: 100,
-                top: 100,
-              },
-              ticks: {
-                callback(label, index) {
-                  return index % 2 === 0 ? window.accounting.formatMoney(label) : '';
+          this.date = new Date();
+          this.current = priceData.last;
+          this.high = priceData.high;
+          this.low = priceData.low;
+          this.volume = priceData.volume;
+          this.chartOptions = null;
+
+          this.chartOptions = {
+            legend: {
+              display: false,
+            },
+            maintainAspectRatio: false,
+            padding: {
+              top: 50,
+            },
+            responsive: true,
+            scales: {
+              yAxes: [
+                {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false,
+                    tickMarkLength: 40,
+                  },
+                  margins: {
+                    right: 100,
+                    top: 100,
+                  },
+                  ticks: {
+                    callback(label, index) {
+                      return index % 2 === 0 ? window.accounting.formatMoney(label) : '';
+                    },
+                    autoSkip: true,
+                    fontColor: '#19193A',
+                    fontFamily: 'GilroySemibold',
+                    fontSize: 12,
+                    max: this.high,
+                    maxTicksLimit: 5,
+                    min: this.low,
+                  },
                 },
-                autoSkip: true,
-                fontColor: '#19193A',
-                fontFamily: 'GilroySemibold',
-                fontSize: 12,
-                max: 1.5,
-                maxTicksLimit: 5,
-                min: 1,
-              },
+              ],
+              xAxes: [
+                {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false,
+                    tickMarkLength: 20,
+                  },
+                  ticks: {
+                    fontColor: '#B5B5CA',
+                    fontFamily: 'GilroySemibold',
+                    fontSize: 12,
+                  },
+                },
+              ],
             },
-          ],
-          xAxes: [
-            {
-              gridLines: {
-                display: false,
-                drawBorder: false,
-                tickMarkLength: 20,
+          };
+
+          this.chartData = {
+            labels: priceData.dates,
+            datasets: [
+              {
+                backgroundColor: 'transparent',
+                borderColor: '#742BF0',
+                data: priceData.prices,
+                pointRadius: 0,
               },
-              ticks: {
-                fontColor: '#B5B5CA',
-                fontFamily: 'GilroySemibold',
-                fontSize: 12,
-              },
-            },
-          ],
-        },
-      };
+            ],
+          };
+
+          this.$refs.chart.render();
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     },
   },
 };

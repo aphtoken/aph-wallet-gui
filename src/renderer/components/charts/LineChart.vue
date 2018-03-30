@@ -9,5 +9,13 @@ export default {
   mounted() {
     this.renderChart(this.chartData, this.options);
   },
+
+  methods: {
+    render() {
+      setTimeout(() => {
+        this.renderChart(this.chartData, this.options);
+      }, 100);
+    },
+  },
 };
 </script>
