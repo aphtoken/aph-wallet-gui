@@ -23,6 +23,7 @@ const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969
 const network = 'TestNet';
 const rpcEndpoint = 'http://test3.cityofzion.io:8880'; // todo, an app preference to move between test and main net
 const aphApiBaseUrl = 'http://localhost:62433/api';
+let lastClaimSent;
 
 export default {
   /**
@@ -584,8 +585,9 @@ export default {
               if (res.confirmed === true) {
                 console.log(`TX: ${hash} CONFIRMED`);
                 clearInterval(interval);
+                resolve(res);
               }
-              return resolve(res);
+              return res;
             })
             .catch(e => console.log(e));
         }, 5000);
@@ -597,9 +599,16 @@ export default {
   },
 
   claimGas() {
+    if (new Date() - lastClaimSent < 5 * 60 * 1000) { // 5 minutes ago
+      console.log('May only claim GAS once every 5 minutes.');
+      return null;
+    }
+
+    lastClaimSent = new Date();
     return this.fetchHoldings(wallets.getCurrentWallet().address, 'NEO')
       .then((h) => {
         if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
+          console.log('No NEO to claim from.');
           return;
         }
 
@@ -617,7 +626,8 @@ export default {
             // send the claim gas
             api.claimGas(config)
               .then((res) => {
-                console.log(res);
+                console.log('Gas Claim Sent.');
+                h.availableToClaim = 0;
                 return res;
               })
               .catch((e) => {
