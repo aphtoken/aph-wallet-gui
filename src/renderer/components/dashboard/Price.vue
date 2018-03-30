@@ -22,7 +22,7 @@
       </div>
     </div>
     <div class="body">
-      <line-chart ref="chart" :chart-data="chartData" :options="chartOptions"></line-chart>
+      <line-chart ref="chart" :chart-data="chartData" :options="chartOptions" v-if="chartOptions"></line-chart>
     </div>
   </div>
 </template>
