@@ -18,6 +18,10 @@
           {{ $formatMoney($store.state.statsToken.totalValue) }}<span class="currency">USD</span>
         </div>
       </div>
+      <div class="claim" v-if="$store.state.statsToken.symbol === 'NEO'">
+        <div class="available">{{ $formatNumber($store.state.statsToken.availableToClaim) }} Gas Available</div>
+        <div class="claim-btn" @click="claim">Claim</div>
+      </div>
     </div>
     <div class="footer">
       <div class="total-supply">
@@ -38,6 +42,21 @@
 
 <script>
 export default {
+  methods: {
+    claim() {
+      if (_.isNull(this.wallet)) {
+        return;
+      }
+
+      this.$services.neo.claimGas()
+        .then(() => {
+
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+  },
 };
 </script>
 
@@ -121,6 +140,20 @@ export default {
           margin-left: $space-xsm;
         }
       }
+    }
+    
+    .claim {
+      padding: $space-lg 0 0 $space-lg;
+      font-family: Gilroy;
+      font-size: toRem(20px);
+      margin-bottom: $space;  
+      
+      .available {
+        margin-bottom: $space-sm;
+      }  
+    }
+    .claim-btn {
+      @extend %btn-footer;
     }
   }
 

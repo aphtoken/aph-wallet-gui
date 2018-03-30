@@ -4,10 +4,12 @@ import {
   rpc,
   u,
 } from '@cityofzion/neon-js';
-import BigDecimal from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 import wallets from './wallets';
 import tokens from './tokens';
 import valuation from './valuation';
+
+const toBigNumber = value => new BigNumber(String(value));
 
 const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
@@ -115,8 +117,8 @@ export default {
                   promises.push(this.fetchTransactionDetails(t.txid)
                     .then((transactionDetails) => {
                       if (t.isNep5 !== true) {
-                        let outNEO = new BigDecimal(0);
-                        let outGAS = new BigDecimal(0);
+                        let outNEO = new BigNumber(0);
+                        let outGAS = new BigNumber(0);
 
                         transactionDetails.vin.forEach((i) => {
                           if (i.address === address && i.symbol === 'NEO') {
@@ -127,8 +129,8 @@ export default {
                           }
                         });
 
-                        let inNEO = new BigDecimal(0);
-                        let inGAS = new BigDecimal(0);
+                        let inNEO = new BigNumber(0);
+                        let inGAS = new BigNumber(0);
                         transactionDetails.vout.forEach((o) => {
                           if (o.address === address && o.symbol === 'NEO') {
                             inNEO = inNEO.plus(o.value);
@@ -285,6 +287,7 @@ export default {
         return client.query({ method: 'getaccountstate', params: [address] })
           .then((res) => {
             const holdings = [];
+            const promises = [];
 
             res.result.balances.forEach((b) => {
               const h = {
@@ -297,12 +300,24 @@ export default {
               if (restrictToSymbol && h.symbol !== restrictToSymbol) {
                 return;
               }
+              if (h.symbol === 'NEO') {
+                promises.push(api.getMaxClaimAmountFrom({
+                  net: network,
+                  address: wallets.getCurrentWallet().address,
+                  privateKey: wallets.getCurrentWallet().privateKey,
+                }, api.neonDB)
+                  .then((res) => {
+                    h.availableToClaim = toBigNumber(res).toString();
+                  })
+                  .catch((e) => {
+                    console.log(e);
+                  }));
+              }
               holdings.push(h);
             });
 
-            const nep5Promises = [];
             tokens.getAllAsArray().forEach((nep5) => {
-              nep5Promises.push(this.fetchNEP5Balance(address, nep5.assetId)
+              promises.push(this.fetchNEP5Balance(address, nep5.assetId)
                 .then((val) => {
                   if (val.balance > 0 || nep5.isCustom === true) {
                     const h = {
@@ -326,7 +341,7 @@ export default {
                 }));
             });
 
-            return Promise.all(nep5Promises)
+            return Promise.all(promises)
               .then(() => {
                 const valuationsPromises = [];
                 holdings.forEach((h) => {
@@ -488,7 +503,14 @@ export default {
 
         sendPromise
           .then((res) => {
-            this.monitorTransactionConfirmation(res.tx.hash);
+            console.log(`Transaction Hash: ${res.tx.hash} Sent, waiting for confirmation.`);
+            this.monitorTransactionConfirmation(res.tx.hash)
+              .then(() => {
+                return resolve(res.tx);
+              })
+              .catch((e) => {
+                console.log(e);
+              });
           })
           .catch((e) => {
             console.log(e);
@@ -554,27 +576,27 @@ export default {
   },
 
   monitorTransactionConfirmation(hash) {
-    const interval = setInterval(() => {
-      console.log(`Checking TX: ${hash}`);
-      this.fetchTransactionDetails(hash)
-        .then((res) => {
-          if (res.confirmed === true) {
-            console.log(`TX: ${hash} CONFIRMED`);
-            clearInterval(interval);
-          }
-          return res;
-        })
-        .catch(e => console.log(e));
-    }, 5000);
+    return new Promise((resolve, reject) => {
+      try {
+        const interval = setInterval(() => {
+          this.fetchTransactionDetails(hash)
+            .then((res) => {
+              if (res.confirmed === true) {
+                console.log(`TX: ${hash} CONFIRMED`);
+                clearInterval(interval);
+              }
+              return resolve(res);
+            })
+            .catch(e => console.log(e));
+        }, 5000);
+        return null;
+      } catch (e) {
+        return reject(e);
+      }
+    });
   },
 
   claimGas() {
-    const config = {
-      net: network,
-      address: wallets.getCurrentWallet().address,
-      privateKey: wallets.getCurrentWallet().privateKey,
-    };
-
     return this.fetchHoldings(wallets.getCurrentWallet().address, 'NEO')
       .then((h) => {
         if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
@@ -582,16 +604,29 @@ export default {
         }
 
         const neoAmount = h.holdings[0].balance;
-        this.sendFunds(wallets.getCurrentWallet().address, neoAssetId, neoAmount, false);
-        setTimeout(() => {
-          api.claimGas(config)
-            .then((res) => {
-              console.log(res);
-            })
-            .catch((e) => {
-              console.log(e);
-            });
-        }, 15000);
+        console.log(`Transfering ${neoAmount} to self.`);
+        // send neo to ourself to make all gas available for claim
+        this.sendFunds(wallets.getCurrentWallet().address, neoAssetId, neoAmount, false)
+          .then(() => {
+            const config = {
+              net: network,
+              address: wallets.getCurrentWallet().address,
+              privateKey: wallets.getCurrentWallet().privateKey,
+            };
+
+            // send the claim gas
+            api.claimGas(config)
+              .then((res) => {
+                console.log(res);
+                return res;
+              })
+              .catch((e) => {
+                console.log(e);
+              });
+          })
+          .catch((e) => {
+            console.log(e);
+          });
       })
       .catch((e) => {
         console.log(e);
