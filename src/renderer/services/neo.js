@@ -87,7 +87,7 @@ export default {
   fetchRecentTransactions(address) {
     return new Promise((resolve, reject) => {
       try {
-        return api.neonDB.getTransactionHistory(network, address)
+        return api.neoscan.getTransactionHistory(network, address)
           .then((res) => {
             this.fetchNEP5Transfers(address)
               .then((nep5) => {
@@ -150,6 +150,7 @@ export default {
                             symbol: 'NEO',
                             amount: neoChange,
                             block_time: transactionDetails.blocktime,
+                            details: transactionDetails,
                             isNep5: false,
                           });
                         }
@@ -162,6 +163,7 @@ export default {
                             amount: gasChange,
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
+                            isNep5: false,
                           });
                         }
                       } else {
@@ -306,7 +308,7 @@ export default {
                   net: network,
                   address: wallets.getCurrentWallet().address,
                   privateKey: wallets.getCurrentWallet().privateKey,
-                }, api.neonDB)
+                }, api.neoscan)
                   .then((res) => {
                     h.availableToClaim = toBigNumber(res).toString();
                   })
@@ -486,6 +488,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         let sendPromise = null;
+        toAddress = toAddress.trim();
         if (isNep5 === false) {
           if (assetId === neoAssetId) {
             sendPromise = this.sendSystemAsset(toAddress, amount, 0);
@@ -504,6 +507,10 @@ export default {
 
         sendPromise
           .then((res) => {
+            if (!res) {
+              console.log('Failed to create transaction.');
+              return;
+            }
             console.log(`Transaction Hash: ${res.tx.hash} Sent, waiting for confirmation.`);
             this.monitorTransactionConfirmation(res.tx.hash)
               .then(() => {
@@ -532,7 +539,7 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    return api.neonDB.getBalance(network, wallets.getCurrentWallet().address)
+    return api.neoscan.getBalance(network, wallets.getCurrentWallet().address)
       .then((balance) => {
         const config = {
           net: network,
