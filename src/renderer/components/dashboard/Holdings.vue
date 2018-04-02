@@ -4,7 +4,7 @@
       <h1 class="underlined">My holdings</h1>
     </div>
     <div class="body">
-      <div v-for="(holding, index) in $store.state.holdings" :class="['holding', {active: isActive(holding)}]" :key="index" @click="viewHoldingDetail(holding)">
+      <div v-for="(holding, index) in holdings" :class="['holding', {active: isActive(holding)}]" :key="index" @click="viewHoldingDetail(holding)">
         <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
         <div class="token">
           <div class="name">{{ holding.name }}</div>
@@ -24,6 +24,14 @@
 <script>
 let loadHoldingsIntervalId;
 export default {
+  computed: {
+    holdings() {
+      return this.$store.state.holdings.filter(({ name, symbol }) => {
+        return !!name && !!symbol;
+      });
+    },
+  },
+
   methods: {
     isActive({ symbol }) {
       return _.get(this.$store.state.statsToken, 'symbol') === symbol;

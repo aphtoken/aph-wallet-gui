@@ -32,6 +32,7 @@ module.exports = {
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     'no-underscore-dangle': 0,
-    'arrow-body-style': 0
+    'arrow-body-style': 0,
+    'array-callback-return': 0
   }
 }

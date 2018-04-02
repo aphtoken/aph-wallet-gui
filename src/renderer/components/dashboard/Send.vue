@@ -68,16 +68,22 @@
 export default {
   computed: {
     currencies() {
-      return this.$store.state.holdings.map(
-        ({ name, symbol, asset, isNep5, unitValue, balance }) => {
-          return {
+      return this.$store.state.holdings.reduce(
+        (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
+          if (!name || !symbol) {
+            return result;
+          }
+
+          result.push({
             label: `${name}   Balance: ${balance}`,
             value: symbol,
             asset,
             isNep5,
             unitValue,
-          };
-        });
+          });
+
+          return result;
+        }, []);
     },
 
     showNextButton() {

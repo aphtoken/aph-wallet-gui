@@ -31,6 +31,10 @@ export default {
     filteredHoldings() {
       const searchBy = this.searchBy.toLowerCase();
       return _.filter(this.$store.state.holdings, ({ name, symbol }) => {
+        if (!name || !symbol) {
+          return false;
+        }
+
         return name.toLowerCase().indexOf(searchBy) > -1
           || symbol.toLowerCase().indexOf(searchBy) > -1;
       });
