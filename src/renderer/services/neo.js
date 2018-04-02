@@ -5,6 +5,7 @@ import {
   u,
 } from '@cityofzion/neon-js';
 import BigNumber from 'bignumber.js';
+import alerts from './alerts';
 import wallets from './wallets';
 import tokens from './tokens';
 import valuation from './valuation';
@@ -24,6 +25,7 @@ const network = 'TestNet';
 const rpcEndpoint = 'http://test3.cityofzion.io:8880'; // todo, an app preference to move between test and main net
 const aphApiBaseUrl = 'http://localhost:62433/api';
 let lastClaimSent;
+let lastTransactionsList = null;
 
 export default {
   /**
@@ -182,14 +184,34 @@ export default {
                 });
 
                 Promise.all(promises)
-                  .then(() => resolve(this._sortRecentTransactions(splitTransactions)))
+                  .then(() => {
+                    if (lastTransactionsList != null) {
+                      splitTransactions.forEach((t) => {
+                        if (!_.find(lastTransactionsList, (o) => {
+                          return o.hash === t.hash;
+                        })) {
+                          alerts.success(`New Transaction Found. TX: ${t.hash}`);
+                        }
+                      });
+                    }
+                    lastTransactionsList = splitTransactions;
+                    resolve(this._sortRecentTransactions(splitTransactions));
+                  })
                   .catch(e => reject(e));
               })
               .catch((e) => {
-                console.log(e);
+                alerts.exception(e);
               });
           })
-          .catch(e => console.log(e));
+          .catch((e) => {
+            resolve([]);
+            if (e.message === 'Cannot read property \'length\' of null') {
+              // absorb this error from neoscan,
+              // happens with a new wallet without any transactions yet
+              return;
+            }
+            alerts.exception(e);
+          });
       } catch (e) {
         return reject(e);
       }
@@ -292,6 +314,24 @@ export default {
             const holdings = [];
             const promises = [];
 
+            if (!_.find(res.result.balances, (o) => {
+              return o.asset === neoAssetId;
+            })) {
+              res.result.balances.push({
+                asset: neoAssetId,
+                value: 0,
+              });
+            }
+
+            if (!_.find(res.result.balances, (o) => {
+              return o.asset === gasAssetId;
+            })) {
+              res.result.balances.push({
+                asset: gasAssetId,
+                value: 0,
+              });
+            }
+
             res.result.balances.forEach((b) => {
               const h = {
                 asset: b.asset,
@@ -313,7 +353,7 @@ export default {
                     h.availableToClaim = toBigNumber(res).toString();
                   })
                   .catch((e) => {
-                    console.log(e);
+                    alerts.exception(e);
                   }));
               }
               holdings.push(h);
@@ -339,7 +379,7 @@ export default {
                   }
                 })
                 .catch((e) => {
-                  console.log(e);
+                  alerts.exception(e);
                   reject(e);
                 }));
             });
@@ -360,7 +400,7 @@ export default {
                       h.totalValue = h.unitValue * h.balance;
                     })
                     .catch((e) => {
-                      console.log(e);
+                      alerts.exception(e);
                     }));
                 });
 
@@ -420,8 +460,7 @@ export default {
                 });
               });
             })
-            .catch((e) => {
-              console.log(e);
+            .catch(() => {
             });
         } catch (e) {
           return reject(e);
@@ -434,25 +473,19 @@ export default {
 
   fetchNEP5Balance(address, assetId) {
     return new Promise((resolve) => {
-      try {
-        return api.nep5.getToken(rpcEndpoint, assetId, address)
-          .then((token) => {
-            resolve({
-              name: token.name,
-              symbol: token.symbol,
-              decimals: token.decimals,
-              totalSupply: token.totalSupply,
-              balance: token.balance,
-            });
-          })
-          .catch((e) => {
-            console.log(e);
-            resolve({ balance: 0 });
+      return api.nep5.getToken(rpcEndpoint, assetId, address)
+        .then((token) => {
+          resolve({
+            name: token.name,
+            symbol: token.symbol,
+            decimals: token.decimals,
+            totalSupply: token.totalSupply,
+            balance: token.balance,
           });
-      } catch (e) {
-        console.log(e);
-        return resolve({ balance: 0 });
-      }
+        })
+        .catch(() => {
+          resolve({ balance: 0 });
+        });
     });
   },
 
@@ -463,8 +496,7 @@ export default {
           .then((res) => {
             resolve(res);
           })
-          .catch((e) => {
-            console.log(e);
+          .catch(() => {
             resolve({
               data: {
                 transfers: [],
@@ -508,20 +540,20 @@ export default {
         sendPromise
           .then((res) => {
             if (!res) {
-              console.log('Failed to create transaction.');
+              alerts.error('Failed to create transaction.');
               return;
             }
-            console.log(`Transaction Hash: ${res.tx.hash} Sent, waiting for confirmation.`);
+            alerts.success(`Transaction Hash: ${res.tx.hash} Sent, waiting for confirmation.`);
             this.monitorTransactionConfirmation(res.tx.hash)
               .then(() => {
                 return resolve(res.tx);
               })
               .catch((e) => {
-                console.log(e);
+                alerts.exception(e);
               });
           })
           .catch((e) => {
-            console.log(e);
+            alerts.exception(e);
           });
         return sendPromise;
       } catch (e) {
@@ -551,11 +583,11 @@ export default {
         return api.sendAsset(config)
           .then(res => res)
           .catch((e) => {
-            console.log(e);
+            alerts.exception(e);
           });
       })
       .catch((e) => {
-        console.log(e);
+        alerts.exception(e);
       });
   },
 
@@ -579,7 +611,7 @@ export default {
     return api.doInvoke(config)
       .then(res => res)
       .catch((e) => {
-        console.log(e);
+        alerts.exception(e);
       });
   },
 
@@ -590,13 +622,13 @@ export default {
           this.fetchTransactionDetails(hash)
             .then((res) => {
               if (res.confirmed === true) {
-                console.log(`TX: ${hash} CONFIRMED`);
+                alerts.success(`TX: ${hash} CONFIRMED`);
                 clearInterval(interval);
                 resolve(res);
               }
               return res;
             })
-            .catch(e => console.log(e));
+            .catch(e => alerts.exception(e));
         }, 5000);
         return null;
       } catch (e) {
@@ -607,7 +639,7 @@ export default {
 
   claimGas() {
     if (new Date() - lastClaimSent < 5 * 60 * 1000) { // 5 minutes ago
-      console.log('May only claim GAS once every 5 minutes.');
+      alerts.error('May only claim GAS once every 5 minutes.');
       return null;
     }
 
@@ -615,12 +647,12 @@ export default {
     return this.fetchHoldings(wallets.getCurrentWallet().address, 'NEO')
       .then((h) => {
         if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
-          console.log('No NEO to claim from.');
+          alerts.error('No NEO to claim from.');
           return;
         }
 
         const neoAmount = h.holdings[0].balance;
-        console.log(`Transfering ${neoAmount} to self.`);
+        alerts.success(`Transfering ${neoAmount} NEO to self.`);
         // send neo to ourself to make all gas available for claim
         this.sendFunds(wallets.getCurrentWallet().address, neoAssetId, neoAmount, false)
           .then(() => {
@@ -631,22 +663,24 @@ export default {
             };
 
             // send the claim gas
-            api.claimGas(config)
-              .then((res) => {
-                console.log('Gas Claim Sent.');
-                h.availableToClaim = 0;
-                return res;
-              })
-              .catch((e) => {
-                console.log(e);
-              });
+            setTimeout(() => {
+              api.claimGas(config)
+                .then((res) => {
+                  alerts.success('Gas Claim Sent.');
+                  h.availableToClaim = 0;
+                  return res;
+                })
+                .catch((e) => {
+                  alerts.exception(e);
+                });
+            }, 30 * 1000);
           })
           .catch((e) => {
-            console.log(e);
+            alerts.exception(e);
           });
       })
       .catch((e) => {
-        console.log(e);
+        alerts.exception(e);
       });
   },
 

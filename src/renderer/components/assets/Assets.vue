@@ -45,7 +45,6 @@ export default {
 
   methods: {
     loadHoldings() {
-      console.log('assets');
       this.$store.dispatch('fetchHoldings');
     },
   },

@@ -4,6 +4,7 @@ import _ from 'lodash';
 import axios from 'axios';
 import accounting from 'accounting';
 import moment from 'moment';
+import VueFlashMessage from 'vue-flash-message';
 
 // Initial Vue Libraries.
 import './libraries';
@@ -34,6 +35,8 @@ Vue.config.productionTip = false;
 
 // Vue Plugins.
 Vue.use(VueHighCharts);
+Vue.use(VueFlashMessage);
+require('vue-flash-message/dist/vue-flash-message.min.css');
 
 // Register global mixins.
 _.each(mixins, (mixin) => {

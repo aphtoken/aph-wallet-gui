@@ -148,7 +148,7 @@ export default {
           }
         })
         .catch((e) => {
-          console.log(e);
+          this.$services.alert.exception(e);
         });
     },
   },
