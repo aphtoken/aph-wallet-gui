@@ -84,9 +84,11 @@ export default {
       background: white;
       border-left: 3px solid transparent;
       border-radius: $border-radius;
+      box-shadow: $box-shadow;
       cursor: pointer;
       display: flex;
       padding: $space;
+      transition: $transition;
 
       .aph-token-icon {
         flex: none;

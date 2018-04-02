@@ -99,13 +99,10 @@ export default {
         .btn-square {
           @extend %btn-square;
 
+          box-shadow: $box-shadow;
           cursor: default;
           padding-bottom: $space-xl;
           width: toRem(250px);
-
-          > p {
-
-          }
 
           .aph-icon {
             .fill {

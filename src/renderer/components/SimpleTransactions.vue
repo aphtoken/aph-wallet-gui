@@ -88,9 +88,16 @@ export default {
     tr {
       cursor: pointer;
 
+      td {
+        background: transparent;
+        transition: $transition;
+      }
+
       &:hover, &.active {
-        background: #F9F9FD;
-        color: $purple;
+        td {
+          background: #F9F9FD;
+          color: $purple;
+        }
       }
     }
   }

@@ -1,14 +1,14 @@
 <template>
   <section id="portfolio-header">
-    <simple-donut :percent="portfolio.changePercent"></simple-donut>
+    <simple-donut :percent="$store.state.portfolio.changePercent"></simple-donut>
     <div class="ticker">
       <h1 class="underlined">My Porfolio</h1>
       <div class="balance">
-        <span class="symbol">$</span><span class="amount">{{ $formatNumberShort(portfolio.balance) }}</span><span class="currency">USD</span>
+        <span class="symbol">$</span><span class="amount">{{ $formatNumberShort($store.state.portfolio.balance) }}</span><span class="currency">USD</span>
       </div>
       <div class="change">
         <div class="label">24h change</div>
-        <div :class="['amount', {increase: portfolio.changeUsd > 0, decrease: portfolio.changeUsd < 0}]">{{ $formatMoney(portfolio.changeUsd, '0,0[.]0') }}</div>
+        <div :class="['amount', {increase: $store.state.portfolio.changeUsd > 0, decrease: $store.state.portfolio.changeUsd < 0}]">{{ $formatMoney($store.state.portfolio.changeUsd, '0,0[.]0') }}</div>
       </div>
     </div>
     <div class="btn-group">
@@ -49,18 +49,7 @@ export default {
     },
 
     loadHoldings() {
-      if (!this.$services.wallets.getCurrentWallet()) {
-        return;
-      }
-      this.$services.neo
-        .fetchHoldings(this.$services.wallets.getCurrentWallet().address)
-        .then((data) => {
-          this.portfolio.balance = data.totalBalance;
-          this.portfolio.changeUsd = data.change24hrValue;
-          this.portfolio.changePercent = data.change24hrPercent;
-        })
-        .catch(() => {
-        });
+      this.$store.dispatch('fetchPortfolio');
     },
 
   },
@@ -146,7 +135,7 @@ h1.underlined {
   .receive-btn, .send-btn {
     @extend %btn-square;
 
-    box-shadow: $box-shadow-light;
+    box-shadow: $box-shadow;
     height: $space * 9;
 
     .aph-icon {

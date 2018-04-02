@@ -182,7 +182,7 @@ export default {
                 });
 
                 Promise.all(promises)
-                  .then(() => resolve(this._sortRecentTransactions(splitTransactions)))
+                  .then(() => resolve(_.sortBy(splitTransactions, 'block_time').reverse()))
                   .catch(e => reject(e));
               })
               .catch((e) => {
@@ -368,12 +368,7 @@ export default {
                   .then(() => {
                     const res = { };
 
-                    res.holdings = holdings.sort((a, b) => {
-                      if (a.symbol > b.symbol) {
-                        return 1;
-                      }
-                      return -1;
-                    });
+                    res.holdings = _.sortBy(holdings, 'symbol');
 
                     res.totalBalance = 0;
                     res.change24hrValue = 0;
@@ -648,20 +643,6 @@ export default {
       .catch((e) => {
         console.log(e);
       });
-  },
-
-  _sortRecentTransactions(transactions) {
-    return transactions.sort((a, b) => {
-      if (a.block_time < b.block_time) {
-        return 1;
-      }
-
-      if (a.block_time > b.block_time) {
-        return -1;
-      }
-
-      return 0;
-    });
   },
 
 };

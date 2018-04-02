@@ -11,6 +11,7 @@ const state = {
   activeTransactionHash: null,
   activeTransactionToken: null,
   holdings: [],
+  portfolio: {},
   recentTransactions: [],
   showAddTokenModal: false,
   showSendAddressModal: false,

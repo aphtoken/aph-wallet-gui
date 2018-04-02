@@ -6,6 +6,7 @@ export {
   setActiveTransaction,
   setActiveTransactionToken,
   setHoldings,
+  setPortfolio,
   setRecentTransactions,
   setShowAddTokenModal,
   setShowSendAddressModal,
@@ -43,6 +44,10 @@ function setHoldings(state, holdings) {
   if (!state.statsToken && holdings.length) {
     state.statsToken = holdings[0];
   }
+}
+
+function setPortfolio(state, data) {
+  state.portfolio = data;
 }
 
 function setRecentTransactions(state, transactions) {

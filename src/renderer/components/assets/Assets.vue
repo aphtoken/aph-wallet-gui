@@ -124,6 +124,7 @@ export default {
       align-items: center;
       background: white;
       border-radius: $border-radius;
+      box-shadow: $box-shadow;
       display: flex;
       padding: $space;
 
