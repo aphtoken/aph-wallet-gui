@@ -2,21 +2,9 @@
 import { neo, wallets } from '../services';
 
 export {
-  fetchActiveTransactionDetails,
   fetchHoldings,
   fetchRecentTransactions,
 };
-
-function fetchActiveTransactionDetails({ commit, state }) {
-  neo
-    .fetchTransactionDetails(state.activeTransactionHash)
-    .then((data) => {
-      commit('setActiveRecentTransaction', data);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-}
 
 function fetchHoldings({ commit }) {
   const currentWallet = wallets.getCurrentWallet();

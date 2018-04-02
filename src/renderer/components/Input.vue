@@ -1,6 +1,7 @@
 <template>
   <div class="aph-input">
-    <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value" />
+    <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value"
+                @keyup.enter="onEnter" />
 
     <div v-if="type === 'password'" class="visibility-toggle" @click="toggleIsVisible">
       <aph-icon :name="iconName"></aph-icon>
@@ -29,6 +30,10 @@ export default {
   methods: {
     onInput(event) {
       this.$emit('input', event.target.value);
+    },
+
+    onEnter(event) {
+      this.$emit('enter', event.target.value);
     },
 
     toggleIsVisible() {

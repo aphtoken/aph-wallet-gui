@@ -12,7 +12,7 @@
           </div>
           <div class="column">
             <div class="label">Value</div>
-            <div class="value">asdfasfd</div>
+            <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} USD</div>
           </div>
         </div>
         <div class="row">
@@ -36,29 +36,29 @@
       </div>
       <div class="footer">
         <div class="back-btn" @click="showConfirmation = false">Back</div>
-        <div class="send-btn" @click="false">Send</div>
+        <div class="send-btn" @click="send()">Send</div>
       </div>
     </template>
     <template v-else>
       <div class="body">
+        <div class="currency">
+          <aph-select :options="currencies" :light="true" placeholder="Select a currency" v-model="currency"></aph-select>
+        </div>
         <div class="address">
-          <aph-input placeholder="Enter address" v-model="address"></aph-input>
+          <aph-input placeholder="Enter Send to Address" v-model="address" @enter="next"></aph-input>
         </div>
         <div class="amount">
-          <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
+          <aph-input placeholder="Enter Amount" v-model="amount" @enter="next"></aph-input>
           <div class="symbol">{{ currency ? currency.value : '' }}</div>
         </div>
         <div class="estimated-value">
           <div class="label">Estimated</div>
-          <div class="value">{{ $formatMoney(0) }} USD</div>
-        </div>
-        <div class="currency">
-          <aph-select :options="currencies" :light="true" placeholder="Select a currency" v-model="currency"></aph-select>
+          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} USD</div>
         </div>
       </div>
       <div class="footer">
         <router-link class="cancel-btn" to="/dashboard">Cancel</router-link>
-        <div class="next-btn" v-if="showNextButton" @click="showConfirmation = true">Next</div>
+        <div class="next-btn" v-if="showNextButton" @click="next">Next</div>
       </div>
     </template>
   </section>
@@ -68,20 +68,37 @@
 export default {
   computed: {
     currencies() {
-      return this.$store.state.holdings.map(({ name, symbol }) => {
-        return {
-          label: name,
-          value: symbol,
-        };
-      });
+      return this.$store.state.holdings.map(
+        ({ name, symbol, asset, isNep5, unitValue, balance }) => {
+          return {
+            label: `${name}   Balance: ${balance}`,
+            value: symbol,
+            asset,
+            isNep5,
+            unitValue,
+          };
+        });
     },
 
     showNextButton() {
-      // implement...
       return this.address && this.amount && parseFloat(this.amount) && this.currency;
     },
   },
 
+  methods: {
+    next() {
+      if (!(this.address && this.amount && parseFloat(this.amount) && this.currency)) {
+        return;
+      }
+
+      this.showConfirmation = true;
+    },
+
+    send() {
+      this.$services.neo.sendFunds(this.address, this.currency.asset,
+        this.amount, this.currency.isNep5);
+    },
+  },
   data() {
     return {
       address: null,
@@ -163,7 +180,7 @@ export default {
     }
 
     .currency {
-      margin-top: $space;
+      margin-bottom: $space;
     }
 
     .row {

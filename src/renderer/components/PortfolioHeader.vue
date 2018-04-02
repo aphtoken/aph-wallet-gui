@@ -26,6 +26,7 @@
 
 <script>
 import SimpleDonut from './charts/SimpleDonut';
+let loadHoldingsIntervalId;
 
 export default {
   components: {
@@ -51,7 +52,6 @@ export default {
       if (!this.$services.wallets.getCurrentWallet()) {
         return;
       }
-
       this.$services.neo
         .fetchHoldings(this.$services.wallets.getCurrentWallet().address)
         .then((data) => {
@@ -67,9 +67,14 @@ export default {
 
   mounted() {
     this.loadHoldings();
-    setInterval(() => {
+
+    loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldings();
-    }, 15000);
+    }, this.$constants.intervals.POLLING);
+  },
+
+  beforeDestroy() {
+    clearInterval(loadHoldingsIntervalId);
   },
 };
 </script>

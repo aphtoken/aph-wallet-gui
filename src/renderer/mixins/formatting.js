@@ -9,6 +9,10 @@ export default {
       return moment(timestamp, 'X').format(formats.DATE);
     },
 
+    $formatDateShow(timestamp) {
+      return moment(timestamp, 'X').format(formats.DATE_SHORT);
+    },
+
     $formatMoney(value) {
       return accounting.formatMoney(value);
     },

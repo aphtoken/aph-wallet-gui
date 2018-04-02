@@ -45,6 +45,8 @@ export default {
   },
 
   mounted() {
+    this.$services.neo.fetchNEP5Tokens();
+
     if (!this.$services.wallets.getCurrentWallet()) {
       this.$router.push('/login');
     }

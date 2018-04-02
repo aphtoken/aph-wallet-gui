@@ -3,13 +3,13 @@
     <div class="content">
       <div class="body">
         <aph-icon name="create"></aph-icon>
-        <aph-input placeholder="Address" :light="true"></aph-input>
-        <aph-input placeholder="Token symbol"></aph-input>
-        <aph-input placeholder="Decimals"></aph-input>
+        <aph-input placeholder="Address" :light="true" v-model="assetId"></aph-input>
+        <aph-input placeholder="Token symbol" v-model="symbol"></aph-input>
+        <aph-input placeholder="Decimals" v-model="decimals"></aph-input>
       </div>
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">Cancel</div>
-        <div class="add-btn" @click="onAdd">Add</div>
+        <div class="add-btn" @click="add">Add</div>
       </div>
     </div>
   </div>
@@ -21,6 +21,26 @@ export default {
     onCancel: {
       required: true,
       type: Function,
+    },
+  },
+
+  data() {
+    return {
+      assetId: '',
+      symbol: '',
+      decimals: 8,
+    };
+  },
+
+  methods: {
+    add() {
+      this.$services.tokens.add(this.symbol, {
+        symbol: this.symbol,
+        assetId: this.assetId.replace('0x', ''),
+        isCustom: true,
+      });
+      this.$store.dispatch('fetchHoldings');
+      this.onCancel();
     },
   },
 };

@@ -1,10 +1,13 @@
 <template>
   <div id="login--create-wallet">
     <p class="help-text">Choose a name for your new wallet:</p>
-    <aph-input v-model="walletName" placeholder="Enter your wallet name here"></aph-input>
+    <aph-input v-model="walletName" placeholder="Enter your wallet name here"
+                @enter="create"></aph-input>
     <p class="help-text">Choose a passphrase to encrypt your private key:</p>
-    <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
-    <aph-input v-model="passphraseConfirm" placeholder="Repeat your passphrase here" type="password"></aph-input>
+    <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"
+                @enter="create"></aph-input>
+    <aph-input v-model="passphraseConfirm" placeholder="Repeat your passphrase here" type="password"
+                @enter="create"></aph-input>
     <div v-if="showButton" class="create" @click="create">{{ buttonLabel }}</div>
   </div>
 </template>
@@ -37,6 +40,11 @@ export default {
 
   methods: {
     create() {
+      if ((this.passphrase.length > 0
+        && this.walletName.length > 0 && this.passphrasesMatch) !== true
+        || this.creating === true) {
+        return;
+      }
       this.creating = true;
 
       this.$services.neo

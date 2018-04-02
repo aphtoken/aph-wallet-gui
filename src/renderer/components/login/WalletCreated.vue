@@ -1,10 +1,13 @@
 <template>
   <section id="login--wallet-created" v-if="wallet">
     <p class="help-text">
-      Your keys are now encrypted and saved in your local application storage.
+      Your keys are now encrypted and saved in your local application storage as '{{ wallet.label }}'
     </p>
     <p class="help-text">
-      You must save and backup the keys below. If you lose them, you lose access to your assets.
+      You must save and backup the keys below.
+    </p>
+    <p class="help-text">
+      If you lose them, you lose access to your assets.
     </p>
     <div v-if="wallet" class="qr-codes">
       <div class="qr-code">
@@ -98,7 +101,7 @@ export default {
   .help-text {
     color: $purple;
     font-family: GilroySemibold;
-    font-size: toRem(12px);
+    font-size: toRem(18px);
     line-height: $line-height;
     text-align: center;
     text-transform: uppercase;
