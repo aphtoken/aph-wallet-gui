@@ -89,6 +89,10 @@
 <script>
 export default {
   computed: {
+    activeTransactionHash() {
+      return this.$store.state.activeTransactionHash;
+    },
+
     fromTransactions() {
       return this.$store.state.activeRecentTransaction.vin.map(transaction => _.set(transaction, 'amount', transaction.value));
     },
@@ -96,16 +100,6 @@ export default {
     toTransactions() {
       return this.$store.state.activeRecentTransaction.vout.map(transaction => _.set(transaction, 'amount', transaction.value));
     },
-  },
-
-  methods: {
-    loadTransactionDetails() {
-      this.$store.dispatch('fetchActiveTransactionDetails');
-    },
-  },
-
-  mounted() {
-    this.loadTransactionDetails();
   },
 };
 </script>

@@ -37,11 +37,13 @@ function setActiveRecentTransaction(state, transaction) {
 function setActiveTransactionHash(state, hash) {
   state.activeTransactionHash = hash;
   state.showPriceTile = false;
+  this.dispatch('fetchActiveTransactionDetails');
 }
 
 function setActiveTransactionToken(state, token) {
   state.activeTransactionToken = token;
   state.showPriceTile = false;
+  this.dispatch('fetchActiveTransactionDetails');
 }
 
 function setHoldings(state, holdings) {
