@@ -29,6 +29,7 @@
 
 <script>
 import LineChart from '../charts/LineChart';
+let loadPriceDataIntervalId;
 
 export default {
   components: { LineChart },
@@ -47,7 +48,7 @@ export default {
 
   mounted() {
     this.loadPriceData();
-    setInterval(() => {
+    loadPriceDataIntervalId = setInterval(() => {
       this.loadPriceData();
     }, 60000);
 
@@ -59,6 +60,10 @@ export default {
       });
   },
 
+  beforeDestroy() {
+    clearInterval(loadPriceDataIntervalId);
+  },
+
   methods: {
     loadPriceData() {
       if (!this.$store.state.statsToken) {
@@ -67,8 +72,6 @@ export default {
 
       this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol, 24 * 30, 10)
         .then((priceData) => {
-          console.log(priceData);
-
           this.date = new Date();
           this.current = priceData.last;
           this.high = priceData.high;
@@ -140,7 +143,9 @@ export default {
             ],
           };
 
-          this.$refs.chart.render();
+          if (priceData.dates.length > 0 && this.$refs.chart) {
+            this.$refs.chart.render();
+          }
         })
         .catch((e) => {
           console.log(e);

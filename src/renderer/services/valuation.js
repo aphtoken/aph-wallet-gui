@@ -42,7 +42,6 @@ export default {
       try {
         return axios.get(`https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=USD&limit=${hoursBack}&aggregate=3&e=CCCAGG`)
           .then((res) => {
-            console.log(res);
             const mod = Math.round(res.data.Data.length / points);
             let i = 0;
             const returnData = {
