@@ -23,7 +23,7 @@ export default {
 
   mounted() {
     if (this.$services.wallets.getCurrentWallet()) {
-      this.$router.push('/dashboard');
+      this.$router.push('/authenticated/dashboard');
     }
   },
 };

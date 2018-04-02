@@ -3,7 +3,7 @@
     <div class="header">
       <h1 class="underlined">Transaction</h1>
     </div>
-    <div class="body" v-if="$store.state.activeTransaction">
+    <div class="body">
       <div class="section">
         <div class="row">
           <div class="column">

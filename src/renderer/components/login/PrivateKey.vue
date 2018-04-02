@@ -23,7 +23,7 @@ export default {
     login() {
       this.$services.wallets.openWIF(this.wif)
         .then(() => {
-          this.$router.push('dashboard');
+          this.$router.push('/authenticated/dashboard');
         })
         .catch(() => {
           this.creating = false;

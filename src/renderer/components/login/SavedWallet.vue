@@ -38,7 +38,7 @@ export default {
         Still not sure why the Promise model would freeze the UI */
         this.$services.wallets.openSavedWallet(this.wallet.label, this.passphrase)
           .then(() => {
-            this.$router.push('dashboard');
+            this.$router.push('/authenticated/dashboard');
           })
           .catch((e) => {
             console.log(e);

@@ -25,7 +25,7 @@ export default {
     login() {
       this.$services.wallets.openEncryptedKey(this.encryptedKey, this.passphrase)
         .then(() => {
-          this.$router.push('dashboard');
+          this.$router.push('/authenticated/dashboard');
         })
         .catch(() => {
           this.creating = false;

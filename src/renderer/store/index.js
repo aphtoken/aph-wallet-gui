@@ -7,9 +7,7 @@ import * as mutations from './mutations';
 Vue.use(Vuex);
 
 const state = {
-  activeRecentTransaction: null,
-  activeTransactionHash: null,
-  activeTransactionToken: null,
+  activeTransaction: null,
   holdings: [],
   portfolio: {},
   recentTransactions: [],

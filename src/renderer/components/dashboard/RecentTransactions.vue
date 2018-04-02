@@ -28,8 +28,9 @@ export default {
   methods: {
     transactions() {
       return this.$store.state.recentTransactions.map((transaction) => {
-        const active = transaction.hash === this.$store.state.activeTransactionHash
-          && transaction.symbol === this.$store.state.activeTransactionToken;
+        console.log(transaction);
+        const active = transaction.details.txid === _.get(this.$store.state.activeTransaction, 'txid')
+          && transaction.symbol === _.get(this.$store.state.activeTransaction, 'symbol');
 
         return _.merge(transaction, {
           active,
@@ -42,11 +43,8 @@ export default {
       this.$store.dispatch('fetchRecentTransactions');
     },
 
-    viewTransaction(transaction) {
-      this.$store.commit('clearActiveTransaction');
-      setTimeout(() => {
-        this.$store.commit('setActiveTransaction', transaction.details);
-      }, 10);
+    viewTransaction({ details }) {
+      this.$store.commit('setActiveTransaction', details);
     },
   },
 };

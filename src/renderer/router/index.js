@@ -60,47 +60,53 @@ export default new Router({
       ],
     },
     {
-      path: '/dashboard',
-      component: require('@/components/Dashboard').default,
+      path: '/authenticated',
+      component: require('@/components/AuthenticatedWrapper').default,
       children: [
         {
-          path: '',
-          components: {
-            'bottom-left': require('@/components/dashboard/Holdings').default,
-            'bottom-right': require('@/components/dashboard/RecentTransactions').default,
-            header: require('@/components/PortfolioHeader').default,
-            'top-left': require('@/components/dashboard/TokenStats').default,
-            'top-right': require('@/components/dashboard/TopRightTile').default,
-          },
+          path: 'dashboard',
+          component: require('@/components/Dashboard').default,
+          children: [
+            {
+              path: '',
+              components: {
+                'bottom-left': require('@/components/dashboard/Holdings').default,
+                'bottom-right': require('@/components/dashboard/RecentTransactions').default,
+                header: require('@/components/PortfolioHeader').default,
+                'top-left': require('@/components/dashboard/TokenStats').default,
+                'top-right': require('@/components/dashboard/TopRightTile').default,
+              },
+            },
+            {
+              path: 'send',
+              components: {
+                'bottom-left': require('@/components/dashboard/Holdings').default,
+                'bottom-right': require('@/components/dashboard/RecentTransactions').default,
+                header: require('@/components/PortfolioHeader').default,
+                'top-left': require('@/components/dashboard/TokenStats').default,
+                'top-right': require('@/components/dashboard/Send').default,
+              },
+            },
+          ],
         },
         {
-          path: 'send',
-          components: {
-            'bottom-left': require('@/components/dashboard/Holdings').default,
-            'bottom-right': require('@/components/dashboard/RecentTransactions').default,
-            header: require('@/components/PortfolioHeader').default,
-            'top-left': require('@/components/dashboard/TokenStats').default,
-            'top-right': require('@/components/dashboard/Send').default,
-          },
-        },
-      ],
-    },
-    {
-      path: '/assets',
-      component: require('@/components/Assets').default,
-      children: [
-        {
-          path: '',
-          components: {
-            header: require('@/components/PortfolioHeader').default,
-            left: require('@/components/assets/Assets').default,
-          },
+          path: 'assets',
+          component: require('@/components/Assets').default,
+          children: [
+            {
+              path: '',
+              components: {
+                header: require('@/components/PortfolioHeader').default,
+                left: require('@/components/assets/Assets').default,
+              },
+            },
+          ],
         },
       ],
     },
     {
       path: '*',
-      redirect: '/dashboard',
+      redirect: '/authenticated/dashboard',
     },
   ],
 });

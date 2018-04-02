@@ -1,10 +1,8 @@
 /* eslint-disable no-use-before-define */
 export {
   clearActiveTransaction,
-  clearActiveTransactionToken,
   clearRecentTransactions,
   setActiveTransaction,
-  setActiveTransactionToken,
   setHoldings,
   setPortfolio,
   setRecentTransactions,
@@ -18,10 +16,6 @@ function clearActiveTransaction(state) {
   state.showPriceTile = true;
 }
 
-function clearActiveTransactionToken(state) {
-  state.activeTransactionToken = null;
-}
-
 function clearRecentTransactions(state) {
   state.recentTransactions = [];
 }
@@ -29,13 +23,6 @@ function clearRecentTransactions(state) {
 function setActiveTransaction(state, transaction) {
   state.activeTransaction = transaction;
   state.showPriceTile = false;
-  this.dispatch('fetchActiveTransactionDetails');
-}
-
-function setActiveTransactionToken(state, token) {
-  state.activeTransactionToken = token;
-  state.showPriceTile = false;
-  this.dispatch('fetchActiveTransactionDetails');
 }
 
 function setHoldings(state, holdings) {

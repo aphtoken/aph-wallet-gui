@@ -1,24 +1,20 @@
 <template>
   <section id="assets">
-    <sidebar></sidebar>
-    <div class="assets--content">
-      <router-view name="header"></router-view>
-      <div class="header">
-        <h1 class="underlined">Assets</h1>
+    <div class="header">
+      <h1 class="underlined">Assets</h1>
+    </div>
+    <div class="grid">
+      <div class="grid--column left">
+        <router-view name="left"></router-view>
       </div>
-      <div class="assets--grid">
-        <div class="assets--grid--column left">
-          <router-view name="left"></router-view>
-        </div>
-        <div class="assets--grid--column right">
-          <div class="add-token">
-            <div class="btn-square">
-              <aph-icon name="create"></aph-icon>
-              <p>Add token</p>
-            </div>
-            <div class="btn-circle" @click="showAddTokenModal">
-              <aph-icon name="show"></aph-icon>
-            </div>
+      <div class="grid--column right">
+        <div class="add-token">
+          <div class="btn-square">
+            <aph-icon name="create"></aph-icon>
+            <p>Add token</p>
+          </div>
+          <div class="btn-circle" @click="showAddTokenModal">
+            <aph-icon name="show"></aph-icon>
           </div>
         </div>
       </div>
@@ -28,13 +24,11 @@
 </template>
 
 <script>
-import Sidebar from './Sidebar';
 import AphAddTokenModal from './assets/AddTokenModal';
 
 export default {
   components: {
     AphAddTokenModal,
-    Sidebar,
   },
 
   methods: {
@@ -52,7 +46,8 @@ export default {
 <style lang="scss">
 #assets {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  flex: 1;
 
   .header {
     padding: $space-lg $space-lg 0;
@@ -65,26 +60,21 @@ export default {
     }
   }
 
-  #dashboard--sidebar {
-    flex: none;
-    width: toRem(300px);
-  }
-
-  .assets--content {
+  .content {
     background: $light-grey;
     display: flex;
     flex-direction: column;
     flex: 1;
   }
 
-  .assets--grid {
+  .grid {
     display: flex;
     flex-direction: row;
     flex: 1;
     padding: $space-lg;
   }
 
-  .assets--grid--column {
+  .grid--column {
     display: flex;
     flex-direction: column;
     flex: 1;

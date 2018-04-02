@@ -16,11 +16,12 @@
         <aph-icon name="receive"></aph-icon>
         <p>Receive</p>
       </div>
-      <router-link class="send-btn" to="/dashboard/send">
+      <router-link class="send-btn" to="/authenticated/dashboard/send">
         <aph-icon name="send"></aph-icon>
         <p>Send</p>
       </router-link>
     </div>
+    <aph-address-modal v-if="this.$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></aph-address-modal>
   </section>
 </template>
 
@@ -44,14 +45,21 @@ export default {
   },
 
   methods: {
-    showSendAddressModal() {
-      this.$store.commit('setShowSendAddressModal', true);
+    getCurrentWalletAddress() {
+      return this.$services.wallets.getCurrentWallet().address;
+    },
+
+    hideSendAddressModal() {
+      this.$store.commit('setShowSendAddressModal', false);
     },
 
     loadHoldings() {
       this.$store.dispatch('fetchPortfolio');
     },
 
+    showSendAddressModal() {
+      this.$store.commit('setShowSendAddressModal', true);
+    },
   },
 
   mounted() {

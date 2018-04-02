@@ -1,28 +1,28 @@
 <template>
-  <section id="dashboard--sidebar">
+  <section id="sidebar">
     <div class="header">
       <aph-icon name="logo-mark"></aph-icon>
     </div>
     <div class="menu link-list">
-      <router-link to="/dashboard">
+      <router-link to="/authenticated/dashboard">
         <span class="icon">
           <aph-icon name="dashboard"></aph-icon>
         </span>
         <span class="label">Dashboard</span>
       </router-link>
-      <router-link to="/assets">
+      <router-link to="/authenticated/assets">
         <span class="icon">
           <aph-icon name="wallet"></aph-icon>
         </span>
         <span class="label">Assets</span>
       </router-link>
-      <router-link to="/history">
+      <router-link to="/authenticated/history">
         <span class="icon">
           <aph-icon name="history"></aph-icon>
         </span>
         <span class="label">History</span>
       </router-link>
-      <router-link to="/settings">
+      <router-link to="/authenticated/settings">
         <span class="icon">
           <aph-icon name="settings"></aph-icon>
         </span>
@@ -52,7 +52,7 @@ export default {
 </script>
 
 <style lang="scss">
-#dashboard--sidebar {
+#sidebar {
   background: $purple;
   display: flex;
   flex-direction: column;

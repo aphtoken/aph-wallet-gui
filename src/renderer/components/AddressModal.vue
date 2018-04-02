@@ -1,5 +1,5 @@
 <template>
-  <div class="aph-address-modal">
+  <div id="aph-address-modal">
     <div class="content">
       <div class="body">
         <div class="code">
@@ -48,7 +48,7 @@ export default {
 </script>
 
 <style lang="scss">
-.aph-address-modal {
+#aph-address-modal {
   align-items: center;
   background: rgba($dark, 0.8);
   bottom: 0;
@@ -61,9 +61,11 @@ export default {
   right: 0;
   top: 0;
   width: 100%;
+  z-index: 2000;
 
   .content {
     background: white;
+    flex: none;
   }
 
   .body {

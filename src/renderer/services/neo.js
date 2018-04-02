@@ -144,10 +144,12 @@ export default {
                         const neoChange = inNEO.minus(outNEO);
                         const gasChange = inGAS.minus(outGAS);
                         if (neoChange.isZero() === false) {
+                          transactionDetails.symbol = 'NEO';
+
                           splitTransactions.push({
                             hash: t.txid,
                             block_index: transactionDetails.block,
-                            symbol: 'NEO',
+                            symbol: transactionDetails.symbol,
                             amount: neoChange,
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
@@ -156,10 +158,12 @@ export default {
                         }
 
                         if (gasChange.isZero() === false) {
+                          transactionDetails.symbol = 'GAS';
+
                           splitTransactions.push({
                             hash: t.txid,
                             block_index: transactionDetails.block,
-                            symbol: 'GAS',
+                            symbol: transactionDetails.symbol,
                             amount: gasChange,
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
@@ -169,6 +173,7 @@ export default {
                       } else {
                         transactionDetails.vout = t.vout;
                         transactionDetails.vin = t.vin;
+                        transactionDetails.symbol = t.symbol;
                         splitTransactions.push({
                           hash: t.txid,
                           block_index: transactionDetails.block,
