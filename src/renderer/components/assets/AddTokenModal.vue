@@ -5,7 +5,6 @@
         <aph-icon name="create"></aph-icon>
         <aph-input placeholder="Address" :light="true" v-model="assetId"></aph-input>
         <aph-input placeholder="Token symbol" v-model="symbol"></aph-input>
-        <aph-input placeholder="Decimals" v-model="decimals"></aph-input>
       </div>
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">Cancel</div>
@@ -28,7 +27,6 @@ export default {
     return {
       assetId: '',
       symbol: '',
-      decimals: 8,
     };
   },
 

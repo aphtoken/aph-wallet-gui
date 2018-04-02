@@ -1,5 +1,5 @@
 <template>
-  <div id="price">
+  <div id="price" v-if="$store.state.statsToken">
     <div class="header">
       <h1 class="underlined">Price</h1>
       <div class="current-value">
