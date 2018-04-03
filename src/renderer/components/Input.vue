@@ -1,6 +1,6 @@
 <template>
-  <div class="aph-input">
-    <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value" @keyup.enter="onEnter" :disabled="disabled"/>
+  <div :class="['aph-input', {focused: isFocused}]">
+    <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value" @keyup.enter="onEnter" :disabled="disabled" @blur="onBlur" @focus="onFocus"/>
     <div v-if="type === 'password'" class="visibility-toggle" @click="toggleIsVisible">
       <aph-icon :name="iconName"></aph-icon>
     </div>
@@ -21,6 +21,7 @@ export default {
 
   data() {
     return {
+      isFocused: false,
       isVisible: false,
     };
   },
@@ -30,8 +31,16 @@ export default {
       this.$emit('input', event.target.value);
     },
 
+    onBlur() {
+      this.isFocused = false;
+    },
+
     onEnter(event) {
       this.$emit('enter', event.target.value);
+    },
+
+    onFocus() {
+      this.isFocused = true;
     },
 
     toggleIsVisible() {
@@ -67,10 +76,11 @@ export default {
 .aph-input {
   align-items: center;
   border-bottom: $border;
+  border-color: white;
   display: flex;
   height: $input-height;
-  line-height: $input-height;
   position: relative;
+  transition: $transition;
 
   input {
     background: none;
@@ -79,6 +89,7 @@ export default {
     font-size: toRem(14px);
     letter-spacing: .5px;
     outline: none;
+    padding: $space-sm 0;
     width: 100%;
 
     &::placeholder {
@@ -87,12 +98,12 @@ export default {
   }
 
   .visibility-toggle {
-    bottom: 0;
+    // bottom: 0;
     cursor: pointer;
     padding: $space;
-    position: absolute;
-    right: 0;
-    top: 0;
+    // position: absolute;
+    // right: 0;
+    // top: 0;
   }
 
   .aph-icon {
@@ -103,6 +114,10 @@ export default {
     path {
       fill: white;
     }
+  }
+
+  &.focused {
+    border-color: $purple;
   }
 }
 </style>

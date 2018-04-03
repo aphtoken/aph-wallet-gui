@@ -1,6 +1,6 @@
 <template>
   <section id="portfolio-header">
-    <simple-donut :percent="$store.state.portfolio.changePercent"></simple-donut>
+    <simple-donut v-if="$store.state.portfolio.changePercent" :percent="$store.state.portfolio.changePercent"></simple-donut>
     <div class="ticker">
       <h1 class="underlined">My Porfolio</h1>
       <div class="balance">

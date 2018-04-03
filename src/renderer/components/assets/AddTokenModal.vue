@@ -79,6 +79,12 @@ export default {
     }
 
     .aph-input {
+      border-color: $dark;
+
+      &.focused {
+        border-color: $purple;
+      }
+
       input {
         color: $dark;
 
