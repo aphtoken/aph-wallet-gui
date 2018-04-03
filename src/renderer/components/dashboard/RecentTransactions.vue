@@ -4,7 +4,7 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <aph-recent-transaction :transactions="transactions()" :onClick="viewTransaction"></aph-recent-transaction>
+      <aph-simple-transactions :transactions="transactions" :onClick="viewTransaction"></aph-simple-transactions>
     </div>
   </div>
 </template>
@@ -25,7 +25,7 @@ export default {
     }, this.$constants.intervals.POLLING);
   },
 
-  methods: {
+  computed: {
     transactions() {
       return this.$store.state.recentTransactions.map((transaction) => {
         const active = transaction.details.txid === _.get(this.$store.state.activeTransaction, 'txid')
@@ -37,7 +37,9 @@ export default {
         });
       });
     },
+  },
 
+  methods: {
     loadTransactions() {
       this.$store.dispatch('fetchRecentTransactions');
     },

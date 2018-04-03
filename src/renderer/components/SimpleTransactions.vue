@@ -1,15 +1,10 @@
 <template>
   <table class="transactions-table" :class="{'is-clickable': isClickable}">
     <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)" :class="[{active: transaction.active}]">
-      <td>
-        <div class="address">{{ transaction.address }}</div>
-      </td>
-      <td width="15%">
-        <div class="currency">{{ transaction.symbol }}</div>
-      </td>
-      <td width="15%">
-        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</div>
-      </td>
+      <td width="40%" class="address">{{ transaction.address }}</td>
+      <td v-if="transaction.block_time">{{ $formatDate(transaction.block_time) }}</td>
+      <td class="currency">{{ transaction.symbol }}</td>
+      <td width="25%" :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</td>
     </tr>
   </table>
 </template>
@@ -57,14 +52,8 @@ export default {
     @include truncate();
   }
 
-  .currency {
-    text-align: center;
-    flex: 0 0 10%;
-  }
-
   .amount {
     text-align: right;
-    flex: 0 0 20%;
 
     &.received {
       color: $green;
@@ -79,9 +68,22 @@ export default {
     }
   }
 
+  .currency {
+    text-align: center;
+  }
+
   td {
     border-top: 1px solid $light-grey;
     padding: $space $space-sm;
+    white-space: nowrap;
+
+    &:first-child {
+      padding-left: 0;
+    }
+
+    &:last-child {
+      padding-right: 0;
+    }
   }
 
   &.is-clickable {
