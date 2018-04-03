@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { formats } from '../constants';
+import alerts from './alerts';
 
 const fiatCurrency = 'USD'; // todo, pull from app settings
 const cmcBaseUrl = 'https://api.coinmarketcap.com/v1/';
@@ -73,11 +74,11 @@ export default {
             resolve(returnData);
           })
           .catch((e) => {
-            console.log(e);
+            alerts.exception(e);
             resolve([]);
           });
       } catch (e) {
-        console.log(e);
+        alerts.exception(e);
         return reject(e);
       }
     });

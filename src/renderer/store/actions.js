@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { neo, wallets } from '../services';
+import alerts from '../services/alerts';
 
 export {
   fetchHoldings,
@@ -20,7 +21,7 @@ function fetchHoldings({ commit }) {
       commit('setHoldings', data.holdings);
     })
     .catch((e) => {
-      console.log(e);
+      alerts.exception(e);
     });
 }
 
@@ -58,6 +59,6 @@ function fetchRecentTransactions({ commit }) {
       commit('setRecentTransactions', data);
     })
     .catch((e) => {
-      console.log(e);
+      alerts.exception(e);
     });
 }

@@ -25,8 +25,8 @@ export default {
         .then(() => {
           this.$router.push('/authenticated/dashboard');
         })
-        .catch(() => {
-          this.creating = false;
+        .catch((e) => {
+          this.$services.alerts.exception(e);
         });
     },
   },

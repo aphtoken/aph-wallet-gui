@@ -31,7 +31,6 @@ export default {
   data() {
     return {
       creating: false,
-      error: null,
       passphrase: '',
       passphraseConfirm: '',
       walletName: '',
@@ -57,9 +56,9 @@ export default {
             query: { walletName },
           });
         })
-        .catch((error) => {
+        .catch((e) => {
           this.creating = false;
-          this.error = error;
+          this.$services.alerts.exception(e);
         });
     },
   },

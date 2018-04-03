@@ -41,7 +41,7 @@ export default {
             this.$router.push('/authenticated/dashboard');
           })
           .catch((e) => {
-            console.log(e);
+            this.$services.alerts.exception(e);
           });
       }, 1000);
     },

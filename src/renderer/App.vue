@@ -2,6 +2,8 @@
   <div id="app" v-cloak>
     <div class="drag-area"></div>
     <router-view></router-view>
+    
+    <flash-message class="vue-flash-container"></flash-message>
   </div>
 </template>
 

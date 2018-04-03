@@ -3,6 +3,7 @@ import wallets from './wallets';
 import valuation from './valuation';
 import contacts from './contacts';
 import tokens from './tokens';
+import alerts from './alerts';
 
 export {
   neo,
@@ -10,4 +11,5 @@ export {
   valuation,
   contacts,
   tokens,
+  alerts,
 };

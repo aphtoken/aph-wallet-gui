@@ -2,7 +2,7 @@ import lockr from 'lockr';
 import { wallet } from '@cityofzion/neon-js';
 
 const WALLETS_STORAGE_KEY = 'aph.wallets';
-const CURRENT_WALLET_STORAGE_KEY = 'aph.current_wallet';
+let currentWallet = null;
 
 export default {
 
@@ -40,7 +40,7 @@ export default {
   },
 
   getCurrentWallet() {
-    return lockr.get(CURRENT_WALLET_STORAGE_KEY);
+    return currentWallet;
   },
 
   getOne(name) {
@@ -120,7 +120,7 @@ export default {
   },
 
   setCurrentWallet(wallet) {
-    return lockr.set(CURRENT_WALLET_STORAGE_KEY, wallet);
+    currentWallet = wallet;
   },
 
 };
