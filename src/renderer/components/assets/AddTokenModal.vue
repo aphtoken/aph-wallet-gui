@@ -1,5 +1,5 @@
 <template>
-  <div class="aph-add-token-modal">
+  <div id="aph-add-token-modal">
     <div class="content">
       <div class="body">
         <aph-icon name="create"></aph-icon>
@@ -46,7 +46,7 @@ export default {
 
 
 <style lang="scss">
-.aph-add-token-modal {
+#aph-add-token-modal {
   align-items: center;
   background: rgba($dark, 0.8);
   bottom: 0;
@@ -62,6 +62,7 @@ export default {
 
   .content {
     background: white;
+    flex: none;
     width: toRem(400px);
   }
 

@@ -14,10 +14,11 @@ import { store } from './store';
 
 // Global Vue Components.
 import AddressModal from './components/AddressModal';
+import DatePicker from './components/DatePicker';
 import Icon from './components/Icon';
 import Input from './components/Input';
-import Select from './components/Select';
 import RecentTransaction from './components/RecentTransaction';
+import Select from './components/Select';
 import SimpleTransactions from './components/SimpleTransactions';
 import TokenIcon from './components/TokenIcon';
 
@@ -42,10 +43,11 @@ _.each(mixins, (mixin) => {
 
 // Register global components.
 Vue.component('aph-address-modal', AddressModal);
+Vue.component('aph-date-picker', DatePicker);
 Vue.component('aph-icon', Icon);
 Vue.component('aph-input', Input);
-Vue.component('aph-select', Select);
 Vue.component('aph-recent-transaction', RecentTransaction);
+Vue.component('aph-select', Select);
 Vue.component('aph-simple-transactions', SimpleTransactions);
 Vue.component('aph-token-icon', TokenIcon);
 

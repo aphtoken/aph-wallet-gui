@@ -1,5 +1,5 @@
 <template>
-  <section id="assets--assets">
+  <section id="assets-table">
     <div class="search">
       <!-- <aph-icon name="wallet"></aph-icon> -->
       <input placeholder="Search" v-model="searchBy">
@@ -49,7 +49,6 @@ export default {
 
   methods: {
     loadHoldings() {
-      console.log('assets');
       this.$store.dispatch('fetchHoldings');
     },
   },
@@ -69,7 +68,7 @@ export default {
 </script>
 
 <style lang="scss">
-#assets--assets {
+#assets-table {
   display: flex;
   flex-direction: column;
   height: 100%;

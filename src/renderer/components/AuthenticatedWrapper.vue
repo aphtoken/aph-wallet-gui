@@ -35,7 +35,7 @@ export default {
 
   #sidebar {
     flex: none;
-    width: toRem(300px);
+    width: $left-sidebar-width;
   }
 
   .content {

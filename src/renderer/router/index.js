@@ -97,7 +97,20 @@ export default new Router({
               path: '',
               components: {
                 header: require('@/components/PortfolioHeader').default,
-                left: require('@/components/assets/Assets').default,
+                left: require('@/components/assets/Table').default,
+              },
+            },
+          ],
+        },
+        {
+          path: 'history',
+          component: require('@/components/History').default,
+          children: [
+            {
+              path: '',
+              components: {
+                header: require('@/components/PortfolioHeader').default,
+                left: require('@/components/history/Table').default,
               },
             },
           ],

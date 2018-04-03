@@ -1,8 +1,6 @@
 <template>
   <div class="aph-input">
-    <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value"
-                @keyup.enter="onEnter" />
-
+    <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value" @keyup.enter="onEnter" :disabled="disabled"/>
     <div v-if="type === 'password'" class="visibility-toggle" @click="toggleIsVisible">
       <aph-icon :name="iconName"></aph-icon>
     </div>
@@ -42,6 +40,11 @@ export default {
   },
 
   props: {
+    disabled: {
+      default: false,
+      type: Boolean,
+    },
+
     placeholder: {
       default: '',
       type: String,

@@ -28,7 +28,6 @@ export default {
   methods: {
     transactions() {
       return this.$store.state.recentTransactions.map((transaction) => {
-        console.log(transaction);
         const active = transaction.details.txid === _.get(this.$store.state.activeTransaction, 'txid')
           && transaction.symbol === _.get(this.$store.state.activeTransaction, 'symbol');
 

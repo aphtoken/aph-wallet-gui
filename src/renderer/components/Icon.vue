@@ -94,6 +94,16 @@
       <path class="fill arrow--path" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" />
     </svg>
 
+    <!-- arrow-left -->
+    <svg class="icon arrow-left" v-if="name === 'arrow-left'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 9">
+      <path class="fill arrow--path" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" transform="translate(-20.5 -22.5)" />
+    </svg>
+
+    <!-- arrow-right -->
+    <svg class="icon arrow-right" v-if="name === 'arrow-right'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 9">
+      <path class="fill arrow--path" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" />
+    </svg>
+
     <!-- add -->
     <svg class="icon add" v-if="name === 'add'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7">
       <path class="fill add--path" d="M25,28.5a.5.5,0,0,1-.5-.5V22a.5.5,0,0,1,1,0v6A.5.5,0,0,1,25,28.5Z" transform="translate(-21.5 -21.5)"/>
@@ -186,7 +196,60 @@
     </svg>
 
 
+    <!-- unconfirmed -->
+    <svg class="icon unconfirmed" v-if="name === 'unconfirmed'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	    viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
+      <g>
+        <polygon class="stroke st0" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 	"/>
+      </g>
+      <g>
+        <path class="stroke st1" d="M16.6,15.4l-1.7-1.7c0,0,0,0,0,0l-4.2-4.2c-0.2-0.2-0.5-0.2-0.7,0s-0.2,0.5,0,0.7l1.7,1.7l2.5,2.5l1.7,1.7
+          c0.2,0.2,0.5,0.2,0.7,0C16.8,15.9,16.8,15.6,16.6,15.4z"/>
+        <path class="fill stroke st1" d="M16.7,9.5c-0.2-0.2-0.5-0.2-0.7,0l-6,6c-0.2,0.2-0.2,0.5,0,0.7s0.5,0.2,0.7,0l6-6C16.9,10,16.9,9.7,16.7,9.5z"
+          />
+      </g>
+    </svg>
 
+    <!-- calendar -->
+    <svg class="icon calendar" v-if="name === 'calendar'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
+      <g>
+        <g>
+          <path class="stroke st0" d="M25.1,11.5c-0.3,0-0.5-0.2-0.5-0.5V6.5h-22V11c0,0.3-0.2,0.5-0.5,0.5c-0.3,0-0.5-0.2-0.5-0.5V6
+            c0-0.3,0.2-0.5,0.5-0.5h23c0.3,0,0.5,0.2,0.5,0.5v5C25.6,11.3,25.4,11.5,25.1,11.5z"/>
+        </g>
+        <g>
+          <path class="stroke st0" d="M13.1,8.5c-0.3,0-0.5-0.2-0.5-0.5V5c0-0.3,0.2-0.5,0.5-0.5c0.3,0,0.5,0.2,0.5,0.5v3
+            C13.6,8.3,13.4,8.5,13.1,8.5z"/>
+        </g>
+        <g>
+          <path class="stroke st0" d="M19.1,8.5c-0.3,0-0.5-0.2-0.5-0.5V5c0-0.3,0.2-0.5,0.5-0.5c0.3,0,0.5,0.2,0.5,0.5v3
+            C19.6,8.3,19.4,8.5,19.1,8.5z"/>
+        </g>
+        <g>
+          <path class="stroke st0" d="M7.1,8.5C6.8,8.5,6.6,8.3,6.6,8V5c0-0.3,0.2-0.5,0.5-0.5c0.3,0,0.5,0.2,0.5,0.5v3C7.6,8.3,7.4,8.5,7.1,8.5z"
+            />
+        </g>
+        <g>
+          <path class="stroke st0" d="M2.6,12.5v-2h22v2h1V10c0-0.3-0.2-0.5-0.5-0.5h-23c-0.3,0-0.5,0.2-0.5,0.5v2.5H2.6z"/>
+          <path class="stroke st0" d="M24.6,12v9h-22v-9h-1v9.5c0,0.3,0.2,0.5,0.5,0.5h23c0.3,0,0.5-0.2,0.5-0.5V12H24.6z"/>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path class="stroke st0" d="M10.9,14.5h-2c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h2c0.3,0,0.5,0.2,0.5,0.5S11.2,14.5,10.9,14.5z"/>
+        </g>
+        <g>
+          <path class="stroke st0" d="M18.4,14.5h-5c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h5c0.3,0,0.5,0.2,0.5,0.5S18.7,14.5,18.4,14.5z"/>
+        </g>
+        <g>
+          <path class="stroke st0" d="M10.9,17.5h-2c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h2c0.3,0,0.5,0.2,0.5,0.5S11.2,17.5,10.9,17.5z"/>
+        </g>
+        <g>
+          <path class="stroke st0" d="M18.4,17.5h-5c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h5c0.3,0,0.5,0.2,0.5,0.5S18.7,17.5,18.4,17.5z"/>
+        </g>
+      </g>
+    </svg>
 
   </div>
 </template>
@@ -232,6 +295,18 @@ export default {
     }
   }
 
+  .arrow-left {
+    path {
+      transform: rotate(90deg) translate(-20.5px, -27.5px);
+    }
+  }
+
+  .arrow-right {
+    path {
+      transform: rotate(270deg) translate(-29.5px, -22.5px);
+    }
+  }
+
   .remove {
     path {
       transform: rotate(45deg) translate(-20px, -25px);
@@ -256,7 +331,7 @@ export default {
 
   .history {
     .stroke {
-      stroke: $dark
+      stroke: $dark;
     }
     .st0 {
       fill: none;
@@ -271,7 +346,11 @@ export default {
     }
   }
 
-  .settings, .dashboard, .send, .receive, .confirmed{
+  .settings,
+  .dashboard,
+  .send,
+  .receive,
+  .confirmed {
     .stroke {
       stroke: $dark;
     }
@@ -287,6 +366,29 @@ export default {
       stroke-linejoin: round;
       stroke-miterlimit: 10;
     }
+  }
+
+  .unconfirmed {
+    .st0 {
+      fill: none;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10;
+      stroke-width: 1.9;
+      stroke: $dark;
+    }
+    .st1 {
+      fill: $dark;
+      stroke-miterlimit: 10;
+      stroke-width: 0.75;
+      stroke: $dark;
+    }
+  }
+
+  .calendar {
+    fill: $dark;
+    stroke-miterlimit: 10;
+    stroke-width: 0.75;
+    stroke: $dark;
   }
 
   .show {

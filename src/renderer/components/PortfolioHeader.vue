@@ -96,6 +96,12 @@ h1.underlined {
     display: flex;
     flex-direction: row;
     flex: none;
+    width: $right-sidebar-width;
+
+    > * {
+      width: auto;
+      flex: 1;
+    }
   }
 
   .ticker {

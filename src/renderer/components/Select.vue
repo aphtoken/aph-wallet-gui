@@ -59,7 +59,16 @@ export default {
     },
   },
 
+  mounted() {
+    this.selectedOption = this.initialValue;
+  },
+
   props: {
+    initialValue: {
+      default: null,
+      type: Object,
+    },
+
     light: {
       default: false,
       type: Boolean,
@@ -186,14 +195,14 @@ export default {
     }
 
     .dropdown {
-      background: $light-grey;
+      box-shadow: $box-shadow;
       margin: $space 0 0;
 
       > li {
         &:hover,
         &.selected {
-          background: $purple;
-          color: white;
+          background: $light-grey;
+          color: $dark;
         }
       }
     }

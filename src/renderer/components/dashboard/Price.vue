@@ -67,8 +67,6 @@ export default {
 
       this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol, 24 * 30, 10)
         .then((priceData) => {
-          console.log(priceData);
-
           this.date = new Date();
           this.current = priceData.last;
           this.high = priceData.high;

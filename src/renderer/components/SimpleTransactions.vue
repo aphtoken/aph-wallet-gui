@@ -95,7 +95,7 @@ export default {
 
       &:hover, &.active {
         td {
-          background: #F9F9FD;
+          background: $light-grey;
           color: $purple;
         }
       }
