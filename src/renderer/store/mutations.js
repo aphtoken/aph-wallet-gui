@@ -9,6 +9,10 @@ export {
   setShowAddTokenModal,
   setShowSendAddressModal,
   setStatsToken,
+  setSearchTransactions,
+  clearSearchTransactions,
+  setSearchTransactionFromDate,
+  setSearchTransactionToDate,
 };
 
 function clearActiveTransaction(state) {
@@ -52,4 +56,17 @@ function setShowSendAddressModal(state, value) {
 function setStatsToken(state, token) {
   state.statsToken = token;
   state.showPriceTile = true;
+}
+
+function setSearchTransactions(state, transactions) {
+  state.searchTransactions = transactions;
+}
+function clearSearchTransactions(state) {
+  state.searchTransactions = [];
+}
+function setSearchTransactionFromDate(state, fromDate) {
+  state.searchTransactionFromDate = fromDate;
+}
+function setSearchTransactionToDate(state, toDate) {
+  state.searchTransactionToDate = toDate;
 }

@@ -101,6 +101,9 @@ export default {
     close() {
       this.isOpen = false;
     },
+    setDay(day) {
+      this.selectedDay = day;
+    },
 
     getDaysInMonth(year, month) {
       const days = [];

@@ -2,6 +2,9 @@
   <div class="transaction-detail">
     <div class="header">
       <h1 class="underlined">Transaction</h1>
+      <div class="close" @click="close()">
+        close
+      </div>
     </div>
     <div class="body">
       <div class="section">
@@ -42,7 +45,6 @@
         -->
       </div>
       <div class="section">
-        <!-- UI for inputs and outputs needs some improvement to reflect multiple values and the 3 different attributes (address, symbol, value) -->
         <div class="row">
           <div class="column">
             <div class="label">From</div>
@@ -94,11 +96,18 @@ export default {
     },
 
     fromTransactions() {
-      return this.$store.state.activeTransaction.vin.map(transaction => _.set(transaction, 'amount', transaction.value));
+      return this.$store.state.activeTransaction.vin;
     },
 
     toTransactions() {
-      return this.$store.state.activeTransaction.vout.map(transaction => _.set(transaction, 'amount', transaction.value));
+      return this.$store.state.activeTransaction.vout;
+    },
+  },
+
+  methods: {
+    close() {
+      this.$store.state.activeTransaction.active = false;
+      this.$store.commit('clearActiveTransaction');
     },
   },
 };
@@ -114,12 +123,20 @@ export default {
 
   .header {
     padding: $space;
+    position: relative;
 
     h1.underlined {
       @extend %underlined-header;
 
       flex: 1;
       margin-bottom: 0;
+    }
+    .close {
+      position: absolute;
+      right: 3px;
+      top: 3px;
+      padding: 10px;
+      cursor: pointer;
     }
   }
 

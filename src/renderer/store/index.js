@@ -15,6 +15,9 @@ const state = {
   showSendAddressModal: false,
   showPriceTile: true,
   statsToken: null,
+  searchTransactions: [],
+  searchTransactionFromDate: null,
+  searchTransactionToDate: null,
 };
 
 const store = new Vuex.Store({

@@ -1,4 +1,5 @@
 /* eslint-disable no-use-before-define */
+import moment from 'moment';
 import { neo, wallets } from '../services';
 import alerts from '../services/alerts';
 
@@ -6,6 +7,7 @@ export {
   fetchHoldings,
   fetchPortfolio,
   fetchRecentTransactions,
+  fetchSearchTransactions,
 };
 
 function fetchHoldings({ commit }) {
@@ -57,6 +59,24 @@ function fetchRecentTransactions({ commit }) {
     .fetchRecentTransactions(currentWallet.address)
     .then((data) => {
       commit('setRecentTransactions', data);
+    })
+    .catch((e) => {
+      alerts.exception(e);
+    });
+}
+
+function fetchSearchTransactions({ state, commit }) {
+  const currentWallet = wallets.getCurrentWallet();
+  if (!currentWallet) {
+    return;
+  }
+
+  neo
+    .fetchRecentTransactions(currentWallet.address, true,
+      state.searchTransactionFromDate,
+      state.searchTransactionToDate ? moment(state.searchTransactionToDate).add(1, 'days') : null)
+    .then((data) => {
+      commit('setSearchTransactions', data);
     })
     .catch((e) => {
       alerts.exception(e);

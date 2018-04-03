@@ -5,3 +5,6 @@ export const recentTransactions = state => state.recentTransactions;
 export const showAddTokenModal = state => state.showAddTokenModal;
 export const showSendAddressModal = state => state.showSendAddressModal;
 export const statsToken = state => state.statsToken;
+export const searchTransactions = state => state.searchTransactions;
+export const searchTransactionFromDate = state => state.searchTransactionFromDate;
+export const searchTransactionToDate = state => state.searchTransactionToDate;

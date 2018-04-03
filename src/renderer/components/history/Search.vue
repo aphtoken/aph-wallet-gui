@@ -4,18 +4,23 @@
       <h1 class="underlined">Search</h1>
     </div>
     <div class="body">
-      <aph-select :light="true" :options="dateRanges" :initial-value="dateRanges[0]"></aph-select>
-      <div class="custom-search-label">Custom Search</div>
-      <aph-date-picker placeholder="From" v-model="fromDate"></aph-date-picker>
-      <aph-date-picker placeholder="To" v-model="toDate"></aph-date-picker>
+      <aph-select :light="true" :options="dateRanges" :initial-value="dateRanges[0]" v-model="selectedDateRange"></aph-select>
+      <div id="search-custom" :class="[{isCustom: selectedDateRange && selectedDateRange.value == 'custom'}]">
+        <div class="custom-search-label">Custom Search</div>
+        <aph-date-picker placeholder="From" v-model="fromDate" ref="fromDate"></aph-date-picker>
+        <aph-date-picker placeholder="To" v-model="toDate" ref="toDate"></aph-date-picker>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import moment from 'moment';
+
 export default {
   data() {
     return {
+      selectedDateRange: null,
       dateRanges: [
         {
           label: 'All',
@@ -33,10 +38,40 @@ export default {
           label: 'Last 90 days',
           value: '90',
         },
+        {
+          label: 'Custom',
+          value: 'custom',
+        },
       ],
       fromDate: null,
       toDate: null,
     };
+  },
+
+  watch: {
+    selectedDateRange() {
+      if (this.selectedDateRange.value === 'custom') {
+        this.$refs.fromDate.setDay(this.fromDate);
+        this.$refs.toDate.setDay(this.toDate);
+        return;
+      } else if (this.selectedDateRange.value === null) {
+        this.fromDate = null;
+        this.toDate = null;
+        return;
+      }
+
+      const daysBack = Number.parseInt(this.selectedDateRange.value, 10);
+      this.fromDate = moment().startOf('day').subtract(daysBack, 'days');
+      this.toDate = moment().startOf('day');
+    },
+    fromDate() {
+      this.$store.commit('setSearchTransactionFromDate', this.fromDate);
+      this.$store.dispatch('fetchSearchTransactions');
+    },
+    toDate() {
+      this.$store.commit('setSearchTransactionToDate', this.toDate);
+      this.$store.dispatch('fetchSearchTransactions');
+    },
   },
 };
 </script>
@@ -68,6 +103,14 @@ export default {
     .aph-date-picker {
       & + .aph-date-picker {
         margin-top: $space;
+      }
+    }
+    
+    #search-custom {
+      display: none;
+      
+      &.isCustom {
+        display: block;
       }
     }
   }

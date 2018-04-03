@@ -8,7 +8,7 @@
         <div class="currency">{{ transaction.symbol }}</div>
       </td>
       <td width="15%">
-        <div :class="['amount', {sent: transaction.amount < 0, received: transaction.amount > 0}]">{{ $formatNumber(transaction.amount) }}</div>
+        <div :class="['amount', {sent: transaction.value < 0, received: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</div>
       </td>
     </tr>
   </table>

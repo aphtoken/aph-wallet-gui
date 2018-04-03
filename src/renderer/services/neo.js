@@ -86,7 +86,7 @@ export default {
    *  {String} amount
    *  {String} block_time
    */
-  fetchRecentTransactions(address) {
+  fetchRecentTransactions(address, forSearch, fromDate, toDate) {
     return new Promise((resolve, reject) => {
       try {
         return api.neoscan.getTransactionHistory(network, address)
@@ -98,7 +98,7 @@ export default {
                   res.push({
                     txid: t.transactionHash.replace('0x', ''),
                     symbol: t.symbol,
-                    amount: t.received - t.sent,
+                    value: t.received - t.sent,
                     block_index: t.blockIndex,
                     block_time: t.blockTime,
                     isNep5: true,
@@ -119,6 +119,15 @@ export default {
                 res.forEach((t) => {
                   promises.push(this.fetchTransactionDetails(t.txid)
                     .then((transactionDetails) => {
+                      if (fromDate
+                            && transactionDetails.blocktime < fromDate.unix()) {
+                        return;
+                      }
+                      if (toDate
+                            && transactionDetails.blocktime > toDate.unix()) {
+                        return;
+                      }
+
                       if (t.isNep5 !== true) {
                         let outNEO = new BigNumber(0);
                         let outGAS = new BigNumber(0);
@@ -152,7 +161,7 @@ export default {
                             hash: t.txid,
                             block_index: transactionDetails.block,
                             symbol: transactionDetails.symbol,
-                            amount: neoChange,
+                            value: neoChange,
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
                             isNep5: false,
@@ -166,7 +175,7 @@ export default {
                             hash: t.txid,
                             block_index: transactionDetails.block,
                             symbol: transactionDetails.symbol,
-                            amount: gasChange,
+                            value: gasChange,
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
                             isNep5: false,
@@ -180,7 +189,7 @@ export default {
                           hash: t.txid,
                           block_index: transactionDetails.block,
                           symbol: t.symbol,
-                          amount: t.amount,
+                          value: t.value,
                           block_time: transactionDetails.blocktime,
                           details: transactionDetails,
                         });
@@ -190,16 +199,18 @@ export default {
 
                 Promise.all(promises)
                   .then(() => {
-                    if (lastTransactionsList != null) {
-                      splitTransactions.forEach((t) => {
-                        if (!_.find(lastTransactionsList, (o) => {
-                          return o.hash === t.hash;
-                        })) {
-                          alerts.success(`New Transaction Found. TX: ${t.hash}`);
-                        }
-                      });
+                    if (forSearch !== true) {
+                      if (lastTransactionsList != null) {
+                        splitTransactions.forEach((t) => {
+                          if (!_.find(lastTransactionsList, (o) => {
+                            return o.hash === t.hash;
+                          })) {
+                            alerts.success(`New Transaction Found. TX: ${t.hash}`);
+                          }
+                        });
+                      }
+                      lastTransactionsList = splitTransactions;
                     }
-                    lastTransactionsList = splitTransactions;
                     resolve(_.sortBy(splitTransactions, 'block_time').reverse());
                   })
                   .catch(e => reject(e));
