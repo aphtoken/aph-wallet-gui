@@ -20,7 +20,7 @@ export default {
 <style lang="scss">
 #login--logo {
   .icon.logo {
-    height: 15rem;
+    height: 20rem;
   }
 
   .back-btn {
