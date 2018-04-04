@@ -2,17 +2,18 @@
 export {
   clearActiveTransaction,
   clearRecentTransactions,
+  clearSearchTransactions,
   setActiveTransaction,
+  setCurrency,
   setHoldings,
   setPortfolio,
   setRecentTransactions,
+  setSearchTransactionFromDate,
+  setSearchTransactionToDate,
+  setSearchTransactions,
   setShowAddTokenModal,
   setShowSendAddressModal,
   setStatsToken,
-  setSearchTransactions,
-  clearSearchTransactions,
-  setSearchTransactionFromDate,
-  setSearchTransactionToDate,
 };
 
 function clearActiveTransaction(state) {
@@ -24,9 +25,17 @@ function clearRecentTransactions(state) {
   state.recentTransactions = [];
 }
 
+function clearSearchTransactions(state) {
+  state.searchTransactions = [];
+}
+
 function setActiveTransaction(state, transaction) {
   state.activeTransaction = transaction;
   state.showPriceTile = false;
+}
+
+function setCurrency(state, currency) {
+  state.currency = currency;
 }
 
 function setHoldings(state, holdings) {
@@ -45,6 +54,18 @@ function setRecentTransactions(state, transactions) {
   state.recentTransactions = transactions;
 }
 
+function setSearchTransactionFromDate(state, fromDate) {
+  state.searchTransactionFromDate = fromDate;
+}
+
+function setSearchTransactionToDate(state, toDate) {
+  state.searchTransactionToDate = toDate;
+}
+
+function setSearchTransactions(state, transactions) {
+  state.searchTransactions = transactions;
+}
+
 function setShowAddTokenModal(state, value) {
   state.showAddTokenModal = value;
 }
@@ -58,15 +79,3 @@ function setStatsToken(state, token) {
   state.showPriceTile = true;
 }
 
-function setSearchTransactions(state, transactions) {
-  state.searchTransactions = transactions;
-}
-function clearSearchTransactions(state) {
-  state.searchTransactions = [];
-}
-function setSearchTransactionFromDate(state, fromDate) {
-  state.searchTransactionFromDate = fromDate;
-}
-function setSearchTransactionToDate(state, toDate) {
-  state.searchTransactionToDate = toDate;
-}

@@ -1,16 +1,17 @@
 import moment from 'moment';
 import { formats } from '../constants';
 import alerts from './alerts';
+import settings from './settings';
 
-const fiatCurrency = 'USD'; // todo, pull from app settings
-const cmcBaseUrl = 'https://api.coinmarketcap.com/v1/';
+const CMC_BASE_URL = 'https://api.coinmarketcap.com/v1/';
 
 export default {
 
   getValuation(symbol) {
     return new Promise((resolve, reject) => {
       try {
-        return axios.get(`${cmcBaseUrl}ticker/${symbol}/?convert${fiatCurrency}`)
+        // TODO handle currencies
+        return axios.get(`${CMC_BASE_URL}ticker/${symbol}/?convert=${settings.getCurrency()}`)
           .then((res) => {
             resolve(res.data[0]);
           })
@@ -41,7 +42,7 @@ export default {
   getHistorical(symbol, hoursBack, points) {
     return new Promise((resolve, reject) => {
       try {
-        return axios.get(`https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=USD&limit=${hoursBack}&aggregate=3&e=CCCAGG`)
+        return axios.get(`https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=${settings.getCurrency()}&limit=${hoursBack}&aggregate=3&e=CCCAGG`)
           .then((res) => {
             const mod = Math.round(res.data.Data.length / points);
             let i = 0;

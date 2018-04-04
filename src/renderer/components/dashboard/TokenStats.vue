@@ -15,7 +15,7 @@
           {{ $formatNumber($store.state.statsToken.balance) }}<span class="currency">{{ $store.state.statsToken.symbol }}</span>
         </div>
         <div class="value">
-          {{ $formatMoney($store.state.statsToken.totalValue) }}<span class="currency">USD</span>
+          {{ $formatMoney($store.state.statsToken.totalValue) }}<span class="currency">{{ $store.state.currency }}</span>
         </div>
       </div>
       <div class="claim" v-if="$store.state.statsToken.symbol === 'NEO'">

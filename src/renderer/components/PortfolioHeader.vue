@@ -4,7 +4,7 @@
     <div class="ticker">
       <h1 class="underlined">My Porfolio</h1>
       <div class="balance">
-        <span class="symbol">$</span><span class="amount">{{ $formatNumberShort($store.state.portfolio.balance) }}</span><span class="currency">USD</span>
+        <span class="symbol">$</span><span class="amount">{{ $formatNumberShort($store.state.portfolio.balance) }}</span><span class="currency">{{ $store.state.currency }}</span>
       </div>
       <div class="change">
         <div class="label">24h change</div>

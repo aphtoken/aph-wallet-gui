@@ -54,6 +54,7 @@ export default {
   watch: {
     selectedCurrency(currency) {
       this.$services.settings.setCurrency(currency);
+      this.$store.commit('setCurrency', currency);
     },
   },
 };

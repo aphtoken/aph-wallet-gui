@@ -12,7 +12,7 @@
           </div>
           <div class="column">
             <div class="label">Value</div>
-            <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} USD</div>
+            <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
           </div>
         </div>
         <div class="row">
@@ -53,7 +53,7 @@
         </div>
         <div class="estimated-value">
           <div class="label">Estimated</div>
-          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} USD</div>
+          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
         </div>
       </div>
       <div class="footer">

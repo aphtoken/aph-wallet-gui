@@ -17,7 +17,7 @@
         </div>
         <div class="right">
           <div class="amount">{{ $formatNumber(holding.balance) }} {{ holding.symbol }}</div>
-          <div class="value">{{ $formatMoney(holding.unitValue) }} USD</div>
+          <div class="value">{{ $formatMoney(holding.unitValue) }} {{ $store.state.currency }}</div>
         </div>
       </div>
     </div>

@@ -36,7 +36,7 @@
           </div>
           <div class="column">
             <div class="label">Value</div>
-            <div class="value">{{ $formatMoney(transaction.usd) }} USD</div>
+            <div class="value">{{ $formatMoney(transaction.usd) }} {{ $store.state.currency }}</div>
           </div>
         </div>
         -->
