@@ -1,12 +1,12 @@
 <template>
-  <div class="recent-transactions">
+  <section id="dashboard--recent-transactions">
     <div class="header">
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
       <aph-simple-transactions :transactions="transactions" :onClick="viewTransaction"></aph-simple-transactions>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -52,15 +52,15 @@ export default {
 </script>
 
 <style lang="scss">
-.recent-transactions {
+#dashboard--recent-transactions {
   @extend %tile-light;
 
   display: flex;
   flex-direction: column;
-  padding-bottom: $space;
+  padding-bottom: $space-lg;
 
   .header {
-    padding: $space;
+    padding: $space-lg;
 
     h1.underlined {
       @extend %underlined-header;
@@ -71,7 +71,7 @@ export default {
   }
 
   .body {
-    padding: 0 $space;
+    padding: 0 $space-lg;
     overflow: auto;
   }
 }

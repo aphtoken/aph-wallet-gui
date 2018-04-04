@@ -1,5 +1,5 @@
 <template>
-  <div class="holdings">
+  <section id="dashboard--holdings">
     <div class="header">
       <h1 class="underlined">My holdings</h1>
     </div>
@@ -18,7 +18,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -61,12 +61,12 @@ export default {
 </script>
 
 <style lang="scss">
-.holdings {
+#dashboard--holdings {
   display: flex;
   flex-direction: column;
 
   .header {
-    padding: $space;
+    padding: $space-lg;
 
     h1.underlined {
       @extend %underlined-header;

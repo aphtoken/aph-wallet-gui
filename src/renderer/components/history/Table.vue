@@ -8,7 +8,7 @@
       <div class="cell status">Status</div>
     </div>
     <div class="body">
-      <div v-for="(transaction, index) in transactions()" :key="index" 
+      <div v-for="(transaction, index) in transactions()" :key="index"
            @click="openTransaction(transaction)"
            :class="['transaction', {active: transaction.active, increase: transaction.amount > 0}]">
         <div class="cell date">{{ $formatDate(transaction.block_time) }}</div>
@@ -75,7 +75,7 @@
                 <div class="label">Confirmed</div>
               </div>
             </div>
-          </div>          
+          </div>
         </div>
       </div>
     </div>
@@ -129,7 +129,7 @@ export default {
 <style lang="scss">
 #history--table {
   @extend %tile-light;
-  padding: $space;
+  padding: $space-lg $space-lg 0;
   height: 95%;
 
   .header {
@@ -210,12 +210,12 @@ export default {
       &:hover, &.active {
         background: $light-grey;
       }
-      
+
       .details {
-        display: none;   
+        display: none;
         padding: $space;
         flex-wrap: wrap;
-        
+
         .section {
           display: flex;
           width: 100%;
@@ -225,7 +225,7 @@ export default {
         .section + .section {
           margin-top: $space-lg;
         }
-        
+
         .row {
           display: flex;
           width: 100%;
@@ -291,8 +291,8 @@ export default {
             margin-top: $space;
           }
         }
-        
-          
+
+
         .inputs, .outputs {
           max-width: 35rem;
         }

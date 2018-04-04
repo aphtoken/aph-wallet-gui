@@ -1,5 +1,5 @@
 <template>
-  <section id="send">
+  <section id="dashboard--send">
     <div class="header">
       <h1 class="underlined">Send</h1>
     </div>
@@ -66,26 +66,26 @@
 
 <script>
 export default {
-  computed: {
-    currencies() {
-      return this.$store.state.holdings.reduce(
-        (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
-          if (!name || !symbol) {
-            return result;
-          }
-
-          result.push({
-            label: `${name}   Balance: ${balance}`,
-            value: symbol,
-            asset,
-            isNep5,
-            unitValue,
-          });
-
+  beforeMount() {
+    this.currencies = this.$store.state.holdings.reduce(
+      (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
+        if (!name || !symbol) {
           return result;
-        }, []);
-    },
+        }
 
+        result.push({
+          label: `${name} (${balance})`,
+          value: symbol,
+          asset,
+          isNep5,
+          unitValue,
+        });
+
+        return result;
+      }, []);
+  },
+
+  computed: {
     showNextButton() {
       return this.address && this.amount && parseFloat(this.amount) && this.currency;
     },
@@ -101,8 +101,12 @@ export default {
     },
 
     send() {
-      this.$services.neo.sendFunds(this.address, this.currency.asset,
-        this.amount, this.currency.isNep5);
+      this.$services.neo.sendFunds(
+        this.address,
+        _.find(this.currencies, { value: this.currency }).asset,
+        this.amount,
+        this.currency.isNep5,
+      );
     },
   },
   data() {
@@ -110,6 +114,7 @@ export default {
       address: null,
       amount: null,
       currency: null,
+      currencies: [],
       showConfirmation: false,
     };
   },
@@ -118,7 +123,7 @@ export default {
 
 
 <style lang="scss">
-#send {
+#dashboard--send {
   @extend %tile-light;
 
   display: flex;
@@ -127,7 +132,7 @@ export default {
   .header {
     display: flex;
     flex: none;
-    padding: $space;
+    padding: $space-lg;
 
     h1.underlined {
       @extend %underlined-header;
@@ -139,7 +144,7 @@ export default {
 
   .body {
     flex: 1;
-    padding: $space;
+    padding: 0 $space-lg $space-lg;
 
     .aph-input {
       border-color: $dark;

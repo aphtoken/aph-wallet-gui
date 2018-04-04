@@ -1,17 +1,17 @@
 <template>
-  <div id="history--search">
+  <section id="history--search">
     <div class="header">
       <h1 class="underlined">Search</h1>
     </div>
     <div class="body">
       <aph-select :light="true" :options="dateRanges" :initial-value="dateRanges[0]" v-model="selectedDateRange"></aph-select>
-      <div id="search-custom" :class="[{isCustom: selectedDateRange && selectedDateRange.value == 'custom'}]">
+      <div id="search-custom" :class="[{isCustom: selectedDateRange == 'custom'}]">
         <div class="custom-search-label">Custom Search</div>
         <aph-date-picker placeholder="From" v-model="fromDate" ref="fromDate"></aph-date-picker>
         <aph-date-picker placeholder="To" v-model="toDate" ref="toDate"></aph-date-picker>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -50,17 +50,17 @@ export default {
 
   watch: {
     selectedDateRange() {
-      if (this.selectedDateRange.value === 'custom') {
+      if (this.selectedDateRange === 'custom') {
         this.$refs.fromDate.setDay(this.fromDate);
         this.$refs.toDate.setDay(this.toDate);
         return;
-      } else if (this.selectedDateRange.value === null) {
+      } else if (this.selectedDateRange === null) {
         this.fromDate = null;
         this.toDate = null;
         return;
       }
 
-      const daysBack = Number.parseInt(this.selectedDateRange.value, 10);
+      const daysBack = Number.parseInt(this.selectedDateRange, 10);
       this.fromDate = moment().startOf('day').subtract(daysBack, 'days');
       this.toDate = moment().startOf('day');
     },
@@ -81,7 +81,7 @@ export default {
   @extend %tile-light;
 
   .header {
-    padding: $space;
+    padding: $space-lg $space-lg 0;
 
     h1.underlined {
       @extend %underlined-header;
@@ -92,7 +92,7 @@ export default {
   }
 
   .body {
-    padding: $space;
+    padding: $space-lg;
 
     .custom-search-label {
       @extend %small-uppercase-grey-label;
@@ -105,10 +105,10 @@ export default {
         margin-top: $space;
       }
     }
-    
+
     #search-custom {
       display: none;
-      
+
       &.isCustom {
         display: block;
       }

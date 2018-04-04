@@ -1,9 +1,9 @@
 <template>
-  <div id="login--saved-wallet">
+  <section id="login--saved-wallet">
     <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
     <aph-input v-if="showPassphrase" v-model="passphrase" placeholder="Enter your passphrase here" type="password" @enter="login"></aph-input>
     <button v-if="showButton" class="login" @click="login" :disabled="authenticating">{{ buttonLabel }}</button>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -43,7 +43,7 @@ export default {
         /* don't know how to make this behave using async/await as you described,
         how to we get back the error messages?
         Still not sure why the Promise model would freeze the UI */
-        this.$services.wallets.openSavedWallet(this.wallet.label, this.passphrase)
+        this.$services.wallets.openSavedWallet(this.wallet, this.passphrase)
           .then(() => {
             this.$router.push('/authenticated/dashboard');
           })
@@ -56,7 +56,9 @@ export default {
   },
 
   mounted() {
-    this.wallets = this.$services.wallets.getAllAsArray();
+    this.wallets = this.$services.wallets.getAllAsArray().map((wallet) => {
+      return _.set(wallet, 'value', wallet.label);
+    });
   },
 
   watch: {
@@ -69,8 +71,8 @@ export default {
 
 <style lang="scss">
 #login--saved-wallet {
-  max-width: toRem(350px);
-  width: 50%;
+  max-width: toRem(400px);
+  width: 60%;
 
   .aph-input {
     margin-top: $space-lg;

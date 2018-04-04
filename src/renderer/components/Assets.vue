@@ -60,13 +60,6 @@ export default {
     }
   }
 
-  .content {
-    background: $light-grey;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-
   .grid {
     display: flex;
     flex-direction: row;
@@ -91,7 +84,8 @@ export default {
 
           box-shadow: $box-shadow;
           cursor: default;
-          padding-bottom: $space-xl;
+          height: auto;
+          padding: $space-xl 0;
           width: toRem(250px);
 
           .aph-icon {

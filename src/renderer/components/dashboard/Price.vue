@@ -1,5 +1,5 @@
 <template>
-  <div id="price" v-if="$store.state.statsToken">
+  <section id="dashboard--price" v-if="$store.state.statsToken">
     <div class="header">
       <h1 class="underlined">Price</h1>
       <div class="current-value">
@@ -24,7 +24,7 @@
     <div class="body">
       <line-chart ref="chart" :chart-data="chartData" :options="chartOptions" v-if="chartOptions"></line-chart>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -156,7 +156,7 @@ export default {
 </script>
 
 <style lang="scss">
-#price {
+#dashboard--price {
   @extend %tile-light;
 
   display: flex;
@@ -165,7 +165,7 @@ export default {
   .header {
     display: flex;
     flex: none;
-    padding: $space;
+    padding: $space-lg;
 
     h1.underlined {
       @extend %underlined-header;
@@ -189,7 +189,7 @@ export default {
     display: flex;
     flex: none;
     justify-content: flex-end;
-    padding: $space;
+    padding: 0 $space-lg;
 
     > div {
       align-items: center;
@@ -213,7 +213,7 @@ export default {
   .body {
     flex: 1;
     min-height: 0;
-    padding: $space;
+    padding: $space-lg;
 
     > div {
       height: 100%;

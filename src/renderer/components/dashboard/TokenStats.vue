@@ -1,5 +1,5 @@
 <template>
-  <div class="token-stats" v-if="$store.state.statsToken">
+  <section id="dashboard--token-stats" v-if="$store.state.statsToken">
     <div class="header">
       <h1 class="underlined">Token Stats</h1>
       <div class="current-value">
@@ -37,7 +37,7 @@
         <div :class="['amount', {increase: $store.state.statsToken.change24hrPercent > 0, decrease: $store.state.statsToken.change24hrPercent < 0}]">{{ $formatNumber($store.state.statsToken.change24hrPercent) }}</div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -78,7 +78,7 @@ export default {
 </script>
 
 <style lang="scss">
-.token-stats {
+#dashboard--token-stats {
   @extend %tile-light;
 
   display: flex;
@@ -87,7 +87,7 @@ export default {
   .header {
     display: flex;
     flex: none;
-    padding: $space;
+    padding: $space-lg;
 
     h1.underlined {
       @extend %underlined-header;
@@ -112,10 +112,10 @@ export default {
     align-items: center;
     display: flex;
     flex: 1;
-    padding: $space;
+    padding: 0 $space-lg;
 
     .aph-token-icon {
-      $width: toRem(150px);
+      $width: toRem(125px);
 
       padding: 0 $space-lg 0 0;
 
@@ -182,7 +182,7 @@ export default {
   .footer {
     display: flex;
     flex: none;
-    padding: $space;
+    padding: $space-lg;
 
     > div {
       flex: none;

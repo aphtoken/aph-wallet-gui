@@ -61,12 +61,12 @@ export default {
         const wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
         const account = new wallet.Account(wif);
         const currentWallet = {
-          label: walletToOpen.label,
-          wif,
-          encryptedWIF: walletToOpen.encryptedWIF,
           address: account.address,
+          encryptedWIF: walletToOpen.encryptedWIF,
+          label: walletToOpen.label,
           passphrase,
           privateKey: account.privateKey,
+          wif,
         };
 
         this.setCurrentWallet(currentWallet);

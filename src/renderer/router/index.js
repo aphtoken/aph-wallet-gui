@@ -72,7 +72,6 @@ export default new Router({
               components: {
                 'bottom-left': require('@/components/dashboard/Holdings').default,
                 'bottom-right': require('@/components/dashboard/RecentTransactions').default,
-                header: require('@/components/PortfolioHeader').default,
                 'top-left': require('@/components/dashboard/TokenStats').default,
                 'top-right': require('@/components/dashboard/TopRightTile').default,
               },
@@ -82,7 +81,6 @@ export default new Router({
               components: {
                 'bottom-left': require('@/components/dashboard/Holdings').default,
                 'bottom-right': require('@/components/dashboard/RecentTransactions').default,
-                header: require('@/components/PortfolioHeader').default,
                 'top-left': require('@/components/dashboard/TokenStats').default,
                 'top-right': require('@/components/dashboard/Send').default,
               },
@@ -96,7 +94,6 @@ export default new Router({
             {
               path: '',
               components: {
-                header: require('@/components/PortfolioHeader').default,
                 left: require('@/components/assets/Table').default,
               },
             },
@@ -109,8 +106,21 @@ export default new Router({
             {
               path: '',
               components: {
-                header: require('@/components/PortfolioHeader').default,
                 left: require('@/components/history/Table').default,
+                right: require('@/components/history/Search').default,
+              },
+            },
+          ],
+        },
+        {
+          path: 'settings',
+          component: require('@/components/Settings').default,
+          children: [
+            {
+              path: '',
+              components: {
+                left: require('@/components/settings/Preferences').default,
+                right: require('@/components/settings/Wallets').default,
               },
             },
           ],

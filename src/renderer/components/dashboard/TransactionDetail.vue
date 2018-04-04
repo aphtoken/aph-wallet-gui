@@ -1,5 +1,5 @@
 <template>
-  <div class="transaction-detail">
+  <section id="dashboard--transaction-detail">
     <div class="header">
       <h1 class="underlined">Transaction</h1>
     </div>
@@ -82,7 +82,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -104,15 +104,15 @@ export default {
 </script>
 
 <style lang="scss">
-.transaction-detail {
+#dashboard--transaction-detail {
   @extend %tile-light;
 
   display: flex;
   flex-direction: column;
-  padding-bottom: $space;
+  padding-bottom: $space-lg;
 
   .header {
-    padding: $space;
+    padding: $space-lg;
     position: relative;
 
     h1.underlined {
@@ -125,7 +125,7 @@ export default {
 
   .body {
     overflow: auto;
-    padding: $space $space 0 $space;
+    padding: 0 $space-lg;
 
     .transactions-table {
       td {

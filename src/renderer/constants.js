@@ -1,3 +1,7 @@
+const defaultSettings = {
+  CURRENCY: 'USD',
+};
+
 const formats = {
   DATE: 'DD-MM-YYYY',
   DATE_SHORT: 'DD-MM',
@@ -18,6 +22,7 @@ const loadStates = {
 };
 
 export {
+  defaultSettings,
   formats,
   intervals,
   loadStates,

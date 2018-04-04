@@ -1,5 +1,5 @@
 <template>
-  <div id="login--menu">
+  <section id="login--menu">
     <router-link class="saved-wallet-btn" to="/login/saved-wallet">
       Saved wallet
     </router-link>
@@ -9,7 +9,7 @@
     <router-link class="private-key-btn" to="/login/private-key">
       Private key
     </router-link>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -20,8 +20,8 @@ export default {
 
 <style lang="scss">
 #login--menu {
-  max-width: toRem(350px);
-  width: 50%;
+  max-width: toRem(400px);
+  width: 60%;
 
   a {
     color: white;
