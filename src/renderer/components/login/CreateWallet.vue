@@ -8,7 +8,7 @@
                 @enter="create"></aph-input>
     <aph-input v-model="passphraseConfirm" placeholder="Repeat your passphrase here" type="password"
                 @enter="create"></aph-input>
-    <div v-if="showButton" class="create" @click="create">{{ buttonLabel }}</div>
+    <button v-if="showButton" class="create" @click="create" :disabled="creating">{{ buttonLabel }}</button>
   </div>
 </template>
 
@@ -46,20 +46,20 @@ export default {
       }
       this.creating = true;
 
-      this.$services.neo
-        .createWallet(this.walletName, this.passphrase, this.passphraseConfirm)
-        .then((walletName) => {
-          this.creating = false;
-
-          this.$router.push({
-            path: '/login/wallet-created',
-            query: { walletName },
+      setTimeout(() => {
+        this.$services.neo
+          .createWallet(this.walletName, this.passphrase, this.passphraseConfirm)
+          .then((walletName) => {
+            this.$router.push({
+              path: '/login/wallet-created',
+              query: { walletName },
+            });
+          })
+          .catch((e) => {
+            this.creating = false;
+            this.$services.alerts.exception(e);
           });
-        })
-        .catch((e) => {
-          this.creating = false;
-          this.$services.alerts.exception(e);
-        });
+      }, 100);
     },
   },
 };
@@ -67,6 +67,7 @@ export default {
 
 <style lang="scss">
 #login--create-wallet {
+  max-width: toRem(350px);
   width: 50%;
 
   .help-text {

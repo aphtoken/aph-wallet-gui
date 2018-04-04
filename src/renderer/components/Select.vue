@@ -136,8 +136,7 @@ export default {
     font-family: GilroyMedium;
     font-size: toRem(16px);
     height: $input-height;
-    line-height: $input-height;
-    padding: 0 $space * 5;
+    padding: toRem(14px) 0;
     text-align: center;
     transition: all .1s linear;
     white-space: nowrap;
@@ -184,10 +183,10 @@ export default {
   &.is-light {
     .label {
       background: $light-grey;
-      border: none;
+      border-color: transparent;
       color: $dark;
       text-align: left;
-      padding: 0 $space;
+      padding: toRem(14px) $space;
     }
 
     .aph-icon .fill {

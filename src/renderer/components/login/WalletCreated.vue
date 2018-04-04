@@ -96,6 +96,9 @@ export default {
 
 <style lang="scss">
 #login--wallet-created {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
   width: 75%;
 
   .help-text {
@@ -170,6 +173,8 @@ export default {
     display: flex;
     justify-content: center;
     margin-top: $space-lg;
+    max-width: toRem(350px);
+    width: 50%;
 
     a, div {
       @extend %btn-outline;
@@ -177,7 +182,7 @@ export default {
       &.print, &.done {
         background: $purple;
       }
-      
+
       & + a {
         margin-left: $space-lg;
       }

@@ -20,7 +20,8 @@ export default {
 
 <style lang="scss">
 #login--menu {
-  width: 20rem;
+  max-width: toRem(350px);
+  width: 50%;
 
   a {
     color: white;

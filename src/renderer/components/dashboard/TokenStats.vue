@@ -20,7 +20,7 @@
       </div>
       <div class="claim" v-if="$store.state.statsToken.symbol === 'NEO'">
         <div class="available">{{ $formatNumber($store.state.statsToken.availableToClaim) }} Gas Available</div>
-        <div class="claim-btn" @click="claim">Claim</div>
+        <button class="claim-btn" @click="claim" :disabled="claiming">{{ buttonLabel }}</button>
       </div>
     </div>
     <div class="footer">
@@ -42,19 +42,36 @@
 
 <script>
 export default {
+  computed: {
+    buttonLabel() {
+      return this.claiming ? 'Claiming...' : 'Claim';
+    },
+  },
+
+  data() {
+    return {
+      claiming: false,
+    };
+  },
+
   methods: {
     claim() {
       if (_.isNull(this.wallet)) {
         return;
       }
 
-      this.$services.neo.claimGas()
-        .then(() => {
+      this.claiming = true;
 
-        })
-        .catch((e) => {
-          this.$services.alert.exception(e);
-        });
+      setTimeout(() => {
+        this.$services.neo.claimGas()
+          .then(() => {
+            this.claiming = false;
+          })
+          .catch((e) => {
+            this.claiming = false;
+            this.$services.alert.exception(e);
+          });
+      }, 100);
     },
   },
 };
@@ -113,6 +130,7 @@ export default {
     }
 
     .balance {
+      flex: 1;
       .name {
         color: $purple;
         font-family: GilroyMedium;
@@ -141,19 +159,23 @@ export default {
         }
       }
     }
-    
+
     .claim {
-      padding: $space-lg 0 0 $space-lg;
+      flex: none;
+      margin-left: $space-lg;
       font-family: Gilroy;
       font-size: toRem(20px);
-      margin-bottom: $space;  
-      
+
       .available {
+        @extend %small-uppercase-grey-label;
+
         margin-bottom: $space-sm;
-      }  
+      }
     }
     .claim-btn {
-      @extend %btn-footer;
+      @extend %btn-outline;
+
+      color: $purple;
     }
   }
 

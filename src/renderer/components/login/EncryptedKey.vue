@@ -37,7 +37,8 @@ export default {
 
 <style lang="scss">
 #login--saved-wallet {
-  width: 20rem;
+  max-width: toRem(350px);
+  width: 50%;
 
   .aph-input {
     margin-top: $space-lg;

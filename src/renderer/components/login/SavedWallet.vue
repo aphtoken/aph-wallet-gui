@@ -2,13 +2,17 @@
   <div id="login--saved-wallet">
     <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
     <aph-input v-if="showPassphrase" v-model="passphrase" placeholder="Enter your passphrase here" type="password" @enter="login"></aph-input>
-    <div v-if="showButton" class="login" @click="login">Login</div>
+    <button v-if="showButton" class="login" @click="login" :disabled="authenticating">{{ buttonLabel }}</button>
   </div>
 </template>
 
 <script>
 export default {
   computed: {
+    buttonLabel() {
+      return this.authenticating ? 'Logging in...' : 'Login';
+    },
+
     showButton() {
       return this.passphrase.length > 0 && this.showPassphrase;
     },
@@ -20,6 +24,7 @@ export default {
 
   data() {
     return {
+      authenticating: false,
       passphrase: '',
       wallet: null,
       wallets: [],
@@ -32,6 +37,8 @@ export default {
         return;
       }
 
+      this.authenticating = true;
+
       setTimeout(() => {
         /* don't know how to make this behave using async/await as you described,
         how to we get back the error messages?
@@ -41,9 +48,10 @@ export default {
             this.$router.push('/authenticated/dashboard');
           })
           .catch((e) => {
+            this.authenticating = false;
             this.$services.alerts.exception(e);
           });
-      }, 1000);
+      }, 100);
     },
   },
 
@@ -61,7 +69,8 @@ export default {
 
 <style lang="scss">
 #login--saved-wallet {
-  width: 20rem;
+  max-width: toRem(350px);
+  width: 50%;
 
   .aph-input {
     margin-top: $space-lg;

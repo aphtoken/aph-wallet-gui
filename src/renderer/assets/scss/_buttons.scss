@@ -26,21 +26,32 @@
 }
 
 %btn-outline {
+  background: transparent;
   border-radius: $border-radius;
   border: $border;
   color: white;
   cursor: pointer;
+  display: inline-block;
   font-size: toRem(16px);
   height: $button-height;
-  line-height: $button-height;
-  padding: 0 $space * 5;
+  outline: none;
+  padding: toRem(14px) 0;
   text-align: center;
   transition: $transition;
+  user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  width: 100%;
 
   &:hover {
     background: $purple;
     box-shadow: $box-shadow;
     color: white;
+  }
+
+  &.disabled, &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 }
 
