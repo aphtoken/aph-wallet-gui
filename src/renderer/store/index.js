@@ -10,6 +10,7 @@ Vue.use(Vuex);
 const state = {
   activeTransaction: null,
   currency: settings.getCurrency(),
+  currencySymbol: settings.getCurrencySymbol(),
   holdings: [],
   portfolio: {},
   recentTransactions: [],

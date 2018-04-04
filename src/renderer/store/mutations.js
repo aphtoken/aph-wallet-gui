@@ -5,6 +5,7 @@ export {
   clearSearchTransactions,
   setActiveTransaction,
   setCurrency,
+  setCurrencySymbol,
   setHoldings,
   setPortfolio,
   setRecentTransactions,
@@ -36,6 +37,10 @@ function setActiveTransaction(state, transaction) {
 
 function setCurrency(state, currency) {
   state.currency = currency;
+}
+
+function setCurrencySymbol(state, currencySymbol) {
+  state.currencySymbol = currencySymbol;
 }
 
 function setHoldings(state, holdings) {

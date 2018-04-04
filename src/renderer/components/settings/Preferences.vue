@@ -15,38 +15,13 @@
 <script>
 export default {
   beforeMount() {
+    this.currencies = this.$services.settings.getCurrencies();
     this.selectedCurrency = this.$services.settings.getCurrency();
   },
 
   data() {
     return {
-      currencies: [
-        {
-          label: 'USD',
-          value: 'USD',
-        },
-        {
-          label: 'EUR',
-          value: 'EUR',
-        },
-        {
-          label: 'JPY',
-          value: 'JPY',
-        },
-        {
-          label: 'GBP',
-          value: 'GBP',
-        },
-        {
-          label: 'CHF',
-          value: 'CHF',
-        },
-        {
-          label: 'CAD',
-          value: 'CAD',
-        },
-      ],
-
+      currencies: [],
       selectedCurrency: null,
     };
   },
@@ -55,6 +30,7 @@ export default {
     selectedCurrency(currency) {
       this.$services.settings.setCurrency(currency);
       this.$store.commit('setCurrency', currency);
+      this.$store.commit('setCurrencySymbol', this.$services.settings.getCurrencySymbol());
     },
   },
 };
