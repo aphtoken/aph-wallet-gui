@@ -22,8 +22,8 @@ const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969
 ]; */
 
 const network = 'TestNet';
-const rpcEndpoint = 'http://test3.cityofzion.io:8880'; // todo, an app preference to move between test and main net
-const aphApiBaseUrl = 'http://localhost:62433/api';
+const rpcEndpoint = 'http://18.219.220.162:30333';
+const aphApiBaseUrl = 'http://18.219.220.162:62433/api';
 let lastClaimSent;
 let lastTransactionsList = null;
 
