@@ -1,5 +1,5 @@
 <template>
-  <div id="login--create-wallet">
+  <section id="login--create-wallet">
     <p class="help-text">Choose a name for your new wallet:</p>
     <aph-input v-model="walletName" placeholder="Enter your wallet name here"
                 @enter="create"></aph-input>
@@ -9,7 +9,7 @@
     <aph-input v-model="passphraseConfirm" placeholder="Repeat your passphrase here" type="password"
                 @enter="create"></aph-input>
     <button v-if="showButton" class="create" @click="create" :disabled="creating">{{ buttonLabel }}</button>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -67,8 +67,8 @@ export default {
 
 <style lang="scss">
 #login--create-wallet {
-  max-width: toRem(350px);
-  width: 50%;
+  max-width: toRem(400px);
+  width: 60%;
 
   .help-text {
     color: white;

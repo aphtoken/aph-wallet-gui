@@ -11,7 +11,7 @@
         <p>Create Wallet</p>
       </router-link>
     </div>
-    <router-link class="settings-btn" to="login">Settings</router-link>
+    <!-- <router-link class="settings-btn" to="login">Settings</router-link> -->
   </section>
 </template>
 
@@ -28,7 +28,7 @@ export default {
   flex-direction: column;
 
   .icon.logo {
-    height: 15rem;
+    height: 20rem;
   }
 
   .login-btn, .create-wallet-btn {

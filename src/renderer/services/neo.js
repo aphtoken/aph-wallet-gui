@@ -6,9 +6,10 @@ import {
 } from '@cityofzion/neon-js';
 import BigNumber from 'bignumber.js';
 import alerts from './alerts';
-import wallets from './wallets';
+import settings from './settings';
 import tokens from './tokens';
 import valuation from './valuation';
+import wallets from './wallets';
 
 const toBigNumber = value => new BigNumber(String(value));
 
@@ -404,13 +405,15 @@ export default {
             return Promise.all(promises)
               .then(() => {
                 const valuationsPromises = [];
+                const lowercaseCurrency = settings.getCurrency().toLowerCase();
+
                 holdings.forEach((h) => {
                   valuationsPromises.push(valuation.getValuation(h.symbol)
                     .then((val) => {
                       h.totalSupply = val.total_supply;
-                      h.marketCap = val.market_cap_usd;
+                      h.marketCap = val[`market_cap_${lowercaseCurrency}`];
                       h.change24hrPercent = val.percent_change_24h;
-                      h.unitValue = val.price_usd;
+                      h.unitValue = val[`price_${lowercaseCurrency}`];
                       h.unitValue24hrAgo = h.unitValue / (1 + (h.change24hrPercent / 100.0));
                       h.change24hrValue = (h.unitValue * h.balance)
                         - (h.unitValue24hrAgo * h.balance);

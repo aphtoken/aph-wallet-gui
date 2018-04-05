@@ -1,10 +1,7 @@
 <template>
-  <div class="transaction-detail">
+  <section id="dashboard--transaction-detail">
     <div class="header">
       <h1 class="underlined">Transaction</h1>
-      <div class="close" @click="close()">
-        close
-      </div>
     </div>
     <div class="body">
       <div class="section">
@@ -39,7 +36,7 @@
           </div>
           <div class="column">
             <div class="label">Value</div>
-            <div class="value">{{ $formatMoney(transaction.usd) }} USD</div>
+            <div class="value">{{ $formatMoney(transaction.usd) }} {{ $store.state.currency }}</div>
           </div>
         </div>
         -->
@@ -85,7 +82,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -103,26 +100,19 @@ export default {
       return this.$store.state.activeTransaction.vout;
     },
   },
-
-  methods: {
-    close() {
-      this.$store.state.activeTransaction.active = false;
-      this.$store.commit('clearActiveTransaction');
-    },
-  },
 };
 </script>
 
 <style lang="scss">
-.transaction-detail {
+#dashboard--transaction-detail {
   @extend %tile-light;
 
   display: flex;
   flex-direction: column;
-  padding-bottom: $space;
+  padding-bottom: $space-lg;
 
   .header {
-    padding: $space;
+    padding: $space-lg;
     position: relative;
 
     h1.underlined {
@@ -131,18 +121,11 @@ export default {
       flex: 1;
       margin-bottom: 0;
     }
-    .close {
-      position: absolute;
-      right: 3px;
-      top: 3px;
-      padding: 10px;
-      cursor: pointer;
-    }
   }
 
   .body {
     overflow: auto;
-    padding: $space $space 0 $space;
+    padding: 0 $space-lg;
 
     .transactions-table {
       td {

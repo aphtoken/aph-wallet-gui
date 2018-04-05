@@ -8,19 +8,15 @@
         <router-view name="left"></router-view>
       </div>
       <div class="grid--column right">
-        <search></search>
+        <router-view name="right"></router-view>
       </div>
     </div>
   </section>
 </template>
 
 <script>
-import Search from './history/Search';
-
 export default {
-  components: {
-    Search,
-  },
+
 };
 </script>
 
@@ -39,13 +35,6 @@ export default {
       flex: 1;
       margin-bottom: 0;
     }
-  }
-
-  .content {
-    background: $light-grey;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
   }
 
   .grid {

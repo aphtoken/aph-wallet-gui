@@ -50,30 +50,6 @@ export default {
   table-layout: fixed;
   width: 100%;
 
-  .address {
-    @include truncate();
-  }
-
-  .amount {
-    text-align: right;
-
-    &.received {
-      color: $green;
-
-      &:before {
-        content: "+";
-      }
-    }
-
-    &.sent {
-      color: $red;
-    }
-  }
-
-  .currency {
-    text-align: center;
-  }
-
   td {
     border-top: 1px solid $light-grey;
     padding: $space $space-sm;
@@ -85,6 +61,30 @@ export default {
 
     &:last-child {
       padding-right: 0;
+    }
+
+    &.address {
+      @include truncate();
+    }
+
+    &.currency {
+      text-align: center;
+    }
+
+    &.amount {
+      text-align: right;
+
+      &.received {
+        color: $green;
+
+        &:before {
+          content: "+";
+        }
+      }
+
+      &.sent {
+        color: $red;
+      }
     }
   }
 
@@ -100,7 +100,9 @@ export default {
       &:hover, &.active {
         td {
           background: $light-grey;
-          color: $purple;
+          &:not(.amount) {
+            color: $purple;
+          }
         }
       }
     }

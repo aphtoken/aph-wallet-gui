@@ -1,9 +1,9 @@
 <template>
-  <div id="login--saved-wallet">
+  <section id="login--saved-wallet">
     <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password" ref="password"></aph-input>
     <aph-input v-model="encryptedKey" placeholder="Enter your encrypted key here" type="password" @enter="login"></aph-input>
     <div @click="login" :class="['login', {hidden: showButton === false}]">Login</div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -41,8 +41,8 @@ export default {
 
 <style lang="scss">
 #login--saved-wallet {
-  max-width: toRem(350px);
-  width: 50%;
+  max-width: toRem(400px);
+  width: 60%;
 
   .aph-input {
     margin-top: $space-lg;

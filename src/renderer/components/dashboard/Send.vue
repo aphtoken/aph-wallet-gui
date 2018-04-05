@@ -1,5 +1,5 @@
 <template>
-  <section id="send">
+  <section id="dashboard--send">
     <div class="header">
       <h1 class="underlined">Send</h1>
     </div>
@@ -12,7 +12,7 @@
           </div>
           <div class="column">
             <div class="label">Value</div>
-            <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} USD</div>
+            <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
           </div>
         </div>
         <div class="row">
@@ -53,7 +53,7 @@
         </div>
         <div class="estimated-value">
           <div class="label">Estimated</div>
-          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} USD</div>
+          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
         </div>
       </div>
       <div class="footer">
@@ -68,28 +68,28 @@
 let sendTimeoutIntervalId;
 
 export default {
+  beforeMount() {
+    this.currencies = this.$store.state.holdings.reduce(
+      (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
+        if (!name || !symbol) {
+          return result;
+        }
+
+        result.push({
+          label: `${name} (${balance})`,
+          value: symbol,
+          asset,
+          isNep5,
+          unitValue,
+        });
+
+        return result;
+      }, []);
+  },
+
   computed: {
     sendButtonLabel() {
       return this.sending ? 'Waiting for confirmation...' : 'Send';
-    },
-
-    currencies() {
-      return this.$store.state.holdings.reduce(
-        (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
-          if (!name || !symbol) {
-            return result;
-          }
-
-          result.push({
-            label: `${name}   Balance: ${balance}`,
-            value: symbol,
-            asset,
-            isNep5,
-            unitValue,
-          });
-
-          return result;
-        }, []);
     },
 
     showNextButton() {
@@ -145,6 +145,7 @@ export default {
       address: null,
       amount: null,
       currency: null,
+      currencies: [],
       showConfirmation: false,
       sending: false,
     };
@@ -154,7 +155,7 @@ export default {
 
 
 <style lang="scss">
-#send {
+#dashboard--send {
   @extend %tile-light;
 
   display: flex;
@@ -163,7 +164,7 @@ export default {
   .header {
     display: flex;
     flex: none;
-    padding: $space;
+    padding: $space-lg;
 
     h1.underlined {
       @extend %underlined-header;
@@ -175,7 +176,7 @@ export default {
 
   .body {
     flex: 1;
-    padding: $space;
+    padding: 0 $space-lg $space-lg;
 
     .aph-input {
       border-color: $dark;

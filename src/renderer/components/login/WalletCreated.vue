@@ -173,8 +173,8 @@ export default {
     display: flex;
     justify-content: center;
     margin-top: $space-lg;
-    max-width: toRem(350px);
-    width: 50%;
+    max-width: toRem(400px);
+    width: 60%;
 
     a, div {
       @extend %btn-outline;

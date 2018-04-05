@@ -1,8 +1,8 @@
 <template>
-  <div id="login--saved-wallet">
+  <section id="login--saved-wallet">
     <aph-input v-model="wif" placeholder="Enter your private key here (WIF)" type="password" ref="password" @enter="login"></aph-input>
     <div :class="['login', {hidden: showButton === false}]" @click="login">Login</div>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -39,8 +39,8 @@ export default {
 
 <style lang="scss">
 #login--saved-wallet {
-  max-width: toRem(350px);
-  width: 50%;
+  max-width: toRem(400px);
+  width: 60%;
 
   .aph-input {
     margin-top: $space-lg;

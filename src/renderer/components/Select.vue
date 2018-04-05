@@ -1,7 +1,7 @@
 <template>
   <div :class="['aph-select', {'is-open': isOpen, 'is-light': light}]">
-    <div class="label" @click="toggleOpen">{{ label }}</div>
-    <ul class="dropdown" v-if="isOpen">
+    <div class="aph-select--label" @click="toggleOpen">{{ label }}</div>
+    <ul class="aph-select--dropdown" v-if="isOpen">
       <li :class="{selected: isSelected(option)}" v-for="(option, index) in options" :key="index" @click="toggleSelectedOption(option)">{{ option.label }}</li>
     </ul>
     <aph-icon :name="iconName"></aph-icon>
@@ -28,7 +28,7 @@ export default {
     },
 
     label() {
-      return this.selectedOption ? this.selectedOption.label : this.placeholder;
+      return this.getSelectedOptionLabel() || this.placeholder;
     },
   },
 
@@ -44,8 +44,14 @@ export default {
       this.isOpen = false;
     },
 
-    isSelected(option) {
-      return this.selectedOption === option;
+    getSelectedOptionLabel() {
+      const option = _.find(this.options, { value: this.selectedOption });
+
+      return option ? option.label : null;
+    },
+
+    isSelected({ value }) {
+      return this.selectedOption === value;
     },
 
     toggleOpen() {
@@ -53,7 +59,7 @@ export default {
     },
 
     toggleSelectedOption(option) {
-      this.selectedOption = this.isSelected(option) ? null : option;
+      this.selectedOption = this.allowEmptyValue && this.isSelected(option) ? null : option.value;
       this.$emit('input', this.selectedOption);
       this.close();
     },
@@ -64,9 +70,13 @@ export default {
   },
 
   props: {
+    allowEmptyValue: {
+      default: false,
+      type: Boolean,
+    },
+
     initialValue: {
       default: null,
-      type: Object,
     },
 
     light: {
@@ -83,7 +93,7 @@ export default {
 
     placeholder: {
       default() {
-        return 'No Option Select';
+        return 'No Option Selected';
       },
       type: String,
     },
@@ -128,7 +138,7 @@ export default {
     }
   }
 
-  .label {
+  .aph-select--label {
     border-radius: $border-radius;
     border: $border;
     color: white;
@@ -142,7 +152,7 @@ export default {
     white-space: nowrap;
   }
 
-  .dropdown {
+  .aph-select--dropdown {
     background: white;
     border-radius: $border-radius;
     left: 0;
@@ -183,7 +193,7 @@ export default {
   }
 
   &.is-light {
-    .label {
+    .aph-select--label {
       background: $light-grey;
       border-color: transparent;
       color: $dark;
@@ -195,7 +205,7 @@ export default {
       fill: $dark;
     }
 
-    .dropdown {
+    .aph-select--dropdown {
       box-shadow: $box-shadow;
       margin: $space 0 0;
 

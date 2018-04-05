@@ -35,13 +35,6 @@ export default {
   flex-direction: row;
   flex: 1;
 
-  .content {
-    background: $light-grey;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-
   .grid {
     display: flex;
     flex-direction: row;

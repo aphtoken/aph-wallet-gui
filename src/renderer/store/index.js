@@ -8,6 +8,8 @@ Vue.use(Vuex);
 
 const state = {
   activeTransaction: null,
+  currency: null,
+  currencySymbol: null,
   holdings: [],
   portfolio: {},
   recentTransactions: [],
