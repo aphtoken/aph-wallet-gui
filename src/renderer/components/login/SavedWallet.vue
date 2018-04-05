@@ -1,5 +1,6 @@
 <template>
   <section id="login--saved-wallet">
+    <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
     <aph-input v-model="passphrase" placeholder="Enter your passphrase here" 
                type="password" @enter="login" ref="password"></aph-input>
     <button class="login" @click="login" :disabled="authenticating"
