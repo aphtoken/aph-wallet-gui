@@ -35,8 +35,8 @@
         </div>
       </div>
       <div class="footer">
-        <div class="back-btn" @click="showConfirmation = false">Back</div>
-        <div class="send-btn" @click="send()">Send</div>
+        <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
+        <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
       </div>
     </template>
     <template v-else>
@@ -65,6 +65,8 @@
 </template>
 
 <script>
+let sendTimeoutIntervalId;
+
 export default {
   beforeMount() {
     this.currencies = this.$store.state.holdings.reduce(
@@ -86,6 +88,10 @@ export default {
   },
 
   computed: {
+    sendButtonLabel() {
+      return this.sending ? 'Waiting for confirmation...' : 'Send';
+    },
+
     showNextButton() {
       return this.address && this.amount && parseFloat(this.amount) && this.currency;
     },
@@ -101,14 +107,39 @@ export default {
     },
 
     send() {
-      this.$services.neo.sendFunds(
-        this.address,
-        _.find(this.currencies, { value: this.currency }).asset,
-        this.amount,
-        this.currency.isNep5,
-      );
+      this.sending = true;
+
+      setTimeout(() => {
+        this.$services.neo.sendFunds(this.address, this.currency.asset,
+          this.amount, this.currency.isNep5)
+          .then(() => {
+            this.sending = false;
+            this.address = null;
+            this.amount = null;
+            this.currency = null;
+            this.showConfirmation = false;
+            clearTimeout(sendTimeoutIntervalId);
+            this.$router.replace('/authenticated/dashboard');
+          })
+          .catch((e) => {
+            this.sending = false;
+            this.$services.alerts.exception(e);
+          });
+      }, 100);
+
+      sendTimeoutIntervalId = setTimeout(() => {
+        if (this.this.sending) {
+          this.sending = false;
+          this.address = null;
+          this.amount = null;
+          this.currency = null;
+          this.showConfirmation = false;
+          this.$router.replace('/authenticated/dashboard');
+        }
+      }, 30 * 1000);
     },
   },
+
   data() {
     return {
       address: null,
@@ -116,6 +147,7 @@ export default {
       currency: null,
       currencies: [],
       showConfirmation: false,
+      sending: false,
     };
   },
 };
