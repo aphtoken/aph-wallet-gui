@@ -40,7 +40,7 @@ function fetchPortfolio({ commit }) {
       commit('setPortfolio', {
         balance: data.totalBalance,
         changePercent: data.change24hrPercent,
-        changeUsd: data.change24hrValue,
+        changeValue: data.change24hrValue.toFixed(2),
       });
     })
     .catch((e) => {

@@ -4,11 +4,11 @@
     <div class="ticker">
       <h1 class="underlined">My Porfolio</h1>
       <div class="balance">
-        <span class="symbol">$</span><span class="amount">{{ $formatNumberShort($store.state.portfolio.balance) }}</span><span class="currency">{{ $store.state.currency }}</span>
+        <span class="symbol">{{ $store.state.currencySymbol }}</span><span class="amount">{{ $formatNumberShort($store.state.portfolio.balance) }}</span><span class="currency">{{ $store.state.currency }}</span>
       </div>
       <div class="change">
         <div class="label">24h change</div>
-        <div :class="['amount', {increase: $store.state.portfolio.changeUsd > 0, decrease: $store.state.portfolio.changeUsd < 0}]">{{ $formatMoney($store.state.portfolio.changeUsd, '0,0[.]0') }}</div>
+        <div :class="['amount', {increase: $store.state.portfolio.changeValue > 0, decrease: $store.state.portfolio.changeValue < 0}]">{{ $formatMoney($store.state.portfolio.changeValue) }}</div>
       </div>
     </div>
     <div class="btn-group">
@@ -27,7 +27,7 @@
 
 <script>
 import SimpleDonut from './charts/SimpleDonut';
-let loadHoldingsIntervalId;
+let fetchPortfolioIntervalId;
 
 export default {
   components: {
@@ -38,13 +38,17 @@ export default {
     return {
       portfolio: {
         balance: 0,
-        changeUsd: 0,
+        changeValue: 0,
         changePercent: 0,
       },
     };
   },
 
   methods: {
+    fetchPortfolio() {
+      this.$store.dispatch('fetchPortfolio');
+    },
+
     getCurrentWalletAddress() {
       return this.$services.wallets.getCurrentWallet().address;
     },
@@ -53,25 +57,21 @@ export default {
       this.$store.commit('setShowSendAddressModal', false);
     },
 
-    loadHoldings() {
-      this.$store.dispatch('fetchPortfolio');
-    },
-
     showSendAddressModal() {
       this.$store.commit('setShowSendAddressModal', true);
     },
   },
 
   mounted() {
-    this.loadHoldings();
+    this.fetchPortfolio();
 
-    loadHoldingsIntervalId = setInterval(() => {
-      this.loadHoldings();
+    fetchPortfolioIntervalId = setInterval(() => {
+      this.fetchPortfolio();
     }, this.$constants.intervals.POLLING);
   },
 
   beforeDestroy() {
-    clearInterval(loadHoldingsIntervalId);
+    clearInterval(fetchPortfolioIntervalId);
   },
 };
 </script>

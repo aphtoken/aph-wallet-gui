@@ -2,6 +2,7 @@
 import moment from 'moment';
 import numeral from 'numeral';
 import { formats } from '../constants';
+import { settings } from '../services';
 
 export default {
   methods: {
@@ -13,8 +14,8 @@ export default {
       return moment(timestamp, 'X').format(formats.DATE_SHORT);
     },
 
-    $formatMoney(value) {
-      return accounting.formatMoney(value);
+    $formatMoney(value, symbol) {
+      return accounting.formatMoney(value, symbol || settings.getCurrencySymbol());
     },
 
     $formatNumber(value, format = formats.NUMBER) {

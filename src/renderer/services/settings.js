@@ -57,6 +57,7 @@ export default {
   setCurrency(currency) {
     lockr.set(CURRENCY_STORAGE_KEY, currency);
     this.setCurrencySymbol(this.getCurrencySymbol());
+    store.dispatch('fetchPortfolio');
 
     return this;
   },
