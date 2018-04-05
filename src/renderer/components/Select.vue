@@ -59,7 +59,7 @@ export default {
     },
 
     toggleSelectedOption(option) {
-      this.selectedOption = this.isSelected(option) ? null : option.value;
+      this.selectedOption = this.allowEmptyValue && this.isSelected(option) ? null : option.value;
       this.$emit('input', this.selectedOption);
       this.close();
     },
@@ -70,6 +70,11 @@ export default {
   },
 
   props: {
+    allowEmptyValue: {
+      default: false,
+      type: Boolean,
+    },
+
     initialValue: {
       default: null,
     },

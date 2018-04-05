@@ -83,4 +83,3 @@ function setStatsToken(state, token) {
   state.statsToken = token;
   state.showPriceTile = true;
 }
-

@@ -6,7 +6,7 @@
     <div class="body">
       <div class="row">
         <div class="label">Currency</div>
-        <aph-select :light="true" :options="currencies" :initialValue="selectedCurrency" v-model="selectedCurrency"></aph-select>
+        <aph-select :light="true" :options="currencies" :initialValue="selectedCurrency" v-model="selectedCurrency" :allow-empty-value="false"></aph-select>
       </div>
     </div>
   </section>
@@ -28,9 +28,7 @@ export default {
 
   watch: {
     selectedCurrency(currency) {
-      this.$services.settings.setCurrency(currency);
-      this.$store.commit('setCurrency', currency);
-      this.$store.commit('setCurrencySymbol', this.$services.settings.getCurrencySymbol());
+      this.$services.settings.setCurrency(currency).sync();
     },
   },
 };

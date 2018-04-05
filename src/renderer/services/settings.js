@@ -2,6 +2,7 @@ import _ from 'lodash';
 import lockr from 'lockr';
 
 import { defaultSettings } from '../constants';
+import { store } from '../store';
 
 const CURRENCY_STORAGE_KEY = 'aph.settings.currency';
 const CURRENCY_SYMBOL_STORAGE_KEY = 'aph.settings.currencySymbol';
@@ -64,6 +65,11 @@ export default {
     lockr.set(CURRENCY_SYMBOL_STORAGE_KEY, currencySymbol);
 
     return this;
+  },
+
+  sync() {
+    store.commit('setCurrency', this.getCurrency());
+    store.commit('setCurrencySymbol', this.getCurrencySymbol());
   },
 
 };

@@ -3,14 +3,13 @@ import Vuex from 'vuex';
 import * as actions from './actions';
 import * as getters from './getters';
 import * as mutations from './mutations';
-import { settings } from '../services';
 
 Vue.use(Vuex);
 
 const state = {
   activeTransaction: null,
-  currency: settings.getCurrency(),
-  currencySymbol: settings.getCurrencySymbol(),
+  currency: null,
+  currencySymbol: null,
   holdings: [],
   portfolio: {},
   recentTransactions: [],

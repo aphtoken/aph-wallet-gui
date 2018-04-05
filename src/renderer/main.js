@@ -6,6 +6,9 @@ import accounting from 'accounting';
 import moment from 'moment';
 import VueFlashMessage from 'vue-flash-message';
 
+// Services.
+import { settings } from './services';
+
 // Initial Vue Libraries.
 import './libraries';
 import * as mixins from './mixins';
@@ -51,6 +54,9 @@ Vue.component('aph-input', Input);
 Vue.component('aph-select', Select);
 Vue.component('aph-simple-transactions', SimpleTransactions);
 Vue.component('aph-token-icon', TokenIcon);
+
+// Sync local storage to store.
+settings.sync();
 
 /* eslint-disable no-new */
 new Vue({
