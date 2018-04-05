@@ -65,10 +65,12 @@ export default {
   watch: {
     wallet() {
       this.passphrase = '';
-      const self = this;
-      Vue.nextTick(() => {
-        self.$refs.password.focus();
-      });
+      if (this.wallet) {
+        const self = this;
+        Vue.nextTick(() => {
+          self.$refs.password.focus();
+        });
+      }
     },
   },
 };

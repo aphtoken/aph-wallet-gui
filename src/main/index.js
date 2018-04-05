@@ -20,7 +20,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     height: 900,
     minHeight: 768,
-    minWidth: 1350,
+    minWidth: 1366,
     title: 'Aphelion Desktop Wallet',
     titleBarStyle: 'hidden',
     useContentSize: true,
