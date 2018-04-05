@@ -1,6 +1,6 @@
 <template>
   <div :class="['aph-input', {focused: isFocused}]">
-    <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value" @keyup.enter="onEnter" :disabled="disabled" @blur="onBlur" @focus="onFocus"/>
+    <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value" @keyup.enter="onEnter" :disabled="disabled" @blur="onBlur" @focus="onFocus" ref="input"/>
     <div v-if="type === 'password'" class="visibility-toggle" @click="toggleIsVisible">
       <aph-icon :name="iconName"></aph-icon>
     </div>
@@ -45,6 +45,10 @@ export default {
 
     toggleIsVisible() {
       this.isVisible = !this.isVisible;
+    },
+
+    focus() {
+      this.$refs.input.focus();
     },
   },
 

@@ -1,12 +1,14 @@
 <template>
   <section id="login--saved-wallet">
-    <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
-    <aph-input v-if="showPassphrase" v-model="passphrase" placeholder="Enter your passphrase here" type="password" @enter="login"></aph-input>
-    <button v-if="showButton" class="login" @click="login" :disabled="authenticating">{{ buttonLabel }}</button>
+    <aph-input v-model="passphrase" placeholder="Enter your passphrase here" 
+               type="password" @enter="login" ref="password"></aph-input>
+    <button class="login" @click="login" :disabled="authenticating"
+            :class="['login', {hidden: showButton === false}]">{{ buttonLabel }}</button>
   </section>
 </template>
 
 <script>
+import Vue from 'vue';
 export default {
   computed: {
     buttonLabel() {
@@ -64,6 +66,12 @@ export default {
   watch: {
     wallet() {
       this.passphrase = '';
+      if (this.wallet) {
+        const self = this;
+        Vue.nextTick(() => {
+          self.$refs.password.focus();
+        });
+      }
     },
   },
 };
@@ -80,7 +88,6 @@ export default {
 
   .login {
     @extend %btn-outline;
-
     margin-top: $space-lg;
   }
 }

@@ -30,9 +30,9 @@ export default {
 
   getAllAsArray() {
     return _.values(this.getAll()).sort((a, b) => {
-      if (a.label > b.label) {
+      if (a.label.toUpperCase() > b.label.toUpperCase()) {
         return 1;
-      } else if (a.label < b.label) {
+      } else if (a.label.toUpperCase() < b.label.toUpperCase()) {
         return -1;
       }
       return 0;

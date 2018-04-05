@@ -23,8 +23,9 @@ const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969
 ]; */
 
 const network = 'TestNet';
-const rpcEndpoint = 'http://test3.cityofzion.io:8880'; // todo, an app preference to move between test and main net
-const aphApiBaseUrl = 'http://localhost:62433/api';
+const rpcEndpoint = 'http://18.219.220.162:30333';
+const aphApiBaseUrl = 'http://18.219.220.162:62433/api';
+// const aphApiBaseUrl = 'http://localhost:62433/api';
 let lastClaimSent;
 let lastTransactionsList = null;
 
@@ -92,26 +93,26 @@ export default {
       try {
         return api.neoscan.getTransactionHistory(network, address)
           .then((res) => {
-            this.fetchNEP5Transfers(address)
+            this.fetchNEP5Transfers(address, fromDate, toDate)
               .then((nep5) => {
                 const splitTransactions = [];
                 nep5.data.transfers.forEach((t) => {
                   res.push({
                     txid: t.transactionHash.replace('0x', ''),
                     symbol: t.symbol,
-                    value: t.received - t.sent,
+                    value: new BigNumber(t.received - t.sent).toFormat(8),
                     block_index: t.blockIndex,
                     block_time: t.blockTime,
                     isNep5: true,
                     vin: [{
                       address: t.fromAddress,
                       symbol: t.symbol,
-                      value: Math.abs(t.received - t.sent),
+                      value: new BigNumber(Math.abs(t.received - t.sent)).toFormat(8),
                     }],
                     vout: [{
                       address: t.toAddress,
                       symbol: t.symbol,
-                      value: Math.abs(t.received - t.sent),
+                      value: new BigNumber(Math.abs(t.received - t.sent)).toFormat(8),
                     }],
                   });
                 });
@@ -162,7 +163,7 @@ export default {
                             hash: t.txid,
                             block_index: transactionDetails.block,
                             symbol: transactionDetails.symbol,
-                            value: neoChange,
+                            value: neoChange.toFormat(8),
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
                             isNep5: false,
@@ -176,7 +177,7 @@ export default {
                             hash: t.txid,
                             block_index: transactionDetails.block,
                             symbol: transactionDetails.symbol,
-                            value: gasChange,
+                            value: gasChange.toFormat(8),
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
                             isNep5: false,
@@ -503,10 +504,11 @@ export default {
     });
   },
 
-  fetchNEP5Transfers(address) {
+  fetchNEP5Transfers(address, fromDate, toDate) {
     return new Promise((resolve) => {
       try {
-        return axios.get(`${aphApiBaseUrl}/transfers/${address}`)
+        const requestUrl = `${aphApiBaseUrl}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}`;
+        return axios.get(requestUrl)
           .then((res) => {
             resolve(res);
           })
@@ -518,6 +520,7 @@ export default {
             });
           });
       } catch (e) {
+        console.log(e);
         return resolve({
           data: {
             transfers: [],

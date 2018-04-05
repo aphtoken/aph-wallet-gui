@@ -1,7 +1,7 @@
 <template>
   <section id="login--saved-wallet">
-    <aph-input v-model="wif" placeholder="Enter your private key here (WIF)" type="password"></aph-input>
-    <div v-if="showButton" class="login" @click="login">Login</div>
+    <aph-input v-model="wif" placeholder="Enter your private key here (WIF)" type="password" ref="password" @enter="login"></aph-input>
+    <div :class="['login', {hidden: showButton === false}]" @click="login">Login</div>
   </section>
 </template>
 
@@ -17,6 +17,10 @@ export default {
     return {
       wif: '',
     };
+  },
+
+  mounted() {
+    this.$refs.password.focus();
   },
 
   methods: {

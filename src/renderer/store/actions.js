@@ -56,7 +56,8 @@ function fetchRecentTransactions({ commit }) {
   }
 
   neo
-    .fetchRecentTransactions(currentWallet.address)
+    .fetchRecentTransactions(currentWallet.address, false,
+      moment().subtract(30, 'days'), null)
     .then((data) => {
       commit('setRecentTransactions', data);
     })

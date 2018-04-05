@@ -163,6 +163,8 @@ export default {
     top: 100%;
     width: 100%;
     z-index: 100;
+    max-height: 300px;
+    overflow-x: auto;
 
     > li {
       cursor: pointer;
