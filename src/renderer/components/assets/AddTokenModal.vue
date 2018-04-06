@@ -3,7 +3,7 @@
     <div class="content">
       <div class="body">
         <aph-icon name="create"></aph-icon>
-        <aph-input placeholder="Address" :light="true" v-model="assetId"></aph-input>
+        <aph-input placeholder="Script Hash" :light="true" v-model="assetId"></aph-input>
         <aph-input placeholder="Token symbol" v-model="symbol"></aph-input>
       </div>
       <div class="footer">
