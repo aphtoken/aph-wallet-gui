@@ -25,6 +25,12 @@
                   <div class="label">Address</div>
                   <div class="value">{{ contact.address }}</div>
                 </div>
+                <div class="column right">
+                  <div class="edit" @click="showEditContactModal(contact)">
+                    <aph-icon name="arrow-left"></aph-icon>
+                     Edit
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -40,22 +46,29 @@
         <aph-icon name="show"></aph-icon>
       </div>
     </div>
+    <aph-add-edit-contact-modal v-if="$store.state.showAddContactModal" :onCancel="hideAddContactModal"></aph-add-edit-contact-modal>
   </section>
 </template>
 
 <script>
 import { clipboard } from 'electron';
+import AphAddEditContactModal from './AddEditContactModal';
 
 export default {
+  components: {
+    AphAddEditContactModal,
+  },
+
   computed: {
     filteredContacts() {
       const searchBy = this.searchBy.toLowerCase();
-      const list = _.filter(this.$services.contacts.getAllAsArray(), ({ name }) => {
-        if (!name) {
+      const list = _.filter(this.$services.contacts.getAllAsArray(), ({ name, address }) => {
+        if (!name || !address) {
           return false;
         }
 
-        return name.toLowerCase().indexOf(searchBy) > -1;
+        return name.toLowerCase().indexOf(searchBy) > -1
+          || address.toLowerCase().indexOf(searchBy) > -1;
       }).map((contact) => {
         const active = this.activeContact ? contact.address === this.activeContact.address : false;
         return _.merge(contact, {
@@ -78,11 +91,21 @@ export default {
     showAddContactModal() {
       this.$store.commit('setShowAddContactModal', true);
     },
+    showEditContactModal(contact) {
+      this.$store.commit('setShowEditContactModal', contact);
+    },
+    hideAddContactModal() {
+      this.$store.commit('setShowAddContactModal', false);
+
+      // this is a hack but not sure how to inform vue to read filteredContacts again
+      const search = this.searchBy;
+      this.searchBy = null;
+      this.searchBy = search;
+    },
     copy(text) {
       clipboard.writeText(text);
     },
     openContact(contact) {
-      console.log(contact);
       if (this.activeContact) {
         this.activeContact.active = false;
       }
@@ -186,10 +209,12 @@ export default {
           background: $light-grey;
         }     
       
-        .copy {        
+        .copy, .edit {        
           display: inline-block;
           position: relative;
           margin: 0 $space 0 0;
+          color: $grey;
+          font-weight: bold;
       
           .copy-link {
             position: absolute;
@@ -200,6 +225,7 @@ export default {
           .aph-icon {
             cursor: pointer;
             margin-left: $space-sm;
+            display: inline-block;
 
             path {
               fill: $grey;
@@ -208,16 +234,16 @@ export default {
             svg {
               height: $space;
             }
+          }
 
-            &:hover {
-              path {
-                fill: $purple;
-              }
+          &:hover {
+            color: $purple;
+            path {
+              fill: $purple;
             }
           }
         }
-      
-      
+            
 
         .details {
           display: none;
@@ -254,6 +280,11 @@ export default {
 
               & + .column {
                 margin-left: $space-xl;
+              }
+              
+              &.right {
+                width: 20%;
+                text-align: right;
               }
             }
 

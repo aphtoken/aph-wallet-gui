@@ -9,14 +9,14 @@ export default {
   add(name, data) {
     const wallets = this.getAll();
 
-    lockr.set(WALLETS_STORAGE_KEY, _.set(wallets, name, data));
+    lockr.set(WALLETS_STORAGE_KEY, _.set(wallets, name.trim(), data));
 
     return this;
   },
 
   remove(name) {
     const wallets = this.getAll();
-    lockr.set(WALLETS_STORAGE_KEY, _.omit(wallets, name));
+    lockr.set(WALLETS_STORAGE_KEY, _.omit(wallets, name.trim()));
     return this;
   },
 
@@ -44,11 +44,11 @@ export default {
   },
 
   getOne(name) {
-    return _.get(this.getAll(), name);
+    return _.get(this.getAll(), name.trim());
   },
 
   walletExists(name) {
-    return !!this.getOne(name);
+    return !!this.getOne(name.trim());
   },
 
   openSavedWallet(name, passphrase) {

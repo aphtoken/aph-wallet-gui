@@ -80,7 +80,7 @@ export default new Router({
               path: 'send',
               components: {
                 'bottom-left': require('@/components/dashboard/Holdings').default,
-                'bottom-right': require('@/components/dashboard/RecentTransactions').default,
+                'bottom-right': require('@/components/dashboard/Contacts').default,
                 'top-left': require('@/components/dashboard/TokenStats').default,
                 'top-right': require('@/components/dashboard/Send').default,
               },

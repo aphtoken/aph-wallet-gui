@@ -16,16 +16,9 @@ const toBigNumber = value => new BigNumber(String(value));
 const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 
-// const network = 'MainNet';
-// const rpcEndpoint = 'http://seed1.aphelion-neo.com:10332'; // todo, multiple options for rpc endpoints
-/* const nep5TokenIds = [
-  'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
-]; */
-
 const network = 'TestNet';
-const rpcEndpoint = 'http://18.219.220.162:30333';
-const aphApiBaseUrl = 'http://18.219.220.162:62433/api';
-// const aphApiBaseUrl = 'http://localhost:62433/api';
+const rpcEndpoint = 'http://test1.aphelion-neo.com:30333';
+const aphApiBaseUrl = 'http://test1.aphelion-neo.com:62433/api';
 let lastClaimSent;
 let lastTransactionsList = null;
 

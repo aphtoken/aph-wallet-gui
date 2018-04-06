@@ -14,6 +14,7 @@ export {
   setSearchTransactions,
   setShowAddTokenModal,
   setShowAddContactModal,
+  setShowEditContactModal,
   setShowSendAddressModal,
   setStatsToken,
 };
@@ -78,6 +79,11 @@ function setShowAddTokenModal(state, value) {
 
 function setShowAddContactModal(state, value) {
   state.showAddContactModal = value;
+  state.currentEditContact = null;
+}
+function setShowEditContactModal(state, contact) {
+  state.showAddContactModal = true;
+  state.currentEditContact = contact;
 }
 
 function setShowSendAddressModal(state, value) {

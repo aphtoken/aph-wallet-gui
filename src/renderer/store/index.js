@@ -15,6 +15,7 @@ const state = {
   recentTransactions: [],
   showAddTokenModal: false,
   showAddContactModal: false,
+  currentEditContact: null,
   showSendAddressModal: false,
   showPriceTile: true,
   statsToken: null,

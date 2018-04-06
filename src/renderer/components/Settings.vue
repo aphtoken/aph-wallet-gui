@@ -9,21 +9,10 @@
         <router-view name="bottom-right"></router-view>
       </div>
     </div>
-    <aph-add-contact-modal v-if="$store.state.showAddContactModal" :onCancel="hideAddContactModal"></aph-add-contact-modal>
   </section>
 </template>
 <script>
-import AphAddContactModal from './settings/AddContactModal';
 export default {
-  components: {
-    AphAddContactModal,
-  },
-
-  methods: {
-    hideAddContactModal() {
-      this.$store.commit('setShowAddContactModal', false);
-    },
-  },
 };
 </script>
 

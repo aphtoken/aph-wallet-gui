@@ -45,7 +45,6 @@ export default {
     },
 
     viewTransaction({ details }) {
-      console.log(details);
       this.$store.commit('setActiveTransaction', details);
     },
   },

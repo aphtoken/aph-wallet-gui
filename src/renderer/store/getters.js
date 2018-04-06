@@ -9,5 +9,6 @@ export const searchTransactionToDate = state => state.searchTransactionToDate;
 export const searchTransactions = state => state.searchTransactions;
 export const showAddTokenModal = state => state.showAddTokenModal;
 export const showAddContactModal = state => state.showAddContactModal;
+export const currentEditContact = state => state.currentEditContact;
 export const showSendAddressModal = state => state.showSendAddressModal;
 export const statsToken = state => state.statsToken;
