@@ -45,10 +45,10 @@
           <aph-select :options="currencies" :light="true" placeholder="Select a currency" v-model="currency"></aph-select>
         </div>
         <div class="address">
-          <aph-input placeholder="Enter Send to Address" v-model="address" @enter="next"></aph-input>
+          <aph-input placeholder="Enter Send to Address" v-model="address"></aph-input>
         </div>
         <div class="amount">
-          <aph-input placeholder="Enter Amount" v-model="amount" @enter="next"></aph-input>
+          <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
           <div class="symbol">{{ currency ? currency.value : '' }}</div>
         </div>
         <div class="estimated-value">
@@ -119,13 +119,13 @@ export default {
             this.currency = null;
             this.showConfirmation = false;
             clearTimeout(sendTimeoutIntervalId);
-            this.$router.replace('/authenticated/dashboard');
+            this.$router.push('/authenticated/dashboard');
           })
           .catch((e) => {
             this.sending = false;
             this.$services.alerts.exception(e);
           });
-      }, 100);
+      }, this.$constants.timeouts.NEO_API_CALL);
 
       sendTimeoutIntervalId = setTimeout(() => {
         if (this.this.sending) {
@@ -134,7 +134,7 @@ export default {
           this.amount = null;
           this.currency = null;
           this.showConfirmation = false;
-          this.$router.replace('/authenticated/dashboard');
+          this.$router.push('/authenticated/dashboard');
         }
       }, 30 * 1000);
     },
@@ -176,6 +176,7 @@ export default {
 
   .body {
     flex: 1;
+    overflow: auto;
     padding: 0 $space-lg $space-lg;
 
     .aph-input {

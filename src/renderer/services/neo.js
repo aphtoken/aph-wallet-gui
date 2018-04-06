@@ -4,7 +4,8 @@ import {
   rpc,
   u,
 } from '@cityofzion/neon-js';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
+
 import alerts from './alerts';
 import settings from './settings';
 import tokens from './tokens';
@@ -12,7 +13,6 @@ import valuation from './valuation';
 import wallets from './wallets';
 
 const toBigNumber = value => new BigNumber(String(value));
-
 const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 
@@ -54,12 +54,14 @@ export default {
         const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
 
         account.label = name;
-        wallets.add(name, {
-          label: name,
-          encryptedWIF,
-          address: account.address,
-          scriptHash: account.scriptHash,
-        });
+        wallets
+          .add(name, {
+            label: name,
+            encryptedWIF,
+            address: account.address,
+            scriptHash: account.scriptHash,
+          })
+          .sync();
 
         wallets.openSavedWallet(name, passphrase);
         return resolve(_.merge(account, { encryptedWIF, passphrase }));
@@ -361,7 +363,7 @@ export default {
                   privateKey: wallets.getCurrentWallet().privateKey,
                 }, api.neoscan)
                   .then((res) => {
-                    h.availableToClaim = toBigNumber(res).toString();
+                    h.availableToClaim = toBigNumber(res).toNumber();
                   })
                   .catch((e) => {
                     alerts.exception(e);

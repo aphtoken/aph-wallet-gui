@@ -1,5 +1,7 @@
 import lockr from 'lockr';
 
+import { store } from '../store';
+
 const CONTACTS_STORAGE_KEY = 'aph.contacts';
 
 export default {
@@ -7,12 +9,14 @@ export default {
   add(address, data) {
     const contacts = this.getAll();
     lockr.set(CONTACTS_STORAGE_KEY, _.set(contacts, address.trim(), data));
+
     return this;
   },
 
   remove(address) {
     const contacts = this.getAll();
     lockr.set(CONTACTS_STORAGE_KEY, _.omit(contacts, address.trim()));
+
     return this;
   },
 
@@ -21,14 +25,7 @@ export default {
   },
 
   getAllAsArray() {
-    return _.values(this.getAll()).sort((a, b) => {
-      if (a.name > b.name) {
-        return 1;
-      } else if (a.name < b.name) {
-        return -1;
-      }
-      return 0;
-    });
+    return _.sortBy(_.values(this.getAll()), 'name');
   },
 
   getOne(name) {
@@ -37,6 +34,10 @@ export default {
 
   contactExists(name) {
     return !!this.getOne(name.trim());
+  },
+
+  sync() {
+    store.commit('setContacts', this.getAllAsArray());
   },
 
 };

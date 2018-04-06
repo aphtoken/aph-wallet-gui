@@ -8,20 +8,24 @@ Vue.use(Vuex);
 
 const state = {
   activeTransaction: null,
+  contacts: [],
   currency: null,
   currencySymbol: null,
-  holdings: [],
-  portfolio: {},
-  recentTransactions: [],
-  showAddTokenModal: false,
-  showAddContactModal: false,
   currentEditContact: null,
-  showSendAddressModal: false,
-  showPriceTile: true,
-  statsToken: null,
-  searchTransactions: [],
+  currentWallet: {},
+  holdings: [],
+  portfolio: null,
+  recentTransactions: [],
+  requests: {},
   searchTransactionFromDate: null,
   searchTransactionToDate: null,
+  searchTransactions: [],
+  showAddContactModal: false,
+  showAddTokenModal: false,
+  showPriceTile: true,
+  showSendAddressModal: false,
+  statsToken: null,
+  wallets: [],
 };
 
 const store = new Vuex.Store({

@@ -21,10 +21,23 @@ const loadStates = {
   READY: 'READY',
 };
 
+const requests = {
+  FAILED: 'failed',
+  PENDING: 'pending',
+  SUCCESS: 'success',
+};
+
+const timeouts = {
+  NEO_API_CALL: 500,
+  RENDER_CHART: 100,
+};
+
 export {
   defaultSettings,
   formats,
   intervals,
   loadStates,
+  requests,
+  timeouts,
 };
 

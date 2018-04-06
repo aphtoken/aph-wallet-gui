@@ -45,7 +45,7 @@ export default {
   methods: {
     logOut() {
       this.$services.wallets.clearCurrentWallet();
-      this.$router.replace('/login');
+      this.$router.push('/login');
     },
   },
 };

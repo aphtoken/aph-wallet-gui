@@ -32,6 +32,7 @@ export default {
 #authenticated-wrapper {
   display: flex;
   flex-direction: row;
+  overflow: hidden;
 
   #sidebar {
     flex: none;

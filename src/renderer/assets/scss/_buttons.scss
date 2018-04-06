@@ -1,6 +1,6 @@
 %btn-circle {
   align-items: center;
-  background: $purple;
+  background-color: $purple;
   border-radius: 100%;
   color: white;
   cursor: pointer;
@@ -26,7 +26,7 @@
 }
 
 %btn-outline {
-  background: transparent;
+  background-color: transparent;
   border-radius: $border-radius;
   border: $border;
   color: white;
@@ -35,7 +35,7 @@
   font-size: toRem(16px);
   height: $button-height;
   outline: none;
-  padding: toRem(14px) 0;
+  padding: toRem(14px) $space;
   text-align: center;
   transition: $transition;
   user-select: none;
@@ -44,21 +44,22 @@
   width: 100%;
 
   &:hover {
-    background: $purple;
+    background-color: $purple;
     box-shadow: $box-shadow;
     color: white;
   }
 
   &.disabled, &:disabled {
-    background: $purple;
+    background-color: $purple;
+    border-color: $purple;
     color: white;
     cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 0.65;
   }
 }
 
 %btn-square {
-  background: white;
+  background-color: white;
   border-radius: $border-radius;
   border: none;
   color: $purple;
@@ -98,7 +99,7 @@
   }
 
   &:hover {
-    background: $purple;
+    background-color: $purple;
     color: white;
 
     .aph-icon {
@@ -119,7 +120,7 @@
 }
 
 %btn-footer {
-  background: $purple;
+  background-color: $purple;
   color: white;
   cursor: pointer;
   font-family: GilroyMedium;
@@ -140,6 +141,6 @@
 %btn-footer-light {
   @extend %btn-footer;
 
-  background: $light-grey;
+  background-color: $light-grey;
   color: $dark;
 }

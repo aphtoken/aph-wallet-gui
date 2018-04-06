@@ -14,7 +14,7 @@ export default {
     render() {
       setTimeout(() => {
         this.renderChart(this.chartData, this.options);
-      }, 100);
+      }, this.$constants.timeouts.RENDER_CHART);
     },
   },
 };

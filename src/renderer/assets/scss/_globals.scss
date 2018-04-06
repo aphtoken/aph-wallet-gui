@@ -19,7 +19,7 @@ html, body {
 }
 
 ::-webkit-scrollbar {
-  width: 3px;
+  width: $border-width;
 }
 
 ::-webkit-scrollbar-thumb:vertical {
@@ -37,8 +37,4 @@ a {
   &:focus {
     outline: none;
   }
-}
-
-.hidden {
-  visibility: hidden;
 }

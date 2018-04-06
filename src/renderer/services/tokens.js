@@ -29,14 +29,7 @@ export default {
   },
 
   getAllAsArray() {
-    return _.values(this.getAll()).sort((a, b) => {
-      if (a.symbol > b.symbol) {
-        return 1;
-      } else if (a.symbol < b.symbol) {
-        return -1;
-      }
-      return 0;
-    });
+    return _.sortBy(_.values(this.getAll()), 'symbol');
   },
 
   getOne(symbol) {

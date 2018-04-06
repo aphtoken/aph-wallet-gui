@@ -46,19 +46,14 @@ export default {
       this.$services.contacts.add(this.address, {
         name: this.name.trim(),
         address: this.address.trim(),
-      });
+      }).sync();
+
+      this.$store.dispatch('fetchHoldings');
       this.onCancel();
     },
-    save() {
-      this.$services.contacts.remove(this.prevAddress)
-        .add(this.address, {
-          name: this.name.trim(),
-          address: this.address.trim(),
-        });
-      this.onCancel();
-    },
+
     remove() {
-      this.$services.contacts.remove(this.prevAddress);
+      this.$services.contacts.remove(this.prevAddress).sync();
       this.onCancel();
     },
   },
