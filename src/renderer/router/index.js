@@ -119,8 +119,9 @@ export default new Router({
             {
               path: '',
               components: {
-                left: require('@/components/settings/Preferences').default,
-                right: require('@/components/settings/Wallets').default,
+                left: require('@/components/settings/AddressBook').default,
+                'top-right': require('@/components/settings/Preferences').default,
+                'bottom-right': require('@/components/settings/Wallets').default,
               },
             },
           ],

@@ -14,6 +14,7 @@ const state = {
   portfolio: {},
   recentTransactions: [],
   showAddTokenModal: false,
+  showAddContactModal: false,
   showSendAddressModal: false,
   showPriceTile: true,
   statsToken: null,

@@ -13,6 +13,7 @@ export {
   setSearchTransactionToDate,
   setSearchTransactions,
   setShowAddTokenModal,
+  setShowAddContactModal,
   setShowSendAddressModal,
   setStatsToken,
 };
@@ -73,6 +74,10 @@ function setSearchTransactions(state, transactions) {
 
 function setShowAddTokenModal(state, value) {
   state.showAddTokenModal = value;
+}
+
+function setShowAddContactModal(state, value) {
+  state.showAddContactModal = value;
 }
 
 function setShowSendAddressModal(state, value) {
