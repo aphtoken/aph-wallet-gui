@@ -77,7 +77,13 @@ export default {
 
         result.push({
           label: `${name} (${balance})`,
-          value: symbol,
+          value: {
+            symbol,
+            name,
+            asset,
+            isNep5,
+            label: `${name} (${balance})`,
+          },
           asset,
           isNep5,
           unitValue,
