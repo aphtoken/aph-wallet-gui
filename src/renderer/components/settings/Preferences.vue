@@ -8,6 +8,11 @@
         <div class="label">Currency</div>
         <aph-select :light="true" :options="currencies" :initialValue="selectedCurrency" v-model="selectedCurrency" :allow-empty-value="false"></aph-select>
       </div>
+
+      <div class="row">
+        <div class="label">Currency</div>
+        <aph-select :light="true" :options="currencies" :initialValue="selectedCurrency" v-model="selectedCurrency" :allow-empty-value="false"></aph-select>
+      </div>
     </div>
   </section>
 </template>

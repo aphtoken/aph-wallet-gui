@@ -301,7 +301,7 @@ export default {
                 transition: $transition;
 
                 .edit {
-                  display: flex;l
+                  display: flex;
                 }
 
                 .aph-icon {
