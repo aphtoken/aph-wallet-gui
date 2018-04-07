@@ -66,11 +66,11 @@ export default {
     },
     fromDate() {
       this.$store.commit('setSearchTransactionFromDate', this.fromDate);
-      this.$store.dispatch('fetchSearchTransactions');
+      this.$store.dispatch('findTransactions');
     },
     toDate() {
       this.$store.commit('setSearchTransactionToDate', this.toDate);
-      this.$store.dispatch('fetchSearchTransactions');
+      this.$store.dispatch('findTransactions');
     },
   },
 };

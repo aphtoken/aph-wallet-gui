@@ -1,7 +1,7 @@
 <template>
   <section id="assets-table">
-    <div class="search">
-      <!-- <aph-icon name="wallet"></aph-icon> -->
+    <div class="search-field">
+      <aph-icon name="search"></aph-icon>
       <input placeholder="Search" v-model="searchBy">
     </div>
     <div class="add-token-btn" v-if="$store.state.holdings.length === 0">Add token</div>
@@ -74,20 +74,24 @@ export default {
   height: 100%;
   overflow: hidden;
 
-  .search {
+  .search-field {
     border-bottom: $border;
     border-color: $grey;
     display: flex;
     flex: none;
     margin: 0 $space $space-lg 0;
-    padding: $space 0;
+    padding: $space-sm 0;
 
     .aph-icon {
       flex: none;
       margin: 0 $space;
 
       svg {
-        height: $space-lg;
+        height: toRem(40px);
+
+        .fill {
+          fill: $purple;
+        }
       }
     }
 

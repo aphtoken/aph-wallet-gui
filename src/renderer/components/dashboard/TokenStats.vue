@@ -18,9 +18,9 @@
           {{ $formatMoney($store.state.statsToken.totalValue) }}<span class="currency">{{ $store.state.currency }}</span>
         </div>
       </div>
-      <div class="claim" v-if="$store.state.statsToken.symbol === 'NEO'">
+      <div class="claim" v-if="$store.state.statsToken.availableToClaim">
         <div class="available">{{ $formatNumber($store.state.statsToken.availableToClaim) }} Gas Available</div>
-        <button class="claim-btn" @click="claim" :disabled="claiming">{{ buttonLabel }}</button>
+        <button class="claim-btn" @click="claim" :disabled="$isPending('claimGas')">{{ buttonLabel }}</button>
       </div>
     </div>
     <div class="footer">
@@ -44,34 +44,13 @@
 export default {
   computed: {
     buttonLabel() {
-      return this.claiming ? 'Claiming...' : 'Claim';
+      return this.$isPending('claimGas') ? 'Claiming...' : 'Claim';
     },
-  },
-
-  data() {
-    return {
-      claiming: false,
-    };
   },
 
   methods: {
     claim() {
-      if (_.isNull(this.wallet)) {
-        return;
-      }
-
-      this.claiming = true;
-
-      setTimeout(() => {
-        this.$services.neo.claimGas()
-          .then(() => {
-            this.claiming = false;
-          })
-          .catch((e) => {
-            this.claiming = false;
-            this.$services.alert.exception(e);
-          });
-      }, 100);
+      this.$store.dispatch('claimGas');
     },
   },
 };

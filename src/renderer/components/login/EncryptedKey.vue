@@ -1,8 +1,8 @@
 <template>
   <section id="login--saved-wallet">
-    <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password" ref="password"></aph-input>
-    <aph-input v-model="encryptedKey" placeholder="Enter your encrypted key here" type="password" @enter="login"></aph-input>
-    <div @click="login" :class="['login', {hidden: showButton === false}]">Login</div>
+    <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
+    <aph-input v-model="encryptedKey" placeholder="Enter your encrypted key here" type="password"></aph-input>
+    <div v-if="showButton" class="login" @click="login">Login</div>
   </section>
 </template>
 
@@ -19,10 +19,6 @@ export default {
       encryptedKey: '',
       passphrase: '',
     };
-  },
-
-  mounted() {
-    this.$refs.password.focus();
   },
 
   methods: {

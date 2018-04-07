@@ -112,7 +112,7 @@ export default {
     },
 
     loadTransactions() {
-      this.$store.dispatch('fetchSearchTransactions');
+      this.$store.dispatch('findTransactions');
     },
 
     openTransaction(transaction) {
@@ -129,7 +129,8 @@ export default {
 <style lang="scss">
 #history--table {
   @extend %tile-light;
-  padding: $space-lg $space-lg 0;
+
+  padding: $space $space-lg;
   height: 95%;
 
   .header {

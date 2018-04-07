@@ -7,7 +7,7 @@ import moment from 'moment';
 import VueFlashMessage from 'vue-flash-message';
 
 // Services.
-import { settings } from './services';
+import { contacts, settings, wallets } from './services';
 
 // Initial Vue Libraries.
 import './libraries';
@@ -56,7 +56,9 @@ Vue.component('aph-simple-transactions', SimpleTransactions);
 Vue.component('aph-token-icon', TokenIcon);
 
 // Sync local storage to store.
+contacts.sync();
 settings.sync();
+wallets.sync();
 
 /* eslint-disable no-new */
 new Vue({

@@ -3,15 +3,14 @@
     <div class="header">
       <h1 class="underlined">Address Book</h1>
     </div>
-    <div class="search">
-      <input placeholder="Search" v-model="searchBy" />
+    <div class="search-field">
+      <aph-icon name="search"></aph-icon>
+      <input placeholder="Search" v-model="searchBy">
     </div>
 
-    <section id="contact--table">
+    <div class="contacts">
       <div class="body">
-        <div v-for="(contact, index) in filteredContacts" :key="index"
-           @click="openContact(contact)"
-           :class="['contact', {active: contact.active}]">
+        <div v-for="(contact, index) in filteredContacts" :key="index" @click="openContact(contact)" :class="['contact', {active: contact.active}]">
           <div class="cell name">{{ contact.name }}</div>
           <div class="cell copy">
             <span class="copy-link" @click="copy(contact.address)">
@@ -36,12 +35,10 @@
           </div>
         </div>
       </div>
-    </section>
-    
+    </div>
+
     <div class="add-contact">
-      <div class="btn-square">
-        <p>Add address</p>
-      </div>
+      <div class="cta">Add contact</div>
       <div class="btn-circle" @click="showAddContactModal">
         <aph-icon name="show"></aph-icon>
       </div>
@@ -62,7 +59,7 @@ export default {
   computed: {
     filteredContacts() {
       const searchBy = this.searchBy.toLowerCase();
-      const list = _.filter(this.$services.contacts.getAllAsArray(), ({ name, address }) => {
+      const list = _.filter(this.$store.state.contacts, ({ name, address }) => {
         if (!name || !address) {
           return false;
         }
@@ -71,6 +68,7 @@ export default {
           || address.toLowerCase().indexOf(searchBy) > -1;
       }).map((contact) => {
         const active = this.activeContact ? contact.address === this.activeContact.address : false;
+
         return _.merge(contact, {
           active,
           address: contact.address,
@@ -82,18 +80,21 @@ export default {
 
   data() {
     return {
-      searchBy: '',
       activeContact: null,
+      searchBy: '',
     };
   },
 
   methods: {
-    showAddContactModal() {
-      this.$store.commit('setShowAddContactModal', true);
+    closeContact() {
+      this.activeContact.active = false;
+      this.activeContact = null;
     },
-    showEditContactModal(contact) {
-      this.$store.commit('setShowEditContactModal', contact);
+
+    copy(text) {
+      clipboard.writeText(text);
     },
+
     hideAddContactModal() {
       this.$store.commit('setShowAddContactModal', false);
 
@@ -102,9 +103,7 @@ export default {
       this.searchBy = null;
       this.searchBy = search;
     },
-    copy(text) {
-      clipboard.writeText(text);
-    },
+
     openContact(contact) {
       if (this.activeContact) {
         this.activeContact.active = false;
@@ -113,9 +112,13 @@ export default {
       contact.active = true;
       this.activeContact = contact;
     },
-    closeContact() {
-      this.activeContact.active = false;
-      this.activeContact = null;
+
+    showAddContactModal() {
+      this.$store.commit('setShowAddContactModal', true);
+    },
+
+    showEditContactModal(contact) {
+      this.$store.commit('setShowEditContactModal', contact);
     },
   },
 };
@@ -136,12 +139,12 @@ export default {
     }
   }
 
-  .search {
+  .search-field {
     border-bottom: $border;
     border-color: $grey;
     display: flex;
     flex: none;
-    margin: 0 $space $space-lg $space-lg;
+    margin: 0 $space-lg $space-lg;
     padding: $space 0;
 
     .aph-icon {
@@ -149,7 +152,11 @@ export default {
       margin: 0 $space;
 
       svg {
-        height: $space-lg;
+        height: toRem(40px);
+
+        .fill {
+          fill: $purple;
+        }
       }
     }
 
@@ -170,8 +177,8 @@ export default {
   }
 
 
-  #contact--table {
-    padding: $space-lg $space-lg 0;
+  .contacts {
+    padding: 0 $space-lg;
     height: 95%;
 
     .header {
@@ -196,8 +203,8 @@ export default {
         border-top: 1px solid $light-grey;
         cursor: pointer;
         display: flex;
-        transition: $transition;
         flex-wrap: wrap;
+        transition: $transition;
 
         .cell {
           flex: 1;
@@ -207,15 +214,15 @@ export default {
 
         &:hover, &.active {
           background: $light-grey;
-        }     
-      
-        .copy, .edit {        
+        }
+
+        .copy, .edit {
           display: inline-block;
           position: relative;
           margin: 0 $space 0 0;
           color: $grey;
           font-weight: bold;
-      
+
           .copy-link {
             position: absolute;
             right: 0;
@@ -229,6 +236,7 @@ export default {
 
             path {
               fill: $grey;
+                transition: $transition;
             }
 
             svg {
@@ -243,17 +251,16 @@ export default {
             }
           }
         }
-            
 
         .details {
           display: none;
-          padding: $space;
           flex-wrap: wrap;
+          padding: $space;
 
           .section {
             display: flex;
-            width: 100%;
             flex-wrap: wrap;
+            width: 100%;
           }
 
           .section + .section {
@@ -281,7 +288,7 @@ export default {
               & + .column {
                 margin-left: $space-xl;
               }
-              
+
               &.right {
                 width: 20%;
                 text-align: right;
@@ -304,53 +311,33 @@ export default {
             max-width: 35rem;
           }
         }
-      
+
         &.active {
           .details {
             display: flex;
             width: 100%;
           }
-        }  
-      }  
+        }
+      }
     }
   }
 
 
   .add-contact {
-    position: relative;
+    margin-top: $space-xl;
 
-    .btn-square {
-      @extend %btn-square;
-      cursor: default;
-      height: auto;
-      padding: 1.75rem 0;
-      width: 100%;
-
-      .aph-icon {
-        .fill {
-          fill: $dark;
-        }
-      }
-
-      &:hover {
-        background: white;
-        color: $dark;
-
-        .aph-icon {
-          .fill {
-            fill: $purple;
-          }
-        }
-      }
+    .cta {
+      color: $purple;
+      font-family: GilroyMedium;
+      font-size: toRem(16px);
+      text-align: center;
     }
 
     .btn-circle {
       @extend %btn-circle;
 
-      left: 50%;
-      position: absolute;
-      top: 100%;
-      transform: translate(-50%, -50%);
+      margin-left: 50%;
+      transform: translate(-50%, 50%);
     }
   }
 }

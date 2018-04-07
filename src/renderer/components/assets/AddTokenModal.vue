@@ -32,13 +32,14 @@ export default {
 
   methods: {
     add() {
-      this.$services.tokens.add(this.symbol, {
-        symbol: this.symbol,
-        assetId: this.assetId.replace('0x', ''),
+      this.$store.dispatch('addToken', {
+        assetId: this.assetId,
         isCustom: true,
+        symbol: this.symbol,
+        done: () => {
+          this.onCancel();
+        },
       });
-      this.$store.dispatch('fetchHoldings');
-      this.onCancel();
     },
   },
 };

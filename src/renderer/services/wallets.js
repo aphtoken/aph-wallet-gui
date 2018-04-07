@@ -1,5 +1,6 @@
 import lockr from 'lockr';
 import { wallet } from '@cityofzion/neon-js';
+import { store } from '../store';
 
 const WALLETS_STORAGE_KEY = 'aph.wallets';
 let currentWallet = null;
@@ -7,21 +8,19 @@ let currentWallet = null;
 export default {
 
   add(name, data) {
-    const wallets = this.getAll();
-
-    lockr.set(WALLETS_STORAGE_KEY, _.set(wallets, name.trim(), data));
+    lockr.set(WALLETS_STORAGE_KEY, _.set(this.getAll(), name.trim(), data));
 
     return this;
   },
 
   remove(name) {
-    const wallets = this.getAll();
-    lockr.set(WALLETS_STORAGE_KEY, _.omit(wallets, name.trim()));
+    lockr.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), name.trim()));
+
     return this;
   },
 
   clearCurrentWallet() {
-    this.setCurrentWallet(null);
+    this.setCurrentWallet(null).sync();
   },
 
   getAll() {
@@ -29,14 +28,7 @@ export default {
   },
 
   getAllAsArray() {
-    return _.values(this.getAll()).sort((a, b) => {
-      if (a.label.toUpperCase() > b.label.toUpperCase()) {
-        return 1;
-      } else if (a.label.toUpperCase() < b.label.toUpperCase()) {
-        return -1;
-      }
-      return 0;
-    });
+    return _.sortBy(_.values(this.getAll()), 'label');
   },
 
   getCurrentWallet() {
@@ -69,7 +61,7 @@ export default {
           wif,
         };
 
-        this.setCurrentWallet(currentWallet);
+        this.setCurrentWallet(currentWallet).sync();
 
         return resolve(currentWallet);
       } catch (e) {
@@ -91,7 +83,7 @@ export default {
           privateKey: account.privateKey,
         };
 
-        this.setCurrentWallet(currentWallet);
+        this.setCurrentWallet(currentWallet).sync();
 
         return resolve(currentWallet);
       } catch (e) {
@@ -110,7 +102,7 @@ export default {
           privateKey: account.privateKey,
         };
 
-        this.setCurrentWallet(currentWallet);
+        this.setCurrentWallet(currentWallet).sync();
 
         return resolve(currentWallet);
       } catch (e) {
@@ -121,6 +113,13 @@ export default {
 
   setCurrentWallet(wallet) {
     currentWallet = wallet;
+
+    return this;
+  },
+
+  sync() {
+    store.commit('setCurrentWallet', currentWallet);
+    store.commit('setWallets', this.getAllAsArray());
   },
 
 };

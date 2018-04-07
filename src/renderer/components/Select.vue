@@ -158,13 +158,13 @@ export default {
     left: 0;
     list-style-type: none;
     margin: $space-lg 0 0;
+    max-height: toRem(300px);
+    overflow-x: auto;
     padding: 0;
     position: absolute;
     top: 100%;
     width: 100%;
     z-index: 100;
-    max-height: 300px;
-    overflow-x: auto;
 
     > li {
       cursor: pointer;

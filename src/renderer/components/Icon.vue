@@ -251,6 +251,16 @@
       </g>
     </svg>
 
+    <!-- search -->
+    <svg class="icon search" v-if="name === 'search'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 15 14.2" style="enable-background:new 0 0 15 14.2;" xml:space="preserve">
+      <path class="fill st0" d="M8.4,8.7l2.8,2.8c0.2,0.2,0.5,0.2,0.7,0c0.2-0.2,0.2-0.5,0-0.7L9.1,8L8.4,8.7z"/>
+      <path class="fill st0" d="M9.4,9.1C9.4,9.1,9.3,9.2,9.2,9.2l-3.9,1.1c-0.2,0-0.4,0-0.5-0.1L2,7.3C1.9,7.2,1.8,7,1.9,6.8L3,2.9
+        c0-0.2,0.2-0.3,0.4-0.4l3.9-1.1c0.2,0,0.4,0,0.5,0.1l2.8,2.8c0.1,0.1,0.2,0.3,0.1,0.5L9.6,8.8C9.6,8.9,9.5,9,9.4,9.1 M5.4,9.2
+        l3.3-0.9L9.6,5L7.2,2.6L3.8,3.5L2.9,6.8L5.4,9.2z"/>
+    </svg>
+
+
   </div>
 </template>
 
@@ -392,6 +402,12 @@ export default {
   }
 
   .show {
+    .fill {
+      fill: $dark;
+    }
+  }
+
+  .search {
     .fill {
       fill: $dark;
     }
