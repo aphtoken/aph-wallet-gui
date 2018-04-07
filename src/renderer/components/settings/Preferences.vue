@@ -10,8 +10,8 @@
       </div>
 
       <div class="row">
-        <div class="label">Currency</div>
-        <aph-select :light="true" :options="currencies" :initialValue="selectedCurrency" v-model="selectedCurrency" :allow-empty-value="false"></aph-select>
+        <div class="label">Network</div>
+        <aph-select :light="true" :options="networks" :initialValue="selectedNetwork" v-model="selectedNetwork" :allow-empty-value="false"></aph-select>
       </div>
     </div>
   </section>
@@ -27,7 +27,9 @@ export default {
   data() {
     return {
       currencies: [],
+      networks: [],
       selectedCurrency: null,
+      selectedNetwork: null,
     };
   },
 
@@ -62,6 +64,10 @@ export default {
         @extend %small-uppercase-grey-label;
 
         margin-bottom: $space;
+      }
+
+      & + .row {
+        margin-top: $space-lg;
       }
     }
   }
