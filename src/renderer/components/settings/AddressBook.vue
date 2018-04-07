@@ -26,8 +26,7 @@
                 </div>
                 <div class="column right">
                   <div class="edit" @click="showEditContactModal(contact)">
-                    <aph-icon name="arrow-left"></aph-icon>
-                     Edit
+                    <aph-icon name="back"></aph-icon>Edit
                   </div>
                 </div>
               </div>
@@ -219,7 +218,6 @@ export default {
         .copy, .edit {
           display: inline-block;
           position: relative;
-          margin: 0 $space 0 0;
           color: $grey;
           font-weight: bold;
 
@@ -250,6 +248,10 @@ export default {
               fill: $purple;
             }
           }
+        }
+
+        .copy {
+          padding-right: $space;
         }
 
         .details {
@@ -290,8 +292,35 @@ export default {
               }
 
               &.right {
-                width: 20%;
-                text-align: right;
+                align-items: center;
+                display: flex;
+                flex: none;
+                font-size: toRem(12px);
+                justify-content: right;
+                font-family: GilroySemibold;
+                transition: $transition;
+
+                .edit {
+                  display: flex;l
+                }
+
+                .aph-icon {
+                  margin-right: $space-sm;
+
+                  svg {
+                    height: toRem(12px);
+                  }
+                }
+
+                &:hover {
+                  color: $purple;
+
+                  .aph-icon {
+                    .fill {
+                      fill: $purple;
+                    }
+                  }
+                }
               }
             }
 
