@@ -1,4 +1,5 @@
-import { app, BrowserWindow } from 'electron' // eslint-disable-line
+import { app, BrowserWindow } from 'electron';
+import path from 'path'; // eslint-disable-line
 
 /**
  * Set `__static` path to static files in production
@@ -25,6 +26,7 @@ function createWindow() {
     titleBarStyle: 'hidden',
     useContentSize: true,
     width: 1375,
+    icon: path.join(__dirname, 'assets/img/icons/icon.png'),
   });
 
   mainWindow.loadURL(winURL);

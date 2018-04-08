@@ -23,7 +23,7 @@
     "unit": "karma start test/unit/karma.conf.js"
   },
   "build": {
-    "productName": "aphelion-desktop-wallet",
+    "productName": "Aphelion Wallet",
     "appId": "org.aphelion.desktop-wallet",
     "directories": {
       "output": "build"
