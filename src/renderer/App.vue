@@ -49,4 +49,34 @@ export default {
   top: 0;
   width: 100%;
 }
+
+.flash__message {
+  border-radius: $border-radius;
+  border: none;
+  padding: $space;
+
+  .flash__close-button {
+    display: none;
+  }
+
+  &.error {
+    background: $red;
+    color: white;
+  }
+
+  &.info {
+    background: $purple;
+    color: white;
+  }
+
+  &.success {
+    background: $green;
+    color: white;
+  }
+
+  &.warning {
+    background: $orange;
+    color: white;
+  }
+}
 </style>

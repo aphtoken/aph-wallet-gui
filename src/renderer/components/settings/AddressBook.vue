@@ -234,7 +234,7 @@ export default {
 
             path {
               fill: $grey;
-                transition: $transition;
+              transition: $transition;
             }
 
             svg {
@@ -244,6 +244,7 @@ export default {
 
           &:hover {
             color: $purple;
+
             path {
               fill: $purple;
             }
@@ -298,26 +299,26 @@ export default {
                 font-size: toRem(12px);
                 justify-content: right;
                 font-family: GilroySemibold;
-                transition: $transition;
 
                 .edit {
                   display: flex;
-                }
-
-                .aph-icon {
-                  margin-right: $space-sm;
-
-                  svg {
-                    height: toRem(12px);
-                  }
-                }
-
-                &:hover {
-                  color: $purple;
+                  transition: $transition;
 
                   .aph-icon {
-                    .fill {
-                      fill: $purple;
+                    margin-right: $space-sm;
+
+                    svg {
+                      height: toRem(12px);
+                    }
+                  }
+
+                  &:hover {
+                    color: $purple;
+
+                    .aph-icon {
+                      .fill {
+                        fill: $purple;
+                      }
                     }
                   }
                 }

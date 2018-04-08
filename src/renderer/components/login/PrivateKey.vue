@@ -1,15 +1,15 @@
 <template>
   <section id="login--saved-wallet">
     <aph-input v-model="wif" placeholder="Enter your private key here (WIF)" type="password"></aph-input>
-    <div v-if="showButton" class="login" @click="login">Login</div>
+    <button class="login" @click="login" :disabled="shouldDisableLoginButton">Login</button>
   </section>
 </template>
 
 <script>
 export default {
   computed: {
-    showButton() {
-      return this.wif.length > 0;
+    shouldDisableLoginButton() {
+      return this.wif.length === 0;
     },
   },
 

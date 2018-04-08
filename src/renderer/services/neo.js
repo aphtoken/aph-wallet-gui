@@ -7,6 +7,7 @@ import {
 import { BigNumber } from 'bignumber.js';
 
 import alerts from './alerts';
+import network from './network';
 import settings from './settings';
 import tokens from './tokens';
 import valuation from './valuation';
@@ -16,9 +17,6 @@ const toBigNumber = value => new BigNumber(String(value));
 const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 
-const network = 'TestNet';
-const rpcEndpoint = 'http://test1.aphelion-neo.com:30333';
-const aphApiBaseUrl = 'http://test1.aphelion-neo.com:62433/api';
 let lastClaimSent;
 let lastTransactionsList = null;
 
@@ -86,7 +84,7 @@ export default {
   fetchRecentTransactions(address, forSearch, fromDate, toDate) {
     return new Promise((resolve, reject) => {
       try {
-        return api.neoscan.getTransactionHistory(network, address)
+        return api.neoscan.getTransactionHistory(network.getSelectedNetwork().net, address)
           .then((res) => {
             this.fetchNEP5Transfers(address, fromDate, toDate)
               .then((nep5) => {
@@ -251,7 +249,7 @@ export default {
   fetchTransactionDetails(hash) {
     return new Promise((resolve, reject) => {
       try {
-        const client = rpc.default.create.rpcClient(rpcEndpoint);
+        const client = rpc.default.create.rpcClient(network.getSelectedNetwork().rpc);
 
         return client.getBlockCount()
           .then((blockCount) => {
@@ -321,7 +319,8 @@ export default {
   fetchHoldings(address, restrictToSymbol) {
     return new Promise((resolve, reject) => {
       try {
-        const client = rpc.default.create.rpcClient(rpcEndpoint);
+        const client = rpc.default.create.rpcClient(network.getSelectedNetwork().rpc);
+
         return client.query({ method: 'getaccountstate', params: [address] })
           .then((res) => {
             const holdings = [];
@@ -358,7 +357,7 @@ export default {
               }
               if (h.symbol === 'NEO') {
                 promises.push(api.getMaxClaimAmountFrom({
-                  net: network,
+                  net: network.getSelectedNetwork().net,
                   address: wallets.getCurrentWallet().address,
                   privateKey: wallets.getCurrentWallet().privateKey,
                 }, api.neoscan)
@@ -460,7 +459,7 @@ export default {
         });
 
         try {
-          return axios.get(`${aphApiBaseUrl}/tokens`)
+          return axios.get(`${network.getSelectedNetwork().aph}/tokens`)
             .then((res) => {
               res.data.tokens.forEach((t) => {
                 tokens.add(t.symbol, {
@@ -483,7 +482,7 @@ export default {
 
   fetchNEP5Balance(address, assetId) {
     return new Promise((resolve) => {
-      return api.nep5.getToken(rpcEndpoint, assetId, address)
+      return api.nep5.getToken(network.getSelectedNetwork().rpc, assetId, address)
         .then((token) => {
           resolve({
             name: token.name,
@@ -502,7 +501,7 @@ export default {
   fetchNEP5Transfers(address, fromDate, toDate) {
     return new Promise((resolve) => {
       try {
-        const requestUrl = `${aphApiBaseUrl}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}`;
+        const requestUrl = `${network.getSelectedNetwork().aph}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}`;
         return axios.get(requestUrl)
           .then((res) => {
             resolve(res);
@@ -515,7 +514,7 @@ export default {
             });
           });
       } catch (e) {
-        console.log(e);
+        alerts.exception(e);
         return resolve({
           data: {
             transfers: [],
@@ -583,10 +582,11 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    return api.neoscan.getBalance(network, wallets.getCurrentWallet().address)
+    return api.neoscan.getBalance(
+      network.getSelectedNetwork().net, wallets.getCurrentWallet().address)
       .then((balance) => {
         const config = {
-          net: network,
+          net: network.getSelectedNetwork().net,
           address: wallets.getCurrentWallet().address,
           privateKey: wallets.getCurrentWallet().privateKey,
           balance,
@@ -605,7 +605,7 @@ export default {
 
   sendNep5Transfer(toAddress, assetId, amount) {
     const config = {
-      net: network,
+      net: network.getSelectedNetwork().net,
       account: new wallet.Account(wallets.getCurrentWallet().wif),
       intents: api.makeIntent({ GAS: 0.00000001 }, wallets.getCurrentWallet().address),
       script: {
@@ -669,7 +669,7 @@ export default {
         this.sendFunds(wallets.getCurrentWallet().address, neoAssetId, neoAmount, false)
           .then(() => {
             const config = {
-              net: network,
+              net: network.getSelectedNetwork().net,
               address: wallets.getCurrentWallet().address,
               privateKey: wallets.getCurrentWallet().privateKey,
             };

@@ -10,7 +10,7 @@
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">Cancel</div>
         <div class="add-btn" @click="add" v-if="!prevAddress">Add</div>
-        <div class="add-btn" @click="save" v-if="prevAddress">Save</div>
+        <div class="add-btn" @click="add" v-if="prevAddress">Save</div>
       </div>
     </div>
   </div>

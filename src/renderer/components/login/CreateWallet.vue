@@ -5,7 +5,7 @@
     <p class="help-text">Choose a passphrase to encrypt your private key:</p>
     <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
     <aph-input v-model="passphraseConfirm" placeholder="Repeat your passphrase here" type="password"></aph-input>
-    <button v-if="showButton" class="create" @click="create" :disabled="$isPending('createWallet')">{{ buttonLabel }}</button>
+    <button class="create" @click="create" :disabled="shouldDisableCreateButton">{{ buttonLabel }}</button>
   </section>
 </template>
 
@@ -20,8 +20,8 @@ export default {
       return this.passphrase === this.passphraseConfirm;
     },
 
-    showButton() {
-      return this.passphrase.length > 0 && this.walletName.length > 0 && this.passphrasesMatch;
+    shouldDisableCreateButton() {
+      return this.$isPending('createWallet') || this.passphrase.length === 0 || this.walletName.length === 0 || !this.passphrasesMatch;
     },
   },
 

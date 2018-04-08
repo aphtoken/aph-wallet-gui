@@ -21,7 +21,9 @@
 export default {
   beforeMount() {
     this.currencies = this.$services.settings.getCurrencies();
+    this.networks = this.$services.network.getNetworks();
     this.selectedCurrency = this.$services.settings.getCurrency();
+    this.selectedNetwork = this.$services.network.getSelectedNetwork();
   },
 
   data() {
@@ -36,6 +38,10 @@ export default {
   watch: {
     selectedCurrency(currency) {
       this.$services.settings.setCurrency(currency).sync();
+    },
+
+    selectedNetwork(network) {
+      this.$services.network.setSelectedNetwork(network);
     },
   },
 };

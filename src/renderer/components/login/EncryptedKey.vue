@@ -2,15 +2,15 @@
   <section id="login--saved-wallet">
     <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
     <aph-input v-model="encryptedKey" placeholder="Enter your encrypted key here" type="password"></aph-input>
-    <div v-if="showButton" class="login" @click="login">Login</div>
+    <button class="login" @click="login" :disabled="shouldDisableLoginButton">Login</button>
   </section>
 </template>
 
 <script>
 export default {
   computed: {
-    showButton() {
-      return this.passphrase.length > 0 && this.encryptedKey.length > 0;
+    shouldDisableLoginButton() {
+      return this.passphrase.length === 0 || this.encryptedKey.length === 0;
     },
   },
 

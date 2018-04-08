@@ -5,11 +5,13 @@ import settings from './settings';
 import tokens from './tokens';
 import valuation from './valuation';
 import wallets from './wallets';
+import network from './network';
 
 export {
   alerts,
   contacts,
   neo,
+  network,
   settings,
   tokens,
   valuation,
