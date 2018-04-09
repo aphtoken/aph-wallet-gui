@@ -136,7 +136,6 @@ function fetchRecentTransactions({ commit }) {
     .fetchRecentTransactions(currentWallet.address, false,
       moment().subtract(30, 'days'), null)
     .then((data) => {
-      console.log(data);
       if (data && data.length > 0) {
         commit('setRecentTransactions', data);
       }

@@ -1,6 +1,9 @@
 <template>
   <section id="login--landing">
     <aph-icon name="logo"></aph-icon>
+    <div class="version-number">
+      {{version}}
+    </div>
     <div class="btn-group">
       <router-link class="login-btn" to="/login/menu">
         <aph-icon name="wallet"></aph-icon>
@@ -16,7 +19,14 @@
 </template>
 
 <script>
+const pjson = require('../../../../package.json');
 export default {
+  computed: {
+    version() {
+      return `v${pjson.version}`;
+    },
+  },
+
   //
 };
 </script>

@@ -1,6 +1,9 @@
 <template>
   <section id="login--logo">
     <aph-icon id="login--logo" name="logo"></aph-icon>
+    <div class="version-number">
+      {{version}}
+    </div>
     <div class="back-btn" @click="back">
       <aph-icon name="back"></aph-icon>
     </div>
@@ -8,7 +11,14 @@
 </template>
 
 <script>
+const pjson = require('../../../../package.json');
 export default {
+  computed: {
+    version() {
+      return `v${pjson.version}`;
+    },
+  },
+
   methods: {
     back() {
       this.$router.back();
@@ -22,6 +32,7 @@ export default {
   .icon.logo {
     height: 20rem;
   }
+  text-align: center;
 
   .back-btn {
     @extend %btn-circle;

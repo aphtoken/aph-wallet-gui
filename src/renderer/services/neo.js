@@ -474,7 +474,6 @@ export default {
         try {
           return axios.get(`${network.getSelectedNetwork().aph}/tokens`)
             .then((res) => {
-              console.log(res);
               res.data.tokens.forEach((t) => {
                 tokens.add(t.symbol, {
                   symbol: t.symbol,

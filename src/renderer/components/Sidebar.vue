@@ -33,6 +33,9 @@
       <div class="network-status" v-if="network">
         {{network.net}} Block: {{blockIndex}}<br />{{blockAgo}}
       </div>
+      <div class="version-number">
+        {{version}}
+      </div>
       <a href="#" @click="logOut">
         <span class="icon">
           <aph-icon name="back"></aph-icon>
@@ -46,7 +49,14 @@
 <script>
 let loadNetworkStatusIntervalId;
 
+const pjson = require('../../../package.json');
 export default {
+  computed: {
+    version() {
+      return `v${pjson.version}`;
+    },
+  },
+
   beforeDestroy() {
     clearInterval(loadNetworkStatusIntervalId);
   },
@@ -71,9 +81,9 @@ export default {
         const seconds = Math.floor((+new Date() - (+this.network.lastReceivedBlock)) / 1000);
         if (seconds >= 60) {
           const mins = Math.floor(seconds / 60);
-          this.blockAgo = `${mins}min${((mins === 1) ? '' : 's')} ago`;
+          this.blockAgo = `${mins} min${((mins === 1) ? '' : 's')} ago`;
         } else {
-          this.blockAgo = `${seconds}sec${((seconds === 1) ? '' : 's')} ago`;
+          this.blockAgo = `${seconds} sec${((seconds === 1) ? '' : 's')} ago`;
         }
       }
     },
@@ -184,7 +194,14 @@ export default {
     .network-status {
       color: #cccccc;
       font-size: smaller;
+      line-height: 1.25rem;
       padding: $space-sm;
+      text-align: center;
+    }
+    .version-number {
+      color: white;
+      font-size: smaller;
+      padding: $space-xsm;
       text-align: center;
     }
   }
