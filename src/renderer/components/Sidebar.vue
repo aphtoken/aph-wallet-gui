@@ -30,6 +30,9 @@
       </router-link>
     </div>
     <div class="footer link-list">
+      <div class="network-status" v-if="network">
+        {{network.net}} Block: {{blockIndex}}<br />{{blockAgo}}
+      </div>
       <a href="#" @click="logOut">
         <span class="icon">
           <aph-icon name="back"></aph-icon>
@@ -41,12 +44,47 @@
 </template>
 
 <script>
+let loadNetworkStatusIntervalId;
+
 export default {
+  beforeDestroy() {
+    clearInterval(loadNetworkStatusIntervalId);
+  },
+
+  beforeMount() {
+    this.loadStatus();
+    loadNetworkStatusIntervalId = setInterval(() => {
+      this.loadStatus();
+    }, 1000);
+  },
+
   methods: {
     logOut() {
       this.$services.wallets.clearCurrentWallet();
       this.$router.push('/login');
     },
+    loadStatus() {
+      this.network = this.$services.network.getSelectedNetwork();
+      if (this.network.bestBlock) {
+        this.blockIndex = this.network.bestBlock.index;
+
+        const seconds = Math.floor((+new Date() - (+this.network.lastReceivedBlock)) / 1000);
+        if (seconds >= 60) {
+          const mins = Math.floor(seconds / 60);
+          this.blockAgo = `${mins}min${((mins === 1) ? '' : 's')} ago`;
+        } else {
+          this.blockAgo = `${seconds}sec${((seconds === 1) ? '' : 's')} ago`;
+        }
+      }
+    },
+  },
+
+  data() {
+    return {
+      network: null,
+      blockIndex: 0,
+      blockAgo: '',
+    };
   },
 };
 </script>
@@ -141,6 +179,13 @@ export default {
           fill: white;
         }
       }
+    }
+    
+    .network-status {
+      color: #cccccc;
+      font-size: smaller;
+      padding: $space-sm;
+      text-align: center;
     }
   }
 }

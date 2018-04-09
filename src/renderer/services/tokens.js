@@ -7,9 +7,11 @@ export default {
   add(symbol, data) {
     if (this.tokenExists(symbol, data.network)) {
       const existing = this.getOne(symbol, data.network);
-      if (existing.isCustom === data.isCustom
+      if (existing) {
+        if (existing.isCustom === data.isCustom
           || (existing.isCustom === true && data.isCustom === false)) {
-        return this;
+          return this;
+        }
       }
     }
 

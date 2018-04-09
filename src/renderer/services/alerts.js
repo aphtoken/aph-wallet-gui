@@ -37,6 +37,7 @@ export default {
   },
 
   exception(e) {
+    console.log(e);
     this.error(e.message);
   },
 

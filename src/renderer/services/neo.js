@@ -1,7 +1,6 @@
 import {
   wallet,
   api,
-  rpc,
   u,
 } from '@cityofzion/neon-js';
 import { BigNumber } from 'bignumber.js';
@@ -114,6 +113,10 @@ export default {
                 res.forEach((t) => {
                   promises.push(this.fetchTransactionDetails(t.txid)
                     .then((transactionDetails) => {
+                      if (!transactionDetails) {
+                        return;
+                      }
+
                       if (fromDate
                             && transactionDetails.blocktime < fromDate.unix()) {
                         return;
@@ -249,11 +252,9 @@ export default {
   fetchTransactionDetails(hash) {
     return new Promise((resolve, reject) => {
       try {
-        const client = rpc.default.create.rpcClient(network.getSelectedNetwork().rpc);
-
-        return client.getBlockCount()
+        return network.getSelectedNetwork().rpcClient.getBlockCount()
           .then((blockCount) => {
-            client.getRawTransaction(hash, 1)
+            network.getSelectedNetwork().rpcClient.getRawTransaction(hash, 1)
               .then((transaction) => {
                 transaction.currentBlockHeight = blockCount;
                 if (transaction.confirmations > 0) {
@@ -276,7 +277,8 @@ export default {
                 // pull information for inputs from their previous outputs
                 const inputPromises = [];
                 transaction.vin.forEach((input) => {
-                  inputPromises.push(client.getRawTransaction(input.txid, 1)
+                  inputPromises.push(network.getSelectedNetwork().rpcClient
+                    .getRawTransaction(input.txid, 1)
                     .then((inputTransaction) => {
                       const inputSource = inputTransaction.vout[input.vout];
                       if (inputSource.asset === neoAssetId) {
@@ -296,7 +298,7 @@ export default {
               })
               .catch(e => reject(e));
           })
-          .catch(e => reject(e));
+          .catch(() => resolve(null));
       } catch (e) {
         return reject(e);
       }
@@ -319,9 +321,7 @@ export default {
   fetchHoldings(address, restrictToSymbol) {
     return new Promise((resolve, reject) => {
       try {
-        const client = rpc.default.create.rpcClient(network.getSelectedNetwork().rpc);
-
-        return client.query({ method: 'getaccountstate', params: [address] })
+        return network.getSelectedNetwork().rpcClient.query({ method: 'getaccountstate', params: [address] })
           .then((res) => {
             const holdings = [];
             const promises = [];
@@ -474,6 +474,7 @@ export default {
         try {
           return axios.get(`${network.getSelectedNetwork().aph}/tokens`)
             .then((res) => {
+              console.log(res);
               res.data.tokens.forEach((t) => {
                 tokens.add(t.symbol, {
                   symbol: t.symbol,
@@ -647,7 +648,7 @@ export default {
         const interval = setInterval(() => {
           this.fetchTransactionDetails(hash)
             .then((res) => {
-              if (res.confirmed === true) {
+              if (res && res.confirmed === true) {
                 alerts.success(`TX: ${hash} CONFIRMED`);
                 clearInterval(interval);
                 resolve(res);

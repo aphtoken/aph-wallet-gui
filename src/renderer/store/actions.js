@@ -136,7 +136,10 @@ function fetchRecentTransactions({ commit }) {
     .fetchRecentTransactions(currentWallet.address, false,
       moment().subtract(30, 'days'), null)
     .then((data) => {
-      commit('setRecentTransactions', data);
+      console.log(data);
+      if (data && data.length > 0) {
+        commit('setRecentTransactions', data);
+      }
       commit('endRequest', { identifier: 'fetchRecentTransactions' });
     })
     .catch((message) => {
@@ -163,6 +166,7 @@ function findTransactions({ state, commit }) {
       commit('endRequest', { identifier: 'findTransactions' });
     })
     .catch((message) => {
+      console.log(message);
       commit('failRequest', { identifier: 'findTransactions', message });
     });
 }

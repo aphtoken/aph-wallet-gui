@@ -1,5 +1,9 @@
 import lockr from 'lockr';
 import _ from 'lodash';
+import moment from 'moment';
+import {
+  rpc,
+} from '@cityofzion/neon-js';
 
 const NETWORK_STORAGE_KEY = 'aph.network';
 const NETWORKS = [
@@ -21,6 +25,9 @@ const NETWORKS = [
   },
 ];
 
+let loadNetworkStatusIntervalId;
+let currentNetwork;
+
 export default {
 
   getNetworks() {
@@ -28,13 +35,45 @@ export default {
   },
 
   getSelectedNetwork() {
-    return lockr.get(NETWORK_STORAGE_KEY, _.first(NETWORKS).value);
+    if (!currentNetwork) {
+      this.setSelectedNetwork(_.first(NETWORKS).value);
+    }
+    return currentNetwork;
   },
 
   setSelectedNetwork(network) {
-    lockr.set(NETWORK_STORAGE_KEY, network);
+    if (loadNetworkStatusIntervalId) {
+      clearInterval(loadNetworkStatusIntervalId);
+    }
 
+    currentNetwork = network;
+    network.rpcClient = rpc.default.create.rpcClient(network.rpc);
+
+    this.loadStatus();
+    loadNetworkStatusIntervalId = setInterval(() => {
+      this.loadStatus();
+    }, 15000);
+
+    lockr.set(NETWORK_STORAGE_KEY, network);
     return this;
+  },
+
+  loadStatus() {
+    currentNetwork.rpcClient.getBestBlockHash()
+      .then((blockHash) => {
+        currentNetwork.rpcClient.getBlock(blockHash)
+          .then((data) => {
+            currentNetwork.bestBlock = data;
+            currentNetwork.lastReceivedBlock = moment();
+            lockr.set(NETWORK_STORAGE_KEY, currentNetwork);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   },
 
 };
