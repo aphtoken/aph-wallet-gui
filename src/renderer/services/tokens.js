@@ -5,8 +5,8 @@ const TOKENS_STORAGE_KEY = 'aph.tokens';
 export default {
 
   add(symbol, data) {
-    if (this.tokenExists(symbol)) {
-      const existing = this.getOne(symbol);
+    if (this.tokenExists(symbol, data.network)) {
+      const existing = this.getOne(symbol, data.network);
       if (existing.isCustom === data.isCustom
           || (existing.isCustom === true && data.isCustom === false)) {
         return this;
@@ -14,13 +14,13 @@ export default {
     }
 
     const tokens = this.getAll();
-    lockr.set(TOKENS_STORAGE_KEY, _.set(tokens, symbol, data));
+    lockr.set(TOKENS_STORAGE_KEY, _.set(tokens, `${symbol}_${data.network}`, data));
     return this;
   },
 
-  remove(symbol) {
+  remove(symbol, network) {
     const tokens = this.getAll();
-    lockr.set(TOKENS_STORAGE_KEY, _.omit(tokens, symbol));
+    lockr.set(TOKENS_STORAGE_KEY, _.omit(tokens, `${symbol}_${network}`));
     return this;
   },
 
@@ -32,12 +32,12 @@ export default {
     return _.sortBy(_.values(this.getAll()), 'symbol');
   },
 
-  getOne(symbol) {
-    return _.get(this.getAll(), symbol);
+  getOne(symbol, network) {
+    return _.get(this.getAll(), `${symbol}_${network}`);
   },
 
-  tokenExists(symbol) {
-    return !!this.getOne(symbol);
+  tokenExists(symbol, network) {
+    return !this.getOne(`${symbol}_${network}`);
   },
 
 };

@@ -3,6 +3,7 @@ import moment from 'moment';
 import { alerts, neo, tokens, wallets } from '../services';
 import { timeouts } from '../constants';
 import router from '../router';
+import network from '../services/network';
 
 export {
   addToken,
@@ -21,6 +22,7 @@ function addToken({ dispatch }, { assetId, done, isCustom, symbol }) {
     symbol,
     assetId: assetId.replace('0x', ''),
     isCustom,
+    network: network.getSelectedNetwork().net,
   });
 
   dispatch('fetchHoldings');

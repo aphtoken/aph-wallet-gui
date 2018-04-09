@@ -372,8 +372,15 @@ export default {
             });
 
             tokens.getAllAsArray().forEach((nep5) => {
+              if (nep5.network !== network.getSelectedNetwork().net) {
+                return;
+              }
               promises.push(this.fetchNEP5Balance(address, nep5.assetId)
                 .then((val) => {
+                  if (!val.symbol) {
+                    return; // token not found on this network
+                  }
+
                   if (val.balance > 0 || nep5.isCustom === true) {
                     const h = {
                       asset: nep5.assetId,
@@ -452,12 +459,18 @@ export default {
           symbol: 'APH',
           assetId: '591eedcd379a8981edeefe04ef26207e1391904a',
           isCustom: true, // always show even if 0 balance
-        }];
+          network: 'TestNet',
+        }, {
+          symbol: 'APH',
+          assetId: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
+          isCustom: true, // always show even if 0 balance
+          network: 'MainNet',
+        },
+        ];
 
         defaultList.forEach((t) => {
           tokens.add(t.symbol, t);
         });
-
         try {
           return axios.get(`${network.getSelectedNetwork().aph}/tokens`)
             .then((res) => {
@@ -466,6 +479,7 @@ export default {
                   symbol: t.symbol,
                   assetId: t.scriptHash.replace('0x', ''),
                   isCustom: false,
+                  network: network.getSelectedNetwork().net,
                 });
               });
             })
