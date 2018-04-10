@@ -1,5 +1,7 @@
-import { app, BrowserWindow } from 'electron';
+import { app, Menu, BrowserWindow } from 'electron';
 import path from 'path'; // eslint-disable-line
+
+import menuTemplate from './menu';
 
 /**
  * Set `__static` path to static files in production
@@ -36,6 +38,7 @@ function createWindow() {
   });
 
   mainWindow.setMenu(null);
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate(app)));
 }
 
 app.on('ready', createWindow);
