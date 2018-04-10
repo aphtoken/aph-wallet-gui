@@ -24,6 +24,14 @@
     <div class="body">
       <line-chart ref="chart" :chart-data="chartData" :options="chartOptions" v-if="chartOptions"></line-chart>
     </div>
+    <div class="footer">
+      <div class="option">H</div>
+      <div class="option">D</div>
+      <div class="option">W</div>
+      <div class="option">M</div>
+      <div class="option">6M</div>
+      <div class="option">Y</div>
+    </div>
   </section>
 </template>
 
@@ -235,6 +243,14 @@ export default {
 
       &:hover, &.active {
         border-color: $purple;
+      }
+
+      &:first-child {
+        border-bottom-left-radius: $border-radius;
+      }
+
+      &:last-child {
+        border-bottom-right-radius: $border-radius;
       }
     }
   }
