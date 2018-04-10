@@ -34,7 +34,9 @@ export default {
   },
 
   props: {
-    timestamp: String,
+    timestamp: {
+      type: [Object, String],
+    },
   },
 
   created() {

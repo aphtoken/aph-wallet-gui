@@ -136,8 +136,8 @@ export default {
       sendTimeoutIntervalId = setTimeout(() => {
         if (this.this.sending) {
           this.sending = false;
-          this.address = null;
-          this.amount = null;
+          this.address = '';
+          this.amount = '';
           this.currency = null;
           this.showConfirmation = false;
           this.$router.push('/authenticated/dashboard');
@@ -148,8 +148,8 @@ export default {
 
   data() {
     return {
-      address: null,
-      amount: null,
+      address: '',
+      amount: '',
       currency: null,
       currencies: [],
       showConfirmation: false,
@@ -194,11 +194,11 @@ export default {
 
       input {
         color: $dark;
+      }
 
-        &::placeholder {
-          color: $dark;
-          font-family: GilroyMedium;
-        }
+      .placeholder {
+        color: $grey;
+        font-family: GilroyMedium;
       }
     }
 
