@@ -132,6 +132,11 @@ export default {
     }
   }
 }
+.content {
+  .placeholder {
+    color: grey;
+  }
+}
 </style>
 
 

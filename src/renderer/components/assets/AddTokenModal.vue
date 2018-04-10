@@ -3,8 +3,7 @@
     <div class="content">
       <div class="body">
         <aph-icon name="create"></aph-icon>
-        <aph-input placeholder="Script Hash" :light="true" v-model="assetId"></aph-input>
-        <aph-input placeholder="Token symbol" v-model="symbol"></aph-input>
+        <aph-input placeholder="Script Hash or Token Symbol" :light="true" v-model="userEntry"></aph-input>
       </div>
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">Cancel</div>
@@ -25,18 +24,41 @@ export default {
 
   data() {
     return {
-      assetId: '',
-      symbol: '',
+      userEntry: '',
     };
   },
 
   methods: {
     add() {
+      if (!this.userEntry || this.userEntry.length < 2) {
+        this.$services.alerts.error('Please enter a token script hash or symbol');
+        return;
+      }
+
+      this.userEntry = this.userEntry.replace('0x', '');
+
+      const allTokens = this.$services.tokens.getAllAsArray();
+      let token = _.find(allTokens, (o) => {
+        return o.symbol === this.userEntry && o.network === this.$store.state.currentNetwork.net;
+      });
+
+      if (!token) {
+        token = _.find(allTokens, (o) => {
+          return o.assetId === this.userEntry && o.network === this.$store.state.currentNetwork.net;
+        });
+      }
+
+      if (!token) {
+        this.$services.alerts.error(`Unable to find a token with the symbol or script hash of '${this.userEntry}' on ${this.$store.state.currentNetwork.net}`);
+        return;
+      }
+
       this.$store.dispatch('addToken', {
-        assetId: this.assetId,
+        assetId: token.assetId,
         isCustom: true,
-        symbol: this.symbol,
+        symbol: token.symbol,
         done: () => {
+          this.$services.alerts.success(`Successfully added ${token.symbol}`);
           this.onCancel();
         },
       });

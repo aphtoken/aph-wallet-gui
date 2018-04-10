@@ -9,12 +9,12 @@
           <router-view name="left"></router-view>
         </div>
         <div class="grid--column right">
-          <div class="add-token">
+          <div class="add-token" @click="showAddTokenModal">
             <div class="btn-square">
               <aph-icon name="create"></aph-icon>
               <p>Add token</p>
             </div>
-            <div class="btn-circle" @click="showAddTokenModal">
+            <div class="btn-circle">
               <aph-icon name="show"></aph-icon>
             </div>
           </div>
@@ -50,6 +50,7 @@ export default {
   display: flex;
   flex-direction: column;
   flex: 1;
+  height: 100%;
 
   .header {
     padding: $space-lg $space-lg 0;
@@ -63,11 +64,15 @@ export default {
   }
 
   .body {
+    height: 90%;
+    position: relative;
+
     .grid {
       display: flex;
       flex-direction: row;
       flex: 1;
       padding: $space-lg;
+      height: 100%;
     }
 
     .grid--column {
@@ -86,7 +91,6 @@ export default {
             @extend %btn-square;
 
             box-shadow: $box-shadow;
-            cursor: default;
             height: auto;
             padding: $space-xl 0;
             width: toRem(250px);

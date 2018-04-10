@@ -15,6 +15,7 @@
             <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 1}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
           </div>
         </div>
+        <button class="remove-btn" v-if="holding.canRemove" @click="remove(holding)">Remove</button>
         <div class="right">
           <div class="amount">{{ $formatNumber(holding.balance) }} {{ holding.symbol }}</div>
           <div class="value">{{ $formatMoney(holding.unitValue) }} {{ $store.state.currency }}</div>
@@ -37,6 +38,11 @@ export default {
 
         return name.toLowerCase().indexOf(searchBy) > -1
           || symbol.toLowerCase().indexOf(searchBy) > -1;
+      }).map((holding) => {
+        const canRemove = holding.isCustom === true && holding.symbol !== 'APH';
+        return _.merge(holding, {
+          canRemove,
+        });
       });
     },
   },
@@ -50,6 +56,18 @@ export default {
   methods: {
     loadHoldings() {
       this.$store.dispatch('fetchHoldings');
+    },
+    remove(holding) {
+      this.$services.tokens.remove(holding.symbol, this.$store.state.currentNetwork.net);
+      console.log(holding);
+      this.$store.dispatch('addToken', {
+        assetId: holding.asset,
+        isCustom: false,
+        symbol: holding.symbol,
+        done: () => {
+          this.$services.alerts.success(`Removed ${holding.symbol}`);
+        },
+      });
     },
   },
 
@@ -72,7 +90,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  position: relative;
 
   .search-field {
     border-bottom: $border;
@@ -121,6 +139,7 @@ export default {
   .holdings {
     flex: 1;
     overflow: auto;
+    height: 80%;
     padding: 0 $space 0 0;
 
     .holding {
@@ -174,6 +193,19 @@ export default {
               }
             }
           }
+        }
+      }
+        
+      .remove-btn {
+        @extend %btn-outline;
+
+        display: none;
+        color: $purple;
+        width: 10rem;
+      }
+      &:hover {
+        .remove-btn {
+          display: block;
         }
       }
 

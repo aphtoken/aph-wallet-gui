@@ -396,6 +396,7 @@ export default {
                       symbol: val.symbol,
                       name: val.name,
                       isNep5: true,
+                      isCustom: nep5.isCustom,
                     };
 
                     if (restrictToSymbol && h.symbol !== restrictToSymbol) {
