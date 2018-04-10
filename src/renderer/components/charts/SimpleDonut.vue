@@ -43,7 +43,7 @@ export default {
       type: String,
     },
     percent: {
-      required: true,
+      default: 0,
       type: Number,
     },
   },

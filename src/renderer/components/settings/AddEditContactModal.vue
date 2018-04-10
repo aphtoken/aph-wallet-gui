@@ -104,11 +104,11 @@ export default {
 
       input {
         color: $dark;
+      }
 
-        &::placeholder {
-          color: $grey;
-          font-family: GilroyMedium;
-        }
+      .placeholder {
+        color: $grey;
+        font-family: GilroyMedium;
       }
 
       & + .aph-input {
