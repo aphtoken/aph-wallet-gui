@@ -23,6 +23,7 @@ import Icon from './components/Icon';
 import Input from './components/Input';
 import Select from './components/Select';
 import SimpleTransactions from './components/SimpleTransactions';
+import TimestampFromNow from './components/TimestampFromNow';
 import TokenIcon from './components/TokenIcon';
 
 // Global Libraries.
@@ -53,6 +54,7 @@ Vue.component('aph-icon', Icon);
 Vue.component('aph-input', Input);
 Vue.component('aph-select', Select);
 Vue.component('aph-simple-transactions', SimpleTransactions);
+Vue.component('aph-timestamp-from-now', TimestampFromNow);
 Vue.component('aph-token-icon', TokenIcon);
 
 // Sync local storage to store.

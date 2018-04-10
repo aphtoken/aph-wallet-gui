@@ -31,7 +31,10 @@
     </div>
     <div class="footer link-list">
       <div class="network-status" v-if="network">
-        {{network.net}} Block: {{blockIndex}}<br />{{blockAgo}}
+        {{network.net}} Block: {{blockIndex}}
+        <div>
+          <aph-timestamp-from-now :timestamp="network.lastReceivedBlock"></aph-timestamp-from-now>
+        </div>
       </div>
       <div class="version-number">v{{$store.state.version}}</div>
       <a href="#" @click="logOut">
@@ -54,6 +57,7 @@ export default {
 
   beforeMount() {
     this.loadStatus();
+
     loadNetworkStatusIntervalId = setInterval(() => {
       this.loadStatus();
     }, 1000);
@@ -64,18 +68,12 @@ export default {
       this.$services.wallets.clearCurrentWallet();
       this.$router.push('/login');
     },
+
     loadStatus() {
       this.network = this.$services.network.getSelectedNetwork();
+
       if (this.network.bestBlock) {
         this.blockIndex = this.network.bestBlock.index;
-
-        const seconds = Math.floor((+new Date() - (+this.network.lastReceivedBlock)) / 1000);
-        if (seconds >= 60) {
-          const mins = Math.floor(seconds / 60);
-          this.blockAgo = `${mins} min${((mins === 1) ? '' : 's')} ago`;
-        } else {
-          this.blockAgo = `${seconds} sec${((seconds === 1) ? '' : 's')} ago`;
-        }
       }
     },
   },
@@ -84,7 +82,6 @@ export default {
     return {
       network: null,
       blockIndex: 0,
-      blockAgo: '',
     };
   },
 };

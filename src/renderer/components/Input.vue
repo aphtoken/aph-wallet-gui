@@ -1,9 +1,10 @@
 <template>
-  <div :class="['aph-input', {focused: isFocused}]">
-    <input :type="computedType" :placeholder="placeholder" @input="onInput" v-bind:value="value" @keyup.enter="onEnter" :disabled="disabled" @blur="onBlur" @focus="onFocus" ref="input"/>
+  <div :class="['aph-input', {focused: isFocused || value.length > 0}]">
+    <input :type="computedType" @input="onInput" v-bind:value="value" @keyup.enter="onEnter" :disabled="disabled" @blur="onBlur" @focus="onFocus" ref="input"/>
     <div v-if="type === 'password'" class="visibility-toggle" @click="toggleIsVisible">
       <aph-icon :name="iconName"></aph-icon>
     </div>
+    <div class="placeholder" v-if="placeholder">{{ placeholder }}</div>
   </div>
 </template>
 
@@ -59,7 +60,6 @@ export default {
     },
 
     placeholder: {
-      default: '',
       type: String,
     },
 
@@ -95,19 +95,21 @@ export default {
     outline: none;
     padding: $space-sm 0;
     width: 100%;
+  }
 
-    &::placeholder {
-      color: white;
-    }
+  .placeholder {
+    color: white;
+    padding-top: toRem(12px);
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transition: $transition-fast;
+    z-index: 0;
   }
 
   .visibility-toggle {
-    // bottom: 0;
     cursor: pointer;
     padding: $space;
-    // position: absolute;
-    // right: 0;
-    // top: 0;
   }
 
   .aph-icon {
@@ -122,6 +124,12 @@ export default {
 
   &.focused {
     border-color: $purple;
+
+    .placeholder {
+      color: $grey;
+      font-size: toRem(12px);
+      top: toRem(-18px);
+    }
   }
 }
 </style>
