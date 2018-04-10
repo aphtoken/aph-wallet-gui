@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import Vue from 'vue';
+import lockr from 'lockr';
 
 import { requests } from '../constants';
 
@@ -14,6 +15,7 @@ export {
   setCurrency,
   setCurrencySymbol,
   setCurrentWallet,
+  setCurrentNetwork,
   setHoldings,
   setPortfolio,
   setRecentTransactions,
@@ -68,23 +70,89 @@ function setCurrencySymbol(state, currencySymbol) {
 }
 
 function setCurrentWallet(state, currentWallet) {
+  state.holdings = [];
+  state.statsToken = null;
+  state.portfolio = {};
+  state.recentTransactions = [];
+
   state.currentWallet = currentWallet;
+}
+function setCurrentNetwork(state, network) {
+  if (state.currentNetwork
+      && state.currentNetwork.net === network.net) {
+    return;
+  }
+
+  if (state.currentNetwork) {
+    clearLocalNetworkState(state, network);
+  }
+
+  state.currentNetwork = network;
 }
 
 function setHoldings(state, holdings) {
-  state.holdings = holdings;
-
-  if (!state.statsToken && holdings.length) {
-    state.statsToken = holdings[0];
+  if (holdings && holdings.length > 0) {
+    state.holdings = holdings;
   }
+
+  if (!state.statsToken && state.holdings.length) {
+    state.statsToken = state.holdings[0];
+  }
+
+  if (!state.currentWallet || !state.currentNetwork) {
+    return;
+  }
+
+  const holdingsStorageKey = `aph.holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  lockr.set(holdingsStorageKey, state.holdings);
 }
 
 function setPortfolio(state, data) {
-  state.portfolio = data;
+  if (data) {
+    state.portfolio = data;
+  }
+
+  if (!state.currentWallet || !state.currentNetwork) {
+    return;
+  }
+
+  const portfolioStorageKey = `aph.portfolio.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  lockr.set(portfolioStorageKey, state.portfolio);
 }
 
 function setRecentTransactions(state, transactions) {
-  state.recentTransactions = transactions;
+  _.sortBy(transactions, 'block_index').forEach((t) => {
+    const existingTransaction = _.find(state.recentTransactions, (o) => {
+      return o.hash === t.hash && o.symbol === t.symbol;
+    });
+    if (existingTransaction) {
+      return;
+    }
+    state.recentTransactions.unshift(t);
+  });
+
+  if (!state.currentWallet || !state.currentNetwork) {
+    return;
+  }
+
+  const transactionsStorageKey = `aph.transactions.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  lockr.set(transactionsStorageKey, state.recentTransactions);
+}
+
+function clearLocalNetworkState(state, newNetwork) {
+  state.holdings = [];
+  state.statsToken = null;
+  state.portfolio = {};
+  state.recentTransactions = [];
+
+  const holdingsStorageKey = `aph.holdings.${state.currentWallet.address}.${newNetwork.net}`;
+  lockr.set(holdingsStorageKey, null);
+
+  const portfolioStorageKey = `aph.portfolio.${state.currentWallet.address}.${newNetwork.net}`;
+  lockr.set(portfolioStorageKey, null);
+
+  const transactionsStorageKey = `aph.transactions.${state.currentWallet.address}.${newNetwork.net}`;
+  lockr.set(transactionsStorageKey, null);
 }
 
 function setSearchTransactionFromDate(state, fromDate) {

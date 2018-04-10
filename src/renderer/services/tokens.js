@@ -31,7 +31,7 @@ export default {
   },
 
   getAllAsArray() {
-    return _.sortBy(_.values(this.getAll()), 'symbol');
+    return _.sortBy(_.values(this.getAll()), [token => token.symbol.toLowerCase()], ['symbol']);
   },
 
   getOne(symbol, network) {
