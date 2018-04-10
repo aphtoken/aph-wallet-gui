@@ -3,6 +3,7 @@ import Vue from 'vue';
 import lockr from 'lockr';
 
 import { requests } from '../constants';
+import alerts from '../services/alerts';
 
 export {
   clearActiveTransaction,
@@ -121,6 +122,7 @@ function setPortfolio(state, data) {
 }
 
 function setRecentTransactions(state, transactions) {
+  const existingIsEmpty = !state.recentTransactions || state.recentTransactions.length === 0;
   _.sortBy(transactions, 'block_index').forEach((t) => {
     const existingTransaction = _.find(state.recentTransactions, (o) => {
       return o.hash === t.hash && o.symbol === t.symbol;
@@ -129,6 +131,9 @@ function setRecentTransactions(state, transactions) {
       return;
     }
     state.recentTransactions.unshift(t);
+    if (existingIsEmpty === false) {
+      alerts.success(`New Transaction Found. TX: ${t.hash}`);
+    }
   });
 
   if (!state.currentWallet || !state.currentNetwork) {

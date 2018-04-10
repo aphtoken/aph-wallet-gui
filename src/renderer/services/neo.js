@@ -17,7 +17,6 @@ const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6da
 const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 
 let lastClaimSent;
-let lastTransactionsList = null;
 
 export default {
   /**
@@ -205,18 +204,6 @@ export default {
 
                 Promise.all(promises)
                   .then(() => {
-                    if (forSearch !== true) {
-                      if (lastTransactionsList != null) {
-                        splitTransactions.forEach((t) => {
-                          if (!_.find(lastTransactionsList, (o) => {
-                            return o.hash === t.hash;
-                          })) {
-                            alerts.success(`New Transaction Found. TX: ${t.hash}`);
-                          }
-                        });
-                      }
-                      lastTransactionsList = splitTransactions;
-                    }
                     resolve(_.sortBy(splitTransactions, 'block_time').reverse());
                   })
                   .catch(e => reject(e));

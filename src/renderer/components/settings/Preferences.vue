@@ -43,7 +43,11 @@ export default {
     },
 
     selectedNetwork(network) {
+      if (network.net === this.$store.state.currentNetwork.net) {
+        return;
+      }
       this.$services.network.setSelectedNetwork(network);
+      this.$services.alerts.success(`Switched to ${network.net}`);
     },
   },
 };
