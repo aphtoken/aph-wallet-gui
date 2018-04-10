@@ -395,7 +395,7 @@ export default {
                 })
                 .catch((e) => {
                   if (e.message.indexOf('Expected a hexstring but got') > -1) {
-                    tokens.remove(nep5.symbol, network.getSelectedNetwork().net);
+                    tokens.remove(nep5.assetId, network.getSelectedNetwork().net);
                   }
                   alerts.exception(e);
                   reject(e);
@@ -468,13 +468,13 @@ export default {
         ];
 
         defaultList.forEach((t) => {
-          tokens.add(t.symbol, t);
+          tokens.add(t);
         });
         try {
           return axios.get(`${network.getSelectedNetwork().aph}/tokens`)
             .then((res) => {
               res.data.tokens.forEach((t) => {
-                tokens.add(t.symbol, {
+                tokens.add({
                   symbol: t.symbol,
                   assetId: t.scriptHash.replace('0x', ''),
                   isCustom: false,

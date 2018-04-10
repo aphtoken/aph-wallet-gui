@@ -53,6 +53,11 @@ export default {
         return;
       }
 
+      if (token.isCustom === true) {
+        this.$services.alerts.error(`'${this.userEntry}' is already in your token list ${this.$store.state.currentNetwork.net}`);
+        return;
+      }
+
       this.$store.dispatch('addToken', {
         assetId: token.assetId,
         isCustom: true,

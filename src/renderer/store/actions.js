@@ -19,7 +19,7 @@ export {
 };
 
 function addToken({ dispatch }, { assetId, done, isCustom, symbol }) {
-  tokens.add(symbol, {
+  tokens.add({
     symbol,
     assetId: assetId.replace('0x', ''),
     isCustom,

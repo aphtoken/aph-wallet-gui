@@ -58,7 +58,7 @@ export default {
       this.$store.dispatch('fetchHoldings');
     },
     remove(holding) {
-      this.$services.tokens.remove(holding.symbol, this.$store.state.currentNetwork.net);
+      this.$services.tokens.remove(holding.asset, this.$store.state.currentNetwork.net);
       console.log(holding);
       this.$store.dispatch('addToken', {
         assetId: holding.asset,

@@ -1,12 +1,12 @@
 import lockr from 'lockr';
 
-const TOKENS_STORAGE_KEY = 'aph.tokens';
+const TOKENS_STORAGE_KEY = 'aph.token';
 
 export default {
 
-  add(symbol, data) {
-    if (this.tokenExists(symbol, data.network)) {
-      const existing = this.getOne(symbol, data.network);
+  add(data) {
+    if (this.tokenExists(data.assetId, data.network)) {
+      const existing = this.getOne(data.assetId, data.network);
       if (existing) {
         if (existing.isCustom === data.isCustom
           || (existing.isCustom === true && data.isCustom === false)) {
@@ -16,13 +16,13 @@ export default {
     }
 
     const tokens = this.getAll();
-    lockr.set(TOKENS_STORAGE_KEY, _.set(tokens, `${symbol}_${data.network}`, data));
+    lockr.set(TOKENS_STORAGE_KEY, _.set(tokens, `${data.assetId}_${data.network}`, data));
     return this;
   },
 
-  remove(symbol, network) {
+  remove(assetId, network) {
     const tokens = this.getAll();
-    lockr.set(TOKENS_STORAGE_KEY, _.omit(tokens, `${symbol}_${network}`));
+    lockr.set(TOKENS_STORAGE_KEY, _.omit(tokens, `${assetId}_${network}`));
     return this;
   },
 
@@ -34,12 +34,12 @@ export default {
     return _.sortBy(_.values(this.getAll()), [token => token.symbol.toLowerCase()], ['symbol']);
   },
 
-  getOne(symbol, network) {
-    return _.get(this.getAll(), `${symbol}_${network}`);
+  getOne(assetId, network) {
+    return _.get(this.getAll(), `${assetId}_${network}`);
   },
 
-  tokenExists(symbol, network) {
-    return !this.getOne(`${symbol}_${network}`);
+  tokenExists(assetId, network) {
+    return !this.getOne(`${assetId}_${network}`);
   },
 
 };
