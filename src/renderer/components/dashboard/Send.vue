@@ -58,7 +58,7 @@
       </div>
       <div class="footer">
         <router-link class="cancel-btn" to="/dashboard">Cancel</router-link>
-        <div class="next-btn" v-if="showNextButton" @click="next">Next</div>
+        <button class="next-btn" @click="next" :disabled="shouldDisableNextButton">Next</button>
       </div>
     </template>
   </section>
@@ -98,8 +98,8 @@ export default {
       return this.sending ? 'Waiting for confirmation...' : 'Send';
     },
 
-    showNextButton() {
-      return this.address && this.amount && parseFloat(this.amount) && this.currency;
+    shouldDisableNextButton() {
+      return !this.address || !this.amount || !this.currency || !parseFloat(this.amount);
     },
   },
 

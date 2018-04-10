@@ -29,10 +29,15 @@ export default {
 
 <style lang="scss">
 #login--logo {
+  text-align: center;
+
   .icon.logo {
     height: 20rem;
   }
-  text-align: center;
+
+  .version-number {
+    @extend %small-uppercase-grey-label;
+  }
 
   .back-btn {
     @extend %btn-circle;

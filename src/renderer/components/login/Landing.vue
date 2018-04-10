@@ -41,6 +41,10 @@ export default {
     height: 20rem;
   }
 
+  .version-number {
+    @extend %small-uppercase-grey-label;
+  }
+
   .login-btn, .create-wallet-btn {
     @extend %btn-square;
 
