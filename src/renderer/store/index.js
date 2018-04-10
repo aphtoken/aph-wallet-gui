@@ -6,6 +6,7 @@ import * as mutations from './mutations';
 
 Vue.use(Vuex);
 
+const pjson = require('../../../package.json');
 const state = {
   activeTransaction: null,
   contacts: [],
@@ -25,6 +26,7 @@ const state = {
   showPriceTile: true,
   showSendAddressModal: false,
   statsToken: null,
+  version: pjson.version,
   wallets: [],
 };
 

@@ -33,9 +33,7 @@
       <div class="network-status" v-if="network">
         {{network.net}} Block: {{blockIndex}}<br />{{blockAgo}}
       </div>
-      <div class="version-number">
-        {{version}}
-      </div>
+      <div class="version-number">v{{$store.state.version}}</div>
       <a href="#" @click="logOut">
         <span class="icon">
           <aph-icon name="back"></aph-icon>
@@ -49,14 +47,7 @@
 <script>
 let loadNetworkStatusIntervalId;
 
-const pjson = require('../../../package.json');
 export default {
-  computed: {
-    version() {
-      return `v${pjson.version}`;
-    },
-  },
-
   beforeDestroy() {
     clearInterval(loadNetworkStatusIntervalId);
   },
@@ -190,7 +181,7 @@ export default {
         }
       }
     }
-    
+
     .network-status {
       color: #cccccc;
       font-size: smaller;
