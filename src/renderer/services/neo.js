@@ -406,6 +406,9 @@ export default {
                   }
                 })
                 .catch((e) => {
+                  if (e.message.indexOf('Expected a hexstring but got') > -1) {
+                    tokens.remove(nep5.symbol, network.getSelectedNetwork().net);
+                  }
                   alerts.exception(e);
                   reject(e);
                 }));
