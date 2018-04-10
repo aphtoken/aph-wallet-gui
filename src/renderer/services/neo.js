@@ -80,12 +80,12 @@ export default {
    *  {String} amount
    *  {String} block_time
    */
-  fetchRecentTransactions(address, forSearch, fromDate, toDate) {
+  fetchRecentTransactions(address, forSearch, fromDate, toDate, fromBlock, toBlock) {
     return new Promise((resolve, reject) => {
       try {
         return api.neoscan.getTransactionHistory(network.getSelectedNetwork().net, address)
           .then((res) => {
-            this.fetchNEP5Transfers(address, fromDate, toDate)
+            this.fetchNEP5Transfers(address, fromDate, toDate, fromBlock, toBlock)
               .then((nep5) => {
                 const splitTransactions = [];
                 nep5.data.transfers.forEach((t) => {
@@ -94,6 +94,7 @@ export default {
                     symbol: t.symbol,
                     value: new BigNumber(t.received - t.sent).toFormat(8),
                     block_index: t.blockIndex,
+                    blockHeight: t.blockIndex,
                     block_time: t.blockTime,
                     isNep5: true,
                     vin: [{
@@ -111,6 +112,13 @@ export default {
 
                 const promises = [];
                 res.forEach((t) => {
+                  if (fromBlock && t.blockHeight < fromBlock) {
+                    return;
+                  }
+                  if (toBlock && t.blockHeight > toBlock) {
+                    return;
+                  }
+
                   promises.push(this.fetchTransactionDetails(t.txid)
                     .then((transactionDetails) => {
                       if (!transactionDetails) {
@@ -512,10 +520,10 @@ export default {
     });
   },
 
-  fetchNEP5Transfers(address, fromDate, toDate) {
+  fetchNEP5Transfers(address, fromDate, toDate, fromBlock, toBlock) {
     return new Promise((resolve) => {
       try {
-        const requestUrl = `${network.getSelectedNetwork().aph}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}`;
+        const requestUrl = `${network.getSelectedNetwork().aph}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}&fromBlock=${fromBlock}&toBlock=${toBlock}`;
         return axios.get(requestUrl)
           .then((res) => {
             resolve(res);
@@ -665,8 +673,10 @@ export default {
 
   claimGas() {
     if (new Date() - lastClaimSent < 5 * 60 * 1000) { // 5 minutes ago
-      alerts.error('May only claim GAS once every 5 minutes.');
-      return null;
+      return new Promise((reject) => {
+        alerts.error('May only claim GAS once every 5 minutes.');
+        reject('May only claim GAS once every 5 minutes.');
+      });
     }
 
     lastClaimSent = new Date();

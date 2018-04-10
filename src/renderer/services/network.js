@@ -4,6 +4,7 @@ import moment from 'moment';
 import {
   rpc,
 } from '@cityofzion/neon-js';
+import { store } from '../store';
 
 const NETWORK_STORAGE_KEY = 'aph.network';
 const NETWORKS = [
@@ -36,7 +37,12 @@ export default {
 
   getSelectedNetwork() {
     if (!currentNetwork) {
-      this.setSelectedNetwork(_.first(NETWORKS).value);
+      const storedNetwork = lockr.get(NETWORK_STORAGE_KEY);
+      if (storedNetwork) {
+        this.setSelectedNetwork(storedNetwork);
+      } else {
+        this.setSelectedNetwork(_.first(NETWORKS).value);
+      }
     }
     return currentNetwork;
   },
@@ -55,7 +61,12 @@ export default {
     }, 15000);
 
     lockr.set(NETWORK_STORAGE_KEY, network);
+    this.sync();
     return this;
+  },
+
+  sync() {
+    store.commit('setCurrentNetwork', currentNetwork);
   },
 
   loadStatus() {

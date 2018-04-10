@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import moment from 'moment';
+import lockr from 'lockr';
 import { alerts, neo, tokens, wallets } from '../services';
 import { timeouts } from '../constants';
 import router from '../router';
@@ -78,7 +79,7 @@ function createWallet({ commit }, { name, passphrase, passphraseConfirm }) {
   }, timeouts.NEO_API_CALL);
 }
 
-function fetchHoldings({ commit }) {
+function fetchHoldings({ state, commit }) {
   const currentWallet = wallets.getCurrentWallet();
 
   if (!currentWallet) {
@@ -86,6 +87,16 @@ function fetchHoldings({ commit }) {
   }
 
   commit('startRequest', { identifier: 'fetchHoldings' });
+
+  const holdingsStorageKey = `aph.holdings.${currentWallet.address}.${state.currentNetwork.net}`;
+  const localHoldings = lockr.get(holdingsStorageKey);
+  if (localHoldings) {
+    state.holdings = localHoldings;
+
+    if (!state.statsToken && state.holdings.length) {
+      state.statsToken = state.holdings[0];
+    }
+  }
 
   neo
     .fetchHoldings(currentWallet.address)
@@ -99,7 +110,7 @@ function fetchHoldings({ commit }) {
     });
 }
 
-function fetchPortfolio({ commit }) {
+function fetchPortfolio({ state, commit }) {
   const currentWallet = wallets.getCurrentWallet();
 
   if (!currentWallet) {
@@ -107,6 +118,12 @@ function fetchPortfolio({ commit }) {
   }
 
   commit('startRequest', { identifier: 'fetchPortfolio' });
+
+  const portfolioStorageKey = `aph.portfolio.${currentWallet.address}.${state.currentNetwork.net}`;
+  const localPortfolio = lockr.get(portfolioStorageKey);
+  if (localPortfolio) {
+    state.portfolio = localPortfolio;
+  }
 
   neo
     .fetchHoldings(currentWallet.address)
@@ -123,7 +140,7 @@ function fetchPortfolio({ commit }) {
     });
 }
 
-function fetchRecentTransactions({ commit }) {
+function fetchRecentTransactions({ state, commit }) {
   const currentWallet = wallets.getCurrentWallet();
 
   if (!currentWallet) {
@@ -132,13 +149,20 @@ function fetchRecentTransactions({ commit }) {
 
   commit('startRequest', { identifier: 'fetchRecentTransactions' });
 
+  const transactionsStorageKey = `aph.transactions.${currentWallet.address}.${state.currentNetwork.net}`;
+  const localTransactions = lockr.get(transactionsStorageKey);
+
+  let lastBlockIndex = 0;
+  if (localTransactions && localTransactions.length > 0) {
+    lastBlockIndex = localTransactions[0].block_index;
+    state.recentTransactions = localTransactions;
+  }
+
   neo
     .fetchRecentTransactions(currentWallet.address, false,
-      moment().subtract(30, 'days'), null)
+      moment().subtract(30, 'days'), null, lastBlockIndex)
     .then((data) => {
-      if (data && data.length > 0) {
-        commit('setRecentTransactions', data);
-      }
+      commit('setRecentTransactions', data);
       commit('endRequest', { identifier: 'fetchRecentTransactions' });
     })
     .catch((message) => {
@@ -179,8 +203,9 @@ function openSavedWallet({ commit }, { name, passphrase, done }) {
         done();
         commit('endRequest', { identifier: 'openSavedWallet' });
       })
-      .catch(({ message }) => {
-        commit('failRequest', { identifier: 'openSavedWallet', message });
+      .catch((e) => {
+        alerts.exception(e);
+        commit('failRequest', { identifier: 'openSavedWallet', message: e.message });
       });
   }, timeouts.NEO_API_CALL);
 }
