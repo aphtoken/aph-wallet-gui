@@ -429,7 +429,7 @@ export default {
                   .then(() => {
                     const res = { };
 
-                    res.holdings = _.sortBy(holdings, 'symbol');
+                    res.holdings = _.sortBy(holdings, [holding => holding.symbol.toLowerCase()], ['symbol']);
 
                     res.totalBalance = 0;
                     res.change24hrValue = 0;

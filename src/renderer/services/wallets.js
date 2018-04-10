@@ -28,7 +28,7 @@ export default {
   },
 
   getAllAsArray() {
-    return _.sortBy(_.values(this.getAll()), 'label');
+    return _.sortBy(_.values(this.getAll()), [wallet => wallet.label.toLowerCase()], ['label']);
   },
 
   getCurrentWallet() {
