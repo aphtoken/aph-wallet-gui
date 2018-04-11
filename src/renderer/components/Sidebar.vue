@@ -33,7 +33,12 @@
       <div class="network-status" v-if="network">
         {{network.net}} Block: {{blockIndex}}
         <div>
-          <aph-timestamp-from-now :timestamp="network.lastReceivedBlock"></aph-timestamp-from-now>
+          <div v-if="blockSecondsAgo <= 120">
+            <aph-timestamp-from-now :timestamp="network.lastReceivedBlock"></aph-timestamp-from-now>
+          </div>
+          <div v-if="blockSecondsAgo > 120" class="network-error">
+            Unable to Reach Network
+          </div>
         </div>
       </div>
       <div class="version-number">v{{$store.state.version}}</div>
@@ -74,6 +79,7 @@ export default {
 
       if (this.network.bestBlock) {
         this.blockIndex = this.network.bestBlock.index;
+        this.blockSecondsAgo = moment.utc().diff(moment.utc(this.network.lastReceivedBlock), 'seconds');
       }
     },
   },
@@ -82,6 +88,7 @@ export default {
     return {
       network: null,
       blockIndex: 0,
+      blockSecondsAgo: 0,
     };
   },
 };
@@ -185,6 +192,12 @@ export default {
       line-height: 1.25rem;
       padding: $space-sm;
       text-align: center;
+    }
+    .network-error {
+      padding: $space;
+      background: white;
+      color: $red;
+      font-weight: bold;
     }
     .version-number {
       color: white;

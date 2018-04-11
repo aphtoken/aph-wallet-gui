@@ -58,7 +58,7 @@ export default {
     this.loadStatus();
     loadNetworkStatusIntervalId = setInterval(() => {
       this.loadStatus();
-    }, 15000);
+    }, 10 * 1000);
 
     lockr.set(NETWORK_STORAGE_KEY, network);
     this.sync();
@@ -74,6 +74,9 @@ export default {
       .then((blockHash) => {
         currentNetwork.rpcClient.getBlock(blockHash)
           .then((data) => {
+            if (currentNetwork.bestBlock && currentNetwork.bestBlock.index === data.index) {
+              return;
+            }
             currentNetwork.bestBlock = data;
             currentNetwork.lastReceivedBlock = moment();
             lockr.set(NETWORK_STORAGE_KEY, currentNetwork);

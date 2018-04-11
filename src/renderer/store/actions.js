@@ -160,7 +160,7 @@ function fetchRecentTransactions({ state, commit }) {
 
   neo
     .fetchRecentTransactions(currentWallet.address, false,
-      moment().subtract(30, 'days'), null, lastBlockIndex)
+      moment().subtract(30, 'days'), null, lastBlockIndex, null)
     .then((data) => {
       commit('setRecentTransactions', data);
       commit('endRequest', { identifier: 'fetchRecentTransactions' });
