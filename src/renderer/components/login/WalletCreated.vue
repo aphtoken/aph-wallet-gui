@@ -55,6 +55,15 @@
         </span>
       </div>
     </div>
+    <div class="wallet-data private-key">
+      <div class="label">WIF</div>
+      <div class="value">
+        <p>{{ wallet.wif }}</p>
+        <span class="copy-link" @click="copy(wallet.wif)">
+          <aph-icon name="copy"></aph-icon>
+        </span>
+      </div>
+    </div>
     <div class="btn-group">
       <div @click="print()" class="btn print">Print</div>
     </div>
