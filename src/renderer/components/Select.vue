@@ -46,7 +46,6 @@ export default {
 
     getSelectedOptionLabel() {
       const option = _.find(this.options, { value: this.selectedOption });
-
       return option ? option.label : null;
     },
 
@@ -66,7 +65,11 @@ export default {
   },
 
   mounted() {
-    this.selectedOption = this.initialValue;
+    if (this.initialValue && this.initialValue.value) {
+      this.selectedOption = this.initialValue.value;
+    } else if (this.initialValue) {
+      this.selectedOption = this.initialValue;
+    }
   },
 
   props: {

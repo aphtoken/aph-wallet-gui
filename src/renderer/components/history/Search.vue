@@ -20,11 +20,11 @@ import moment from 'moment';
 export default {
   data() {
     return {
-      selectedDateRange: null,
+      selectedDateRange: 'all',
       dateRanges: [
         {
           label: 'All',
-          value: null,
+          value: 'all',
         },
         {
           label: 'Last 7 days',
@@ -54,7 +54,7 @@ export default {
         this.$refs.fromDate.setDay(this.fromDate);
         this.$refs.toDate.setDay(this.toDate);
         return;
-      } else if (this.selectedDateRange === null) {
+      } else if (this.selectedDateRange === 'all') {
         this.fromDate = null;
         this.toDate = null;
         return;
