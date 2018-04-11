@@ -5,7 +5,7 @@
     </div>
     <div class="body">
       <div class="left">
-        <div :class="['wallet', {active: isActive(wallet)}]" v-for="(wallet, index) in $store.state.wallets" :key="index" @click="changeWallet(wallet)">
+        <div :class="['wallet', {active: isActive(wallet)}]" v-for="(wallet, index) in $store.state.wallets" :key="index" @click="showLoginToWalletModal(wallet)">
           <div class="name">{{ wallet.label }}</div>
           <!-- <div class="value">{{ $formatMoney(444.444) }} {{ $store.state.currency }}</div> -->
         </div>
@@ -22,18 +22,27 @@
         </div>
       </div>
     </div>
+    <aph-login-to-wallet-modal v-if="$store.state.showLoginToWalletModal" :onCancel="hideLoginToWalletModal"></aph-login-to-wallet-modal>
   </section>
 </template>
 
 <script>
+import AphLoginToWalletModal from './LoginToWalletModal';
 export default {
-  methods: {
-    changeWallet(wallet) {
-      this.$store.dispatch('changeWallet', wallet);
-    },
+  components: {
+    AphLoginToWalletModal,
+  },
 
+  methods: {
     isActive({ label }) {
       return _.get(this.$store.state.currentWallet, 'label') === label;
+    },
+
+    showLoginToWalletModal(wallet) {
+      this.$store.commit('setShowLoginToWalletModal', wallet);
+    },
+    hideLoginToWalletModal() {
+      this.$store.commit('setShowLoginToWalletModal', null);
     },
   },
 };

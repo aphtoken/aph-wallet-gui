@@ -27,6 +27,7 @@ export {
   setShowAddTokenModal,
   setShowEditContactModal,
   setShowSendAddressModal,
+  setShowLoginToWalletModal,
   setStatsToken,
   setWallets,
   startRequest,
@@ -188,6 +189,12 @@ function setShowEditContactModal(state, contact) {
 
 function setShowSendAddressModal(state, value) {
   state.showSendAddressModal = value;
+}
+
+function setShowLoginToWalletModal(state, wallet) {
+  const show = wallet !== null;
+  state.showLoginToWalletModal = show;
+  state.currentLoginToWallet = wallet;
 }
 
 function setStatsToken(state, token) {
