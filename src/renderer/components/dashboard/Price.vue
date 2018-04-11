@@ -25,12 +25,10 @@
       <line-chart ref="chart" :chart-data="chartData" :options="chartOptions" v-if="chartOptions"></line-chart>
     </div>
     <div class="footer">
-      <div class="option">H</div>
-      <div class="option">D</div>
-      <div class="option">W</div>
-      <div class="option">M</div>
-      <div class="option">6M</div>
-      <div class="option">Y</div>
+      <div class="option" @click="changeTimeframe('D')" :class="[{selected: timeframeOption === 'D'}]">D</div>
+      <div class="option" @click="changeTimeframe('W')" :class="[{selected: timeframeOption === 'W'}]">W</div>
+      <div class="option" @click="changeTimeframe('M')" :class="[{selected: timeframeOption === 'M'}]">M</div>
+      <div class="option" @click="changeTimeframe('3M')" :class="[{selected: timeframeOption === '3M'}]">3M</div>
     </div>
   </section>
 </template>
@@ -44,6 +42,8 @@ export default {
 
   data() {
     return {
+      timeframeOption: 'M',
+      timeframeHours: 24 * 30,
       date: null,
       chartData: null,
       chartOptions: null,
@@ -73,12 +73,32 @@ export default {
   },
 
   methods: {
+    changeTimeframe(timeframe) {
+      this.timeframeOption = timeframe;
+
+      switch (this.timeframeOption) {
+        case 'D':
+          this.timeframeHours = 24;
+          break;
+        case 'W':
+          this.timeframeHours = 7 * 24;
+          break;
+        case 'M': default:
+          this.timeframeHours = 30 * 24;
+          break;
+        case '3M':
+          this.timeframeHours = 3 * 30 * 24;
+          break;
+      }
+      this.loadPriceData();
+    },
     loadPriceData() {
       if (!this.$store.state.statsToken) {
         return;
       }
 
-      this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol, 24 * 30, 10)
+      this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol,
+        this.timeframeHours, 7)
         .then((priceData) => {
           this.date = new Date();
           this.current = priceData.last;
@@ -251,6 +271,11 @@ export default {
 
       &:last-child {
         border-bottom-right-radius: $border-radius;
+      }
+      
+      &.selected {
+        font-weight: bold;
+        background-color: #cccccc;
       }
     }
   }
