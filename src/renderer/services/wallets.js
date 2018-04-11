@@ -111,6 +111,33 @@ export default {
     });
   },
 
+
+  importWIF(name, wif, passphrase) {
+    return new Promise((resolve, reject) => {
+      try {
+        const account = new wallet.Account(wif);
+        const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
+        const currentWallet = {
+          wif,
+          address: account.address,
+          privateKey: account.privateKey,
+        };
+
+        this.setCurrentWallet(currentWallet).sync();
+        this.add(name, {
+          label: name,
+          encryptedWIF,
+          address: account.address,
+          scriptHash: account.scriptHash,
+        })
+          .sync();
+        return resolve(currentWallet);
+      } catch (e) {
+        return reject(e);
+      }
+    });
+  },
+
   setCurrentWallet(wallet) {
     currentWallet = wallet;
 

@@ -16,6 +16,7 @@ export {
   fetchRecentTransactions,
   findTransactions,
   openSavedWallet,
+  importWallet,
 };
 
 function addToken({ dispatch }, { assetId, done, isCustom, symbol }) {
@@ -206,6 +207,22 @@ function openSavedWallet({ commit }, { name, passphrase, done }) {
       .catch((e) => {
         alerts.exception(e);
         commit('failRequest', { identifier: 'openSavedWallet', message: e.message });
+      });
+  }, timeouts.NEO_API_CALL);
+}
+
+function importWallet({ commit }, { name, wif, passphrase, done }) {
+  commit('startRequest', { identifier: 'importWallet' });
+
+  setTimeout(() => {
+    wallets.importWIF(name, wif, passphrase)
+      .then(() => {
+        done();
+        commit('endRequest', { identifier: 'importWallet' });
+      })
+      .catch((e) => {
+        alerts.exception(e);
+        commit('failRequest', { identifier: 'importWallet', message: e.message });
       });
   }, timeouts.NEO_API_CALL);
 }

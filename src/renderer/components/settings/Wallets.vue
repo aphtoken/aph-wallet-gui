@@ -11,10 +11,10 @@
         </div>
       </div>
       <div class="right">
-        <div class="add-wallet">
+        <div class="add-wallet" @click="showImportAWalletModal">
           <div class="btn-square">
             <aph-icon name="wallet"></aph-icon>
-            <p>Add wallet</p>
+            <p>Import a wallet</p>
           </div>
           <div class="btn-circle">
             <aph-icon name="show"></aph-icon>
@@ -23,14 +23,17 @@
       </div>
     </div>
     <aph-login-to-wallet-modal v-if="$store.state.showLoginToWalletModal" :onCancel="hideLoginToWalletModal"></aph-login-to-wallet-modal>
+    <aph-import-a-wallet-modal v-if="$store.state.showImportAWalletModal" :onCancel="hideImportAWalletModal"></aph-import-a-wallet-modal>
   </section>
 </template>
 
 <script>
 import AphLoginToWalletModal from './LoginToWalletModal';
+import AphImportAWalletModal from './ImportAWalletModal';
 export default {
   components: {
     AphLoginToWalletModal,
+    AphImportAWalletModal,
   },
 
   methods: {
@@ -43,6 +46,13 @@ export default {
     },
     hideLoginToWalletModal() {
       this.$store.commit('setShowLoginToWalletModal', null);
+    },
+
+    showImportAWalletModal() {
+      this.$store.commit('setShowImportAWalletModal', true);
+    },
+    hideImportAWalletModal() {
+      this.$store.commit('setShowImportAWalletModal', false);
     },
   },
 };
@@ -83,7 +93,6 @@ export default {
           @extend %btn-square;
 
           box-shadow: $box-shadow;
-          cursor: default;
           height: auto;
           padding: $space-xl 0;
           width: toRem(250px);

@@ -27,6 +27,7 @@ const state = {
   showPriceTile: true,
   showSendAddressModal: false,
   showLoginToWalletModal: false,
+  showImportAWalletModal: false,
   statsToken: null,
   version: pjson.version,
   wallets: [],
