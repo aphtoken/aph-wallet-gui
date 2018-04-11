@@ -11,6 +11,7 @@ import settings from './settings';
 import tokens from './tokens';
 import valuation from './valuation';
 import wallets from './wallets';
+import { store } from '../store';
 
 const toBigNumber = value => new BigNumber(String(value));
 const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
@@ -82,7 +83,7 @@ export default {
   fetchRecentTransactions(address, forSearch, fromDate, toDate, fromBlock, toBlock) {
     return new Promise((resolve, reject) => {
       try {
-        return api.neoscan.getTransactionHistory(network.getSelectedNetwork().net, address)
+        return this.fetchSystemTransactions(address)
           .then((res) => {
             this.fetchNEP5Transfers(address, fromDate, toDate, fromBlock, toBlock)
               .then((nep5) => {
@@ -125,11 +126,11 @@ export default {
                       }
 
                       if (fromDate
-                            && transactionDetails.blocktime < fromDate.unix()) {
+                        && transactionDetails.blocktime < fromDate.unix()) {
                         return;
                       }
                       if (toDate
-                            && transactionDetails.blocktime > toDate.unix()) {
+                        && transactionDetails.blocktime > toDate.unix()) {
                         return;
                       }
 
@@ -213,6 +214,29 @@ export default {
               });
           })
           .catch((e) => {
+            console.log(e);
+            resolve([]);
+            if (e.message === 'Cannot read property \'length\' of null') {
+              // absorb this error from neoscan,
+              // happens with a new wallet without any transactions yet
+              return;
+            }
+            alerts.exception(e);
+          });
+      } catch (e) {
+        return reject(e);
+      }
+    });
+  },
+  fetchSystemTransactions(address) {
+    return new Promise((resolve, reject) => {
+      try {
+        return api.neoscan.getTransactionHistory(network.getSelectedNetwork().net, address)
+          .then((res) => {
+            resolve(res);
+          })
+          .catch((e) => {
+            console.log(e);
             resolve([]);
             if (e.message === 'Cannot read property \'length\' of null') {
               // absorb this error from neoscan,
@@ -563,12 +587,12 @@ export default {
 
         sendPromise
           .then((res) => {
-            if (!res) {
+            if (!res || !res.tx) {
               alerts.error('Failed to create transaction.');
-              return;
+              return reject('Failed to create transaction.');
             }
             alerts.success(`Transaction Hash: ${res.tx.hash} Sent, waiting for confirmation.`);
-            this.monitorTransactionConfirmation(res.tx.hash)
+            return this.monitorTransactionConfirmation(res.tx.hash)
               .then(() => {
                 return resolve(res.tx);
               })
@@ -617,6 +641,17 @@ export default {
   },
 
   sendNep5Transfer(toAddress, assetId, amount) {
+    const gasAmount = _.find(store.state.holdings, (o) => {
+      return o.asset === gasAssetId;
+    }).balance;
+
+    if (gasAmount <= 0.00000001) {
+      return new Promise((reject) => {
+        alerts.error('At least one drop of GAS is required to send NEP5 transfers.');
+        reject('At least one drop of GAS is required to send NEP5 transfers.');
+      });
+    }
+
     const config = {
       net: network.getSelectedNetwork().net,
       account: new wallet.Account(wallets.getCurrentWallet().wif),
