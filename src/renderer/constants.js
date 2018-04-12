@@ -13,6 +13,7 @@ const formats = {
 
 const intervals = {
   POLLING: 15000,
+  WALLETVERSIONCHECK: 10 * 60 * 1000,
 };
 
 const loadStates = {

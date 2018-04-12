@@ -18,6 +18,7 @@ export {
   openSavedWallet,
   importWallet,
   deleteWallet,
+  fetchLatestWalletVersion,
 };
 
 function addToken({ dispatch }, { assetId, done, isCustom, symbol }) {
@@ -243,5 +244,26 @@ function deleteWallet({ commit }, { name, done }) {
         alerts.exception(e);
         commit('failRequest', { identifier: 'deleteWallet', message: e.message });
       });
+  }, timeouts.NEO_API_CALL);
+}
+
+function fetchLatestWalletVersion({ commit }, { done }) {
+  commit('startRequest', { identifier: 'walletVersion' });
+  setTimeout(() => {
+    try {
+      return axios.get(`${network.getSelectedNetwork().aph}/LatestWalletInfo`)
+        .then((res) => {
+          done(res.data);
+          commit('endRequest', { identifier: 'walletVersion' });
+        })
+        .catch((e) => {
+          console.log(e);
+          commit('failRequest', { identifier: 'walletVersion', message: e });
+        });
+    } catch (e) {
+      console.log(e);
+      commit('failRequest', { identifier: 'walletVersion', message: e.message });
+      return null;
+    }
   }, timeouts.NEO_API_CALL);
 }

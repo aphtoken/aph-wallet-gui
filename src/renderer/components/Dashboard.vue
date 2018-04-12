@@ -23,9 +23,6 @@
 
 <script>
 export default {
-  mounted() {
-    this.$services.neo.fetchNEP5Tokens();
-  },
 };
 </script>
 
