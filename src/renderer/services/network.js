@@ -11,9 +11,9 @@ const NETWORKS = [
   {
     label: 'TestNet',
     value: {
-      aph: 'http://test1.aphelion-neo.com:62433/api',
+      aph: 'http://testnet.aphelion-neo.com:62433/api',
       net: 'TestNet',
-      rpc: 'http://test1.aphelion-neo.com:30333',
+      rpc: 'http://testneo.aphelion-neo.com:20332',
     },
   },
   {
