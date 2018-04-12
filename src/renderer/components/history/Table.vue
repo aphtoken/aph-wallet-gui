@@ -9,7 +9,7 @@
     </div>
     <div class="body">
       <div v-for="(transaction, index) in transactions()" :key="index"
-           @click="openTransaction(transaction)"
+           @click="toggleTransaction(transaction)"
            :class="['transaction', {active: transaction.active, increase: transaction.amount > 0}]">
         <div class="cell date">{{ $formatDate(transaction.block_time) }}</div>
         <div class="cell token">{{ transaction.symbol }}</div>
@@ -84,6 +84,7 @@
 
 <script>
 let loadTransactionsIntervalId;
+let currentOpenedTransaction;
 
 export default {
   beforeDestroy() {
@@ -115,8 +116,14 @@ export default {
       this.$store.dispatch('findTransactions');
     },
 
-    openTransaction(transaction) {
-      this.$store.commit('setActiveTransaction', transaction.details);
+    toggleTransaction(transaction) {
+      if (transaction === currentOpenedTransaction) {
+        this.$store.state.activeTransaction.active = false;
+        this.$store.commit('setActiveTransaction', null);
+      } else {
+        currentOpenedTransaction = transaction;
+        this.$store.commit('setActiveTransaction', transaction.details);
+      }
     },
     closeTransaction() {
       this.$store.state.activeTransaction.active = false;
@@ -168,6 +175,7 @@ export default {
         flex: 1;
         font-family: GilroySemibold;
         padding: $space;
+        min-height: 55px;
 
         .aph-icon {
           svg {
@@ -211,7 +219,13 @@ export default {
       &:hover, &.active {
         background: $light-grey;
       }
-
+      
+      &.active:hover {
+        .cell {
+          background: #cccccc;
+        }
+      }
+      
       .details {
         display: none;
         padding: $space;
