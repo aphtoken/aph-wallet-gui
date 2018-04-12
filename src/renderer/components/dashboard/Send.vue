@@ -8,7 +8,7 @@
         <div class="row">
           <div class="column">
             <div class="label">Amount</div>
-            <div class="value">{{ amount }}</div>
+            <div class="value">{{ $formatNumberBig(amount) }}</div>
           </div>
           <div class="column">
             <div class="label">Value</div>
@@ -76,7 +76,7 @@ export default {
         }
 
         result.push({
-          label: `${name} (${balance})`,
+          label: `${name} (${this.$formatNumber(balance)})`,
           value: {
             symbol,
             name,
