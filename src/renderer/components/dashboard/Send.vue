@@ -115,32 +115,33 @@ export default {
     send() {
       this.sending = true;
 
+      const self = this;
       setTimeout(() => {
         this.$services.neo.sendFunds(this.address, this.currency.asset,
           this.amount, this.currency.isNep5)
           .then(() => {
-            this.sending = false;
-            this.address = null;
-            this.amount = null;
-            this.currency = null;
-            this.showConfirmation = false;
+            self.sending = false;
+            self.address = null;
+            self.amount = null;
+            self.currency = null;
+            self.showConfirmation = false;
             clearTimeout(sendTimeoutIntervalId);
-            this.$router.push('/authenticated/dashboard');
+            self.$router.push('/authenticated/dashboard');
           })
           .catch((e) => {
-            this.sending = false;
-            this.$services.alerts.exception(e);
+            self.sending = false;
+            self.$services.alerts.error(e);
           });
       }, this.$constants.timeouts.NEO_API_CALL);
 
       sendTimeoutIntervalId = setTimeout(() => {
-        if (this.this.sending) {
-          this.sending = false;
-          this.address = '';
-          this.amount = '';
-          this.currency = null;
-          this.showConfirmation = false;
-          this.$router.push('/authenticated/dashboard');
+        if (self.sending) {
+          self.sending = false;
+          self.address = '';
+          self.amount = '';
+          self.currency = null;
+          self.showConfirmation = false;
+          self.$router.push('/authenticated/dashboard');
         }
       }, 30 * 1000);
     },

@@ -139,6 +139,7 @@ export default {
                         let outGAS = new BigNumber(0);
 
                         transactionDetails.vin.forEach((i) => {
+                          i.value = new BigNumber(i.value).toFormat(8);
                           if (i.address === address && i.symbol === 'NEO') {
                             outNEO = outNEO.plus(i.value);
                           }
@@ -150,6 +151,7 @@ export default {
                         let inNEO = new BigNumber(0);
                         let inGAS = new BigNumber(0);
                         transactionDetails.vout.forEach((o) => {
+                          o.value = new BigNumber(o.value).toFormat(8);
                           if (o.address === address && o.symbol === 'NEO') {
                             inNEO = inNEO.plus(o.value);
                           }
@@ -566,9 +568,13 @@ export default {
    */
   sendFunds(toAddress, assetId, amount, isNep5) {
     return new Promise((resolve, reject) => {
+      let sendPromise = null;
       try {
-        let sendPromise = null;
         toAddress = toAddress.trim();
+        if (wallet.isAddress(toAddress) === false) {
+          return reject(`Invalid to address. ${toAddress}`);
+        }
+
         if (isNep5 === false) {
           if (assetId === neoAssetId) {
             sendPromise = this.sendSystemAsset(toAddress, amount, 0);
@@ -584,7 +590,12 @@ export default {
         if (!sendPromise) {
           return reject('Unable to send transaction.');
         }
+      } catch (e) {
+        console.log(e);
+        return reject('Unable to send transaction.');
+      }
 
+      try {
         sendPromise
           .then((res) => {
             if (!res || !res.tx) {
@@ -597,7 +608,7 @@ export default {
                 return resolve(res.tx);
               })
               .catch((e) => {
-                alerts.exception(e);
+                alerts.error(e);
               });
           })
           .catch((e) => {
@@ -688,7 +699,12 @@ export default {
               }
               return res;
             })
-            .catch(e => alerts.exception(e));
+            .catch((e) => {
+              if (e.message === 'Unknown transaction') {
+                return reject('Transaction failed. Please wait several blocks for balance to update and try again.');
+              }
+              return alerts.exception(e);
+            });
         }, 5000);
         return null;
       } catch (e) {
