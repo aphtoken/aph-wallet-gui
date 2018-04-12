@@ -6,7 +6,7 @@
       <td class="currency">{{ transaction.symbol }}</td>
       <td width="25%" class="amount" v-if="!transaction.block_time">{{ $formatNumberBig(transaction.value) }}</td>
       <td width="25%" v-if="transaction.block_time"
-          :class="['amount', {sent: transaction.value < 0, received: transaction.value > 0}]">{{ $formatNumberBig(transaction.value) }}</td>
+          :class="['amount', {sent: !(transaction.value > 0), received: transaction.value > 0}]">{{ $formatNumberBig(transaction.value) }}</td>
     </tr>
   </table>
 </template>

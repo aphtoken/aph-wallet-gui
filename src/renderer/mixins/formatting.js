@@ -27,7 +27,7 @@ export default {
       return numeral(value).format(formats.NUMBER_SHORT);
     },
     $formatNumberBig(value) {
-      return BigNumber(value).toFormat(8);
+      return BigNumber(value.toString().replace(',', '')).toFormat(8);
     },
 
     $formatTime(timestamp) {
