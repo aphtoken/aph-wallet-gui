@@ -139,7 +139,6 @@ export default {
                         let outGAS = new BigNumber(0);
 
                         transactionDetails.vin.forEach((i) => {
-                          i.value = new BigNumber(i.value).toFormat(8);
                           if (i.address === address && i.symbol === 'NEO') {
                             outNEO = outNEO.plus(i.value);
                           }
@@ -151,7 +150,6 @@ export default {
                         let inNEO = new BigNumber(0);
                         let inGAS = new BigNumber(0);
                         transactionDetails.vout.forEach((o) => {
-                          o.value = new BigNumber(o.value).toFormat(8);
                           if (o.address === address && o.symbol === 'NEO') {
                             inNEO = inNEO.plus(o.value);
                           }
