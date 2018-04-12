@@ -81,6 +81,9 @@ export default {
               }
               i += 1;
             });
+            if (returnData.low === 999999999) {
+              returnData.low = 0;
+            }
             resolve(returnData);
           })
           .catch((e) => {
