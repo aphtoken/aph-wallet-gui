@@ -29,7 +29,9 @@ export default {
   },
 
   getOne(name) {
-    return _.get(this.getAll(), name);
+    return _.find(this.getAllAsArray(), (o) => {
+      return o.name === name;
+    });
   },
 
   contactExists(name) {

@@ -10,7 +10,7 @@
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">Cancel</div>
         <div class="add-btn" @click="add" v-if="!prevAddress">Add</div>
-        <div class="add-btn" @click="add" v-if="prevAddress">Save</div>
+        <div class="add-btn" @click="save" v-if="prevAddress">Save</div>
       </div>
     </div>
   </div>
@@ -43,10 +43,26 @@ export default {
 
   methods: {
     add() {
+      if (this.$services.contacts.contactExists(this.name.trim())) {
+        this.$services.alerts.error(`Contact ${this.name.trim()} already exists.`);
+        return;
+      }
+
       this.$services.contacts.add(this.address, {
         name: this.name.trim(),
         address: this.address.trim(),
       }).sync();
+
+      this.$store.dispatch('fetchHoldings');
+      this.onCancel();
+    },
+
+    save() {
+      this.$services.contacts.remove(this.prevAddress)
+        .add(this.address, {
+          name: this.name.trim(),
+          address: this.address.trim(),
+        }).sync();
 
       this.$store.dispatch('fetchHoldings');
       this.onCancel();
