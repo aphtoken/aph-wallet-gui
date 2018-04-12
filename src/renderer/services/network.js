@@ -9,19 +9,19 @@ import { store } from '../store';
 const NETWORK_STORAGE_KEY = 'aph.network';
 const NETWORKS = [
   {
-    label: 'TestNet',
+    label: 'MainNet',
     value: {
-      aph: 'http://testnet.aphelion-neo.com:62433/api',
-      net: 'TestNet',
-      rpc: 'http://testneo.aphelion-neo.com:20332',
+      aph: 'https://mainnet.aphelion-neo.com:62443/api',
+      net: 'MainNet',
+      rpc: 'https://mainneo.aphelion-neo.com:10331',
     },
   },
   {
-    label: 'MainNet',
+    label: 'TestNet',
     value: {
-      aph: 'http://aph-api1.aphelion-neo.com:62433/api',
-      net: 'MainNet',
-      rpc: 'http://seed1.aphelion-neo.com:10332',
+      aph: 'https://testnet.aphelion-neo.com:62443/api',
+      net: 'TestNet',
+      rpc: 'https://testneo.aphelion-neo.com:20331',
     },
   },
 ];
