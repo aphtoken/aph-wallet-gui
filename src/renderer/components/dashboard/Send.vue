@@ -8,7 +8,7 @@
         <div class="row">
           <div class="column">
             <div class="label">Amount</div>
-            <div class="value">{{ $formatNumber(amount) }}</div>
+            <div class="value">{{ amount }}</div>
           </div>
           <div class="column">
             <div class="label">Value</div>
