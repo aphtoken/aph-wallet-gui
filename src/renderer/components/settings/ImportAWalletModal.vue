@@ -2,7 +2,7 @@
   <div id="aph-import-a-wallet-modal">
     <div class="content">
       <div class="body">
-        <aph-input placeholder="Wallet Name" :light="true" v-model="walletName"></aph-input>
+        <aph-input placeholder="Name this Wallet" :light="true" v-model="walletName"></aph-input>
         <aph-input placeholder="Private key (WIF)" :light="true" v-model="wif"></aph-input>
         <aph-input placeholder="Create a Passphrase" :light="true" v-model="passphrase" type="password"></aph-input>
       </div>

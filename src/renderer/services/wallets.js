@@ -14,9 +14,14 @@ export default {
   },
 
   remove(name) {
-    lockr.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), name.trim()));
-
-    return this;
+    return new Promise((resolve, reject) => {
+      try {
+        lockr.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), name.trim()));
+        return resolve();
+      } catch (e) {
+        return reject(e);
+      }
+    });
   },
 
   clearCurrentWallet() {

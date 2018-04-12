@@ -122,7 +122,7 @@ export default {
   .qr-codes {
     display: flex;
     justify-content: space-around;
-    margin-top: $space-xl;
+    margin-top: $space;
   }
 
   .qr-code {
