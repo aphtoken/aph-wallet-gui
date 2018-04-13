@@ -58,12 +58,6 @@ export default {
       });
     },
   },
-
-  watch: {
-    wallet() {
-      this.passphrase = '';
-    },
-  },
 };
 </script>
 

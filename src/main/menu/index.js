@@ -51,6 +51,10 @@ export default (app) => {
       {
         role: 'zoomout',
       },
+      {
+        label: 'Reset Zoom',
+        role: 'resetzoom',
+      },
     ],
   }];
 };

@@ -28,26 +28,28 @@
         </span>
         <span class="label">Settings</span>
       </router-link>
-    </div>
-    <div class="footer link-list">
-      <div class="network-status" v-if="network">
-        {{network.net}} Block: {{blockIndex}}
-        <div>
-          <div v-if="blockSecondsAgo <= 120">
-            <aph-timestamp-from-now :timestamp="network.lastReceivedBlock"></aph-timestamp-from-now>
-          </div>
-          <div v-if="blockSecondsAgo > 120" class="network-error">
-            Unable to Reach Network
-          </div>
-        </div>
-      </div>
-      <div class="version-number">v{{$store.state.version}}</div>
-      <a href="#" @click="logOut">
+      <a class="logout" to="" @click.prevent="logout">
         <span class="icon">
           <aph-icon name="back"></aph-icon>
         </span>
         <span class="label">Log Out</span>
       </a>
+    </div>
+    <div class="footer link-list">
+      <div class="network-status" v-if="network">
+        <div class="block">
+          <span class="network">{{network.net}} block</span><span class="index">{{blockIndex}}</span>
+        </div>
+        <div class="last-update">
+          <div v-if="blockSecondsAgo <= 120">
+            <aph-timestamp-from-now :timestamp="network.lastReceivedBlock"></aph-timestamp-from-now>
+          </div>
+          <!-- <div v-if="blockSecondsAgo > 120" class="network-error">
+            Unable to Reach Network
+          </div> -->
+        </div>
+      </div>
+      <div class="version-number">{{$store.state.version}}</div>
     </div>
   </section>
 </template>
@@ -69,7 +71,7 @@ export default {
   },
 
   methods: {
-    logOut() {
+    logout() {
       this.$services.wallets.clearCurrentWallet();
       this.$router.push('/login');
     },
@@ -124,6 +126,7 @@ export default {
       font-size: toRem(20px);
       padding: $space-sm 0;
       transition: $transition;
+      height: toRem(70px);
 
       .icon {
         flex: 1;
@@ -131,6 +134,10 @@ export default {
 
         svg {
           height: toRem(50px);
+
+          &.back {
+            height: toRem(30px);
+          }
         }
 
         .fill, .stroke {
@@ -165,45 +172,42 @@ export default {
   }
 
   .footer {
+    color: white;
     flex: none;
+    font-family: GilroyMedium;
+    font-size: toRem(14px);
     padding-bottom: $space;
-
-    a {
-      font-size: toRem(15px);
-
-      &:hover {
-        border-color: transparent;
-      }
-
-      .icon {
-        svg {
-          height: toRem(20px);
-        }
-
-        .fill {
-          fill: white;
-        }
-      }
-    }
+    text-transform: uppercase;
+    text-align: center;
 
     .network-status {
-      color: #cccccc;
-      font-size: smaller;
-      line-height: 1.25rem;
-      padding: $space-sm;
-      text-align: center;
+      .block {
+        .network {
+          color: $dark;
+        }
+
+        .index {
+          margin-left: $space;
+        }
+      }
+
+      .last-update {
+        margin: $space-lg 0;
+      }
     }
+
     .network-error {
       padding: $space;
       background: white;
       color: $red;
       font-weight: bold;
     }
+
     .version-number {
-      color: white;
-      font-size: smaller;
-      padding: $space-xsm;
-      text-align: center;
+      &:before {
+        content: "V";
+        color: $dark;
+      }
     }
   }
 }

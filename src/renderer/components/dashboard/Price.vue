@@ -25,10 +25,10 @@
       <line-chart ref="chart" :chart-data="chartData" :options="chartOptions" v-if="chartOptions"></line-chart>
     </div>
     <div class="footer">
-      <div class="option" @click="changeTimeframe('D')" :class="[{selected: timeframeOption === 'D'}]">D</div>
-      <div class="option" @click="changeTimeframe('W')" :class="[{selected: timeframeOption === 'W'}]">W</div>
-      <div class="option" @click="changeTimeframe('M')" :class="[{selected: timeframeOption === 'M'}]">M</div>
-      <div class="option" @click="changeTimeframe('3M')" :class="[{selected: timeframeOption === '3M'}]">3M</div>
+      <div @click="changeTimeframe('D')" :class="['option', {active: timeframeOption === 'D'}]">D</div>
+      <div @click="changeTimeframe('W')" :class="['option', {active: timeframeOption === 'W'}]">W</div>
+      <div @click="changeTimeframe('M')" :class="['option', {active: timeframeOption === 'M'}]">M</div>
+      <div @click="changeTimeframe('3M')" :class="['option', {active: timeframeOption === '3M'}]">3M</div>
     </div>
   </section>
 </template>
@@ -90,6 +90,7 @@ export default {
           this.timeframeHours = 3 * 30 * 24;
           break;
       }
+
       this.loadPriceData();
     },
     loadPriceData() {
@@ -272,7 +273,7 @@ export default {
       &:last-child {
         border-bottom-right-radius: $border-radius;
       }
-      
+
       &.selected {
         font-weight: bold;
         background-color: #cccccc;

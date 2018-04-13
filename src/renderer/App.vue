@@ -36,6 +36,27 @@ export default {
 </script>
 
 <style lang="scss">
+::-webkit-scrollbar {
+  width: $border-width;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  background: $purple;
+}
+
+* {
+  box-sizing: border-box;
+  letter-spacing: $letter-spacing;
+}
+
+a {
+  text-decoration: none;
+
+  &:focus {
+    outline: none;
+  }
+}
+
 #app, #app > * {
   height: 100%;
 }
