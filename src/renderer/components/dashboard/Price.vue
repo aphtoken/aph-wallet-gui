@@ -171,7 +171,6 @@ export default {
             ],
           };
 
-          console.log(priceData);
           if (priceData.dates.length > 0 && this.$refs.chart) {
             this.$refs.chart.render();
           }
