@@ -108,8 +108,6 @@ export default {
       if (!(this.address && this.amount && parseFloat(this.amount) && this.currency)) {
         return;
       }
-      console.log(this.currency);
-      console.log(this.amount);
       this.showConfirmation = true;
     },
 
