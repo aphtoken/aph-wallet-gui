@@ -16,10 +16,16 @@ export default {
     },
 
     $formatMoney(value, symbol) {
+      if (value === null) {
+        return 'N/A';
+      }
       return accounting.formatMoney(value, symbol || settings.getCurrencySymbol());
     },
 
     $formatNumber(value, format = formats.NUMBER) {
+      if (value === null) {
+        return 'N/A';
+      }
       return numeral(value).format(format || formats);
     },
 

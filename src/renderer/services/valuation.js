@@ -23,8 +23,8 @@ const defaultValuation = (symbol) => {
     total_supply: 0,
   };
 
-  data[`market_cap_${lowercaseCurrency}`] = 0;
-  data[`price_${lowercaseCurrency}`] = 0;
+  data[`market_cap_${lowercaseCurrency}`] = null;
+  data[`price_${lowercaseCurrency}`] = null;
 
   return data;
 };
@@ -63,6 +63,17 @@ export default {
               dates: [],
               prices: [],
             };
+            if (res.data.Data.length === 0) {
+              resolve({
+                high: null,
+                low: null,
+                volume: null,
+                last: null,
+                dates: [],
+                prices: [],
+              });
+              return;
+            }
             res.data.Data.forEach((d) => {
               if (i % mod === 0) {
                 returnData.dates.push(moment(d.time, 'X').format(formats.DATE_SHORT));
@@ -81,9 +92,6 @@ export default {
               }
               i += 1;
             });
-            if (returnData.low === 999999999) {
-              returnData.low = 0;
-            }
             resolve(returnData);
           })
           .catch((e) => {

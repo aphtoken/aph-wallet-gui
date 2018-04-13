@@ -442,6 +442,12 @@ export default {
                       h.change24hrValue = (h.unitValue * h.balance)
                         - (h.unitValue24hrAgo * h.balance);
                       h.totalValue = h.unitValue * h.balance;
+                      if (h.unitValue === null) {
+                        h.totalValue = null;
+                        h.change24hrPercent = null;
+                        h.change24hrValue = null;
+                        h.totalSupply = null;
+                      }
                     })
                     .catch((e) => {
                       alerts.exception(e);
