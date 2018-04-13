@@ -41,7 +41,9 @@ export default {
   },
 
   getOne(name) {
-    return _.get(this.getAll(), name.trim());
+    return _.find(this.getAllAsArray(), (o) => {
+      return o.label === name;
+    });
   },
 
   walletExists(name) {
@@ -132,6 +134,9 @@ export default {
   importWIF(name, wif, passphrase) {
     return new Promise((resolve, reject) => {
       try {
+        if (this.walletExists(name) === true) {
+          return reject(`Wallet with name '${name}' already exists.`);
+        }
         const account = new wallet.Account(wif);
         const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
         const currentWallet = {

@@ -1,6 +1,6 @@
 {
   "name": "aphelion-desktop-wallet",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "Aphelion <info@aphelion.org>",
   "description": "Aphelion Desktop Wallet",
   "license": null,
@@ -57,14 +57,14 @@
     }
   },
   "dependencies": {
-    "@cityofzion/neon-js": "git+https://github.com/cityofzion/neon-js.git",
+    "@cityofzion/neon-js": "git+https://github.com/cityofzion/neon-js.git#a9dfaefec870bfd05f3a8a0e5bc90a635fb6c5b9",
     "@ionic/app-scripts": "^3.1.8",
     "@xkeshi/vue-qrcode": "^0.3.0",
     "accounting": "^0.4.1",
     "axios": "^0.16.1",
     "chart.js": "^2.7.2",
     "create-index": "^2.3.0",
-    "highcharts": "^6.0.7",
+    "highcharts": "^6.1.0",
     "lockr": "^0.8.4",
     "lodash": "^4.17.4",
     "moment": "^2.22.0",
@@ -107,7 +107,7 @@
     "eslint-import-resolver-webpack": "^0.8.1",
     "eslint-loader": "^1.9.0",
     "eslint-plugin-html": "^3.1.1",
-    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-import": "^2.11.0",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^0.11.2",
     "html-webpack-plugin": "^2.30.1",
