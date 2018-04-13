@@ -1,4 +1,4 @@
-import LedgerNode from '@ledgerhq/hw-transport-node-hid';
+import { LedgerNode, Transport } from '@ledgerhq/hw-transport-node-hid';
 import alerts from './alerts';
 
 
