@@ -3,9 +3,6 @@
     <router-link class="saved-wallet-btn" to="/login/saved-wallet">
       Saved wallet
     </router-link>
-    <router-link class="private-key-btn" to="/login/ledger">
-      Ledger Nano
-    </router-link>
     <router-link class="encrypted-key-btn" to="/login/encrypted-key">
       Encrypted key
     </router-link>

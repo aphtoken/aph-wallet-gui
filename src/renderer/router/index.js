@@ -44,13 +44,6 @@ export default new Router({
           },
         },
         {
-          path: 'ledger',
-          components: {
-            left: require('@/components/login/Logo').default,
-            right: require('@/components/login/Ledger').default,
-          },
-        },
-        {
           path: 'encrypted-key',
           components: {
             left: require('@/components/login/Logo').default,

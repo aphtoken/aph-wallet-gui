@@ -6,7 +6,6 @@ import tokens from './tokens';
 import valuation from './valuation';
 import wallets from './wallets';
 import network from './network';
-import ledger from './ledger';
 
 export {
   alerts,
@@ -17,5 +16,4 @@ export {
   tokens,
   valuation,
   wallets,
-  ledger,
 };
