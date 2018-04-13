@@ -86,6 +86,10 @@ a {
 
 #app, #app > * {
   height: 100%;
+
+  .vue-flash-container  {
+    height: auto;
+  }
 }
 
 .drag-area {
@@ -113,9 +117,18 @@ a {
   z-index: 10000;
 }
 
+.vue-flash-container {
+  bottom: $space;
+  position: absolute;
+  right: $space;
+  width: toRem(500px);
+  z-index: 10000;
+}
+
 .flash__message {
   border-radius: $border-radius;
   border: none;
+  margin: 0;
   padding: $space;
 
   .flash__close-button {
@@ -140,6 +153,10 @@ a {
   &.warning {
     background: $orange;
     color: white;
+  }
+
+  & + .flash__message {
+    margin-top: $space;
   }
 }
 </style>

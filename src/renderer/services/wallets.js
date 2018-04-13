@@ -19,7 +19,9 @@ export default {
         lockr.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), name.trim()));
         return resolve();
       } catch (e) {
-        return reject(e);
+        console.log(e);
+
+        return reject('Unable to delete wallet');
       }
     });
   },
@@ -53,12 +55,6 @@ export default {
   openSavedWallet(name, passphrase) {
     return new Promise((resolve, reject) => {
       try {
-        if (!name || name.length <= 0) {
-          return reject('Empty Wallet Name');
-        }
-        if (this.walletExists(name) === false) {
-          return reject(`Wallet with name '${name}' not found.`);
-        }
         const walletToOpen = this.getOne(name);
         const wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
         const account = new wallet.Account(wif);
@@ -75,7 +71,9 @@ export default {
 
         return resolve(currentWallet);
       } catch (e) {
-        return reject(e);
+        console.log(e);
+
+        return reject('Wrong passphrase');
       }
     });
   },
@@ -83,12 +81,6 @@ export default {
   openEncryptedKey(encryptedKey, passphrase) {
     return new Promise((resolve, reject) => {
       try {
-        if (!encryptedKey || encryptedKey.length <= 0) {
-          return reject('Empty Encrypted Key');
-        }
-        if (!passphrase || passphrase.length <= 0) {
-          return reject('Empty Passphrase');
-        }
         const wif = wallet.decrypt(encryptedKey, passphrase);
         const account = new wallet.Account(wif);
         const currentWallet = {
@@ -103,7 +95,9 @@ export default {
 
         return resolve(currentWallet);
       } catch (e) {
-        return reject(e);
+        console.log(e);
+
+        return reject('Wrong key or passphrase');
       }
     });
   },
@@ -111,9 +105,6 @@ export default {
   openWIF(wif) {
     return new Promise((resolve, reject) => {
       try {
-        if (!wif || wif.length <= 0) {
-          return reject('Empty WIF');
-        }
         const account = new wallet.Account(wif);
         const currentWallet = {
           wif,
@@ -125,7 +116,9 @@ export default {
 
         return resolve(currentWallet);
       } catch (e) {
-        return reject(e);
+        console.log(e);
+
+        return reject('Wrong private key');
       }
     });
   },
@@ -155,7 +148,7 @@ export default {
           .sync();
         return resolve(currentWallet);
       } catch (e) {
-        return reject(e);
+        return reject('Wrong key or passphrase');
       }
     });
   },

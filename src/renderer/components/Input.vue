@@ -1,5 +1,5 @@
 <template>
-  <div :class="['aph-input', {focused: isFocused || value.length > 0}]">
+  <div :class="['aph-input', {focused: isFocused || value.length > 0, 'has-error': hasError}]">
     <input :type="computedType" @input="onInput" v-bind:value="value" @keyup.enter="onEnter" :disabled="disabled" @blur="onBlur" @focus="onFocus" ref="input"/>
     <div v-if="type === 'password'" class="visibility-toggle" @click="toggleIsVisible">
       <aph-icon :name="iconName"></aph-icon>
@@ -61,6 +61,10 @@ export default {
 
     placeholder: {
       type: String,
+    },
+
+    hasError: {
+      type: Boolean,
     },
 
     type: {
@@ -134,6 +138,10 @@ export default {
       font-size: toRem(12px);
       top: toRem(-18px);
     }
+  }
+
+  &.has-error {
+    border-color: $red;
   }
 }
 .content {

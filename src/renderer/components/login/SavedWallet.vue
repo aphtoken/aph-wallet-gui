@@ -2,7 +2,7 @@
   <section id="login--saved-wallet">
     <login-form-wrapper identifier="openSavedWallet">
       <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
-      <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
+      <aph-input :hasError="$isFailed('openSavedWallet')" v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
       <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
     </login-form-wrapper>
   </section>

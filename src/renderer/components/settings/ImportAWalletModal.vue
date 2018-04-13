@@ -2,9 +2,9 @@
   <div id="aph-import-a-wallet-modal">
     <div class="content">
       <div class="body">
-        <aph-input placeholder="Name this Wallet" :light="true" v-model="walletName"></aph-input>
-        <aph-input placeholder="Private key (WIF)" :light="true" v-model="wif"></aph-input>
-        <aph-input placeholder="Create a Passphrase" :light="true" v-model="passphrase" type="password"></aph-input>
+        <aph-input placeholder="Name" v-model="walletName"></aph-input>
+        <aph-input placeholder="Private key" v-model="wif"></aph-input>
+        <aph-input placeholder="Passphrase" v-model="passphrase" type="password"></aph-input>
       </div>
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">Cancel</div>
@@ -89,14 +89,6 @@ export default {
     text-align: center;
     display: block;
 
-    .aph-icon {
-      margin-bottom: $space-lg;
-
-      svg {
-        height: $space-xl;
-      }
-    }
-
     .aph-input {
       border-color: $dark;
       height: 50px;
@@ -108,6 +100,12 @@ export default {
 
       input {
         color: $dark;
+      }
+
+      .aph-icon {
+        .fill {
+          fill: $dark;
+        }
       }
 
       .placeholder {

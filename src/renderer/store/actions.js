@@ -208,7 +208,7 @@ function openEncryptedKey({ commit }, { encryptedKey, passphrase, done }) {
         commit('endRequest', { identifier: 'openEncryptedKey' });
       })
       .catch((e) => {
-        commit('failRequest', { identifier: 'openEncryptedKey', message: e.message });
+        commit('failRequest', { identifier: 'openEncryptedKey', message: e });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -223,7 +223,7 @@ function openPrivateKey({ commit }, { wif, done }) {
         commit('endRequest', { identifier: 'openPrivateKey' });
       })
       .catch((e) => {
-        commit('failRequest', { identifier: 'openPrivateKey', message: e.message });
+        commit('failRequest', { identifier: 'openPrivateKey', message: e });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -238,7 +238,7 @@ function openSavedWallet({ commit }, { name, passphrase, done }) {
         commit('endRequest', { identifier: 'openSavedWallet' });
       })
       .catch((e) => {
-        commit('failRequest', { identifier: 'openSavedWallet', message: e.message });
+        commit('failRequest', { identifier: 'openSavedWallet', message: e });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -256,8 +256,7 @@ function importWallet({ commit }, { name, wif, passphrase, done }) {
       })
       .catch((e) => {
         alerts.exception(e);
-        done();
-        commit('failRequest', { identifier: 'importWallet', message: e.message });
+        commit('failRequest', { identifier: 'importWallet', message: e });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -274,7 +273,7 @@ function deleteWallet({ commit }, { name, done }) {
       })
       .catch((e) => {
         alerts.exception(e);
-        commit('failRequest', { identifier: 'deleteWallet', message: e.message });
+        commit('failRequest', { identifier: 'deleteWallet', message: e });
       });
   }, timeouts.NEO_API_CALL);
 }
