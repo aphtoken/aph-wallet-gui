@@ -6,7 +6,7 @@
         close
       </div>
     </div>
-    <div class="body">
+    <div class="body" v-if="$store.state.activeTransaction">
       <div class="section">
         <div class="row">
           <div class="column">
@@ -96,17 +96,25 @@ export default {
     },
 
     fromTransactions() {
+      if (!this.$store.state.activeTransaction) {
+        return [];
+      }
       return this.$store.state.activeTransaction.vin;
     },
 
     toTransactions() {
+      if (!this.$store.state.activeTransaction) {
+        return [];
+      }
       return this.$store.state.activeTransaction.vout;
     },
   },
 
   methods: {
     close() {
-      this.$store.state.activeTransaction.active = false;
+      if (this.$store.state.activeTransaction) {
+        this.$store.state.activeTransaction.active = false;
+      }
       this.$store.commit('clearActiveTransaction');
     },
   },
