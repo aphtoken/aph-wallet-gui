@@ -70,9 +70,13 @@ let sendTimeoutIntervalId;
 export default {
   computed: {
     currencies() {
-      this.$store.state.holdings.map(
+      return this.$store.state.holdings.reduce(
         (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
-          return {
+          if (!name || !symbol) {
+            return result;
+          }
+
+          result.push({
             label: `${name} (${this.$formatNumber(balance)})`,
             value: {
               symbol,
@@ -80,14 +84,16 @@ export default {
               asset,
               isNep5,
               label: `${name} (${balance})`,
+              unitValue,
             },
             asset,
             isNep5,
             unitValue,
-          };
-        });
-    },
+          });
 
+          return result;
+        }, []);
+    },
     sendButtonLabel() {
       return this.sending ? 'Waiting for confirmation...' : 'Send';
     },
@@ -102,7 +108,8 @@ export default {
       if (!(this.address && this.amount && parseFloat(this.amount) && this.currency)) {
         return;
       }
-
+      console.log(this.currency);
+      console.log(this.amount);
       this.showConfirmation = true;
     },
 
@@ -146,7 +153,6 @@ export default {
       address: '',
       amount: '',
       currency: null,
-      currencies: [],
       showConfirmation: false,
       sending: false,
     };
