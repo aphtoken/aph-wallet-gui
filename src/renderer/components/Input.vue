@@ -16,7 +16,7 @@ export default {
     },
 
     iconName() {
-      return this.isVisible ? 'remove' : 'add';
+      return this.isVisible ? 'eye-closed' : 'eye-open';
     },
   },
 
@@ -114,10 +114,14 @@ export default {
 
   .aph-icon {
     svg {
-      height: $space * .8;
+      height: toRem(12px);
+
+      &.eye-closed {
+        height: toRem(17px);
+      }
     }
 
-    path {
+    .fill {
       fill: white;
     }
   }

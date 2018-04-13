@@ -49,12 +49,17 @@ export default {
       }
 
       if (!token) {
+        /* eslint-disable max-len */
         this.$services.alerts.error(`Unable to find a token with the symbol or script hash of '${this.userEntry}' on ${this.$store.state.currentNetwork.net}`);
+        /* eslint-enable max-len */
+
         return;
       }
 
       if (token.isCustom === true) {
+        /* eslint-disable max-len */
         this.$services.alerts.error(`'${this.userEntry}' is already in your token list ${this.$store.state.currentNetwork.net}`);
+        /* eslint-enable max-len */
         return;
       }
 

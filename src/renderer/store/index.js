@@ -16,6 +16,7 @@ const state = {
   currentWallet: {},
   currentLoginToWallet: null,
   holdings: [],
+  latestVersion: null,
   portfolio: null,
   recentTransactions: [],
   requests: {},

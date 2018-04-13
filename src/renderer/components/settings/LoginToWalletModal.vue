@@ -60,7 +60,8 @@ export default {
     },
 
     shouldDisableDeleteButton() {
-      return this.$isPending('deleteWallet') || this.confirmWalletName.toLowerCase() !== this.$store.state.currentLoginToWallet.label.toLowerCase();
+      return this.$isPending('deleteWallet')
+        || this.confirmWalletName.toLowerCase() !== this.$store.state.currentLoginToWallet.label.toLowerCase();
     },
   },
 

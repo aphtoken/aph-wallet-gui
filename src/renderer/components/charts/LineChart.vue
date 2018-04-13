@@ -3,11 +3,16 @@ import { Line, mixins } from 'vue-chartjs';
 const { reactiveProp } = mixins;
 
 export default {
+  beforeDestroy() {
+    window.removeEventListener('resize', this.render);
+  },
+
   extends: Line,
-  mixins: [reactiveProp],
-  props: ['options'],
+
   mounted() {
-    this.renderChart(this.chartData, this.options);
+    this.render();
+
+    window.addEventListener('resize', this.render);
   },
 
   methods: {
@@ -17,5 +22,10 @@ export default {
       }, this.$constants.timeouts.RENDER_CHART);
     },
   },
+
+  mixins: [reactiveProp],
+
+  props: ['options'],
+
 };
 </script>

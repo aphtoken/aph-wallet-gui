@@ -49,9 +49,13 @@ export default {
   },
 
   getHistorical(symbol, hoursBack, points) {
+    /* eslint-disable max-len */
+    const uri = `https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=${settings.getCurrency()}&limit=${hoursBack}&aggregate=1&e=CCCAGG`;
+    /* eslint-enable max-len */
+
     return new Promise((resolve, reject) => {
       try {
-        return axios.get(`https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=${settings.getCurrency()}&limit=${hoursBack}&aggregate=1&e=CCCAGG`)
+        return axios.get(uri)
           .then((res) => {
             const mod = Math.round(res.data.Data.length / points);
             let i = 0;

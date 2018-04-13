@@ -544,7 +544,9 @@ export default {
   fetchNEP5Transfers(address, fromDate, toDate, fromBlock, toBlock) {
     return new Promise((resolve) => {
       try {
+        /* eslint-disable max-len */
         const requestUrl = `${network.getSelectedNetwork().aph}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}&fromBlock=${fromBlock}&toBlock=${toBlock}`;
+        /* eslint-enable max-len */
         return axios.get(requestUrl)
           .then((res) => {
             resolve(res);

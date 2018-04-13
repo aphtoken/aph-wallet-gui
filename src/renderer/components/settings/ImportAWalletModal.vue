@@ -37,7 +37,8 @@ export default {
     },
 
     shouldDisableSaveButton() {
-      return this.$isPending('importWallet') || this.wif.length === 0 || this.walletName.length === 0 || this.passphrase.length === 0;
+      return this.$isPending('importWallet') || this.wif.length === 0
+        || this.walletName.length === 0 || this.passphrase.length === 0;
     },
   },
 
@@ -129,7 +130,7 @@ export default {
       flex: 1;
     }
   }
-  
+
   .cancel-btn {
     @extend %btn-footer-light;
   }

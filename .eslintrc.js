@@ -33,6 +33,7 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     'no-underscore-dangle': 0,
     'arrow-body-style': 0,
-    'array-callback-return': 0
+    'array-callback-return': 0,
+    'max-len': [2, 120],
   }
 }

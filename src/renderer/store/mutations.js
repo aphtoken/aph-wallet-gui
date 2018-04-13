@@ -18,6 +18,7 @@ export {
   setCurrentNetwork,
   setCurrentWallet,
   setHoldings,
+  setLatestVersion,
   setPortfolio,
   setRecentTransactions,
   setSearchTransactionFromDate,
@@ -160,6 +161,10 @@ function clearLocalNetworkState(state, newNetwork) {
 
   const transactionsStorageKey = `aph.transactions.${state.currentWallet.address}.${newNetwork.net}`;
   lockr.set(transactionsStorageKey, null);
+}
+
+function setLatestVersion(state, version) {
+  state.latestVersion = version;
 }
 
 function setSearchTransactionFromDate(state, fromDate) {

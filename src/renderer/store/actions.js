@@ -13,7 +13,7 @@ export {
   createWallet,
   deleteWallet,
   fetchHoldings,
-  fetchLatestWalletVersion,
+  fetchLatestVersion,
   fetchPortfolio,
   fetchRecentTransactions,
   findTransactions,
@@ -277,23 +277,16 @@ function deleteWallet({ commit }, { name, done }) {
   }, timeouts.NEO_API_CALL);
 }
 
-function fetchLatestWalletVersion({ commit }, { done }) {
-  commit('startRequest', { identifier: 'walletVersion' });
-  setTimeout(() => {
-    try {
-      return axios.get(`${network.getSelectedNetwork().aph}/LatestWalletInfo`)
-        .then((res) => {
-          done(res.data);
-          commit('endRequest', { identifier: 'walletVersion' });
-        })
-        .catch((e) => {
-          console.log(e);
-          commit('failRequest', { identifier: 'walletVersion', message: e });
-        });
-    } catch (e) {
+function fetchLatestVersion({ commit }) {
+  commit('startRequest', { identifier: 'fetchLatestVersion' });
+
+  return axios.get(`${network.getSelectedNetwork().aph}/LatestWalletInfo`)
+    .then(({ data }) => {
+      commit('setLatestVersion', data.version);
+      commit('endRequest', { identifier: 'fetchLatestVersion' });
+    })
+    .catch((e) => {
       console.log(e);
-      commit('failRequest', { identifier: 'walletVersion', message: e.message });
-      return null;
-    }
-  }, timeouts.NEO_API_CALL);
+      commit('failRequest', { identifier: 'fetchLatestVersion', message: e });
+    });
 }

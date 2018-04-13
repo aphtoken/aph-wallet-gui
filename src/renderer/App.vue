@@ -1,14 +1,35 @@
 <template>
   <div id="app" v-cloak>
     <div class="drag-area"></div>
+    <div id="out-of-date" v-if="isOutOfDate">A new version is available. Please restart to update.</div>
     <router-view></router-view>
     <flash-message class="vue-flash-container"></flash-message>
   </div>
 </template>
 
 <script>
+let fetchLatestVersionIntervalId;
+
 export default {
   name: 'aphtoken-wallet',
+
+  beforeDestroy() {
+    clearInterval(fetchLatestVersionIntervalId);
+  },
+
+  beforeMount() {
+    this.fetchLatestVersion();
+
+    fetchLatestVersionIntervalId = setInterval(this.fetchLatestVersion(), this.$constants.WALLET_VERSION_CHECK);
+  },
+
+  computed: {
+    isOutOfDate() {
+      const latestVersion = this.$store.state.latestVersion;
+
+      return latestVersion && latestVersion > this.$store.state.version;
+    },
+  },
 
   created() {
     window.addEventListener('online', this.updateOnlineStatus);
@@ -18,7 +39,9 @@ export default {
 
   data() {
     return {
+      latestWalletVersion: '',
       online: true,
+      outOfDate: false,
     };
   },
 
@@ -28,6 +51,10 @@ export default {
   },
 
   methods: {
+    fetchLatestVersion() {
+      this.$store.dispatch('fetchLatestVersion');
+    },
+
     updateOnlineStatus() {
       this.online = navigator.onLine;
     },
@@ -69,6 +96,21 @@ a {
   position: fixed;
   top: 0;
   width: 100%;
+}
+
+#out-of-date {
+  background: rgba(black, 0.8);
+  color: $red;
+  font-family: GilroyMedium;
+  font-size: toRem(14px);
+  height: auto;
+  left: 0;
+  padding: $space-sm;
+  position: fixed;
+  right: 0;
+  text-align: center;
+  top: 0;
+  z-index: 10000;
 }
 
 .flash__message {

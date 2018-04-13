@@ -68,14 +68,10 @@
 let sendTimeoutIntervalId;
 
 export default {
-  beforeMount() {
-    this.currencies = this.$store.state.holdings.reduce(
-      (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
-        if (!name || !symbol) {
-          return result;
-        }
-
-        result.push({
+  computed: {
+    currencies() {
+      this.$store.state.holdings.map((result, { name, symbol, asset, isNep5, unitValue, balance }) => {
+        return {
           label: `${name} (${this.$formatNumber(balance)})`,
           value: {
             symbol,
@@ -87,13 +83,10 @@ export default {
           asset,
           isNep5,
           unitValue,
-        });
+        };
+      });
+    },
 
-        return result;
-      }, []);
-  },
-
-  computed: {
     sendButtonLabel() {
       return this.sending ? 'Waiting for confirmation...' : 'Send';
     },

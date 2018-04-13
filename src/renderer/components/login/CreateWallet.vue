@@ -29,7 +29,8 @@ export default {
     },
 
     shouldDisableCreateButton() {
-      return this.$isPending('createWallet') || this.passphrase.length === 0 || this.walletName.length === 0 || !this.passphrasesMatch;
+      return this.$isPending('createWallet') || this.passphrase.length === 0
+        || this.walletName.length === 0 || !this.passphrasesMatch;
     },
   },
 

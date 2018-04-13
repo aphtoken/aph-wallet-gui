@@ -41,12 +41,10 @@
           <span class="network">{{network.net}} block</span><span class="index">{{blockIndex}}</span>
         </div>
         <div class="last-update">
-          <div v-if="blockSecondsAgo <= 120">
+          <div v-if="blockSecondsAgo > 120" class="network-error">Unable to Reach Network</div>
+          <div v-else>
             <aph-timestamp-from-now :timestamp="network.lastReceivedBlock"></aph-timestamp-from-now>
           </div>
-          <!-- <div v-if="blockSecondsAgo > 120" class="network-error">
-            Unable to Reach Network
-          </div> -->
         </div>
       </div>
       <div class="version-number">{{$store.state.version}}</div>
@@ -184,6 +182,7 @@ export default {
       .block {
         .network {
           color: $dark;
+          font-family: GilroySemibold;
         }
 
         .index {
@@ -197,16 +196,15 @@ export default {
     }
 
     .network-error {
-      padding: $space;
-      background: white;
       color: $red;
-      font-weight: bold;
+      font-family: GilroySemibold;
     }
 
     .version-number {
       &:before {
         content: "V";
         color: $dark;
+        font-family: GilroySemibold;
       }
     }
   }
