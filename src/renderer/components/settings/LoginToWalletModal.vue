@@ -1,19 +1,6 @@
 <template>
   <div id="aph-login-to-wallet-modal">
     <div class="content">
-      <div v-if="!showRemove">
-        <div class="body">
-          <div class="wallet-name">
-            <span>{{$store.state.currentLoginToWallet.label}}</span>
-          </div>
-          <div class="remove-btn" @click="showRemoveConfirmation">Remove</div>
-          <aph-input placeholder="Enter your passphrase to login" :light="true" v-model="passphrase" type="password"></aph-input>
-        </div>
-        <div class="footer">
-          <div class="cancel-btn" @click="onCancel">Cancel</div>
-          <button class="login-btn" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
-        </div>
-      </div>
       <div v-if="showRemove">
         <div class="body">
           <div class="wallet-name">
@@ -27,6 +14,19 @@
         <div class="footer">
           <div class="cancel-btn" @click="cancelRemove">Cancel</div>
           <button class="login-btn" @click="remove" :disabled="shouldDisableDeleteButton">Yes, Delete Wallet</button>
+        </div>
+      </div>
+      <div v-else>
+        <div class="body">
+          <div class="wallet-name">
+            <span>{{$store.state.currentLoginToWallet.label}}</span>
+          </div>
+          <div class="remove-btn" @click="showRemoveConfirmation">Remove</div>
+          <aph-input placeholder="Enter your passphrase to login" :light="true" v-model="passphrase" type="password"></aph-input>
+        </div>
+        <div class="footer">
+          <div class="cancel-btn" @click="onCancel">Cancel</div>
+          <button class="login-btn" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
         </div>
       </div>
     </div>
@@ -176,7 +176,7 @@ export default {
           color: $purple;
         }
     }
-    
+
     .aph-input {
       border-color: $dark;
       width: 100%;
@@ -207,7 +207,7 @@ export default {
       flex: 1;
     }
   }
-  
+
   .cancel-btn {
     @extend %btn-footer-light;
   }

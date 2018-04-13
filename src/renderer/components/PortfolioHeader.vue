@@ -2,7 +2,7 @@
   <section id="portfolio-header" v-if="$store.state.portfolio">
     <simple-donut :percent="$store.state.portfolio.changePercent"></simple-donut>
     <div class="ticker">
-      <h1 class="underlined">My Porfolio</h1>
+      <h1 class="underlined">My Portfolio</h1>
       <div class="balance">
         <span class="symbol">{{ $store.state.currencySymbol }}</span><span class="amount">{{ $formatNumberShort($store.state.portfolio.balance) }}</span><span class="currency">{{ $store.state.currency }}</span>
       </div>
