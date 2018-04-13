@@ -8,12 +8,13 @@
       <div class="cell status">Status</div>
     </div>
     <div class="body">
-      <div v-for="(transaction, index) in transactions()" :key="index"
-           @click="toggleTransaction(transaction)"
+      <div v-for="(transaction, index) in transactions()" :key="index"           
            :class="['transaction', {active: transaction.active, increase: transaction.amount > 0}]">
-        <div class="cell date">{{ $formatDate(transaction.block_time) }}</div>
-        <div class="cell token">{{ transaction.symbol }}</div>
-        <div :class="['cell', 'amount', {decrease: transaction.value < 0, increase: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</div>
+        <div class="cell date" @click="toggleTransaction(transaction)">{{ $formatDate(transaction.block_time) }}</div>
+        <div class="cell token" @click="toggleTransaction(transaction)">{{ transaction.symbol }}</div>
+        <div :class="['cell', 'amount', {decrease: transaction.value < 0, increase: transaction.value > 0}]" @click="toggleTransaction(transaction)">
+          {{ $formatNumberBig(transaction.value) }}
+        </div>
         <!--<div class="cell total">{{ $formatMoney(transaction.value) }}</div>-->
         <div class="cell status" v-if="transaction.details">
           <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
@@ -28,7 +29,7 @@
               </div>
               <div class="column">
                 <div class="label">Hash</div>
-                <div class="value truncate">{{ transaction.details.txid }}</div>
+                <div class="value">{{ transaction.details.txid }}</div>
               </div>
             </div>
           </div>
@@ -118,10 +119,16 @@ export default {
 
     toggleTransaction(transaction) {
       if (transaction === currentOpenedTransaction) {
-        this.$store.state.activeTransaction.active = false;
+        if (this.$store.state.activeTransaction) {
+          this.$store.state.activeTransaction.active = false;
+        }
+        currentOpenedTransaction = null;
         this.$store.commit('setActiveTransaction', null);
       } else {
         currentOpenedTransaction = transaction;
+        if (this.$store.state.activeTransaction) {
+          this.$store.state.activeTransaction.active = false;
+        }
         this.$store.commit('setActiveTransaction', transaction.details);
       }
     },
