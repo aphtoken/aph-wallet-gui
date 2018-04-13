@@ -52,7 +52,6 @@ export default {
         wif: this.wif,
         passphrase: this.passphrase,
         done: () => {
-          this.$services.alerts.success(`Imported Wallet ${this.walletName}`);
           this.onCancel();
         },
       });

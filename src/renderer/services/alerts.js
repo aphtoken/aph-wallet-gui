@@ -38,12 +38,16 @@ export default {
 
   exception(e) {
     console.log(e);
-    if (e.message === 'Network Error') {
-      // absorb these errors, so we don't constantly alert the user if they are not online
-      // maybe some other kind of offline indicator?
-      return;
+    if (!e.message) {
+      this.error(e);
+    } else {
+      if (e.message === 'Network Error') {
+        // absorb these errors, so we don't constantly alert the user if they are not online
+        // maybe some other kind of offline indicator?
+        return;
+      }
+      this.error(e.message);
     }
-    this.error(e.message);
   },
 
 };

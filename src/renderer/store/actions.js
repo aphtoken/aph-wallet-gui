@@ -250,11 +250,13 @@ function importWallet({ commit }, { name, wif, passphrase, done }) {
     wallets.importWIF(name, wif, passphrase)
       .then(() => {
         wallets.sync();
+        alerts.success(`Imported Wallet ${name}`);
         done();
         commit('endRequest', { identifier: 'importWallet' });
       })
       .catch((e) => {
         alerts.exception(e);
+        done();
         commit('failRequest', { identifier: 'importWallet', message: e.message });
       });
   }, timeouts.NEO_API_CALL);
