@@ -217,7 +217,7 @@ function openPrivateKey({ commit }, { wif, done }) {
   commit('startRequest', { identifier: 'openPrivateKey' });
 
   setTimeout(() => {
-    wallets.openWIF(name, wif)
+    wallets.openWIF(wif)
       .then(() => {
         done();
         commit('endRequest', { identifier: 'openPrivateKey' });
