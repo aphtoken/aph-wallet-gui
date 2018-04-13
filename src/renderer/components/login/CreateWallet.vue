@@ -1,16 +1,24 @@
 <template>
   <section id="login--create-wallet">
-    <p class="help-text">Choose a name for your new wallet:</p>
-    <aph-input v-model="walletName" placeholder="Enter your wallet name here"></aph-input>
-    <p class="help-text">Choose a passphrase to encrypt your private key:</p>
-    <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
-    <aph-input v-model="passphraseConfirm" placeholder="Repeat your passphrase here" type="password"></aph-input>
-    <button class="create" @click="create" :disabled="shouldDisableCreateButton">{{ buttonLabel }}</button>
+    <login-form-wrapper identifier="createWallet">
+      <p class="help-text">Choose a name for your new wallet:</p>
+      <aph-input v-model="walletName" placeholder="Enter your wallet name here"></aph-input>
+      <p class="help-text">Choose a passphrase to encrypt your private key:</p>
+      <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
+      <aph-input v-model="passphraseConfirm" placeholder="Repeat your passphrase here" type="password"></aph-input>
+      <button class="create" @click="create" :disabled="shouldDisableCreateButton">{{ buttonLabel }}</button>
+    </login-form-wrapper>
   </section>
 </template>
 
 <script>
+import LoginFormWrapper from './LoginFormWrapper';
+
 export default {
+  components: {
+    LoginFormWrapper,
+  },
+
   computed: {
     buttonLabel() {
       return this.$isPending('createWallet') ? 'Creating...' : 'Create';

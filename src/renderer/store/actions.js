@@ -11,14 +11,16 @@ export {
   changeWallet,
   claimGas,
   createWallet,
+  deleteWallet,
   fetchHoldings,
+  fetchLatestWalletVersion,
   fetchPortfolio,
   fetchRecentTransactions,
   findTransactions,
-  openSavedWallet,
   importWallet,
-  deleteWallet,
-  fetchLatestWalletVersion,
+  openEncryptedKey,
+  openPrivateKey,
+  openSavedWallet,
 };
 
 function addToken({ dispatch }, { assetId, done, isCustom, symbol }) {
@@ -76,7 +78,6 @@ function createWallet({ commit }, { name, passphrase, passphraseConfirm }) {
         commit('endRequest', { identifier: 'createWallet' });
       })
       .catch((message) => {
-        alerts.exception(message);
         commit('failRequest', { identifier: 'createWallet', message });
       });
   }, timeouts.NEO_API_CALL);
@@ -197,6 +198,36 @@ function findTransactions({ state, commit }) {
     });
 }
 
+function openEncryptedKey({ commit }, { encryptedKey, passphrase, done }) {
+  commit('startRequest', { identifier: 'openEncryptedKey' });
+
+  setTimeout(() => {
+    wallets.openEncryptedKey(encryptedKey, passphrase)
+      .then(() => {
+        done();
+        commit('endRequest', { identifier: 'openEncryptedKey' });
+      })
+      .catch((e) => {
+        commit('failRequest', { identifier: 'openEncryptedKey', message: e.message });
+      });
+  }, timeouts.NEO_API_CALL);
+}
+
+function openPrivateKey({ commit }, { wif, done }) {
+  commit('startRequest', { identifier: 'openPrivateKey' });
+
+  setTimeout(() => {
+    wallets.openWIF(name, wif)
+      .then(() => {
+        done();
+        commit('endRequest', { identifier: 'openPrivateKey' });
+      })
+      .catch((e) => {
+        commit('failRequest', { identifier: 'openPrivateKey', message: e.message });
+      });
+  }, timeouts.NEO_API_CALL);
+}
+
 function openSavedWallet({ commit }, { name, passphrase, done }) {
   commit('startRequest', { identifier: 'openSavedWallet' });
 
@@ -207,7 +238,6 @@ function openSavedWallet({ commit }, { name, passphrase, done }) {
         commit('endRequest', { identifier: 'openSavedWallet' });
       })
       .catch((e) => {
-        alerts.exception(e);
         commit('failRequest', { identifier: 'openSavedWallet', message: e.message });
       });
   }, timeouts.NEO_API_CALL);

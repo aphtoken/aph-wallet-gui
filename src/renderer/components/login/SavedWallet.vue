@@ -1,13 +1,21 @@
 <template>
   <section id="login--saved-wallet">
-    <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
-    <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
-    <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
+    <login-form-wrapper identifier="openSavedWallet">
+      <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
+      <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
+      <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
+    </login-form-wrapper>
   </section>
 </template>
 
 <script>
+import LoginFormWrapper from './LoginFormWrapper';
+
 export default {
+  components: {
+    LoginFormWrapper,
+  },
+
   computed: {
     buttonLabel() {
       return this.$isPending('openSavedWallet') ? 'Logging in...' : 'Login';

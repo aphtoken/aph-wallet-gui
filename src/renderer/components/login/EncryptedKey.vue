@@ -1,13 +1,21 @@
 <template>
   <section id="login--saved-wallet">
-    <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
-    <aph-input v-model="encryptedKey" placeholder="Enter your encrypted key here" type="password"></aph-input>
-    <button class="login" @click="login" :disabled="shouldDisableLoginButton">Login</button>
+    <login-form-wrapper identifier="openEncryptedKey">
+      <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
+      <aph-input v-model="encryptedKey" placeholder="Enter your encrypted key here" type="password"></aph-input>
+      <button class="login" @click="login" :disabled="shouldDisableLoginButton">Login</button>
+    </login-form-wrapper>
   </section>
 </template>
 
 <script>
+import LoginFormWrapper from './LoginFormWrapper';
+
 export default {
+  components: {
+    LoginFormWrapper,
+  },
+
   computed: {
     shouldDisableLoginButton() {
       return this.passphrase.length === 0 || this.encryptedKey.length === 0;
@@ -23,13 +31,13 @@ export default {
 
   methods: {
     login() {
-      this.$services.wallets.openEncryptedKey(this.encryptedKey, this.passphrase)
-        .then(() => {
+      this.$store.dispatch('openEncryptedKey', {
+        encryptedKey: this.encryptedKey,
+        passphrase: this.passphrase,
+        done: () => {
           this.$router.push('/authenticated/dashboard');
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
+        },
+      });
     },
   },
 };

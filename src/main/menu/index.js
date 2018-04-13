@@ -21,19 +21,6 @@ export default (app) => {
     label: 'Edit',
     submenu: [
       {
-        label: 'Undo',
-        accelerator: 'CmdOrCtrl+Z',
-        selector: 'undo:',
-      },
-      {
-        label: 'Redo',
-        accelerator: 'Shift+CmdOrCtrl+Z',
-        selector: 'redo:',
-      },
-      {
-        type: 'separator',
-      },
-      {
         label: 'Cut',
         accelerator: 'CmdOrCtrl+X',
         selector: 'cut:',
@@ -52,6 +39,17 @@ export default (app) => {
         label: 'Select All',
         accelerator: 'CmdOrCtrl+A',
         selector: 'selectAll:',
+      },
+    ],
+  },
+  {
+    label: 'View',
+    submenu: [
+      {
+        role: 'zoomin',
+      },
+      {
+        role: 'zoomout',
       },
     ],
   }];
