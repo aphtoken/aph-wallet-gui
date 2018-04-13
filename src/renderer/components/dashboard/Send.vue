@@ -70,21 +70,22 @@ let sendTimeoutIntervalId;
 export default {
   computed: {
     currencies() {
-      this.$store.state.holdings.map((result, { name, symbol, asset, isNep5, unitValue, balance }) => {
-        return {
-          label: `${name} (${this.$formatNumber(balance)})`,
-          value: {
-            symbol,
-            name,
+      this.$store.state.holdings.map(
+        (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
+          return {
+            label: `${name} (${this.$formatNumber(balance)})`,
+            value: {
+              symbol,
+              name,
+              asset,
+              isNep5,
+              label: `${name} (${balance})`,
+            },
             asset,
             isNep5,
-            label: `${name} (${balance})`,
-          },
-          asset,
-          isNep5,
-          unitValue,
-        };
-      });
+            unitValue,
+          };
+        });
     },
 
     sendButtonLabel() {

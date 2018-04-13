@@ -61,7 +61,8 @@ export default {
 
     shouldDisableDeleteButton() {
       return this.$isPending('deleteWallet')
-        || this.confirmWalletName.toLowerCase() !== this.$store.state.currentLoginToWallet.label.toLowerCase();
+        || this.confirmWalletName.toLowerCase()
+          !== this.$store.state.currentLoginToWallet.label.toLowerCase();
     },
   },
 
