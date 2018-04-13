@@ -693,23 +693,25 @@ export default {
   monitorTransactionConfirmation(hash) {
     return new Promise((resolve, reject) => {
       try {
-        const interval = setInterval(() => {
-          this.fetchTransactionDetails(hash)
-            .then((res) => {
-              if (res && res.confirmed === true) {
-                alerts.success(`TX: ${hash} CONFIRMED`);
-                clearInterval(interval);
-                resolve(res);
-              }
-              return res;
-            })
-            .catch((e) => {
-              if (e.message === 'Unknown transaction') {
-                return reject('Transaction failed. Please wait several blocks for balance to update and try again.');
-              }
-              return alerts.exception(e);
-            });
-        }, 5000);
+        setTimeout(() => {
+          const interval = setInterval(() => {
+            this.fetchTransactionDetails(hash)
+              .then((res) => {
+                if (res && res.confirmed === true) {
+                  alerts.success(`TX: ${hash} CONFIRMED`);
+                  clearInterval(interval);
+                  resolve(res);
+                }
+                return res;
+              })
+              .catch((e) => {
+                if (e.message === 'Unknown transaction') {
+                  return reject('Transaction failed. Please wait several blocks for balance to update and try again.');
+                }
+                return alerts.exception(e);
+              });
+          }, 5000);
+        }, 15 * 1000); // wait a block for propagation
         return null;
       } catch (e) {
         return reject(e);
