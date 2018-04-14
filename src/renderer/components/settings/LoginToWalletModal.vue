@@ -1,34 +1,36 @@
 <template>
   <div id="aph-login-to-wallet-modal">
     <div class="content">
-      <div v-if="showRemove">
+      <template v-if="showRemove">
+        <div class="header">
+          <aph-icon name="wallet"></aph-icon>
+        </div>
         <div class="body">
-          <div class="wallet-name">
-            Are you sure you'd like to remove <span>{{$store.state.currentLoginToWallet.label}}</span>?
-            <div class="warning">
-              <em>Loss of funds is possible</em>, if you have not properly backed up this wallet's keys.
-            </div>
-          </div>
+          <p>Are you sure you'd like to remove <span>{{$store.state.currentLoginToWallet.label}}</span>?</p>
+          <p>Loss of funds is possible, if you have not properly backed up this wallet's keys.</p>
           <aph-input placeholder="Enter the name of your wallet to delete" :light="true" v-model="confirmWalletName"></aph-input>
         </div>
         <div class="footer">
           <div class="cancel-btn" @click="cancelRemove">Cancel</div>
           <button class="login-btn" @click="remove" :disabled="shouldDisableDeleteButton">Yes, Delete Wallet</button>
         </div>
-      </div>
-      <div v-else>
-        <div class="body">
-          <div class="wallet-name">
-            <span>{{$store.state.currentLoginToWallet.label}}</span>
-          </div>
-          <div class="remove-btn" @click="showRemoveConfirmation">Remove</div>
+      </template>
+      <template v-else>
+        <div class="header">
+          <div class="name">{{$store.state.currentLoginToWallet.label}}</div>
+          <div class="remove" @click="showRemoveConfirmation">Remove</div>
+        </div>
+        <div v-if="isNotCurrentWallet" class="body">
           <aph-input placeholder="Enter your passphrase to login" :light="true" v-model="passphrase" type="password"></aph-input>
+        </div>
+        <div v-else class="body">
+          <aph-icon name="wallet"></aph-icon>
         </div>
         <div class="footer">
           <div class="cancel-btn" @click="onCancel">Cancel</div>
-          <button class="login-btn" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
+          <button v-if="isNotCurrentWallet" class="login-btn" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -53,6 +55,10 @@ export default {
   computed: {
     buttonLabel() {
       return this.$isPending('openSavedWallet') ? 'Logging in...' : 'Login';
+    },
+
+    isNotCurrentWallet() {
+      return this.$store.state.currentWallet.label !== this.$store.state.currentLoginToWallet.label;
     },
 
     shouldDisableLoginButton() {
@@ -134,11 +140,56 @@ export default {
     width: toRem(500px);
   }
 
+  .header {
+    display: flex;
+    justify-content: center;
+
+    .name {
+      flex: 1;
+      font-family: GilroyMedium;
+      font-size: toRem(18px);
+    }
+
+    .aph-icon {
+      svg {
+        height: $space-xl;
+      }
+
+      .fill {
+        fill: $dark;
+      }
+    }
+
+    .remove {
+      color: $red;
+      cursor: pointer;
+      flex: none;
+      font-family: GilroySemibold;
+      font-size: toRem(14px);
+      transition: $transition;
+
+      &:hover {
+        color: $purple;
+      }
+    }
+  }
+
   .body {
     padding: $space-lg;
     text-align: center;
     display: block;
     position: relative;
+
+    p {
+      margin-bottom: $space-lg;
+      line-height: $line-height;
+
+      &:first-child {
+        span {
+          font-family: GilroySemibold;
+        }
+      }
+    }
 
     .aph-icon {
       margin-bottom: $space-lg;
@@ -148,35 +199,8 @@ export default {
       }
     }
 
-    .wallet-name {
-      width: 100%;
-      margin-bottom: $space-lg;
-      text-align: left;
-      line-height: 1.5rem;
-      span {
-        font-weight: bold;
-      }
-      em {
-        font-weight: bold;
-        color: $red;
-        font-style: normal;
-      }
-      .warning {
-        margin-top: $space-lg;
-      }
-    }
-
-    .remove-btn {
-      display: flow;
-      cursor: pointer;
-      margin: $space-sm;
-      position: absolute;
-      right: .5rem;
-      top: .5rem;
-      padding-top: $space;
-        &:hover {
-          color: $purple;
-        }
+    .warning {
+      color: $red;
     }
 
     .aph-input {
