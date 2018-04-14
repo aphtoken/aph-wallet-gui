@@ -68,6 +68,7 @@
   flex-direction: column;
   font-family: GilroyMedium;
   height: toRem(175px);
+  outline: none;
   transition: $transition;
   width: toRem(175px);
 
@@ -127,6 +128,7 @@
   font-size: toRem(16px);
   height: $button-height;
   line-height: $button-height;
+  outline: none;
   padding: 0 $space * 1.2;
   text-align: center;
   transition: $transition;

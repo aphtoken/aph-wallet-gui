@@ -4,7 +4,7 @@
       <h1 class="underlined">Contacts</h1>
     </div>
     <div class="body">
-      <section id="contact--table">
+      <section id="contacts--table">
         <div class="body">
           <div v-for="(contact, index) in filteredContacts" :key="index"
              @click="useContact(contact)" class="contact">
@@ -80,11 +80,8 @@ export default {
   .body {
     padding: 0 $space-lg;
     overflow: auto;
-    
-    #contact--table {
-      padding: $space-lg $space-lg 0;
-      height: 95%;
 
+    #contacts--table {
       .header {
         display: flex;
         padding: 0;
@@ -116,15 +113,15 @@ export default {
             font-family: GilroySemibold;
             padding: $space;
           }
-  
-      
-          .copy {        
+
+
+          .copy {
             display: inline-block;
             position: relative;
             margin: 0 $space 0 0;
             color: $grey;
             font-weight: bold;
-      
+
             .copy-link {
               position: absolute;
               right: 0;
@@ -152,17 +149,17 @@ export default {
               }
             }
           }
-        
+
           &:hover, &.active {
             background: $light-grey;
-          }     
-      
-        }  
+          }
+
+        }
       }
     }
   }
-  
-  
+
+
 
 }
 </style>

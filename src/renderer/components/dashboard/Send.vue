@@ -285,10 +285,14 @@ export default {
 
     .cancel-btn, .back-btn {
       @extend %btn-footer-light;
+
+      border-bottom-left-radius: $border-radius;
     }
 
     .next-btn, .send-btn {
       @extend %btn-footer;
+
+      border-bottom-right-radius: $border-radius;
     }
   }
 }
