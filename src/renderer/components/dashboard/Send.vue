@@ -138,6 +138,7 @@ export default {
             self.showConfirmation = false;
             clearTimeout(sendTimeoutIntervalId);
             self.$router.push('/authenticated/dashboard');
+            this.$store.dispatch('fetchHoldings');
           })
           .catch((e) => {
             self.sending = false;
@@ -153,6 +154,7 @@ export default {
           self.currency = null;
           self.showConfirmation = false;
           self.$router.push('/authenticated/dashboard');
+          this.$store.dispatch('fetchHoldings');
         }
       }, 30 * 1000);
     },
