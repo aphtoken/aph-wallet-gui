@@ -15,16 +15,16 @@ export default {
       return moment(timestamp, 'X').format(formats.DATE_SHORT);
     },
 
-    $formatMoney(value, symbol) {
+    $formatMoney(value, symbol, defaultValue = 'N/A') {
       if (value === null) {
-        return 'N/A';
+        return defaultValue;
       }
       return accounting.formatMoney(value, symbol || settings.getCurrencySymbol());
     },
 
-    $formatNumber(value, format = formats.NUMBER) {
+    $formatNumber(value, format = formats.NUMBER, defaultValue = 'N/A') {
       if (value === null) {
-        return 'N/A';
+        return defaultValue;
       }
       return numeral(value).format(format || formats);
     },
