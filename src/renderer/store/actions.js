@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import moment from 'moment';
 import lockr from 'lockr';
-import { alerts, neo, tokens, wallets } from '../services';
+import { alerts, neo, tokens, wallets, ledger } from '../services';
 import { timeouts } from '../constants';
 import router from '../router';
 import network from '../services/network';
@@ -19,6 +19,8 @@ export {
   findTransactions,
   importWallet,
   openEncryptedKey,
+  verifyLedgerConnection,
+  openLedger,
   openPrivateKey,
   openSavedWallet,
 };
@@ -211,6 +213,48 @@ function openEncryptedKey({ commit }, { encryptedKey, passphrase, done }) {
         commit('failRequest', { identifier: 'openEncryptedKey', message: e });
       });
   }, timeouts.NEO_API_CALL);
+}
+
+function verifyLedgerConnection({ commit }, { done, failed }) {
+  commit('startRequest', { identifier: 'verifyLedgerConnection' });
+
+  ledger.open()
+    .then(() => {
+      done();
+      commit('endRequest', { identifier: 'verifyLedgerConnection' });
+    })
+    .catch((e) => {
+      failed(e);
+      commit('failRequest', { identifier: 'verifyLedgerConnection', message: e });
+    });
+}
+
+function openLedger({ commit }, { done, failed }) {
+  commit('startRequest', { identifier: 'openLedger' });
+
+  ledger.open()
+    .then(() => {
+      ledger.getPublicKey()
+        .then((publicKey) => {
+          wallets.openLedger(publicKey)
+            .then(() => {
+              done();
+              commit('endRequest', { identifier: 'openLedger' });
+            })
+            .catch((e) => {
+              failed(e);
+              commit('failRequest', { identifier: 'openLedger', message: e });
+            });
+        })
+        .catch((e) => {
+          failed(e);
+          commit('failRequest', { identifier: 'openLedger', message: e });
+        });
+    })
+    .catch((e) => {
+      failed(e);
+      commit('failRequest', { identifier: 'openLedger', message: e });
+    });
 }
 
 function openPrivateKey({ commit }, { wif, done }) {

@@ -11,6 +11,7 @@ import settings from './settings';
 import tokens from './tokens';
 import valuation from './valuation';
 import wallets from './wallets';
+import ledger from './ledger';
 import { store } from '../store';
 
 const toBigNumber = value => new BigNumber(String(value));
@@ -118,7 +119,6 @@ export default {
                   if (toBlock && t.blockHeight > toBlock) {
                     return;
                   }
-
                   promises.push(this.fetchTransactionDetails(t.txid)
                     .then((transactionDetails) => {
                       if (!transactionDetails) {
@@ -135,15 +135,19 @@ export default {
                       }
 
                       if (t.isNep5 !== true) {
+                        let movedNEO = false;
+                        let movedGAS = false;
                         let outNEO = new BigNumber(0);
                         let outGAS = new BigNumber(0);
 
                         transactionDetails.vin.forEach((i) => {
                           if (i.address === address && i.symbol === 'NEO') {
                             outNEO = outNEO.plus(i.value);
+                            movedNEO = true;
                           }
                           if (i.address === address && i.symbol === 'GAS') {
                             outGAS = outGAS.plus(i.value);
+                            movedGAS = true;
                           }
                         });
 
@@ -152,15 +156,25 @@ export default {
                         transactionDetails.vout.forEach((o) => {
                           if (o.address === address && o.symbol === 'NEO') {
                             inNEO = inNEO.plus(o.value);
+                            movedNEO = true;
                           }
                           if (o.address === address && o.symbol === 'GAS') {
                             inGAS = inGAS.plus(o.value);
+                            movedGAS = true;
                           }
                         });
 
                         const neoChange = inNEO.minus(outNEO);
                         const gasChange = inGAS.minus(outGAS);
-                        if (neoChange.isZero() === false) {
+
+                        if (transactionDetails.type === 'InvocationTransaction' && neoChange.isZero()) {
+                          movedNEO = false;
+                        }
+                        if (transactionDetails.type === 'InvocationTransaction' && gasChange.isZero()) {
+                          movedGAS = false;
+                        }
+
+                        if (movedNEO === true) {
                           transactionDetails.symbol = 'NEO';
 
                           splitTransactions.push({
@@ -174,7 +188,7 @@ export default {
                           });
                         }
 
-                        if (gasChange.isZero() === false) {
+                        if (movedGAS === true) {
                           transactionDetails.symbol = 'GAS';
 
                           splitTransactions.push({
@@ -646,6 +660,11 @@ export default {
           balance,
           intents: api.makeIntent(intentAmounts, toAddress),
         };
+
+        if (wallets.getCurrentWallet().isLedger === true) {
+          config.signingFunction = ledger.signWithLedger;
+        }
+
         return api.sendAsset(config)
           .then(res => res)
           .catch((e) => {
@@ -671,8 +690,6 @@ export default {
 
     const config = {
       net: network.getSelectedNetwork().net,
-      account: new wallet.Account(wallets.getCurrentWallet().wif),
-      intents: api.makeIntent({ GAS: 0.00000001 }, wallets.getCurrentWallet().address),
       script: {
         scriptHash: assetId,
         operation: 'transfer',
@@ -684,6 +701,24 @@ export default {
       },
       gas: 0,
     };
+
+    if (wallets.getCurrentWallet().isLedger === true) {
+      config.signingFunction = ledger.signWithLedger;
+      config.address = wallets.getCurrentWallet().address;
+      const intents = api.makeIntent({ GAS: 0.00000001 }, config.address);
+      config.intents = intents;
+
+      return api.doInvoke(config)
+        .then(res => res)
+        .catch((e) => {
+          alerts.exception(e);
+        });
+    }
+
+    const account = new wallet.Account(wallets.getCurrentWallet().wif);
+    config.account = account;
+    const intents = api.makeIntent({ GAS: 0.00000001 }, wallets.getCurrentWallet().address);
+    config.intents = intents;
 
     return api.doInvoke(config)
       .then(res => res)

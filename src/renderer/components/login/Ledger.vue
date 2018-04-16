@@ -1,8 +1,7 @@
 <template>
   <section id="login--ledger">
-    <login-form-wrapper identifier="openLedger">
-      <aph-input :hasError="$isFailed('openLedger')" v-model="wif" placeholder="Enter your private key here (WIF)" type="password"></aph-input>
-      <button class="login" @click="login" :disabled="shouldDisableLoginButton">Login</button>
+    <login-form-wrapper identifier="verifyLedgerConnection">
+      <button class="login" @click="login" v-if="connected" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
     </login-form-wrapper>
   </section>
 </template>
@@ -10,7 +9,7 @@
 <script>
 import LoginFormWrapper from './LoginFormWrapper';
 
-const ledgerPollingInterval = 10000;
+const ledgerPollingInterval = 1000;
 let checkLedgerStatusIntervalId;
 export default {
   components: {
@@ -29,28 +28,43 @@ export default {
   },
 
   computed: {
+    buttonLabel() {
+      return this.$isPending('openLedger') ? 'Logging in...' : 'Login with Ledger';
+    },
     shouldDisableLoginButton() {
-      return this.wif.length === 0;
+      return this.$isPending('openLedger');
     },
   },
 
   data() {
     return {
-      wif: '',
+      connected: null,
     };
   },
 
   methods: {
     checkLedgerStatus() {
-      this.$services.ledger.open()
-        .then((hid) => {
-          console.log(hid);
-        })
-        .catch((e) => {
-          this.$services.alerts.error(e);
-        });
+      this.$store.dispatch('verifyLedgerConnection', {
+        done: () => {
+          this.connected = true;
+        },
+        failed: () => {
+          this.connected = false;
+        },
+      });
     },
     login() {
+      if (!this.connected) {
+        return;
+      }
+      this.$store.dispatch('openLedger', {
+        done: () => {
+          this.$router.push('/authenticated/dashboard');
+        },
+        failed: () => {
+          this.connected = false;
+        },
+      });
     },
   },
 };
