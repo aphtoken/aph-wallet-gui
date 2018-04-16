@@ -1,4 +1,4 @@
-﻿import LedgerNode from '@ledgerhq/hw-transport-node-hid';
+import LedgerNode from '@ledgerhq/hw-transport-node-hid';
 import alerts from './alerts';
 
 
@@ -14,18 +14,18 @@ export default {
 
             return LedgerNode.list()
               .then((paths) => {
-                console.log(paths);
-
                 if (paths.length === 0) {
-                  return reject('USB Error: No device found.');
+                  return reject('No Ledger device found.');
                 }
 
                 const path = paths[0];
-
-                const device = LedgerNode.open(path);
-                console.log(device);
-
-                return resolve(device);
+                return LedgerNode.open(path)
+                  .then((res) => {
+                    resolve(res);
+                  })
+                  .catch((e) => {
+                    return reject(e);
+                  });
               })
               .catch((e) => {
                 return reject(e);

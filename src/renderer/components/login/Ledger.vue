@@ -42,7 +42,13 @@ export default {
 
   methods: {
     checkLedgerStatus() {
-      this.$services.ledger.open();
+      this.$services.ledger.open()
+        .then((hid) => {
+          console.log(hid);
+        })
+        .catch((e) => {
+          this.$services.alerts.error(e);
+        });
     },
     login() {
     },
