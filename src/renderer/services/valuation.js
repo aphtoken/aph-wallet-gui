@@ -4,6 +4,7 @@ import alerts from './alerts';
 import settings from './settings';
 
 const CMC_BASE_URL = 'https://api.coinmarketcap.com/v1/';
+const DEFAULT_APH_TOTAL_SUPPLY = 75000000;
 
 const defaultValuation = (symbol) => {
   const lowercaseCurrency = settings.getCurrency().toLowerCase();
@@ -40,7 +41,12 @@ export default {
             resolve(res.data[0]);
           })
           .catch(() => {
-            resolve(defaultValuation(symbol));
+            const res = defaultValuation(symbol);
+            if (symbol === 'APH') {
+              res.total_supply = DEFAULT_APH_TOTAL_SUPPLY;
+            }
+            console.log(res);
+            resolve(res);
           });
       } catch (e) {
         return reject(e);

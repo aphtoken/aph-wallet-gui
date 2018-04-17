@@ -460,7 +460,6 @@ export default {
                         h.totalValue = null;
                         h.change24hrPercent = null;
                         h.change24hrValue = null;
-                        h.totalSupply = null;
                       }
                     })
                     .catch((e) => {
