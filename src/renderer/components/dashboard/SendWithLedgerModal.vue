@@ -1,9 +1,7 @@
 <template>
   <div id="aph-send-with-ledger-modal">
     <div class="content">
-      <div class="body">
-        {{ prompt }}
-      </div>
+      <div class="body">{{ prompt }}</div>
       <div class="footer">
         <div class="cancel-btn" @click="cancel">Cancel</div>
       </div>

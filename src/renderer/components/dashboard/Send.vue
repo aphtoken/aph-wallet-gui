@@ -145,9 +145,9 @@ export default {
           });
       }, this.$constants.timeouts.NEO_API_CALL);
 
-      let transactionTimeout = 30 * 1000;
+      let transactionTimeout = this.$constants.intervals.TRANSACTIONTIMEOUT;
       if (this.$services.wallets.getCurrentWallet().isLedger === true) {
-        transactionTimeout = 3 * 60 * 1000;
+        transactionTimeout = this.$constants.intervals.TRANSACTIONTIMEOUTWITHHARDWARE;
       }
 
       sendTimeoutIntervalId = setTimeout(() => {

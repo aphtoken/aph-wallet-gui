@@ -18,6 +18,8 @@ const formats = {
 const intervals = {
   POLLING: 15000,
   WALLET_VERSION_CHECK: 10 * 60 * 1000,
+  TRANSACTIONTIMEOUT: 30 * 1000,
+  TRANSACTIONTIMEOUTWITHHARDWARE: 3 * 60 * 1000,
 };
 
 const loadStates = {

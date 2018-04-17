@@ -204,15 +204,19 @@ function setShowLoginToWalletModal(state, wallet) {
   state.showLoginToWalletModal = show;
   state.currentLoginToWallet = wallet;
 }
+
 function setShowImportAWalletModal(state, value) {
   state.showImportAWalletModal = value;
 }
+
 function setShowSendWithLedgerModal(state, value) {
   state.showSendWithLedgerModal = value;
 }
+
 function setShowSendRequestLedgerSignature(state, value) {
   state.showSendRequestLedgerSignature = value;
 }
+
 function setStatsToken(state, token) {
   state.statsToken = token;
   state.showPriceTile = true;
