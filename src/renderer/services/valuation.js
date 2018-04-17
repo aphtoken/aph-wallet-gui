@@ -45,7 +45,6 @@ export default {
             if (symbol === 'APH') {
               res.total_supply = DEFAULT_APH_TOTAL_SUPPLY;
             }
-            console.log(res);
             resolve(res);
           });
       } catch (e) {

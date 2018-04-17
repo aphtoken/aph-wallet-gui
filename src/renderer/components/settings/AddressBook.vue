@@ -10,12 +10,14 @@
 
     <div class="contacts">
       <div class="body">
-        <div v-for="(contact, index) in filteredContacts" :key="index" @click="openContact(contact)" :class="['contact', {active: contact.active}]">
-          <div class="cell name">{{ contact.name }}</div>
-          <div class="cell copy">
-            <span class="copy-link" @click="copy(contact.address)">
-              <aph-icon name="copy"></aph-icon>
-            </span>
+        <div v-for="(contact, index) in filteredContacts" :key="index" :class="['contact', {active: contact.active}]">
+          <div class="summary">
+            <div class="cell name" @click="toggleContact(contact)">{{ contact.name }}</div>
+            <div class="cell copy">
+              <span class="copy-link" @click="copy(contact.address)">
+                <aph-icon name="copy"></aph-icon>
+              </span>
+            </div>
           </div>
           <div class="details">
             <div class="section">
@@ -85,11 +87,6 @@ export default {
   },
 
   methods: {
-    closeContact() {
-      this.activeContact.active = false;
-      this.activeContact = null;
-    },
-
     copy(text) {
       clipboard.writeText(text);
     },
@@ -103,13 +100,16 @@ export default {
       this.searchBy = search;
     },
 
-    openContact(contact) {
-      if (this.activeContact) {
+    toggleContact(contact) {
+      if (contact === this.activeContact) {
+        contact.active = false;
         this.activeContact.active = false;
+        this.activeContact = null;
+        this.$store.commit('setActiveTransaction', null);
+      } else {
+        contact.active = true;
+        this.activeContact = contact;
       }
-
-      contact.active = true;
-      this.activeContact = contact;
     },
 
     showAddContactModal() {
@@ -197,22 +197,40 @@ export default {
       overflow-y: auto;
 
       .contact {
-        align-items: center;
         background: transparent;
         border-top: 1px solid $light-grey;
-        cursor: pointer;
-        display: flex;
-        flex-wrap: wrap;
         transition: $transition;
+      
+        .summary {
+          align-items: center;
+          cursor: pointer;
+          display: flex;
+          flex-wrap: wrap;
+        }
 
         .cell {
           flex: 1;
           font-family: GilroySemibold;
-          padding: $space;
+          padding: $space;      
+          min-height: 44px;    
         }
-
+        
+        &.active {
+          .summary:hover .cell {
+            background: #cccccc;
+          }
+        }
+        
         &:hover, &.active {
           background: $light-grey;
+        }
+
+        .name {
+          flex: 4;
+        }
+
+        .copy {
+          flex: 1;
         }
 
         .copy, .edit {
@@ -224,13 +242,14 @@ export default {
           .copy-link {
             position: absolute;
             right: 0;
-            top: $space * .4;
+            top: $space * .8;
           }
 
           .aph-icon {
             cursor: pointer;
             margin-left: $space-sm;
-            display: inline-block;
+            display: inline-block;   
+            min-height: 44px;
 
             path {
               fill: $grey;

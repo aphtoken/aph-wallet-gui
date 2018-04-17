@@ -10,15 +10,17 @@
     <div class="body">
       <div v-for="(transaction, index) in transactions()" :key="index"           
            :class="['transaction', {active: transaction.active, increase: transaction.amount > 0}]">
-        <div class="cell date" @click="toggleTransaction(transaction)">{{ $formatDate(transaction.block_time) }}</div>
-        <div class="cell token" @click="toggleTransaction(transaction)">{{ transaction.symbol }}</div>
-        <div :class="['cell', 'amount', {decrease: transaction.value < 0, increase: transaction.value > 0}]" @click="toggleTransaction(transaction)">
-          {{ $formatNumberBig(transaction.value) }}
-        </div>
-        <!--<div class="cell total">{{ $formatMoney(transaction.value) }}</div>-->
-        <div class="cell status" v-if="transaction.details">
-          <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
-          <aph-icon name="unconfirmed" v-else></aph-icon>
+        <div class="summary">
+          <div class="cell date" @click="toggleTransaction(transaction)">{{ $formatDate(transaction.block_time) }}</div>
+          <div class="cell token" @click="toggleTransaction(transaction)">{{ transaction.symbol }}</div>
+          <div :class="['cell', 'amount', {decrease: transaction.value < 0, increase: transaction.value > 0}]" @click="toggleTransaction(transaction)">
+            {{ $formatNumberBig(transaction.value) }}
+          </div>
+          <!--<div class="cell total">{{ $formatMoney(transaction.value) }}</div>-->
+          <div class="cell status" v-if="transaction.details">
+            <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
+            <aph-icon name="unconfirmed" v-else=""></aph-icon>
+          </div>
         </div>
         <div class="details" v-if="transaction.details">
           <div class="section">
@@ -27,6 +29,10 @@
                 <div class="label">Time</div>
                 <div class="value">{{ $formatTime(transaction.details.blocktime) }}</div>
               </div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="row">
               <div class="column">
                 <div class="label">Hash</div>
                 <div class="value">{{ transaction.details.txid }}</div>
@@ -170,19 +176,22 @@ export default {
     overflow-y: auto;
 
     .transaction {
-      align-items: center;
       background: transparent;
       border-top: 1px solid $light-grey;
-      cursor: pointer;
-      display: flex;
-      transition: $transition;
-      flex-wrap: wrap;
+      
+      .summary {
+        align-items: center;
+        cursor: pointer;
+        display: flex;
+        transition: $transition;
+        flex-wrap: wrap;
+      }
 
       .cell {
         flex: 1;
         font-family: GilroySemibold;
         padding: $space;
-        min-height: 55px;
+        min-height: 58px;
 
         .aph-icon {
           svg {
@@ -227,8 +236,8 @@ export default {
         background: $light-grey;
       }
       
-      &.active:hover {
-        .cell {
+      &.active {
+        .summary:hover .cell {
           background: #cccccc;
         }
       }
@@ -323,6 +332,12 @@ export default {
         .details {
           display: flex;
           width: 100%;
+          
+          .transactions-table {
+            .address {
+              width: 60%!important;
+            }
+          }
         }
       }
     }
