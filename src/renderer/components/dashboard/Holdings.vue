@@ -42,6 +42,7 @@ export default {
     },
 
     viewHoldingDetail(holding) {
+      this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setStatsToken', holding);
     },
   },

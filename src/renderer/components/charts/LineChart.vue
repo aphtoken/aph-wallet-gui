@@ -4,7 +4,7 @@ const { reactiveProp } = mixins;
 
 export default {
   beforeDestroy() {
-    window.removeEventListener('resize', this.render);
+    window.removeEventListener('resize', this.debouncedRender);
   },
 
   extends: Line,
@@ -12,7 +12,11 @@ export default {
   mounted() {
     this.render();
 
-    window.addEventListener('resize', this.render);
+    this.debouncedRender = _.debounce(() => {
+      this.render();
+    }, this.$constants.charts.DEBOUNCE);
+
+    window.addEventListener('resize', this.debouncedRender);
   },
 
   methods: {
@@ -29,3 +33,10 @@ export default {
 
 };
 </script>
+
+<style lang="scss" scoped>
+canvas {
+  width: 100% !important;
+}
+</style>
+

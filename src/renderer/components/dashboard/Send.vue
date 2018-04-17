@@ -21,12 +21,12 @@
             <div class="value">{{ currency.label }}</div>
           </div>
         </div>
-        <!-- <div class="row">
+        <div class="row" v-if="this.contact">
           <div class="column">
             <div class="label">Recipient</div>
-            <div class="value purple">John Doe</div>
+            <div class="value purple">{{ this.contact.name }}</div>
           </div>
-        </div> -->
+        </div>
         <div class="row">
           <div class="column">
             <div class="label">Address</div>
@@ -100,6 +100,7 @@ export default {
           return result;
         }, []);
     },
+
     sendButtonLabel() {
       return this.sending ? 'Waiting for confirmation...' : 'Send';
     },
@@ -107,6 +108,17 @@ export default {
     shouldDisableNextButton() {
       return !this.address || !this.amount || !this.currency || !parseFloat(this.amount);
     },
+  },
+
+  data() {
+    return {
+      address: '',
+      amount: '',
+      contact: null,
+      currency: null,
+      showConfirmation: false,
+      sending: false,
+    };
   },
 
   methods: {
@@ -134,6 +146,7 @@ export default {
             self.showConfirmation = false;
             clearTimeout(sendTimeoutIntervalId);
             self.$router.push('/authenticated/dashboard');
+            this.$store.dispatch('fetchHoldings');
           })
           .catch((e) => {
             self.sending = false;
@@ -154,23 +167,19 @@ export default {
           self.currency = null;
           self.showConfirmation = false;
           self.$router.push('/authenticated/dashboard');
-
           if (currentWallet.isLedger === true) {
             this.$services.ledger.close();
           }
+          this.$store.dispatch('fetchHoldings');
         }
       }, transactionTimeout);
     },
   },
 
-  data() {
-    return {
-      address: '',
-      amount: '',
-      currency: null,
-      showConfirmation: false,
-      sending: false,
-    };
+  watch: {
+    address() {
+      this.contact = this.$services.contacts.findContactByAddress(this.address);
+    },
   },
 };
 </script>
@@ -302,10 +311,14 @@ export default {
 
     .cancel-btn, .back-btn {
       @extend %btn-footer-light;
+
+      border-bottom-left-radius: $border-radius;
     }
 
     .next-btn, .send-btn {
       @extend %btn-footer;
+
+      border-bottom-right-radius: $border-radius;
     }
   }
 }

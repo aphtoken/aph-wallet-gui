@@ -38,6 +38,10 @@ export default {
     return !!this.getOne(name.trim());
   },
 
+  findContactByAddress(address) {
+    return _.find(this.getAllAsArray(), { address });
+  },
+
   sync() {
     store.commit('setContacts', this.getAllAsArray());
   },

@@ -1,3 +1,7 @@
+const charts = {
+  DEBOUNCE: 500,
+};
+
 const defaultSettings = {
   CURRENCY: 'USD',
 };
@@ -34,6 +38,7 @@ const timeouts = {
 };
 
 export {
+  charts,
   defaultSettings,
   formats,
   intervals,

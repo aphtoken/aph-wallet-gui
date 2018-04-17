@@ -20,7 +20,7 @@ export default {
 
     formattedPercent() {
       return this.percent > 0
-        ? `+${this.$formatNumber(this.percent, '0,0[.]0')}` : this.$formatNumber(this.percent, '0,0[.]0');
+        ? `+${this.$formatNumber(this.percent, '0,0[.]0', 0)}` : this.$formatNumber(this.percent, '0,0[.]0', 0);
     },
 
     strokeDashArray() {

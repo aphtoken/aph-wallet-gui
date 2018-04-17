@@ -131,10 +131,22 @@ export default {
         text-align: center;
 
         svg {
-          height: toRem(50px);
+          height: toRem(48px);
 
           &.back {
-            height: toRem(30px);
+            height: toRem(22px);
+          }
+
+          &.wallet {
+            height: toRem(34px);
+          }
+
+          &.history {
+            height: toRem(40px);
+          }
+
+          &.settings {
+            height: toRem(46px);
           }
         }
 

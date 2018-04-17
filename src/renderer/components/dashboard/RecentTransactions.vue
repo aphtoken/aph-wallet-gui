@@ -45,6 +45,7 @@ export default {
     },
 
     viewTransaction({ details }) {
+      this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setActiveTransaction', details);
     },
   },
