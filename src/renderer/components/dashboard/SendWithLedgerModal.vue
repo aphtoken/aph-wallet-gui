@@ -13,6 +13,13 @@
 
 <script>
 export default {
+  props: {
+    onCancel: {
+      required: true,
+      type: Function,
+    },
+  },
+
   computed: {
     prompt() {
       if (this.$store.state.showSendRequestLedgerSignature === true) {
@@ -26,6 +33,7 @@ export default {
   methods: {
     cancel() {
       this.$services.ledger.close();
+      this.onCancel();
     },
   },
 };

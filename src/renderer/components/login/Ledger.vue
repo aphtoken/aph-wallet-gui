@@ -47,6 +47,7 @@ export default {
       this.$store.dispatch('verifyLedgerConnection', {
         done: () => {
           this.connected = true;
+          this.login();
         },
         failed: () => {
           this.connected = false;
