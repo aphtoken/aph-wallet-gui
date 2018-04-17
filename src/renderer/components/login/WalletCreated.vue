@@ -113,7 +113,7 @@ export default {
   .help-text {
     color: $purple;
     font-family: GilroySemibold;
-    font-size: toRem(18px);
+    font-size: toRem(12px);
     line-height: $line-height;
     text-align: center;
     text-transform: uppercase;
@@ -121,12 +121,15 @@ export default {
 
   .qr-codes {
     display: flex;
-    justify-content: space-around;
     margin-top: $space;
   }
 
   .qr-code {
     text-align: center;
+
+    & + .qr-code {
+      margin-left: $space-xxl;
+    }
   }
 
   .wallet-data {
@@ -142,8 +145,9 @@ export default {
 
       p {
         color: $dark;
-        font-size: toRem(15px);
-        margin: $space-sm 0 $space;
+        font-family: GilroyMedium;
+        font-size: toRem(14px);
+        margin: $space-sm 0 $space-lg;
       }
 
       .copy-link {
@@ -174,7 +178,7 @@ export default {
     }
 
     &.passphrase {
-      margin: $space-lg 0;
+      margin: $space-lg 0 0;
     }
   }
 
@@ -188,8 +192,20 @@ export default {
     a, div {
       @extend %btn-outline;
 
-      &.print, &.done {
+      &.done {
         background: $purple;
+
+        &:hover {
+          background-color: $purple-hover;
+        }
+      }
+
+      &.print {
+        color: $purple;
+
+        &:hover {
+          color: white;
+        }
       }
 
       & + a {

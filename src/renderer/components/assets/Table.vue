@@ -12,7 +12,7 @@
           <div class="currency">{{ holding.name }}</div>
           <div class="meta">
             <div class="symbol">{{ holding.symbol }}</div>
-            <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 1}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
+            <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 0}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
           </div>
         </div>
         <button class="remove-btn" v-if="holding.canRemove" @click="remove(holding)">Remove</button>
@@ -146,7 +146,6 @@ export default {
       align-items: center;
       background: white;
       border-radius: $border-radius;
-      box-shadow: $box-shadow;
       display: flex;
       padding: $space;
 
@@ -195,7 +194,7 @@ export default {
           }
         }
       }
-        
+
       .remove-btn {
         @extend %btn-outline;
 

@@ -72,7 +72,7 @@ export default {
     top: 0;
 
     &.login-wallet-created {
-      background: $light-grey;
+      background: $background;
     }
   }
 }

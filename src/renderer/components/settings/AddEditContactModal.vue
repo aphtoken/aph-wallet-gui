@@ -5,7 +5,7 @@
         <aph-icon name="create"></aph-icon>
         <aph-input placeholder="Name" :light="true" v-model="name"></aph-input>
         <aph-input placeholder="Address" v-model="address"></aph-input>
-        <div class="remove-btn" @click="remove" v-if="prevAddress">Remove</div>
+        <div class="remove" @click="remove" v-if="prevAddress">Remove</div>
       </div>
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">Cancel</div>
@@ -141,14 +141,18 @@ export default {
     }
   }
 
-  .remove-btn {
-    display: flow;
+  .remove {
+    color: $grey;
     cursor: pointer;
+    display: flow;
+    font-family: GilroyMedium;
     margin: $space-sm;
     padding-top: $space;
-      &:hover {
-        color: $purple;
-      }
+    transition: $transition;
+
+    &:hover {
+      color: $red;
+    }
   }
   .cancel-btn {
     @extend %btn-footer-light;

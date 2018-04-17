@@ -150,10 +150,13 @@ h1.underlined {
   .receive-btn, .send-btn {
     @extend %btn-square;
 
-    box-shadow: $box-shadow;
-    height: $space * 9;
+    height: toRem(160px);
 
     .aph-icon {
+      svg {
+        height: toRem(57px);
+      }
+
       .fill {
         fill: $dark;
       }
@@ -170,7 +173,11 @@ h1.underlined {
 
   .send-btn {
     background: $purple;
-    margin-left: $space;
+    margin-left: $space-lg;
+
+    &:hover {
+      box-shadow: 0px 0px 50px 15px rgba($purple, 0.3);
+    }
 
     p {
       color: white;

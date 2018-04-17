@@ -83,7 +83,7 @@ export default {
 <style lang="scss">
 .aph-input {
   align-items: center;
-  border-bottom: $border;
+  border-bottom: $border-thin;
   border-color: white;
   display: flex;
   height: $input-height;
@@ -97,13 +97,13 @@ export default {
     font-size: toRem(14px);
     letter-spacing: .5px;
     outline: none;
-    padding: $space-sm 0;
+    padding: $space 0 $space-sm;
     width: 100%;
   }
 
   .placeholder {
     color: white;
-    padding-top: toRem(12px);
+    padding-top: toRem(16px);
     pointer-events: none;
     position: absolute;
     top: 0;
@@ -118,7 +118,7 @@ export default {
 
   .aph-icon {
     svg {
-      height: toRem(12px);
+      height: toRem(16px);
 
       &.eye-closed {
         height: toRem(17px);

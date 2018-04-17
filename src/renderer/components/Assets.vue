@@ -90,7 +90,6 @@ export default {
           .btn-square {
             @extend %btn-square;
 
-            box-shadow: $box-shadow;
             height: auto;
             padding: $space-xl 0;
             width: toRem(250px);

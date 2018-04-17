@@ -31,7 +31,7 @@ export default {
     display: block;
 
     & + a {
-      margin-top: $space-lg;
+      margin-top: $space-xl;
     }
   }
 

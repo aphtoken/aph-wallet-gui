@@ -8,6 +8,7 @@
 }
 
 @function toRem($size) {
-    $remSize: $size / 16px;
+    $remSize: $size / $font-size;
+
     @return #{$remSize}rem;
   }

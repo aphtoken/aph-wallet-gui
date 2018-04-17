@@ -151,7 +151,7 @@ export default {
                     tickMarkLength: 20,
                   },
                   ticks: {
-                    fontColor: '#B5B5CA',
+                    fontColor: '#66688D',
                     fontFamily: 'GilroySemibold',
                     fontSize: 12,
                   },

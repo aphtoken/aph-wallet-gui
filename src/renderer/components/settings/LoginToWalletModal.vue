@@ -87,7 +87,6 @@ export default {
         name: this.$store.state.currentLoginToWallet.label,
         passphrase: this.passphrase,
         done: () => {
-          this.$services.alerts.success(`Switched to Wallet ${this.$store.state.currentLoginToWallet.label}`);
           this.onCancel();
         },
       });
@@ -161,7 +160,7 @@ export default {
     }
 
     .remove {
-      color: $red;
+      color: $grey;
       cursor: pointer;
       flex: none;
       font-family: GilroySemibold;
@@ -169,7 +168,7 @@ export default {
       transition: $transition;
 
       &:hover {
-        color: $purple;
+        color: $red;
       }
     }
   }
@@ -214,6 +213,22 @@ export default {
       input {
         color: $dark;
       }
+
+    .aph-icon {
+      margin-bottom: 0;
+
+      svg {
+        height: toRem(16px);
+
+        &.eye-closed {
+          height: toRem(17px);
+        }
+      }
+
+      .fill {
+        fill: $grey;
+      }
+    }
 
       .placeholder {
         color: $grey;

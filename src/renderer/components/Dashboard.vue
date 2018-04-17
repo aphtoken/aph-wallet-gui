@@ -43,6 +43,11 @@ export default {
     display: flex;
     flex-direction: column;
     flex: 1 0 50%;
+
+    &:first-child {
+      flex: none;
+      width: toRem(570px);
+    }
   }
 
   .grid--cell {

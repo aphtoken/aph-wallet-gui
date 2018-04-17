@@ -173,7 +173,7 @@ export default {
 
   .label {
     align-items: center;
-    background: $light-grey;
+    background: $background;
     border-radius: $border-radius;
     cursor: pointer;
     display: flex;
@@ -205,7 +205,7 @@ export default {
     align-items: center;
     background: white;
     border-radius: $border-radius;
-    box-shadow: $box-shadow;
+    box-shadow: $box-shadow-small;
     left: 0;
     margin: $space 0 0;
     padding: 0;
@@ -243,7 +243,7 @@ export default {
     }
 
     .weekdays {
-      background: $light-grey;
+      background: $background;
       display: flex;
       padding: $space-sm;
 
@@ -287,7 +287,7 @@ export default {
           }
 
           &.is-today {
-            background: $light-grey;
+            background: $background;
           }
 
           &:hover, &.active {

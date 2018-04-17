@@ -47,7 +47,6 @@ export default {
         return;
       }
       this.$services.network.setSelectedNetwork(network);
-      this.$services.alerts.success(`Switched to ${network.net}`);
     },
   },
 };

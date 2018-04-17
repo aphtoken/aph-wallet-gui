@@ -51,7 +51,7 @@ export default {
   width: 100%;
 
   td {
-    border-top: 1px solid $light-grey;
+    border-top: 1px solid $border-grey;
     padding: $space $space-sm;
     white-space: nowrap;
 
@@ -100,6 +100,7 @@ export default {
       &:hover, &.active {
         td {
           background: $light-grey;
+
           &:not(.amount) {
             color: $purple;
           }

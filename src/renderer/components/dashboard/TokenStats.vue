@@ -167,7 +167,11 @@ export default {
       flex: none;
 
       & + div {
-        margin-left: 10%;
+        margin-left: $space-lg;
+      }
+
+      &.total-supply {
+        width: toRem(125px);
       }
     }
 

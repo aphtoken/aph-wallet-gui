@@ -116,7 +116,7 @@ export default {
 
   .aph-icon {
     position: absolute;
-    right: $space-sm;
+    right: $space;
     top: 50%;
     transform: translate(-50%, -50%);
 
@@ -131,7 +131,7 @@ export default {
 
   &.is-open {
     .aph-select--label {
-      background: $purple;
+      background: $purple-hover;
     }
 
     .aph-icon {
@@ -142,8 +142,10 @@ export default {
   }
 
   .aph-select--label {
+    background: $purple;
     border-radius: $border-radius;
     border: $border;
+    border-color: transparent;
     color: white;
     cursor: pointer;
     font-family: GilroyMedium;
@@ -153,6 +155,10 @@ export default {
     text-align: center;
     transition: all .1s linear;
     white-space: nowrap;
+
+    &:hover {
+      background: $purple-hover;
+    }
   }
 
   .aph-select--dropdown {
@@ -197,7 +203,7 @@ export default {
 
   &.is-light {
     .aph-select--label {
-      background: $light-grey;
+      background: $background;
       border-color: transparent;
       color: $dark;
       text-align: left;
@@ -209,13 +215,13 @@ export default {
     }
 
     .aph-select--dropdown {
-      box-shadow: $box-shadow;
       margin: $space 0 0;
+      box-shadow: $box-shadow-small;
 
       > li {
         &:hover,
         &.selected {
-          background: $light-grey;
+          background: $background;
           color: $dark;
         }
       }

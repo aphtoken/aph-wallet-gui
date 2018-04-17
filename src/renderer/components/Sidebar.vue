@@ -99,6 +99,7 @@ export default {
   background: $purple;
   display: flex;
   flex-direction: column;
+  overflow: auto;
 
   .header {
     flex: none;
@@ -131,22 +132,24 @@ export default {
         text-align: center;
 
         svg {
-          height: toRem(48px);
+          &.dashboard {
+            height: toRem(42px);
+          }
 
           &.back {
-            height: toRem(22px);
+            height: toRem(20px);
           }
 
           &.wallet {
-            height: toRem(34px);
+            height: toRem(35px);
           }
 
           &.history {
-            height: toRem(40px);
+            height: toRem(42px);
           }
 
           &.settings {
-            height: toRem(46px);
+            height: toRem(42px);
           }
         }
 

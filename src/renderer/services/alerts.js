@@ -1,6 +1,6 @@
 import Vue from 'vue';
 
-const MILLISECONDS_PER_WORD = 1250;
+const MILLISECONDS_PER_WORD = 750;
 
 function countWords(str) {
   return str.trim().split(/\s+/).length;

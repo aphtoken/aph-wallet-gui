@@ -185,6 +185,7 @@ export default {
 #dashboard--send {
   @extend %tile-light;
 
+  box-shadow: $box-shadow-small;
   display: flex;
   flex-direction: column;
 
@@ -207,7 +208,7 @@ export default {
     padding: 0 $space-lg $space-lg;
 
     .aph-input {
-      border-color: $dark;
+      border-color: $background;
 
       &.focused {
         border-color: $purple;

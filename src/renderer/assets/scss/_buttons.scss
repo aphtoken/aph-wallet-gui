@@ -5,18 +5,18 @@
   color: white;
   cursor: pointer;
   display: inline-flex;
-  height: 4rem;
+  height: toRem(69px);
   justify-content: center;
   transition: $transition;
-  width: 4rem;
+  width: toRem(69px);
 
   &:hover {
-    box-shadow: $box-shadow;
+    background-color: $purple-hover;
   }
 
   .aph-icon {
     .icon {
-      height: 1rem;
+      height: toRem(20px);
     }
 
     path {
@@ -28,14 +28,14 @@
 %btn-outline {
   background-color: transparent;
   border-radius: $border-radius;
-  border: $border;
+  border: $border-thin;
   color: white;
   cursor: pointer;
   display: inline-block;
   font-size: toRem(16px);
   height: $button-height;
   outline: none;
-  padding: toRem(14px) $space;
+  padding: toRem(16px);
   text-align: center;
   transition: $transition;
   user-select: none;
@@ -45,16 +45,14 @@
 
   &:hover {
     background-color: $purple;
-    box-shadow: $box-shadow;
     color: white;
   }
 
   &.disabled, &:disabled {
-    background-color: $purple;
-    border-color: $purple;
+    background-color: transparent;
+    border-color: white;
     color: white;
     cursor: not-allowed;
-    opacity: 0.65;
   }
 }
 
@@ -79,11 +77,15 @@
     justify-content: center;
 
     svg {
-      height: 3rem;
+      height: toRem(42px);
+
+      &.create {
+        height: toRem(50px);
+      }
     }
 
     .fill {
-      fill: $purple;
+      fill: $dark;
       transition: $transition;
     }
 
@@ -135,14 +137,15 @@
   border: none;
 
   &.disabled, &:disabled {
+    background-color: $background;
+    color: $grey;
     cursor: not-allowed;
-    opacity: 0.7;
   }
 }
 
 %btn-footer-light {
   @extend %btn-footer;
 
-  background-color: $light-grey;
+  background-color: $background;
   color: $dark;
 }

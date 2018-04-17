@@ -14,7 +14,7 @@
           <div class="amount">
             {{ $formatNumber(holding.balance) }}<span class="currency">{{ holding.symbol }}</span>
           </div>
-          <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 1}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
+          <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 0}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
         </div>
       </div>
     </div>
@@ -79,13 +79,13 @@ export default {
 
   .body {
     overflow: auto;
+    padding-right: $space;
 
     .holding {
       align-items: center;
       background: white;
       border-left: 3px solid transparent;
       border-radius: $border-radius;
-      box-shadow: $box-shadow;
       cursor: pointer;
       display: flex;
       padding: $space;
@@ -101,14 +101,14 @@ export default {
 
         .name {
           font-family: GilroySemibold;
-          font-size: toRem(18px);
+          font-size: toRem(19px);
           margin-bottom: $space-sm;
         }
 
         .currency {
           @extend %small-uppercase-grey-label;
 
-          font-size: toRem(12px);
+          font-size: toRem(15px);
         }
       }
 
@@ -119,7 +119,7 @@ export default {
 
         .amount {
           margin-bottom: $space-sm;
-          font-size: toRem(18px);
+          font-size: toRem(19px);
 
           .currency {
             margin-left: $space-xsm;

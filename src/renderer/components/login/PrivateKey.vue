@@ -52,7 +52,7 @@ export default {
   .login {
     @extend %btn-outline;
 
-    margin-top: $space-lg;
+    margin-top: $space-xl;
   }
 }
 </style>

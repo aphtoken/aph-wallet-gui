@@ -47,7 +47,7 @@ export default {
   }
 
   .content {
-    background: $light-grey;
+    background: $background;
     display: flex;
     flex-direction: column;
     flex: 1;

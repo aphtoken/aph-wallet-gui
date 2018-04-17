@@ -38,7 +38,7 @@ export default {
   .login-btn, .create-wallet-btn {
     @extend %btn-square;
 
-    box-shadow: 0 0 100px 10px rgba($purple, .25);
+    box-shadow: $box-shadow;
   }
 
   .settings-btn {
@@ -54,7 +54,7 @@ export default {
     margin-top: $space * 5;
 
     > .create-wallet-btn {
-      margin-left: $space-lg;
+      margin-left: $space-xl;
     }
   }
 }

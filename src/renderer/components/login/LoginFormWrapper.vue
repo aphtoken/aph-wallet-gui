@@ -36,8 +36,10 @@ export default {
 .login-form-wrapper {
   .request-status-message {
     align-items: center;
-    background: rgba(black, 0.7);
+    background: $dark;
+    border-radius: $border-radius;
     display: flex;
+    justify-content: center;
     margin-top: $space-lg;
     padding: $space-lg;
 
@@ -45,7 +47,7 @@ export default {
       flex: none;
 
       svg {
-        height: toRem(50px);
+        height: toRem(40px);
       }
 
       .fill {
@@ -60,7 +62,7 @@ export default {
     .right {
       margin-left: $space;
       color: $red;
-      flex: 1;
+      flex: none !important;
     }
   }
 }

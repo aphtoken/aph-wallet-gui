@@ -82,7 +82,7 @@ export default {
 
   .percent {
     font-size: toRem(30px);
-    font-family: GilroyMedium;
+    // font-family: GilroyMedium;
 
     &.decrease {
       fill: $red;
