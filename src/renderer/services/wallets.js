@@ -78,6 +78,27 @@ export default {
     });
   },
 
+  openLedger(publicKey) {
+    return new Promise((resolve, reject) => {
+      try {
+        const scriptHash = wallet.getScriptHashFromPublicKey(publicKey);
+        const address = wallet.getAddressFromScriptHash(scriptHash);
+        const currentWallet = {
+          isLedger: true,
+          address,
+          publicKey,
+          publicKeyEncoded: wallet.getPublicKeyEncoded(publicKey),
+        };
+
+        this.setCurrentWallet(currentWallet).sync();
+        return resolve(currentWallet);
+      } catch (e) {
+        console.log(e);
+        return reject(e.message);
+      }
+    });
+  },
+
   openEncryptedKey(encryptedKey, passphrase) {
     return new Promise((resolve, reject) => {
       try {

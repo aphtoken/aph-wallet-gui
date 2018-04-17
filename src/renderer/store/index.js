@@ -29,6 +29,8 @@ const state = {
   showSendAddressModal: false,
   showLoginToWalletModal: false,
   showImportAWalletModal: false,
+  showSendWithLedgerModal: false,
+  showSendRequestLedgerSignature: false,
   statsToken: null,
   version: pjson.version,
   wallets: [],

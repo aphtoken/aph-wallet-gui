@@ -33,6 +33,7 @@
             <div class="value">{{ address }}</div>
           </div>
         </div>
+        <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal" :onCancel="end"></aph-send-with-ledger-modal>
       </div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
@@ -65,9 +66,14 @@
 </template>
 
 <script>
+import AphSendWithLedgerModal from './SendWithLedgerModal';
 let sendTimeoutIntervalId;
 
 export default {
+  components: {
+    AphSendWithLedgerModal,
+  },
+
   computed: {
     currencies() {
       return this.$store.state.holdings.reduce(
@@ -126,37 +132,43 @@ export default {
     send() {
       this.sending = true;
 
-      const self = this;
       setTimeout(() => {
         this.$services.neo.sendFunds(this.address, this.currency.asset,
           this.amount, this.currency.isNep5)
           .then(() => {
-            self.sending = false;
-            self.address = null;
-            self.amount = null;
-            self.currency = null;
-            self.showConfirmation = false;
-            clearTimeout(sendTimeoutIntervalId);
-            self.$router.push('/authenticated/dashboard');
-            this.$store.dispatch('fetchHoldings');
+            this.end();
           })
           .catch((e) => {
             self.sending = false;
+            this.end();
             self.$services.alerts.error(e);
           });
       }, this.$constants.timeouts.NEO_API_CALL);
 
+      let transactionTimeout = this.$constants.intervals.TRANSACTIONTIMEOUT;
+      if (this.$services.wallets.getCurrentWallet().isLedger === true) {
+        transactionTimeout = this.$constants.intervals.TRANSACTIONTIMEOUTWITHHARDWARE;
+      }
+
       sendTimeoutIntervalId = setTimeout(() => {
         if (self.sending) {
-          self.sending = false;
-          self.address = '';
-          self.amount = '';
-          self.currency = null;
-          self.showConfirmation = false;
-          self.$router.push('/authenticated/dashboard');
-          this.$store.dispatch('fetchHoldings');
+          this.end();
         }
-      }, 30 * 1000);
+      }, transactionTimeout);
+    },
+
+    end() {
+      this.sending = false;
+      this.address = '';
+      this.amount = '';
+      this.currency = null;
+      this.showConfirmation = false;
+      this.$router.push('/authenticated/dashboard');
+      if (this.$services.wallets.getCurrentWallet().isLedger === true) {
+        this.$services.ledger.close();
+      }
+      this.$store.dispatch('fetchHoldings');
+      clearInterval(sendTimeoutIntervalId);
     },
   },
 

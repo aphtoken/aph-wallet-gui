@@ -6,7 +6,7 @@
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder",
+    "build": "node .electron-vue/build.js && electron-builder && tsc && electron-rebuild",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "@cityofzion/neon-js": "git+https://github.com/cityofzion/neon-js.git#a9dfaefec870bfd05f3a8a0e5bc90a635fb6c5b9",
+    "@ledgerhq/hw-transport-node-hid": "^4.2.0",
     "@ionic/app-scripts": "^3.1.8",
     "@xkeshi/vue-qrcode": "^0.3.0",
     "accounting": "^0.4.1",
