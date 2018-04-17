@@ -145,7 +145,7 @@ function setRecentTransactions(state, transactions) {
     return;
   }
 
-  const transactionsStorageKey = `aph.transactions.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  const transactionsStorageKey = `aph.txs.${state.currentWallet.address}.${state.currentNetwork.net}`;
   lockr.set(transactionsStorageKey, state.recentTransactions);
 }
 
@@ -161,7 +161,7 @@ function clearLocalNetworkState(state, newNetwork) {
   const portfolioStorageKey = `aph.portfolio.${state.currentWallet.address}.${newNetwork.net}`;
   lockr.set(portfolioStorageKey, null);
 
-  const transactionsStorageKey = `aph.transactions.${state.currentWallet.address}.${newNetwork.net}`;
+  const transactionsStorageKey = `aph.txs.${state.currentWallet.address}.${newNetwork.net}`;
   lockr.set(transactionsStorageKey, null);
 }
 

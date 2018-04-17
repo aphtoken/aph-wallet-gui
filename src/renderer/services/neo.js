@@ -98,6 +98,8 @@ export default {
                     blockHeight: t.blockIndex,
                     block_time: t.blockTime,
                     isNep5: true,
+                    from: t.fromAddress,
+                    to: t.toAddress,
                     vin: [{
                       address: t.fromAddress,
                       symbol: t.symbol,
@@ -177,6 +179,30 @@ export default {
                         if (movedNEO === true) {
                           transactionDetails.symbol = 'NEO';
 
+                          transactionDetails.vin.forEach((i) => {
+                            if (i.symbol === 'NEO') {
+                              if (neoChange.isGreaterThan(0)) {
+                                if (i.address !== address) {
+                                  t.from = i.address;
+                                }
+                              } else if (i.address === address) {
+                                t.from = i.address;
+                              }
+                            }
+                          });
+
+                          transactionDetails.vout.forEach((o) => {
+                            if (o.symbol === 'NEO') {
+                              if (neoChange.isGreaterThan(0)) {
+                                if (o.address === address) {
+                                  t.to = o.address;
+                                }
+                              } else if (o.address !== address) {
+                                t.to = o.address;
+                              }
+                            }
+                          });
+
                           splitTransactions.push({
                             hash: t.txid,
                             block_index: transactionDetails.block,
@@ -185,11 +211,37 @@ export default {
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
                             isNep5: false,
+                            from: t.from,
+                            to: t.to,
                           });
                         }
 
                         if (movedGAS === true) {
                           transactionDetails.symbol = 'GAS';
+
+                          transactionDetails.vin.forEach((i) => {
+                            if (i.symbol === 'GAS') {
+                              if (gasChange.isGreaterThan(0)) {
+                                if (i.address !== address) {
+                                  t.from = i.address;
+                                }
+                              } else if (i.address === address) {
+                                t.from = i.address;
+                              }
+                            }
+                          });
+
+                          transactionDetails.vout.forEach((o) => {
+                            if (o.symbol === 'GAS') {
+                              if (gasChange.isGreaterThan(0)) {
+                                if (o.address === address) {
+                                  t.to = o.address;
+                                }
+                              } else if (o.address !== address) {
+                                t.to = o.address;
+                              }
+                            }
+                          });
 
                           splitTransactions.push({
                             hash: t.txid,
@@ -199,6 +251,8 @@ export default {
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
                             isNep5: false,
+                            from: t.from,
+                            to: t.to,
                           });
                         }
                       } else {
@@ -212,6 +266,8 @@ export default {
                           value: t.value,
                           block_time: transactionDetails.blocktime,
                           details: transactionDetails,
+                          from: t.from,
+                          to: t.to,
                         });
                       }
                     }));
@@ -245,7 +301,7 @@ export default {
   fetchSystemTransactions(address) {
     return new Promise((resolve, reject) => {
       try {
-        return api.neoscan.getTransactionHistory(network.getSelectedNetwork().net, address)
+        return api.neonDB.getTransactionHistory(network.getSelectedNetwork().net, address)
           .then((res) => {
             resolve(res);
           })
@@ -393,7 +449,7 @@ export default {
                   net: network.getSelectedNetwork().net,
                   address: wallets.getCurrentWallet().address,
                   privateKey: wallets.getCurrentWallet().privateKey,
-                }, api.neoscan)
+                }, api.neonDB)
                   .then((res) => {
                     h.availableToClaim = toBigNumber(res).toNumber();
                   })

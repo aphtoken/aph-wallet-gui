@@ -33,7 +33,7 @@ export default {
 
         return _.merge(transaction, {
           active,
-          address: transaction.hash,
+          address: transaction.value > 0 ? transaction.from : transaction.to,
         });
       });
     },

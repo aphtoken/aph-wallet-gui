@@ -155,7 +155,7 @@ function fetchRecentTransactions({ state, commit }) {
 
   commit('startRequest', { identifier: 'fetchRecentTransactions' });
 
-  const transactionsStorageKey = `aph.transactions.${currentWallet.address}.${state.currentNetwork.net}`;
+  const transactionsStorageKey = `aph.txs.${currentWallet.address}.${state.currentNetwork.net}`;
   const localTransactions = lockr.get(transactionsStorageKey);
 
   let lastBlockIndex = 0;
