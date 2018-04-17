@@ -619,7 +619,6 @@ export default {
         sendPromise
           .then((res) => {
             if (!res || !res.tx) {
-              alerts.error('Failed to create transaction.');
               return reject('Failed to create transaction.');
             }
             alerts.success(`Transaction Hash: ${res.tx.hash} Sent, waiting for confirmation.`);
@@ -650,14 +649,23 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    return api.neoscan.getBalance(
-      network.getSelectedNetwork().net, wallets.getCurrentWallet().address)
+    const currentWallet = wallets.getCurrentWallet();
+    return api.getBalanceFrom({
+      net: network.getSelectedNetwork().net,
+      address: currentWallet.address,
+    }, api.neonDB)
+    // or api.neoscan? sometimes these apis go down or are unreliable
+    // maybe we should stand up our own version ?
       .then((balance) => {
+        if (balance.net !== network.getSelectedNetwork().net) {
+          alerts.error('Unable to read address balance from neonDB. Please try again later.');
+          return null;
+        }
         const config = {
           net: network.getSelectedNetwork().net,
           address: wallets.getCurrentWallet().address,
           privateKey: wallets.getCurrentWallet().privateKey,
-          balance,
+          balance: balance.balance,
           intents: api.makeIntent(intentAmounts, toAddress),
         };
 

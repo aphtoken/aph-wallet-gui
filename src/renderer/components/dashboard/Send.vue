@@ -33,6 +33,7 @@
             <div class="value">{{ address }}</div>
           </div>
         </div>
+        <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal"></aph-send-with-ledger-modal>
       </div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
@@ -65,9 +66,14 @@
 </template>
 
 <script>
+import AphSendWithLedgerModal from './SendWithLedgerModal';
 let sendTimeoutIntervalId;
 
 export default {
+  components: {
+    AphSendWithLedgerModal,
+  },
+
   computed: {
     currencies() {
       return this.$store.state.holdings.reduce(
@@ -114,6 +120,8 @@ export default {
     send() {
       this.sending = true;
 
+      const currentWallet = this.$services.wallets.getCurrentWallet();
+
       const self = this;
       setTimeout(() => {
         this.$services.neo.sendFunds(this.address, this.currency.asset,
@@ -133,6 +141,11 @@ export default {
           });
       }, this.$constants.timeouts.NEO_API_CALL);
 
+      let transactionTimeout = 30 * 1000;
+      if (currentWallet.isLedger === true) {
+        transactionTimeout = 3 * 60 * 1000;
+      }
+
       sendTimeoutIntervalId = setTimeout(() => {
         if (self.sending) {
           self.sending = false;
@@ -141,8 +154,12 @@ export default {
           self.currency = null;
           self.showConfirmation = false;
           self.$router.push('/authenticated/dashboard');
+
+          if (currentWallet.isLedger === true) {
+            this.$services.ledger.close();
+          }
         }
-      }, 30 * 1000);
+      }, transactionTimeout);
     },
   },
 

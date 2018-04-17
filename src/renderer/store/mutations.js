@@ -30,6 +30,8 @@ export {
   setShowImportAWalletModal,
   setShowLoginToWalletModal,
   setShowSendAddressModal,
+  setShowSendWithLedgerModal,
+  setShowSendRequestLedgerSignature,
   setStatsToken,
   setWallets,
   startRequest,
@@ -205,7 +207,12 @@ function setShowLoginToWalletModal(state, wallet) {
 function setShowImportAWalletModal(state, value) {
   state.showImportAWalletModal = value;
 }
-
+function setShowSendWithLedgerModal(state, value) {
+  state.showSendWithLedgerModal = value;
+}
+function setShowSendRequestLedgerSignature(state, value) {
+  state.showSendRequestLedgerSignature = value;
+}
 function setStatsToken(state, token) {
   state.statsToken = token;
   state.showPriceTile = true;

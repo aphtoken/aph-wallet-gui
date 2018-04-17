@@ -2,6 +2,7 @@ import LedgerNode from '@ledgerhq/hw-transport-node-hid';
 import { tx, wallet, u } from '@cityofzion/neon-js';
 import alerts from './alerts';
 import wallets from './wallets';
+import { store } from '../store';
 
 const VALID_STATUS = 0x9000;
 let currentLedger = null;
@@ -57,6 +58,8 @@ export default {
   },
 
   close() {
+    store.commit('setShowSendWithLedgerModal', false);
+    store.commit('setShowSendRequestLedgerSignature', false);
     if (currentDevice) {
       return currentDevice.close();
     }
@@ -129,9 +132,11 @@ export default {
           return;
         }
 
+        store.commit('setShowSendWithLedgerModal', true);
         currentLedger.open()
           .then(() => {
             const data = tx.serializeTransaction(unsignedTx, false);
+            store.commit('setShowSendRequestLedgerSignature', true);
             currentLedger.getSignature(data, 0)
               .then((sig) => {
                 const invocationScript = `40${sig}`;
@@ -143,16 +148,19 @@ export default {
                 currentLedger.close();
               })
               .catch((e) => {
-                console.log(e);
+                alerts.error(e);
+                currentLedger.close();
                 reject(e);
               });
           })
           .catch((e) => {
-            console.log(e);
+            alerts.error(e);
+            currentLedger.close();
             reject(e);
           });
       } catch (e) {
-        console.log(e);
+        alerts.exception(e);
+        currentLedger.close();
         reject(e);
       }
     });
