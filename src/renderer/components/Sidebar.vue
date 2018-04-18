@@ -41,7 +41,7 @@
           <span class="network">{{network.net}} block</span><span class="index">{{blockIndex}}</span>
         </div>
         <div class="last-update">
-          <div v-if="blockSecondsAgo > 120" class="network-error">Unable to Reach Network</div>
+          <div v-if="showNetworkError" class="network-error">Unable to Reach Network</div>
           <div v-else>
             <aph-timestamp-from-now :timestamp="network.lastReceivedBlock"></aph-timestamp-from-now>
           </div>
@@ -80,6 +80,9 @@ export default {
       if (this.network.bestBlock) {
         this.blockIndex = this.network.bestBlock.index;
         this.blockSecondsAgo = moment.utc().diff(moment.utc(this.network.lastReceivedBlock), 'seconds');
+        const apiSuccessfulRequestSecondsAgo =
+          moment.utc().diff(moment.utc(this.network.lastSuccessfulRequest), 'seconds');
+        this.showNetworkError = this.blockSecondsAgo > 120 && apiSuccessfulRequestSecondsAgo > 120;
       }
     },
   },
@@ -89,6 +92,7 @@ export default {
       network: null,
       blockIndex: 0,
       blockSecondsAgo: 0,
+      showNetworkError: false,
     };
   },
 };

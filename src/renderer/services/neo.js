@@ -618,6 +618,7 @@ export default {
         /* eslint-enable max-len */
         return axios.get(requestUrl)
           .then((res) => {
+            network.getSelectedNetwork().lastSuccessfulRequest = moment.utc();
             resolve(res);
           })
           .catch(() => {

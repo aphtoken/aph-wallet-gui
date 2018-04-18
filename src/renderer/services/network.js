@@ -54,6 +54,7 @@ export default {
 
     currentNetwork = network;
     network.rpcClient = rpc.default.create.rpcClient(network.rpc);
+    currentNetwork.lastSuccessfulRequest = moment.utc();
 
     this.loadStatus();
     loadNetworkStatusIntervalId = setInterval(() => {
