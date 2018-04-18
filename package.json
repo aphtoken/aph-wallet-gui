@@ -1,6 +1,6 @@
 {
   "name": "aphelion-desktop-wallet",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Aphelion <info@aphelion.org>",
   "description": "Aphelion Desktop Wallet",
   "license": null,
@@ -17,7 +17,7 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "postinstall": "npm run lint:fix",
+    "postinstall": "npm run lint:fix && electron-builder install-app-deps",
     "start": "npm run dev",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js"
@@ -73,6 +73,7 @@
     "numeral": "^2.0.6",
     "vue": "^2.5.16",
     "vue-chartjs": "^3.3.1",
+    "vue-dom-portal": "^0.1.6",
     "vue-electron": "^1.0.6",
     "vue-highcharts": "0.0.10",
     "vue-router": "^2.5.3",
@@ -103,7 +104,6 @@
     "electron-builder": "^19.19.1",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
-    "electron-rebuild": "^1.7.3",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^11.2.0",
     "eslint-friendly-formatter": "^3.0.0",

@@ -1,10 +1,11 @@
+import DomPortal from 'vue-dom-portal';
 import Vue from 'vue';
+import VueFlashMessage from 'vue-flash-message';
 import VueHighCharts from 'vue-highcharts';
 import _ from 'lodash';
-import axios from 'axios';
 import accounting from 'accounting';
+import axios from 'axios';
 import moment from 'moment';
-import VueFlashMessage from 'vue-flash-message';
 
 // Services.
 import { contacts, settings, wallets } from './services';
@@ -40,6 +41,7 @@ Vue.config.productionTip = false;
 // Vue Plugins.
 Vue.use(VueHighCharts);
 Vue.use(VueFlashMessage);
+Vue.use(DomPortal);
 require('vue-flash-message/dist/vue-flash-message.min.css');
 
 // Register global mixins.
