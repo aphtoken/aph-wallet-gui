@@ -58,11 +58,12 @@
   },
   "dependencies": {
     "@cityofzion/neon-js": "git+https://github.com/cityofzion/neon-js.git#a9dfaefec870bfd05f3a8a0e5bc90a635fb6c5b9",
-    "@ledgerhq/hw-transport-node-hid": "^4.2.0",
     "@ionic/app-scripts": "^3.1.8",
+    "@ledgerhq/hw-transport-node-hid": "^4.2.0",
     "@xkeshi/vue-qrcode": "^0.3.0",
     "accounting": "^0.4.1",
     "axios": "^0.16.1",
+    "babel-runtime": "^6.26.0",
     "chart.js": "^2.7.2",
     "create-index": "^2.3.0",
     "highcharts": "^6.1.0",
