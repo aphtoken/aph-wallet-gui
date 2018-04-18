@@ -1,11 +1,12 @@
 import _ from 'lodash';
-import lockr from 'lockr';
 
 import { defaultSettings } from '../constants';
 import { store } from '../store';
+import storage from './storage';
 
-const CURRENCY_STORAGE_KEY = 'aph.settings.currency';
-const CURRENCY_SYMBOL_STORAGE_KEY = 'aph.settings.currencySymbol';
+const SETTINGS_STORAGE_KEY = 'settings';
+const CURRENCY_STORAGE_KEY = `${SETTINGS_STORAGE_KEY}.currency`;
+const CURRENCY_SYMBOL_STORAGE_KEY = `${SETTINGS_STORAGE_KEY}.currencySymbol`;
 const CURRENCIES = [
   {
     label: 'USD',
@@ -39,7 +40,6 @@ const CURRENCIES = [
   },
 ];
 
-
 export default {
 
   getCurrencies() {
@@ -47,7 +47,7 @@ export default {
   },
 
   getCurrency() {
-    return lockr.get(CURRENCY_STORAGE_KEY, defaultSettings.CURRENCY);
+    return storage.get(CURRENCY_STORAGE_KEY, defaultSettings.CURRENCY);
   },
 
   getCurrencySymbol() {
@@ -55,7 +55,7 @@ export default {
   },
 
   setCurrency(currency) {
-    lockr.set(CURRENCY_STORAGE_KEY, currency);
+    storage.set(CURRENCY_STORAGE_KEY, currency);
     this.setCurrencySymbol(this.getCurrencySymbol());
     store.dispatch('fetchPortfolio');
 
@@ -63,7 +63,7 @@ export default {
   },
 
   setCurrencySymbol(currencySymbol) {
-    lockr.set(CURRENCY_SYMBOL_STORAGE_KEY, currencySymbol);
+    storage.set(CURRENCY_SYMBOL_STORAGE_KEY, currencySymbol);
 
     return this;
   },

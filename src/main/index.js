@@ -1,5 +1,5 @@
 import { app, Menu, BrowserWindow } from 'electron';
-import path from 'path'; // eslint-disable-line
+import path from 'path';
 
 import menuTemplate from './menu';
 
@@ -32,6 +32,7 @@ function createWindow() {
   });
 
   mainWindow.loadURL(winURL);
+  // mainWindow.webContents.openDevTools();
 
   mainWindow.on('closed', () => {
     mainWindow = null;

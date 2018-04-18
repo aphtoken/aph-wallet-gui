@@ -273,11 +273,6 @@ export default {
       &:last-child {
         border-bottom-right-radius: $border-radius;
       }
-
-      &.selected {
-        font-weight: bold;
-        background-color: #cccccc;
-      }
     }
   }
 

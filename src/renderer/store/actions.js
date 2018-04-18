@@ -1,10 +1,9 @@
 /* eslint-disable no-use-before-define */
 import moment from 'moment';
-import lockr from 'lockr';
-import { alerts, neo, tokens, wallets, ledger } from '../services';
+
+import { alerts, neo, network, storage, tokens, wallets, ledger } from '../services';
 import { timeouts } from '../constants';
 import router from '../router';
-import network from '../services/network';
 
 export {
   addToken,
@@ -125,8 +124,8 @@ function fetchHoldings({ state, commit }) {
 
   commit('startRequest', { identifier: 'fetchHoldings' });
 
-  const holdingsStorageKey = `aph.holdings.${currentWallet.address}.${state.currentNetwork.net}`;
-  const localHoldings = lockr.get(holdingsStorageKey);
+  const holdingsStorageKey = `holdings.${currentWallet.address}.${state.currentNetwork.net}`;
+  const localHoldings = storage.get(holdingsStorageKey);
   if (localHoldings) {
     state.holdings = localHoldings;
 
@@ -156,8 +155,8 @@ function fetchPortfolio({ state, commit }) {
 
   commit('startRequest', { identifier: 'fetchPortfolio' });
 
-  const portfolioStorageKey = `aph.portfolio.${currentWallet.address}.${state.currentNetwork.net}`;
-  const localPortfolio = lockr.get(portfolioStorageKey);
+  const portfolioStorageKey = `portfolios.${currentWallet.address}.${state.currentNetwork.net}`;
+  const localPortfolio = storage.get(portfolioStorageKey);
   if (localPortfolio) {
     state.portfolio = localPortfolio;
   }
@@ -186,8 +185,8 @@ function fetchRecentTransactions({ state, commit }) {
 
   commit('startRequest', { identifier: 'fetchRecentTransactions' });
 
-  const transactionsStorageKey = `aph.txs.${currentWallet.address}.${state.currentNetwork.net}`;
-  const localTransactions = lockr.get(transactionsStorageKey);
+  const transactionsStorageKey = `txs.${currentWallet.address}.${state.currentNetwork.net}`;
+  const localTransactions = storage.get(transactionsStorageKey);
 
   let lastBlockIndex = 0;
   if (localTransactions && localTransactions.length > 0) {

@@ -1,9 +1,8 @@
 /* eslint-disable no-use-before-define */
 import Vue from 'vue';
-import lockr from 'lockr';
 
 import { requests } from '../constants';
-import alerts from '../services/alerts';
+import { alerts, storage } from '../services';
 
 export {
   clearActiveTransaction,
@@ -114,8 +113,8 @@ function setHoldings(state, holdings) {
     return;
   }
 
-  const holdingsStorageKey = `aph.holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  lockr.set(holdingsStorageKey, state.holdings);
+  const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  storage.set(holdingsStorageKey, state.holdings);
 }
 
 function setPortfolio(state, data) {
@@ -127,8 +126,8 @@ function setPortfolio(state, data) {
     return;
   }
 
-  const portfolioStorageKey = `aph.portfolio.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  lockr.set(portfolioStorageKey, state.portfolio);
+  const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  storage.set(portfolioStorageKey, state.portfolio);
 }
 
 function setRecentTransactions(state, transactions) {
@@ -150,8 +149,8 @@ function setRecentTransactions(state, transactions) {
     return;
   }
 
-  const transactionsStorageKey = `aph.txs.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  lockr.set(transactionsStorageKey, state.recentTransactions);
+  const transactionsStorageKey = `txs.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  storage.set(transactionsStorageKey, state.recentTransactions);
 }
 
 function clearLocalNetworkState(state, newNetwork) {
@@ -160,14 +159,14 @@ function clearLocalNetworkState(state, newNetwork) {
   state.portfolio = {};
   state.recentTransactions = [];
 
-  const holdingsStorageKey = `aph.holdings.${state.currentWallet.address}.${newNetwork.net}`;
-  lockr.set(holdingsStorageKey, null);
+  const holdingsStorageKey = `holdings.${state.currentWallet.address}.${newNetwork.net}`;
+  storage.set(holdingsStorageKey, null);
 
-  const portfolioStorageKey = `aph.portfolio.${state.currentWallet.address}.${newNetwork.net}`;
-  lockr.set(portfolioStorageKey, null);
+  const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${newNetwork.net}`;
+  storage.set(portfolioStorageKey, null);
 
-  const transactionsStorageKey = `aph.txs.${state.currentWallet.address}.${newNetwork.net}`;
-  lockr.set(transactionsStorageKey, null);
+  const transactionsStorageKey = `txs.${state.currentWallet.address}.${newNetwork.net}`;
+  storage.set(transactionsStorageKey, null);
 }
 
 function setLatestVersion(state, version) {

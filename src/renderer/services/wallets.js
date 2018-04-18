@@ -1,14 +1,15 @@
-import lockr from 'lockr';
 import { wallet } from '@cityofzion/neon-js';
-import { store } from '../store';
 
-const WALLETS_STORAGE_KEY = 'aph.wallets';
+import { store } from '../store';
+import storage from './storage';
+
+const WALLETS_STORAGE_KEY = 'wallets';
 let currentWallet = null;
 
 export default {
 
   add(name, data) {
-    lockr.set(WALLETS_STORAGE_KEY, _.set(this.getAll(), name.trim(), data));
+    storage.set(WALLETS_STORAGE_KEY, _.set(this.getAll(), name.trim(), data));
 
     return this;
   },
@@ -16,7 +17,7 @@ export default {
   remove(name) {
     return new Promise((resolve, reject) => {
       try {
-        lockr.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), name.trim()));
+        storage.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), name.trim()));
         return resolve();
       } catch (e) {
         console.log(e);
@@ -31,7 +32,7 @@ export default {
   },
 
   getAll() {
-    return lockr.get(WALLETS_STORAGE_KEY, {});
+    return storage.get(WALLETS_STORAGE_KEY, {});
   },
 
   getAllAsArray() {

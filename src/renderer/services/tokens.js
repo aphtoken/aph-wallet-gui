@@ -1,6 +1,6 @@
-import lockr from 'lockr';
+import storage from './storage';
 
-const TOKENS_STORAGE_KEY = 'aph.token';
+const TOKENS_STORAGE_KEY = 'token';
 
 export default {
 
@@ -16,18 +16,19 @@ export default {
     }
 
     const tokens = this.getAll();
-    lockr.set(TOKENS_STORAGE_KEY, _.set(tokens, `${data.assetId}_${data.network}`, data));
+    storage.set(TOKENS_STORAGE_KEY, _.set(tokens, `${data.assetId}_${data.network}`, data));
     return this;
   },
 
   remove(assetId, network) {
     const tokens = this.getAll();
-    lockr.set(TOKENS_STORAGE_KEY, _.omit(tokens, `${assetId}_${network}`));
+    storage.set(TOKENS_STORAGE_KEY, _.omit(tokens, `${assetId}_${network}`));
+
     return this;
   },
 
   getAll() {
-    return lockr.get(TOKENS_STORAGE_KEY, {});
+    return storage.get(TOKENS_STORAGE_KEY, {});
   },
 
   getAllAsArray() {
