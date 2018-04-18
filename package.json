@@ -6,7 +6,7 @@
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder && tsc",
+    "build": "node .electron-vue/build.js && electron-builder",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
