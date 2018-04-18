@@ -11,4 +11,10 @@
   .btn-group {
     display: none!important;
   }
+  #sidebar, #portfolio-header {
+    display: none;
+  }
+  #backup-wallet {
+    width: auto;
+  }
 }

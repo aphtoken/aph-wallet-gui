@@ -2,7 +2,7 @@
   <section id="authenticated-wrapper">
     <sidebar></sidebar>
     <div class="content">
-      <portfolio-header></portfolio-header>
+      <portfolio-header v-if="$store.state.showPortfolioHeader"></portfolio-header>
       <router-view></router-view>
     </div>
   </section>

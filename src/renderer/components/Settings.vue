@@ -4,7 +4,8 @@
       <div class="grid--column left">
         <router-view name="left"></router-view>
       </div>
-      <div class="grid--column right">
+      <div class="grid--column right"
+           v-if="!$store.state.walletBackup">
         <router-view name="top-right"></router-view>
         <router-view name="bottom-right"></router-view>
       </div>

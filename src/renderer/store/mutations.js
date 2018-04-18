@@ -35,6 +35,7 @@ export {
   setStatsToken,
   setWallets,
   startRequest,
+  setWalletBackup,
 };
 
 function clearActiveTransaction(state) {
@@ -236,4 +237,9 @@ function startRequest(state, payload) {
 
 function updateRequest(state, { identifier, message }, status) {
   Vue.set(state.requests, identifier, { status, message });
+}
+
+function setWalletBackup(state, wallet) {
+  state.walletBackup = wallet;
+  state.showPortfolioHeader = !wallet;
 }

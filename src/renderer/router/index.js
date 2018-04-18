@@ -131,6 +131,12 @@ export default new Router({
                 'bottom-right': require('@/components/settings/Wallets').default,
               },
             },
+            {
+              path: 'wallet-backup',
+              components: {
+                left: require('@/components/settings/WalletBackup').default,
+              },
+            },
           ],
         },
       ],

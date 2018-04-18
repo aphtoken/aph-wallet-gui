@@ -34,6 +34,8 @@ const state = {
   statsToken: null,
   version: pjson.version,
   wallets: [],
+  walletBackup: null,
+  showPortfolioHeader: true,
 };
 
 const store = new Vuex.Store({

@@ -19,3 +19,5 @@ export const showAddTokenModal = state => state.showAddTokenModal;
 export const showSendAddressModal = state => state.showSendAddressModal;
 export const statsToken = state => state.statsToken;
 export const wallets = state => state.wallets;
+export const walletBackup = state => state.walletBackup;
+export const showPortfolioHeader = state => state.showPortfolioHeader;
