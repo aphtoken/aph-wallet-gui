@@ -1,7 +1,7 @@
 <template>
   <span class="aph-copy-text" @click.stop="copy">
     <aph-icon name="copy" ref="icon"></aph-icon>
-    <span :class="['confirmation-text', {show: showConfirmationText}]" ref="confirmationText">Copied</span>
+    <span :class="['aph-copy-text--confirmation-text', {show: showConfirmationText}]" ref="confirmationText" v-dom-portal>Copied</span>
   </span>
 </template>
 
@@ -9,9 +9,15 @@
 import { clipboard } from 'electron';
 
 const SHOW_CONFIRMATION_DELAY = 50;
-const SHOW_CONFIRMATION_TIMEOUT = 1000;
+const SHOW_CONFIRMATION_TIMEOUT = 500;
 
 export default {
+  beforeDestroy() {
+    const $confirmationText = this.$refs.confirmationText;
+
+    $confirmationText.parentNode.removeChild($confirmationText);
+  },
+
   data() {
     return {
       showConfirmationText: false,
@@ -32,11 +38,11 @@ export default {
       }, SHOW_CONFIRMATION_TIMEOUT);
     },
 
-    position({ clientX, clientY }) {
-      const child = this.$refs.confirmationText;
+    position({ x, y }) {
+      const $confirmationText = this.$refs.confirmationText;
 
-      child.style.left = `${clientX}px`;
-      child.style.top = `${clientY}px`;
+      $confirmationText.style.left = `${x}px`;
+      $confirmationText.style.top = `${y}px`;
     },
   },
 
@@ -49,6 +55,26 @@ export default {
 </script>
 
 <style lang="scss">
+.aph-copy-text--confirmation-text {
+  color: $purple;
+  display: inline-block;
+  font-family: GilroyMedium;
+  font-size: toRem(12px);
+  opacity: 1;
+  position: fixed;
+  transform: translate(-50%, -20px);
+  visibility: hidden;
+  z-index: -1;
+
+  &.show {
+    opacity: 0;
+    transform: translate(-50%, -30px);
+    transition: all 0.5s;
+    visibility: visible;
+    z-index: 100000;
+  }
+}
+
 .aph-copy-text {
   color: $grey;
   display: inline-block;
@@ -65,26 +91,6 @@ export default {
 
     svg {
       height: $space;
-    }
-  }
-
-  .confirmation-text {
-    color: $purple;
-    display: inline-block;
-    font-family: GilroyMedium;
-    font-size: toRem(12px);
-    opacity: 1;
-    position: fixed;
-    transform: translate(-50%, -10px);
-    visibility: hidden;
-    z-index: -1;
-
-    &.show {
-      opacity: 0;
-      transform: translate(-50%, -20px);
-      transition: all 0.5s;
-      visibility: visible;
-      z-index: 100000;
     }
   }
 
