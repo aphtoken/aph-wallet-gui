@@ -10,9 +10,7 @@
              @click="useContact(contact)" class="contact">
             <div class="cell name">{{ contact.name }}</div>
             <div class="cell copy">
-              <span class="copy-link" @click="copy(contact.address)">
-                <aph-icon name="copy"></aph-icon>
-              </span>
+              <aph-copy-text :text="contact.address"></aph-copy-text>
             </div>
           </div>
         </div>
@@ -22,9 +20,7 @@
 </template>
 
 <script>
-import { clipboard } from 'electron';
 export default {
-
   computed: {
     filteredContacts() {
       const searchBy = this.searchBy.toLowerCase();
@@ -50,9 +46,6 @@ export default {
     useContact(contact) {
       // todo, send this over to the address field on the send form automatically?
       console.log(contact);
-    },
-    copy(text) {
-      clipboard.writeText(text);
     },
   },
 };
@@ -103,7 +96,6 @@ export default {
           align-items: center;
           background: transparent;
           border-top: 1px solid $light-grey;
-          cursor: pointer;
           display: flex;
           transition: $transition;
           flex-wrap: wrap;
@@ -112,41 +104,9 @@ export default {
             flex: 1;
             font-family: GilroySemibold;
             padding: $space;
-          }
 
-
-          .copy {
-            display: inline-block;
-            position: relative;
-            margin: 0 $space 0 0;
-            color: $grey;
-            font-weight: bold;
-
-            .copy-link {
-              position: absolute;
-              right: 0;
-              top: $space * .4;
-            }
-
-            .aph-icon {
-              cursor: pointer;
-              margin-left: $space-sm;
-              display: inline-block;
-
-              path {
-                fill: $grey;
-              }
-
-              svg {
-                height: $space;
-              }
-            }
-
-            &:hover {
-              color: $purple;
-              path {
-                fill: $purple;
-              }
+            &.copy {
+              flex: none;
             }
           }
 

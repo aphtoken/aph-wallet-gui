@@ -14,9 +14,7 @@
           <div class="summary">
             <div class="cell name" @click="toggleContact(contact)">{{ contact.name }}</div>
             <div class="cell copy">
-              <span class="copy-link" @click="copy(contact.address)">
-                <aph-icon name="copy"></aph-icon>
-              </span>
+              <aph-copy-text :text="contact.address"></aph-copy-text>
             </div>
           </div>
           <div class="details">
@@ -49,7 +47,6 @@
 </template>
 
 <script>
-import { clipboard } from 'electron';
 import AphAddEditContactModal from '../modals/AddEditContactModal';
 
 export default {
@@ -87,10 +84,6 @@ export default {
   },
 
   methods: {
-    copy(text) {
-      clipboard.writeText(text);
-    },
-
     hideAddContactModal() {
       this.$store.commit('setShowAddContactModal', false);
 
@@ -200,7 +193,7 @@ export default {
         background: transparent;
         border-top: 1px solid $light-grey;
         transition: $transition;
-      
+
         .summary {
           align-items: center;
           cursor: pointer;
@@ -211,16 +204,16 @@ export default {
         .cell {
           flex: 1;
           font-family: GilroySemibold;
-          padding: $space;      
-          min-height: 44px;    
+          padding: $space;
+          min-height: 44px;
         }
-        
+
         &.active {
           .summary:hover .cell {
             background: #cccccc;
           }
         }
-        
+
         &:hover, &.active {
           background: $light-grey;
         }
@@ -239,7 +232,7 @@ export default {
           color: $grey;
           font-weight: bold;
 
-          .copy-link {
+          .aph-copy-text {
             position: absolute;
             right: 0;
             top: $space * .8;
@@ -248,7 +241,7 @@ export default {
           .aph-icon {
             cursor: pointer;
             margin-left: $space-sm;
-            display: inline-block;   
+            display: inline-block;
             min-height: 44px;
 
             path {

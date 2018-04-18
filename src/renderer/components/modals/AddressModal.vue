@@ -4,9 +4,7 @@
       <div class="code">
         <vue-qrcode :value="address" :options="{ backgroundAlpha: 0, size: 200 }"></vue-qrcode>
       </div>
-      <div class="copy-link" @click="copy()">
-        <aph-icon name="copy"></aph-icon>
-      </div>
+      <aph-copy-text :text="address"></aph-copy-text>
       <div class="address">{{ address }}</div>
     </div>
     <div class="footer">
@@ -17,7 +15,6 @@
 
 <script>
 import VueQrcode from '@xkeshi/vue-qrcode';
-import { clipboard } from 'electron';
 
 import ModalWrapper from './ModalWrapper';
 
@@ -28,10 +25,6 @@ export default {
   },
 
   methods: {
-    copy() {
-      clipboard.writeText(this.address);
-    },
-
     print() {
       window.print();
     },
@@ -58,24 +51,9 @@ export default {
     text-align: center;
   }
 
-  .copy-link {
+  .aph-copy-text {
     margin-top: $space;
     text-align: center;
-
-    path {
-      fill: $grey;
-    }
-
-    svg {
-      cursor: pointer;
-      height: $space;
-
-      &:hover {
-        path {
-          fill: $purple;
-        }
-      }
-    }
   }
 
   .address {

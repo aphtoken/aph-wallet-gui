@@ -23,45 +23,35 @@
       <div class="label">Passphrase</div>
       <div class="value">
         <p>{{ wallet.passphrase }}</p>
-        <span class="copy-link" @click="copy(wallet.passphrase)">
-          <aph-icon name="copy"></aph-icon>
-        </span>
+        <aph-copy-text :text="wallet.passphrase"></aph-copy-text>
       </div>
     </div>
     <div class="wallet-data public-address">
       <div class="label">Public Address</div>
       <div class="value">
         <p>{{ wallet.address }}</p>
-        <span class="copy-link" @click="copy(wallet.address)">
-          <aph-icon name="copy"></aph-icon>
-        </span>
+        <aph-copy-text :text="wallet.address"></aph-copy-text>
       </div>
     </div>
     <div class="wallet-data encrypted-key">
       <div class="label">Encrypted Key</div>
       <div class="value">
         <p>{{ wallet.encryptedWIF }}</p>
-        <span class="copy-link" @click="copy(wallet.encryptedWIF)">
-          <aph-icon name="copy"></aph-icon>
-        </span>
+        <aph-copy-text :text="wallet.encryptedWIF"></aph-copy-text>
       </div>
     </div>
     <div class="wallet-data private-key">
       <div class="label">Private Key</div>
       <div class="value">
         <p>{{ wallet.privateKey }}</p>
-        <span class="copy-link" @click="copy(wallet.privateKey)">
-          <aph-icon name="copy"></aph-icon>
-        </span>
+        <aph-copy-text :text="wallet.privateKey"></aph-copy-text>
       </div>
     </div>
     <div class="wallet-data private-key">
       <div class="label">WIF</div>
       <div class="value">
         <p>{{ wallet.wif }}</p>
-        <span class="copy-link" @click="copy(wallet.wif)">
-          <aph-icon name="copy"></aph-icon>
-        </span>
+        <aph-copy-text :text="wallet.wif"></aph-copy-text>
       </div>
     </div>
     <div class="btn-group">
@@ -75,7 +65,6 @@
 
 <script>
 import VueQrcode from '@xkeshi/vue-qrcode';
-import { clipboard } from 'electron';
 
 export default {
   data() {
@@ -85,9 +74,7 @@ export default {
   },
 
   methods: {
-    copy(text) {
-      clipboard.writeText(text);
-    },
+
     print() {
       window.print();
     },
@@ -150,7 +137,7 @@ export default {
         margin: $space-sm 0 $space-lg;
       }
 
-      .copy-link {
+      .aph-copy-text {
         position: absolute;
         right: 0;
         top: $space * .4;
