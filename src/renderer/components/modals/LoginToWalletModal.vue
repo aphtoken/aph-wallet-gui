@@ -1,55 +1,52 @@
 <template>
-  <div id="aph-login-to-wallet-modal">
-    <div class="content">
-      <template v-if="showRemove">
-        <div class="header">
-          <aph-icon name="wallet"></aph-icon>
-        </div>
-        <div class="body">
-          <p>Are you sure you'd like to remove <span>{{$store.state.currentLoginToWallet.label}}</span>?</p>
-          <p>Loss of funds is possible, if you have not properly backed up this wallet's keys.</p>
-          <aph-input placeholder="Enter the name of your wallet to delete" :light="true" v-model="confirmWalletName"></aph-input>
-        </div>
-        <div class="footer">
-          <div class="cancel-btn" @click="cancelRemove">Cancel</div>
-          <button class="login-btn" @click="remove" :disabled="shouldDisableDeleteButton">Yes, Delete Wallet</button>
-        </div>
-      </template>
-      <template v-else>
-        <div class="header">
-          <div class="name">{{$store.state.currentLoginToWallet.label}}</div>
-          <div class="remove" @click="showRemoveConfirmation">Remove</div>
-        </div>
-        <div v-if="isNotCurrentWallet" class="body">
-          <aph-input placeholder="Enter your passphrase to login" :light="true" v-model="passphrase" type="password"></aph-input>
-        </div>
-        <div v-else class="body">
-          <aph-icon name="wallet"></aph-icon>
-        </div>
-        <div class="footer">
-          <div class="cancel-btn" @click="onCancel">Cancel</div>
-          <button v-if="isNotCurrentWallet" class="login-btn" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
-        </div>
-      </template>
-    </div>
-  </div>
+  <modal-wrapper id="aph-login-to-wallet-modal" identifier="openSavedWallet">
+    <template v-if="showRemove">
+      <div class="header">
+        <aph-icon name="wallet"></aph-icon>
+      </div>
+      <div class="body">
+        <p>Are you sure you'd like to remove <span>{{$store.state.currentLoginToWallet.label}}</span>?</p>
+        <p>Loss of funds is possible, if you have not properly backed up this wallet's keys.</p>
+        <aph-input placeholder="Enter the name of your wallet to delete" :light="true" v-model="confirmWalletName"></aph-input>
+      </div>
+      <div class="footer">
+        <div class="cancel-btn" @click="cancelRemove">Cancel</div>
+        <button class="login-btn" @click="remove" :disabled="shouldDisableDeleteButton">Yes, Delete Wallet</button>
+      </div>
+    </template>
+    <template v-else>
+      <div class="header">
+        <div class="name">{{$store.state.currentLoginToWallet.label}}</div>
+        <div class="remove" @click="showRemoveConfirmation">Remove</div>
+      </div>
+      <div v-if="isNotCurrentWallet" class="body">
+        <aph-input placeholder="Enter your passphrase to login" :light="true" v-model="passphrase" type="password"></aph-input>
+      </div>
+      <div v-else class="body">
+        <aph-icon name="wallet"></aph-icon>
+      </div>
+      <div class="footer">
+        <div class="cancel-btn" @click="onCancel">Cancel</div>
+        <button v-if="isNotCurrentWallet" class="login-btn" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
+      </div>
+    </template>
+  </modal-wrapper>
 </template>
 
 <script>
-export default {
-  props: {
-    onCancel: {
-      required: true,
-      type: Function,
-    },
-  },
+import ModalWrapper from './ModalWrapper';
 
+export default {
   data() {
     return {
       passphrase: '',
       showRemove: false,
       confirmWalletName: '',
     };
+  },
+
+  components: {
+    ModalWrapper,
   },
 
   computed: {
@@ -113,32 +110,19 @@ export default {
       });
     },
   },
+
+  props: {
+    onCancel: {
+      required: true,
+      type: Function,
+    },
+  },
 };
 </script>
 
 
 <style lang="scss">
 #aph-login-to-wallet-modal {
-  align-items: center;
-  background: rgba($dark, 0.8);
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  left: 0;
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 100%;
-  z-index: 9999;
-
-  .content {
-    background: white;
-    flex: none;
-    width: toRem(500px);
-  }
-
   .header {
     display: flex;
     justify-content: center;
@@ -251,10 +235,14 @@ export default {
 
   .cancel-btn {
     @extend %btn-footer-light;
+
+    border-bottom-left-radius: $border-radius;
   }
 
   .login-btn {
     @extend %btn-footer;
+
+    border-bottom-right-radius: $border-radius;
   }
 }
 </style>

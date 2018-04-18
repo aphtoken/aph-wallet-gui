@@ -60,6 +60,7 @@ export default {
   close() {
     store.commit('setShowSendWithLedgerModal', false);
     store.commit('setShowSendRequestLedgerSignature', false);
+
     if (currentDevice) {
       return currentDevice.close();
     }

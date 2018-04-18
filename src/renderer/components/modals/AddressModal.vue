@@ -1,33 +1,37 @@
 <template>
-  <div id="aph-address-modal">
-    <div class="content">
-      <div class="body">
-        <div class="code">
-          <vue-qrcode :value="address" :options="{ backgroundAlpha: 0, size: 200 }"></vue-qrcode>
-        </div>
-        <div class="copy-link" @click="copy()">
-          <aph-icon name="copy"></aph-icon>
-        </div>
-        <div class="address">{{ address }}</div>
+  <modal-wrapper id="aph-address-modal">
+    <div class="body">
+      <div class="code">
+        <vue-qrcode :value="address" :options="{ backgroundAlpha: 0, size: 200 }"></vue-qrcode>
       </div>
-      <div class="footer">
-        <div class="done-btn" @click="onDone">Done</div>
+      <div class="copy-link" @click="copy()">
+        <aph-icon name="copy"></aph-icon>
       </div>
+      <div class="address">{{ address }}</div>
     </div>
-  </div>
+    <div class="footer">
+      <div class="done-btn" @click="onDone">Done</div>
+    </div>
+  </modal-wrapper>
 </template>
 
 <script>
 import VueQrcode from '@xkeshi/vue-qrcode';
 import { clipboard } from 'electron';
 
+import ModalWrapper from './ModalWrapper';
+
 export default {
-  components: { VueQrcode },
+  components: {
+    ModalWrapper,
+    VueQrcode,
+  },
 
   methods: {
     copy() {
       clipboard.writeText(this.address);
     },
+
     print() {
       window.print();
     },
@@ -49,25 +53,6 @@ export default {
 
 <style lang="scss">
 #aph-address-modal {
-  align-items: center;
-  background: rgba($dark, 0.8);
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  left: 0;
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 100%;
-  z-index: 2000;
-
-  .content {
-    background: white;
-    flex: none;
-  }
-
   .body {
     padding: $space-lg;
     text-align: center;

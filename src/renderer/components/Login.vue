@@ -15,6 +15,10 @@
 </template>
 <script>
 export default {
+  beforeDestroy() {
+    this.$store.commit('resetRequests');
+  },
+
   computed: {
     routeClassName() {
       return _.kebabCase(this.$route.path);

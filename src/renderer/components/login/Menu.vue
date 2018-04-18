@@ -17,7 +17,9 @@
 
 <script>
 export default {
-  //
+  mounted() {
+    this.$store.commit('resetRequests');
+  },
 };
 </script>
 

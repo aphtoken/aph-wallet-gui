@@ -1,34 +1,23 @@
 <template>
-  <div id="aph-import-a-wallet-modal">
-    <div class="content">
-      <div class="body">
-        <aph-input placeholder="Name" v-model="walletName"></aph-input>
-        <aph-input placeholder="Private key" v-model="wif"></aph-input>
-        <aph-input placeholder="Passphrase" v-model="passphrase" type="password"></aph-input>
-      </div>
-      <div class="footer">
-        <div class="cancel-btn" @click="onCancel">Cancel</div>
-        <button class="login-btn" @click="save" :disabled="shouldDisableSaveButton">{{ buttonLabel }}</button>
-      </div>
+  <modal-wrapper id="aph-import-a-wallet-modal" identifier="importWallet">
+    <div class="body">
+      <aph-input placeholder="Name" v-model="walletName"></aph-input>
+      <aph-input placeholder="Private key" v-model="wif"></aph-input>
+      <aph-input placeholder="Passphrase" v-model="passphrase" type="password"></aph-input>
     </div>
-  </div>
+    <div class="footer">
+      <div class="cancel-btn" @click="onCancel">Cancel</div>
+      <button class="login-btn" @click="save" :disabled="shouldDisableSaveButton">{{ buttonLabel }}</button>
+    </div>
+  </modal-wrapper>
 </template>
 
 <script>
-export default {
-  props: {
-    onCancel: {
-      required: true,
-      type: Function,
-    },
-  },
+import ModalWrapper from './ModalWrapper';
 
-  data() {
-    return {
-      walletName: '',
-      wif: '',
-      passphrase: '',
-    };
+export default {
+  components: {
+    ModalWrapper,
   },
 
   computed: {
@@ -40,6 +29,14 @@ export default {
       return this.$isPending('importWallet') || this.wif.length === 0
         || this.walletName.length === 0 || this.passphrase.length === 0;
     },
+  },
+
+  data() {
+    return {
+      walletName: '',
+      wif: '',
+      passphrase: '',
+    };
   },
 
   methods: {
@@ -58,32 +55,19 @@ export default {
       });
     },
   },
+
+  props: {
+    onCancel: {
+      required: true,
+      type: Function,
+    },
+  },
 };
 </script>
 
 
 <style lang="scss">
 #aph-import-a-wallet-modal {
-  align-items: center;
-  background: rgba($dark, 0.8);
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  left: 0;
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 100%;
-  z-index: 9999;
-
-  .content {
-    background: white;
-    flex: none;
-    width: toRem(600px);
-  }
-
   .body {
     padding: $space-lg;
     text-align: center;
@@ -130,10 +114,14 @@ export default {
 
   .cancel-btn {
     @extend %btn-footer-light;
+
+    border-bottom-left-radius: $border-radius;
   }
 
   .login-btn {
     @extend %btn-footer;
+
+    border-bottom-right-radius: $border-radius;
   }
 }
 </style>

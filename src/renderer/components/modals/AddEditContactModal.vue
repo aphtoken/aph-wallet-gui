@@ -1,44 +1,39 @@
 <template>
-  <div id="aph-add-edit-contact-modal">
-    <div class="content">
-      <div class="body">
-        <aph-icon name="create"></aph-icon>
-        <aph-input placeholder="Name" :light="true" v-model="name"></aph-input>
-        <aph-input placeholder="Address" v-model="address"></aph-input>
-        <div class="remove" @click="remove" v-if="prevAddress">Remove</div>
-      </div>
-      <div class="footer">
-        <div class="cancel-btn" @click="onCancel">Cancel</div>
-        <div class="add-btn" @click="save" v-if="prevAddress">Save</div>
-        <div class="add-btn" @click="add" v-else>Add</div>
-      </div>
+  <modal-wrapper id="aph-add-edit-contact-modal">
+    <div class="body">
+      <aph-icon name="create"></aph-icon>
+      <aph-input placeholder="Name" :light="true" v-model="name"></aph-input>
+      <aph-input placeholder="Address" v-model="address"></aph-input>
+      <div class="remove" @click="remove" v-if="prevAddress">Remove</div>
     </div>
-  </div>
+    <div class="footer">
+      <button class="cancel-btn" @click="onCancel">Cancel</button>
+      <button class="add-btn" @click="save" v-if="prevAddress" :disabled="shouldDisableSaveAddButton">Save</button>
+      <button class="add-btn" @click="add" v-else :disabled="shouldDisableSaveAddButton">Add</button>
+    </div>
+  </modal-wrapper>
 </template>
 
 <script>
+import ModalWrapper from './ModalWrapper';
+
 export default {
-  props: {
-    onCancel: {
-      required: true,
-      type: Function,
+  components: {
+    ModalWrapper,
+  },
+
+  computed: {
+    shouldDisableSaveAddButton() {
+      return !this.address.length || !this.name.length;
     },
   },
 
   data() {
     return {
-      name: '',
       address: '',
+      name: '',
       prevAddress: null,
     };
-  },
-
-  mounted() {
-    if (this.$store.state.currentEditContact) {
-      this.name = this.$store.state.currentEditContact.name;
-      this.address = this.$store.state.currentEditContact.address;
-      this.prevAddress = this.$store.state.currentEditContact.address;
-    }
   },
 
   methods: {
@@ -73,32 +68,27 @@ export default {
       this.onCancel();
     },
   },
+
+  mounted() {
+    if (this.$store.state.currentEditContact) {
+      this.name = this.$store.state.currentEditContact.name;
+      this.address = this.$store.state.currentEditContact.address;
+      this.prevAddress = this.$store.state.currentEditContact.address;
+    }
+  },
+
+  props: {
+    onCancel: {
+      required: true,
+      type: Function,
+    },
+  },
 };
 </script>
 
 
 <style lang="scss">
 #aph-add-edit-contact-modal {
-  align-items: center;
-  background: rgba($dark, 0.8);
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  left: 0;
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 100%;
-  z-index: 9999;
-
-  .content {
-    background: white;
-    flex: none;
-    width: toRem(400px);
-  }
-
   .body {
     padding: $space-lg;
     text-align: center;
@@ -156,10 +146,14 @@ export default {
   }
   .cancel-btn {
     @extend %btn-footer-light;
+
+    border-bottom-left-radius: $border-radius;
   }
 
   .add-btn {
     @extend %btn-footer;
+
+    border-bottom-right-radius: $border-radius;
   }
 }
 </style>

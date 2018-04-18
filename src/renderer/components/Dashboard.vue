@@ -45,8 +45,7 @@ export default {
     flex: 1 0 50%;
 
     &:first-child {
-      flex: none;
-      width: toRem(570px);
+      max-width: toRem(570px);
     }
   }
 

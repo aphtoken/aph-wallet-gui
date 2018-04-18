@@ -11,6 +11,7 @@ export {
   clearSearchTransactions,
   endRequest,
   failRequest,
+  resetRequests,
   setActiveTransaction,
   setContacts,
   setCurrency,
@@ -30,8 +31,8 @@ export {
   setShowImportAWalletModal,
   setShowLoginToWalletModal,
   setShowSendAddressModal,
-  setShowSendWithLedgerModal,
   setShowSendRequestLedgerSignature,
+  setShowSendWithLedgerModal,
   setStatsToken,
   setWallets,
   startRequest,
@@ -56,6 +57,10 @@ function endRequest(state, payload) {
 
 function failRequest(state, payload) {
   updateRequest(state, payload, requests.FAILED);
+}
+
+function resetRequests(state) {
+  state.requests = {};
 }
 
 function setActiveTransaction(state, transaction) {

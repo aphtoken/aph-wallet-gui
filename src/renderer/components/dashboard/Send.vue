@@ -66,7 +66,8 @@
 </template>
 
 <script>
-import AphSendWithLedgerModal from './SendWithLedgerModal';
+import AphSendWithLedgerModal from '../modals/SendWithLedgerModal';
+
 let sendTimeoutIntervalId;
 
 export default {

@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import AphAddTokenModal from './assets/AddTokenModal';
+import AphAddTokenModal from './modals/AddTokenModal';
 
 export default {
   components: {

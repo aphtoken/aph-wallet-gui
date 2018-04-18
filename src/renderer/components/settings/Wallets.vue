@@ -28,8 +28,9 @@
 </template>
 
 <script>
-import AphLoginToWalletModal from './LoginToWalletModal';
-import AphImportAWalletModal from './ImportAWalletModal';
+import AphLoginToWalletModal from '../modals/LoginToWalletModal';
+import AphImportAWalletModal from '../modals/ImportAWalletModal';
+
 export default {
   components: {
     AphLoginToWalletModal,

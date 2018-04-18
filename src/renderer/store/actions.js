@@ -25,17 +25,48 @@ export {
   openSavedWallet,
 };
 
-function addToken({ dispatch }, { assetId, done, isCustom, symbol }) {
+function addToken({ commit, dispatch, state }, { done, hashOrSymbol }) {
+  const allTokens = tokens.getAllAsArray();
+  let token;
+
+  commit('startRequest', { identifier: 'addToken' });
+
+  hashOrSymbol = hashOrSymbol.replace('0x', '');
+
+  token = _.find(allTokens, (o) => {
+    return o.symbol === hashOrSymbol && o.network === state.currentNetwork.net;
+  });
+
+  if (!token) {
+    token = _.find(allTokens, (o) => {
+      return o.assetId === hashOrSymbol && o.network === state.currentNetwork.net;
+    });
+  }
+
+  if (!token) {
+    /* eslint-disable max-len */
+    return commit('failRequest', { identifier: 'addToken', message: `Unable to find a token with the symbol or script hash of '${hashOrSymbol}' on ${state.currentNetwork.net}` });
+    /* eslint-enable max-len */
+  }
+
+  if (token.isCustom) {
+    /* eslint-disable max-len */
+    return commit('failRequest', { identifier: 'addToken', message: `'${hashOrSymbol}' is already in your token list ${state.currentNetwork.net}` });
+    /* eslint-enable max-len */
+  }
+
   tokens.add({
-    symbol,
-    assetId: assetId.replace('0x', ''),
-    isCustom,
+    symbol: token.symbol,
+    assetId: token.assetId.replace('0x', ''),
+    isCustom: true,
     network: network.getSelectedNetwork().net,
   });
 
   dispatch('fetchHoldings');
 
   done();
+
+  return commit('endRequest', { identifier: 'addToken' });
 }
 
 function changeWallet({ dispatch }, wallet) {
@@ -294,12 +325,10 @@ function importWallet({ commit }, { name, wif, passphrase, done }) {
     wallets.importWIF(name, wif, passphrase)
       .then(() => {
         wallets.sync();
-        alerts.success(`Imported Wallet ${name}`);
         done();
         commit('endRequest', { identifier: 'importWallet' });
       })
       .catch((e) => {
-        alerts.exception(e);
         commit('failRequest', { identifier: 'importWallet', message: e });
       });
   }, timeouts.NEO_API_CALL);

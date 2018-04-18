@@ -17,7 +17,6 @@ import router from './router';
 import { store } from './store';
 
 // Global Vue Components.
-import AddressModal from './components/AddressModal';
 import DatePicker from './components/DatePicker';
 import Icon from './components/Icon';
 import Input from './components/Input';
@@ -48,7 +47,6 @@ _.each(mixins, (mixin) => {
 });
 
 // Register global components.
-Vue.component('aph-address-modal', AddressModal);
 Vue.component('aph-date-picker', DatePicker);
 Vue.component('aph-icon', Icon);
 Vue.component('aph-input', Input);

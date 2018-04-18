@@ -50,7 +50,7 @@
 
 <script>
 import { clipboard } from 'electron';
-import AphAddEditContactModal from './AddEditContactModal';
+import AphAddEditContactModal from '../modals/AddEditContactModal';
 
 export default {
   components: {

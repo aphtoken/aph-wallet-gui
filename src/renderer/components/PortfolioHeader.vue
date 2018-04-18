@@ -21,17 +21,20 @@
         <p>Send</p>
       </router-link>
     </div>
-    <aph-address-modal v-if="this.$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></aph-address-modal>
+    <address-modal v-if="this.$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></address-modal>
   </section>
   <section v-else></section>
 </template>
 
 <script>
+import AddressModal from './modals/AddressModal';
 import SimpleDonut from './charts/SimpleDonut';
+
 let fetchPortfolioIntervalId;
 
 export default {
   components: {
+    AddressModal,
     SimpleDonut,
   },
 

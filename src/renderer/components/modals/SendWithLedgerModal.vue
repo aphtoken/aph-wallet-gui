@@ -1,21 +1,17 @@
 <template>
-  <div id="aph-send-with-ledger-modal">
-    <div class="content">
-      <div class="body">{{ prompt }}</div>
-      <div class="footer">
-        <div class="cancel-btn" @click="cancel">Cancel</div>
-      </div>
+  <modal-wrapper id="aph-send-with-ledger-modal">
+    <div class="body">{{ prompt }}</div>
+    <div class="footer">
+      <div class="cancel-btn" @click="cancel">Cancel</div>
     </div>
-  </div>
+  </modal-wrapper>
 </template>
 
 <script>
+import ModalWrapper from './ModalWrapper';
 export default {
-  props: {
-    onCancel: {
-      required: true,
-      type: Function,
-    },
+  components: {
+    ModalWrapper,
   },
 
   computed: {
@@ -34,32 +30,19 @@ export default {
       this.onCancel();
     },
   },
+
+  props: {
+    onCancel: {
+      required: true,
+      type: Function,
+    },
+  },
 };
 </script>
 
 
 <style lang="scss">
 #aph-send-with-ledger-modal {
-  align-items: center;
-  background: rgba($dark, 0.8);
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  left: 0;
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 100%;
-  z-index: 9999;
-
-  .content {
-    background: white;
-    flex: none;
-    width: toRem(600px);
-  }
-
   .body {
     padding: $space-lg;
     text-align: center;

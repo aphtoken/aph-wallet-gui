@@ -1,26 +1,21 @@
 <template>
   <div :class="['login-form-wrapper', {failed}]">
     <slot></slot>
-    <div v-if="hasErrorMessage" class="request-status-message">
-      <aph-icon name="unconfirmed"></aph-icon>
-      <div class="right">{{ message }}</div>
-    </div>
+    <request-error-message v-if="identifier" :identifier="identifier"></request-error-message>
   </div>
 </template>
 
 <script>
+import RequestErrorMessage from '../RequestErrorMessage';
+
 export default {
+  components: {
+    RequestErrorMessage,
+  },
+
   computed: {
     failed() {
       return this.$isFailed(this.identifier);
-    },
-
-    hasErrorMessage() {
-      return this.failed && this.message;
-    },
-
-    message() {
-      return this.$store.state.requests[this.identifier].message;
     },
   },
 
@@ -31,41 +26,5 @@ export default {
   },
 };
 </script>
-
-<style lang="scss">
-.login-form-wrapper {
-  .request-status-message {
-    align-items: center;
-    background: $dark;
-    border-radius: $border-radius;
-    display: flex;
-    justify-content: center;
-    margin-top: $space-lg;
-    padding: $space-lg;
-
-    .aph-icon {
-      flex: none;
-
-      svg {
-        height: toRem(40px);
-      }
-
-      .fill {
-        fill: $red;
-      }
-
-      .stroke {
-        stroke: $red;
-      }
-    }
-
-    .right {
-      margin-left: $space;
-      color: $red;
-      flex: none !important;
-    }
-  }
-}
-</style>
 
 

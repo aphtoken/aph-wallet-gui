@@ -41,12 +41,12 @@ export default {
   flex-direction: row;
   overflow: hidden;
 
-  #sidebar {
+  > #sidebar {
     flex: none;
     width: $left-sidebar-width;
   }
 
-  .content {
+  > .content {
     background: $background;
     display: flex;
     flex-direction: column;

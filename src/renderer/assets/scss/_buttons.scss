@@ -136,6 +136,10 @@
   transition: $transition;
   border: none;
 
+  &:hover {
+    background-color: $purple-hover;
+  }
+
   &.disabled, &:disabled {
     background-color: $background;
     color: $grey;
@@ -148,4 +152,8 @@
 
   background-color: $background;
   color: $dark;
+
+  &:hover {
+    background-color: $background;
+  }
 }
