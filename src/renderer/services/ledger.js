@@ -38,21 +38,21 @@ export default {
                           + 'unlock it and open the NEO application.');
                       });
                   })
-                  .catch((e) => {
-                    return reject(e);
+                  .catch(({ message }) => {
+                    return reject(message);
                   });
               })
-              .catch((e) => {
-                return reject(e);
+              .catch(({ message }) => {
+                return reject(message);
               });
           })
-          .catch((e) => {
-            alerts.exception(e);
-            return reject(e);
+          .catch(({ message }) => {
+            alerts.exception(message);
+            return reject(message);
           });
-      } catch (e) {
-        console.log(e);
-        return reject(e);
+      } catch ({ message }) {
+        console.log(message);
+        return reject(message);
       }
     });
   },

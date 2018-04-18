@@ -12,25 +12,27 @@ import LoginFormWrapper from './LoginFormWrapper';
 const ledgerPollingInterval = 1000;
 let checkLedgerStatusIntervalId;
 export default {
-  components: {
-    LoginFormWrapper,
-  },
-
   beforeDestroy() {
     clearInterval(checkLedgerStatusIntervalId);
   },
 
   beforeMount() {
     this.checkLedgerStatus();
+
     checkLedgerStatusIntervalId = setInterval(() => {
       this.checkLedgerStatus();
     }, ledgerPollingInterval);
+  },
+
+  components: {
+    LoginFormWrapper,
   },
 
   computed: {
     buttonLabel() {
       return this.$isPending('openLedger') ? 'Logging in...' : 'Login with Ledger';
     },
+
     shouldDisableLoginButton() {
       return this.$isPending('openLedger');
     },
@@ -54,10 +56,12 @@ export default {
         },
       });
     },
+
     login() {
       if (!this.connected) {
         return;
       }
+
       this.$store.dispatch('openLedger', {
         done: () => {
           this.$router.push('/authenticated/dashboard');

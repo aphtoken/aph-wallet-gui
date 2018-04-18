@@ -33,7 +33,7 @@ export default {
 
   .placeholder {
     align-items: center;
-    background: #d5d5e0;
+    background: $grey;
     border-radius: 50%;
     color: white;
     display: flex;

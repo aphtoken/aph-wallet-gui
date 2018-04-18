@@ -1,12 +1,13 @@
-import lockr from 'lockr';
 import _ from 'lodash';
 import moment from 'moment';
 import {
   rpc,
 } from '@cityofzion/neon-js';
-import { store } from '../store';
 
-const NETWORK_STORAGE_KEY = 'aph.network';
+import { store } from '../store';
+import storage from './storage';
+
+const NETWORK_STORAGE_KEY = 'network';
 const NETWORKS = [
   {
     label: 'MainNet',
@@ -37,7 +38,7 @@ export default {
 
   getSelectedNetwork() {
     if (!currentNetwork) {
-      const storedNetwork = lockr.get(NETWORK_STORAGE_KEY);
+      const storedNetwork = storage.get(NETWORK_STORAGE_KEY);
       if (storedNetwork) {
         this.setSelectedNetwork(storedNetwork);
       } else {
@@ -60,7 +61,7 @@ export default {
       this.loadStatus();
     }, 10 * 1000);
 
-    lockr.set(NETWORK_STORAGE_KEY, network);
+    storage.set(NETWORK_STORAGE_KEY, network);
     this.sync();
     return this;
   },
@@ -79,7 +80,7 @@ export default {
             }
             currentNetwork.bestBlock = data;
             currentNetwork.lastReceivedBlock = moment();
-            lockr.set(NETWORK_STORAGE_KEY, currentNetwork);
+            storage.set(NETWORK_STORAGE_KEY, currentNetwork);
           })
           .catch((e) => {
             console.log(e);

@@ -1,27 +1,26 @@
-import lockr from 'lockr';
-
 import { store } from '../store';
+import storage from './storage';
 
-const CONTACTS_STORAGE_KEY = 'aph.contacts';
+const CONTACTS_STORAGE_KEY = 'contacts';
 
 export default {
 
   add(address, data) {
     const contacts = this.getAll();
-    lockr.set(CONTACTS_STORAGE_KEY, _.set(contacts, address.trim(), data));
+    storage.set(CONTACTS_STORAGE_KEY, _.set(contacts, address.trim(), data));
 
     return this;
   },
 
   remove(address) {
     const contacts = this.getAll();
-    lockr.set(CONTACTS_STORAGE_KEY, _.omit(contacts, address.trim()));
+    storage.set(CONTACTS_STORAGE_KEY, _.omit(contacts, address.trim()));
 
     return this;
   },
 
   getAll() {
-    return lockr.get(CONTACTS_STORAGE_KEY, {});
+    return storage.get(CONTACTS_STORAGE_KEY, {});
   },
 
   getAllAsArray() {
