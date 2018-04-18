@@ -3,13 +3,6 @@ export default (app) => {
     label: 'Application',
     submenu: [
       {
-        label: 'About Application',
-        selector: 'orderFrontStandardAboutPanel:',
-      },
-      {
-        type: 'separator',
-      },
-      {
         label: 'Quit',
         accelerator: 'Command+Q',
         click() {
@@ -24,21 +17,25 @@ export default (app) => {
         label: 'Cut',
         accelerator: 'CmdOrCtrl+X',
         selector: 'cut:',
+        role: 'cut',
       },
       {
         label: 'Copy',
         accelerator: 'CmdOrCtrl+C',
         selector: 'copy:',
+        role: 'copy',
       },
       {
         label: 'Paste',
         accelerator: 'CmdOrCtrl+V',
         selector: 'paste:',
+        role: 'paste',
       },
       {
         label: 'Select All',
         accelerator: 'CmdOrCtrl+A',
         selector: 'selectAll:',
+        role: 'selectall',
       },
     ],
   },
