@@ -1,14 +1,9 @@
 <template>
   <div id="app" v-cloak>
     <div class="drag-area"></div>
-    <div id="out-of-date" v-if="isOutOfDate">
-      A new version is available. Please download v{{this.$store.state.latestVersion.version}}:<br />
-      <a :href="newVersionDownloadUrl" :title="newVersionDownloadUrl" target="_blank">
-        {{newVersionDownloadUrl}}
-      </a>
-    </div>
     <router-view></router-view>
     <flash-message class="vue-flash-container"></flash-message>
+    <div id="out-of-date" v-if="isOutOfDate">A new version is available. <a :href="newVersionDownloadUrl" :title="newVersionDownloadUrl" target="_blank">Click here</a> to download v{{this.$store.state.latestVersion.version}}.</div>
   </div>
 </template>
 
@@ -137,15 +132,10 @@ a {
   text-align: center;
   top: 0;
   z-index: 10000;
-  
+
   a {
-    @include truncate();
-    
-    padding: $space-sm;
-    display: block;
     color: white;
-    max-width: 900px;
-    margin: 0 auto;
+    cursor: pointer;
   }
 }
 
