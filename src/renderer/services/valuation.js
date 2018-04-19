@@ -6,6 +6,9 @@ import settings from './settings';
 const CMC_BASE_URL = 'https://api.coinmarketcap.com/v1/';
 const DEFAULT_APH_TOTAL_SUPPLY = 75000000;
 
+let coinTickerList = [];
+let lastCheckedTicker = null;
+
 const defaultValuation = (symbol) => {
   const lowercaseCurrency = settings.getCurrency().toLowerCase();
 
@@ -35,17 +38,34 @@ export default {
   getValuation(symbol) {
     return new Promise((resolve, reject) => {
       try {
-        // TODO handle currencies
-        return axios.get(`${CMC_BASE_URL}ticker/${symbol}/?convert=${settings.getCurrency()}`)
+        if (lastCheckedTicker !== null
+          && moment.utc().diff(lastCheckedTicker, 'seconds') < 60) {
+          let v = _.find(coinTickerList, (o) => {
+            return o.symbol === symbol;
+          });
+
+          if (!v) {
+            v = defaultValuation(symbol);
+            if (symbol === 'APH') {
+              v.total_supply = DEFAULT_APH_TOTAL_SUPPLY;
+            }
+          }
+          return resolve(v);
+        }
+        lastCheckedTicker = moment.utc();
+
+        return axios.get(`${CMC_BASE_URL}ticker/?limit=1000&convert=${settings.getCurrency()}`)
           .then((res) => {
-            resolve(res.data[0]);
+            coinTickerList = res.data;
+            console.log(coinTickerList);
+            resolve(_.find(coinTickerList, (o) => {
+              return o.symbol === symbol;
+            }));
           })
           .catch(() => {
-            const res = defaultValuation(symbol);
-            if (symbol === 'APH') {
-              res.total_supply = DEFAULT_APH_TOTAL_SUPPLY;
-            }
-            resolve(res);
+            resolve(_.find(coinTickerList, (o) => {
+              return o.symbol === symbol;
+            }));
           });
       } catch (e) {
         return reject(e);

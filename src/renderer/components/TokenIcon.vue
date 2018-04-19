@@ -5,6 +5,7 @@
     <img src="~@/assets/img/token-icons/NEO.png" v-else-if="symbol === 'NEO'">
     <div class="placeholder" v-else>
       <span>{{ symbol }}</span>
+      <img :src="imageUrl" onerror="this.style.display='none';this.parentNode.classList.add('default');"/>
     </div>
   </div>
 </template>
@@ -14,6 +15,11 @@ export default {
   props: {
     symbol: {
       type: String,
+    },
+  },
+  computed: {
+    imageUrl() {
+      return `https://s3.us-east-2.amazonaws.com/aphelion-public-artifacts/TokenLogos/${this.symbol.toLowerCase()}.png`;
     },
   },
 };
@@ -33,17 +39,28 @@ export default {
 
   .placeholder {
     align-items: center;
-    background: $grey;
-    border-radius: 50%;
     color: white;
     display: flex;
     justify-content: center;
     font-size: toRem(12px);
     font-family: GilroyMedium;
+    position: relative;
 
+    span {
+      display: none;
+    }
+    &.default {
+      background: $grey;
+      border-radius: 50%;
+      span {
+        display: block;
+      }
+    }
+    
     > * {
-      position: relative;
-      top: 2px;
+      position: absolute;
+      max-width: 100%;
+      max-height: 100%;
     }
   }
 }
