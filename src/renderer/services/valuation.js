@@ -57,7 +57,6 @@ export default {
         return axios.get(`${CMC_BASE_URL}ticker/?limit=1000&convert=${settings.getCurrency()}`)
           .then((res) => {
             coinTickerList = res.data;
-            console.log(coinTickerList);
             resolve(_.find(coinTickerList, (o) => {
               return o.symbol === symbol;
             }));
