@@ -9,15 +9,14 @@ let currentWallet = null;
 export default {
 
   add(name, data) {
-    storage.set(WALLETS_STORAGE_KEY, _.set(this.getAll(), name.trim(), data));
-
+    storage.set(WALLETS_STORAGE_KEY, _.set(this.getAll(), this.cleanForKey(name), data));
     return this;
   },
 
   remove(name) {
     return new Promise((resolve, reject) => {
       try {
-        storage.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), name.trim()));
+        storage.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), this.cleanForKey(name)));
         return resolve();
       } catch (e) {
         console.log(e);
@@ -36,7 +35,29 @@ export default {
   },
 
   getAllAsArray() {
-    return _.sortBy(_.values(this.getAll()), [wallet => wallet.label.toLowerCase()], ['label']);
+    try {
+      return _.sortBy(_.values(this.getAll()), [wallet => wallet.label.toLowerCase()], ['label']);
+    } catch (e) {
+      console.log(e);
+      this.cleanBadWalletValues();
+      return _.sortBy(_.values(this.getAll()), [wallet => wallet.label.toLowerCase()], ['label']);
+    }
+  },
+
+  cleanForKey(key) {
+    return key.trim().replace('.', '_').replace('[', '').replace(']', '');
+  },
+
+  cleanBadWalletValues() {
+    const wallets = this.getAll();
+    const keys = Object.keys(wallets);
+    const values = Object.values(wallets);
+    for (let i = 0; i < keys.length; i += 1) {
+      if (!values[i].label) {
+        console.log(wallets);
+        storage.set(WALLETS_STORAGE_KEY, _.omit(wallets, keys[i]));
+      }
+    }
   },
 
   getCurrentWallet() {

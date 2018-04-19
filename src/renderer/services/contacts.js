@@ -7,14 +7,14 @@ export default {
 
   add(address, data) {
     const contacts = this.getAll();
-    storage.set(CONTACTS_STORAGE_KEY, _.set(contacts, address.trim(), data));
+    storage.set(CONTACTS_STORAGE_KEY, _.set(contacts, this.cleanForKey(address), data));
 
     return this;
   },
 
   remove(address) {
     const contacts = this.getAll();
-    storage.set(CONTACTS_STORAGE_KEY, _.omit(contacts, address.trim()));
+    storage.set(CONTACTS_STORAGE_KEY, _.omit(contacts, this.cleanForKey(address)));
 
     return this;
   },
@@ -31,6 +31,10 @@ export default {
     return _.find(this.getAllAsArray(), (o) => {
       return o.name === name;
     });
+  },
+
+  cleanForKey(key) {
+    return key.trim().replace('.', '_').replace('[', '').replace(']', '');
   },
 
   contactExists(name) {
