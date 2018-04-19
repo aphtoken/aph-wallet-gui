@@ -11,12 +11,8 @@
       <aph-token-icon :symbol="$store.state.statsToken.symbol"></aph-token-icon>
       <div class="balance">
         <div class="name">{{ $store.state.statsToken.name }}</div>
-        <div class="amount">
-          {{ $formatNumber($store.state.statsToken.balance) }}<span class="currency">{{ $store.state.statsToken.symbol }}</span>
-        </div>
-        <div class="value">
-          {{ $formatMoney($store.state.statsToken.totalValue, null, `${$store.state.currencySymbol }0.00`) }}<span class="currency">{{ $store.state.currency }}</span>
-        </div>
+        <div class="amount">{{ $formatNumber($store.state.statsToken.balance) }}<span class="currency">{{ $store.state.statsToken.symbol }}</span></div>
+        <div class="value">{{ $formatMoney($store.state.statsToken.totalValue, null, `${$store.state.currencySymbol }0.00`) }}<span class="currency">{{ $store.state.currency }}</span></div>
       </div>
       <div class="claim" v-if="$store.state.statsToken.availableToClaim">
         <div class="available">{{ $formatNumber($store.state.statsToken.availableToClaim) }} Gas Available</div>
@@ -119,13 +115,13 @@ export default {
 
       .amount {
         font-family: GilroyMedium;
-        font-size: toRem(38px);
+        font-size: toRem(32px);
         margin-bottom: $space;
 
         .currency {
           font-family: Gilroy;
-          font-size: toRem(27px);
-          margin-left: $space;
+          font-size: toRem(20px);
+          margin-left: $space-sm;
         }
       }
 
@@ -171,7 +167,7 @@ export default {
       }
 
       &.total-supply {
-        width: toRem(125px);
+        min-width: toRem(125px);
       }
     }
 
