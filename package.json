@@ -71,6 +71,7 @@
     "lodash": "^4.17.4",
     "moment": "^2.22.0",
     "numeral": "^2.0.6",
+    "shell": "^0.5.0",
     "vue": "^2.5.16",
     "vue-chartjs": "^3.3.1",
     "vue-dom-portal": "^0.1.6",

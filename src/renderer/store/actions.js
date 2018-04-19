@@ -355,7 +355,7 @@ function fetchLatestVersion({ commit }) {
 
   return axios.get(`${network.getSelectedNetwork().aph}/LatestWalletInfo`)
     .then(({ data }) => {
-      commit('setLatestVersion', data.version);
+      commit('setLatestVersion', data);
       commit('endRequest', { identifier: 'fetchLatestVersion' });
     })
     .catch((e) => {

@@ -1,7 +1,12 @@
 <template>
   <div id="app" v-cloak>
     <div class="drag-area"></div>
-    <div id="out-of-date" v-if="isOutOfDate">A new version is available. Please restart to update.</div>
+    <div id="out-of-date" v-if="isOutOfDate">
+      A new version is available. Please download v{{this.$store.state.latestVersion.version}}:<br />
+      <a :href="newVersionDownloadUrl" :title="newVersionDownloadUrl" target="_blank">
+        {{newVersionDownloadUrl}}
+      </a>
+    </div>
     <router-view></router-view>
     <flash-message class="vue-flash-container"></flash-message>
   </div>
@@ -18,17 +23,33 @@ export default {
   },
 
   beforeMount() {
-    this.fetchLatestVersion();
+    const shell = require('electron').shell;
+    document.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A' && e.target.target === '_blank' && e.target.href.startsWith('http')) {
+        e.preventDefault();
+        shell.openExternal(e.target.href);
+      }
+    });
 
+    this.fetchLatestVersion();
     fetchLatestVersionIntervalId =
       setInterval(this.fetchLatestVersion(), this.$constants.WALLET_VERSION_CHECK);
   },
 
   computed: {
     isOutOfDate() {
-      const latestVersion = this.$store.state.latestVersion;
-
-      return latestVersion && latestVersion > this.$store.state.version;
+      return this.$store.state.latestVersion
+        && this.$store.state.latestVersion.version > this.$store.state.version;
+    },
+    newVersionDownloadUrl() {
+      if (process.platform === 'darwin') {
+        return this.$store.state.latestVersion.downloadUrlMac;
+      } else if (process.platform === 'linux') {
+        return this.$store.state.latestVersion.downloadUrlLin;
+      } else if (process.platform === 'win32') {
+        return this.$store.state.latestVersion.downloadUrlWin;
+      }
+      return '';
     },
   },
 
@@ -116,6 +137,16 @@ a {
   text-align: center;
   top: 0;
   z-index: 10000;
+  
+  a {
+    @include truncate();
+    
+    padding: $space-sm;
+    display: block;
+    color: white;
+    max-width: 900px;
+    margin: 0 auto;
+  }
 }
 
 .vue-flash-container {
