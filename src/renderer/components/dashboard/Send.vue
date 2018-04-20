@@ -140,9 +140,8 @@ export default {
             this.end();
           })
           .catch((e) => {
-            self.sending = false;
-            this.end();
-            self.$services.alerts.error(e);
+            this.sending = false;
+            this.$services.alerts.error(e);
           });
       }, this.$constants.timeouts.NEO_API_CALL);
 
