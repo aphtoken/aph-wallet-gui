@@ -22,7 +22,12 @@ export default {
 
   remove(assetId, network) {
     const tokens = this.getAll();
-    storage.set(TOKENS_STORAGE_KEY, _.omit(tokens, `${assetId}_${network}`));
+    const token = this.getOne(assetId, network);
+    if (!token) {
+      return this;
+    }
+    token.isCustom = false;
+    storage.set(TOKENS_STORAGE_KEY, _.set(tokens, `${assetId}_${network}`, token));
 
     return this;
   },
