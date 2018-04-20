@@ -155,6 +155,8 @@ a {
   margin: 0;
   padding: $space-lg;
   font-size: toRem(18px);
+  word-wrap: break-word;
+
 
   .flash__close-button {
     display: none;
