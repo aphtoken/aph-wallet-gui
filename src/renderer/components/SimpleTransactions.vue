@@ -5,8 +5,8 @@
       <td width="40%" class="address" v-else>{{ transaction.address }}</td>
       <td v-if="transaction.block_time">{{ $formatDate(transaction.block_time) }}</td>
       <td class="currency">{{ transaction.symbol }}</td>
-      <td width="25%" v-if="transaction.block_time" :class="['amount', {sent: !(transaction.value > 0), received: transaction.value > 0}]">{{ $formatNumberBig(transaction.value) }}</td>
-      <td width="25%" class="amount" v-else>{{ $formatNumberBig(transaction.value) }}</td>
+      <td width="25%" v-if="transaction.block_time" :class="['amount', {sent: !(transaction.value > 0), received: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</td>
+      <td width="25%" class="amount" v-else>{{ $formatNumber(transaction.value) }}</td>
     </tr>
   </table>
 </template>
