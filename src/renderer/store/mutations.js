@@ -32,10 +32,10 @@ export {
   setShowSendAddressModal,
   setShowSendRequestLedgerSignature,
   setShowSendWithLedgerModal,
+  setShowWalletBackupModal,
   setStatsToken,
   setWallets,
   startRequest,
-  setWalletBackup,
 };
 
 function clearActiveTransaction(state) {
@@ -222,6 +222,10 @@ function setShowSendRequestLedgerSignature(state, value) {
   state.showSendRequestLedgerSignature = value;
 }
 
+function setShowWalletBackupModal(state, value) {
+  state.showWalletBackupModal = value;
+}
+
 function setStatsToken(state, token) {
   state.statsToken = token;
   state.showPriceTile = true;
@@ -235,11 +239,8 @@ function startRequest(state, payload) {
   updateRequest(state, payload, requests.PENDING);
 }
 
+
+// Local functions
 function updateRequest(state, { identifier, message }, status) {
   Vue.set(state.requests, identifier, { status, message });
-}
-
-function setWalletBackup(state, wallet) {
-  state.walletBackup = wallet;
-  state.showPortfolioHeader = !wallet;
 }

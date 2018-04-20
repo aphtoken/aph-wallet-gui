@@ -27,15 +27,15 @@ const state = {
   showAddTokenModal: false,
   showImportAWalletModal: false,
   showLoginToWalletModal: false,
+  showPortfolioHeader: true,
   showPriceTile: true,
   showSendAddressModal: false,
   showSendRequestLedgerSignature: false,
   showSendWithLedgerModal: false,
+  showWalletBackupModal: false,
   statsToken: null,
   version: pjson.version,
   wallets: [],
-  walletBackup: null,
-  showPortfolioHeader: true,
 };
 
 const store = new Vuex.Store({

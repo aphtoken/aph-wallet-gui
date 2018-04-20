@@ -1,20 +1,29 @@
 @media print {
-
   #login {
     .left {
       display: none;
     }
+
+    .right-content.login-wallet-created {
+      background: white;
+    }
   }
-  .copy-link {
+
+  .aph-copy-text {
     display: none;
   }
+
   .btn-group {
-    display: none!important;
+    display: none !important;
   }
+
   #sidebar, #portfolio-header {
     display: none;
   }
-  #backup-wallet {
-    width: auto;
+
+  #aph-wallet-backup-modal {
+    .content {
+      width: 100%;
+    }
   }
 }

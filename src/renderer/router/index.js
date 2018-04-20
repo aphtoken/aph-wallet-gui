@@ -126,15 +126,10 @@ export default new Router({
             {
               path: '',
               components: {
-                left: require('@/components/settings/AddressBook').default,
-                'top-right': require('@/components/settings/Preferences').default,
+                'bottom-left': require('@/components/settings/AddressBook').default,
                 'bottom-right': require('@/components/settings/Wallets').default,
-              },
-            },
-            {
-              path: 'wallet-backup',
-              components: {
-                left: require('@/components/settings/WalletBackup').default,
+                'top-left': require('@/components/settings/WalletActions').default,
+                'top-right': require('@/components/settings/Preferences').default,
               },
             },
           ],

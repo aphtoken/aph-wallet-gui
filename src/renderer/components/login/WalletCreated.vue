@@ -177,27 +177,19 @@ export default {
     width: 60%;
 
     a, div {
-      @extend %btn-outline;
-
       &.done {
-        background: $purple;
-
-        &:hover {
-          background-color: $purple-hover;
-        }
+        @extend %btn;
       }
 
       &.print {
+        @extend %btn-outline;
+
         color: $purple;
-
-        &:hover {
-          color: white;
-        }
       }
+    }
 
-      & + a {
-        margin-left: $space-lg;
-      }
+    @include lowRes() {
+      margin-top: $space;
     }
   }
 }
