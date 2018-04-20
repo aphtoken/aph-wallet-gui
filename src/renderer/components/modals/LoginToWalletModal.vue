@@ -1,10 +1,9 @@
 <template>
   <modal-wrapper id="aph-login-to-wallet-modal" identifier="openSavedWallet">
     <template v-if="showRemove">
-      <div class="header">
-        <aph-icon name="wallet"></aph-icon>
-      </div>
       <div class="body">
+        <aph-icon name="wallet"></aph-icon>
+        <div class="wallet-name">{{ $store.state.currentLoginToWallet.label }}</div>
         <p>Are you sure you'd like to remove <span>{{$store.state.currentLoginToWallet.label}}</span>?</p>
         <p><span class="warning">Loss of funds is possible</span>, if you have not properly backed up this wallet's keys.</p>
         <aph-input placeholder="Enter the name of your wallet to delete" :light="true" v-model="confirmWalletName"></aph-input>
@@ -16,28 +15,16 @@
     </template>
     <template v-else>
       <div class="header">
-        <div class="name">{{$store.state.currentLoginToWallet.label}}</div>
-        <div class="options" @click="toggleOptions" title="Show Wallet Options">
-          Options
-          <aph-icon name="send" v-if="showWalletOptions"></aph-icon>
-          <aph-icon name="receive" v-else></aph-icon>
-        </div>
+        <div class="remove" @click="showRemoveConfirmation">Remove</div>
       </div>
-      <div v-if="!showWalletOptions">
-        <div v-if="isNotCurrentWallet" class="body">
-          <aph-input :placeholder="loginMessage" :light="true" v-model="passphrase" type="password"></aph-input>
-        </div>
-        <div v-else class="body">
-          <aph-icon name="wallet"></aph-icon>
-        </div>
-      </div>
-      <div v-else class="body">
-        <div class="backup-btn" @click="backup">Backup Wallet Keys</div>
-        <div class="remove-btn" @click="showRemoveConfirmation">Delete This Wallet</div>
+      <div class="body">
+        <aph-icon name="wallet"></aph-icon>
+        <div class="wallet-name">{{ $store.state.currentLoginToWallet.label }}</div>
+        <aph-input v-if="isNotCurrentWallet" :placeholder="loginMessage" :light="true" v-model="passphrase" type="password"></aph-input>
       </div>
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">Cancel</div>
-        <button v-if="isNotCurrentWallet && !showWalletOptions" class="login-btn" @click="login" :disabled="shouldDisableLoginButton">
+        <button v-if="isNotCurrentWallet" class="login-btn" @click="login" :disabled="shouldDisableLoginButton">
           {{ buttonLabel }}
         </button>
       </div>
@@ -49,24 +36,13 @@
 import ModalWrapper from './ModalWrapper';
 
 export default {
-  data() {
-    return {
-      passphrase: '',
-      showRemove: false,
-      confirmWalletName: '',
-      showWalletOptions: false,
-      backingUp: false,
-    };
-  },
-
   components: {
     ModalWrapper,
   },
 
   computed: {
     loginMessage() {
-      return this.backingUp === false ? 'Enter your passphrase to login'
-        : 'Enter your passphrase to decrypt your wallet';
+      return 'Enter your passphrase to login';
     },
 
     buttonLabel() {
@@ -88,6 +64,14 @@ export default {
     },
   },
 
+  data() {
+    return {
+      confirmWalletName: '',
+      passphrase: '',
+      showRemove: false,
+    };
+  },
+
   methods: {
     login() {
       if (this.$isPending('openSavedWallet')) {
@@ -103,32 +87,13 @@ export default {
         name: this.$store.state.currentLoginToWallet.label,
         passphrase: this.passphrase,
         done: () => {
-          if (this.backingUp === true) {
-            this.$store.commit('setWalletBackup', this.$store.state.currentWallet);
-            this.$router.push({ path: '/authenticated/settings/wallet-backup' });
-          }
-
           this.onCancel();
         },
       });
     },
 
-    toggleOptions() {
-      this.showWalletOptions = !this.showWalletOptions;
-    },
-
-    backup() {
-      if (this.isNotCurrentWallet) {
-        this.backingUp = true;
-        this.showWalletOptions = false;
-      } else {
-        this.$store.commit('setWalletBackup', this.$store.state.currentWallet);
-        this.$router.push({ path: '/authenticated/settings/wallet-backup' });
-        this.onCancel();
-      }
-    },
-
     showRemoveConfirmation() {
+      this.$store.commit('endRequest', { identifier: 'openSavedWallet' });
       this.showRemove = true;
     },
 
@@ -165,59 +130,16 @@ export default {
 
 <style lang="scss">
 #aph-login-to-wallet-modal {
-  .content {
-    width: 35rem;
-  }
   .header {
-    display: flex;
-    justify-content: center;
+    padding: $space-lg $space-lg 0;
 
-    .name {
-      flex: 1;
-      font-family: GilroyMedium;
-      font-size: toRem(18px);
-    }
-
-    .aph-icon {
-      svg {
-        height: $space-xl;
-      }
-
-      .fill {
-        fill: $dark;
-      }
-    }
-
-    .options {
-      color: $grey;
+    .remove {
       cursor: pointer;
-      flex: none;
-      font-family: GilroySemibold;
-      font-size: 1rem;
-      transition: $transition;
-      padding-right: 3 * $space;
-      padding-top: $space;
-      margin-top: -1 * $space;
-      height: 2 * $space;      
-      position: relative;
-    
-      &:hover {
-        color: $purple;
-      }
-      
-      .aph-icon {
-        top: 5px;
-        position: absolute;
-        right: 0px;
-        height: 2 * $space;     
-        
-        svg {
-          height: $space * 2;
-        }
+      font-family: GilroyMedium;
+      text-align: right;
 
-        .fill {
-          fill: $grey;
-        }
+      &:hover {
+        color: $red;
       }
     }
   }
@@ -227,6 +149,12 @@ export default {
     text-align: center;
     display: block;
     position: relative;
+
+    .wallet-name {
+      font-family: GilroyMedium;
+      font-size: toRem(18px);
+      padding: $space-lg 0;
+    }
 
     p {
       margin-bottom: $space-lg;
@@ -240,10 +168,12 @@ export default {
     }
 
     .aph-icon {
-      margin-bottom: $space-lg;
-
       svg {
         height: $space-xl;
+      }
+
+      & + p {
+        margin-top: $space-xl;
       }
     }
 
@@ -253,6 +183,7 @@ export default {
 
     .aph-input {
       border-color: $dark;
+      margin-top: $space-lg;
       width: 100%;
 
       &.focused {
@@ -278,7 +209,7 @@ export default {
           fill: $grey;
         }
       }
-    
+
       .placeholder {
         color: $grey;
         font-family: GilroyMedium;
@@ -287,21 +218,6 @@ export default {
       & + .aph-input {
         margin-top: $space;
       }
-    }
-    
-    
-
-    .backup-btn {
-      @extend %btn-footer-light;
-
-      border-bottom-left-radius: $border-radius;
-      margin-bottom: $space;
-    }
-    .remove-btn {
-      @extend %btn-footer-light;
-
-      border-bottom-left-radius: $border-radius;
-      color: $red;
     }
   }
 

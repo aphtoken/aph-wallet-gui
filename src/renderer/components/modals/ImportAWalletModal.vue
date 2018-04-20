@@ -1,6 +1,7 @@
 <template>
   <modal-wrapper id="aph-import-a-wallet-modal" identifier="importWallet">
     <div class="body">
+      <aph-icon name="wallet"></aph-icon>
       <aph-input placeholder="Name" v-model="walletName"></aph-input>
       <aph-input placeholder="Private key" v-model="wif"></aph-input>
       <aph-input placeholder="Passphrase" v-model="passphrase" type="password"></aph-input>
@@ -72,6 +73,13 @@ export default {
     padding: $space-lg;
     text-align: center;
     display: block;
+
+    .aph-icon {
+      .wallet {
+        height: $space-xl;
+        margin-bottom: $space-lg;
+      }
+    }
 
     .aph-input {
       border-color: $dark;

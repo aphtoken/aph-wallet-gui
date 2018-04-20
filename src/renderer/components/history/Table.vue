@@ -8,7 +8,7 @@
       <div class="cell status">Status</div>
     </div>
     <div class="body">
-      <div v-for="(transaction, index) in transactions()" :key="index"           
+      <div v-for="(transaction, index) in transactions()" :key="index"
            :class="['transaction', {active: transaction.active, increase: transaction.amount > 0}]">
         <div class="summary">
           <div class="cell date" @click="toggleTransaction(transaction)">{{ $formatDate(transaction.block_time) }}</div>
@@ -178,7 +178,7 @@ export default {
     .transaction {
       background: transparent;
       border-top: 1px solid $light-grey;
-      
+
       .summary {
         align-items: center;
         cursor: pointer;
@@ -191,7 +191,6 @@ export default {
         flex: 1;
         font-family: GilroySemibold;
         padding: $space;
-        min-height: 58px;
 
         .aph-icon {
           svg {
@@ -235,13 +234,13 @@ export default {
       &:hover, &.active {
         background: $light-grey;
       }
-      
+
       &.active {
         .summary:hover .cell {
           background: #cccccc;
         }
       }
-      
+
       .details {
         display: none;
         padding: $space;
@@ -332,7 +331,7 @@ export default {
         .details {
           display: flex;
           width: 100%;
-          
+
           .transactions-table {
             .address {
               width: 60%!important;

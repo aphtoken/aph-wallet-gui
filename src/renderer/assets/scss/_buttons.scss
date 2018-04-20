@@ -25,8 +25,8 @@
   }
 }
 
-%btn-outline {
-  background-color: transparent;
+%btn {
+  background-color: $purple;
   border-radius: $border-radius;
   border: $border-thin;
   color: white;
@@ -42,6 +42,23 @@
   vertical-align: middle;
   white-space: nowrap;
   width: 100%;
+
+  &:hover {
+    background: $purple-hover;
+  }
+
+  &.disabled, &:disabled {
+    border-color: white;
+    color: white;
+    cursor: not-allowed;
+  }
+}
+
+%btn-outline {
+  @extend %btn;
+
+  background-color: transparent;
+  color: white;
 
   &:hover {
     background-color: $purple;

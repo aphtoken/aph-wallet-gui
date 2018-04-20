@@ -11,6 +11,12 @@
 import RequestErrorMessage from '../RequestErrorMessage';
 
 export default {
+  beforeDestroy() {
+    if (this.identifier) {
+      this.$store.commit('endRequest', { identifier: this.identifier });
+    }
+  },
+
   components: {
     RequestErrorMessage,
   },

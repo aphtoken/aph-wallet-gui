@@ -11,9 +11,8 @@
         </div>
       </div>
       <div class="right">
-        <div class="add-wallet" @click="showImportAWalletModal">
-          <div class="btn-square">
-            <aph-icon name="wallet"></aph-icon>
+        <div class="import-wallet" @click="showImportAWalletModal">
+          <div class="import-wallet-btn">
             <p>Import a wallet</p>
           </div>
           <div class="btn-circle">
@@ -87,14 +86,14 @@ export default {
       flex: none;
       margin-left: $space;
 
-      .add-wallet {
+      .import-wallet {
         position: relative;
 
-        .btn-square {
+        .import-wallet-btn {
           @extend %btn-square;
 
           height: auto;
-          padding: $space-xl 0;
+          padding: $space * 3 0;
           width: toRem(250px);
 
           .aph-icon {
@@ -107,11 +106,11 @@ export default {
 
           &:hover {
             background: white;
-            color: $dark;
+            color: $purple;
 
             .aph-icon {
               .fill {
-                fill: $purple;
+                fill: $dark;
               }
             }
           }
