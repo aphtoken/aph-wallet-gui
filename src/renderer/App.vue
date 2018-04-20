@@ -148,33 +148,36 @@ a {
 }
 
 .flash__message {
+  background-color: $dark !important;
   border-radius: $border-radius;
-  border: none;
+  border: $border;
+  font-family: GilroyMedium;
   margin: 0;
-  padding: $space;
+  padding: $space-lg;
+  font-size: toRem(18px);
 
   .flash__close-button {
     display: none;
   }
 
   &.error {
-    background: $red;
-    color: white;
+    border-color: $red;
+    color: $red;
   }
 
   &.info {
-    background: $purple;
-    color: white;
+    border-color: $purple;
+    color: $purple;
   }
 
   &.success {
-    background: $green;
-    color: white;
+    border-color: $green;
+    color: $green;
   }
 
   &.warning {
-    background: $orange;
-    color: white;
+    border-color: $orange;
+    color: $orange;
   }
 
   & + .flash__message {
