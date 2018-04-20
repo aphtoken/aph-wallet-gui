@@ -745,7 +745,7 @@ export default {
       return o.asset === gasAssetId;
     }).balance;
 
-    if (gasAmount <= 0.00000001) {
+    if (gasAmount < 0.00000001) {
       return new Promise((reject) => {
         alerts.error('At least one drop of GAS is required to send NEP5 transfers.');
         reject('At least one drop of GAS is required to send NEP5 transfers.');
