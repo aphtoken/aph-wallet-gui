@@ -14,7 +14,7 @@
           <div class="cell date" @click="toggleTransaction(transaction)">{{ $formatDate(transaction.block_time) }}</div>
           <div class="cell token" @click="toggleTransaction(transaction)">{{ transaction.symbol }}</div>
           <div :class="['cell', 'amount', {decrease: transaction.value < 0, increase: transaction.value > 0}]" @click="toggleTransaction(transaction)">
-            {{ $formatNumberBig(transaction.value) }}
+            {{ $formatNumber(transaction.value) }}
           </div>
           <!--<div class="cell total">{{ $formatMoney(transaction.value) }}</div>-->
           <div class="cell status" v-if="transaction.details">

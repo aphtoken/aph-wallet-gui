@@ -1,7 +1,6 @@
 // import accounting from 'accounting';
 import moment from 'moment';
 import numeral from 'numeral';
-import { BigNumber } from 'bignumber.js';
 import { formats } from '../constants';
 import { settings } from '../services';
 
@@ -31,9 +30,6 @@ export default {
 
     $formatNumberShort(value) {
       return numeral(value).format(formats.NUMBER_SHORT);
-    },
-    $formatNumberBig(value) {
-      return BigNumber(value.toString().replace(',', '')).toFormat(8);
     },
 
     $formatTime(timestamp) {
