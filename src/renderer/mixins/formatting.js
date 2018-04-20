@@ -25,6 +25,13 @@ export default {
       if (value === null) {
         return defaultValue;
       }
+
+      if (value.toString().indexOf('e') > -1) {
+        return parseFloat(value.toString()).toFixed(8);
+      }
+      if (numeral(value).format(format || formats) === 'NaN') {
+        return parseFloat(value.toString()).toFixed(8);
+      }
       return numeral(value).format(format || formats);
     },
 
