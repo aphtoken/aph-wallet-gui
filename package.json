@@ -3,7 +3,7 @@
   "version": "0.1.5",
   "author": "Aphelion <info@aphelion.org>",
   "description": "Aphelion Desktop Wallet",
-  "license": null,
+  "license": "LicenseRef-LICENSE",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",

@@ -3,6 +3,10 @@
     <login-form-wrapper identifier="verifyLedgerConnection">
       <button class="login" @click="login" v-if="connected" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
     </login-form-wrapper>
+    <div class="aph-request-status-message" v-if="connected === null">
+      <aph-icon name="unconfirmed"></aph-icon>
+      <div class="right">No Ledger device found. Please plugin your Ledger in, unlock it and open the NEO application.</div>
+    </div>
   </section>
 </template>
 
@@ -17,8 +21,6 @@ export default {
   },
 
   beforeMount() {
-    this.checkLedgerStatus();
-
     checkLedgerStatusIntervalId = setInterval(() => {
       this.checkLedgerStatus();
     }, ledgerPollingInterval);
