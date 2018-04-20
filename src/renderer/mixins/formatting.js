@@ -36,6 +36,12 @@ export default {
     },
 
     $formatNumberShort(value) {
+      if (value.toString().indexOf('e') > -1) {
+        return parseFloat(value.toString()).toFixed(2);
+      }
+      if (numeral(value).format(formats.NUMBER_SHORT) === 'NaN') {
+        return parseFloat(value.toString()).toFixed(2);
+      }
       return numeral(value).format(formats.NUMBER_SHORT);
     },
 
