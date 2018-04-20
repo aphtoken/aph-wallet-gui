@@ -130,6 +130,35 @@ export default {
       this.showConfirmation = true;
     },
 
+    cleanAmount() {
+      if (!this.amount) {
+        return;
+      }
+
+      let cleanAmount = this.amount.replace(/[^\d.]/g, '');
+
+      if (cleanAmount && cleanAmount.length > 0) {
+        if (this.currency && this.currency.symbol === 'NEO') {
+          cleanAmount = Math.floor(parseFloat(cleanAmount)).toFixed(0);
+        } else if (cleanAmount[cleanAmount.length - 1] !== '.'
+          && cleanAmount[cleanAmount.length - 1] !== '0') {
+          const f = parseFloat(cleanAmount);
+          cleanAmount = f.toString();
+          if (cleanAmount.indexOf('e') > -1
+              || (cleanAmount.indexOf('.') > -1 && cleanAmount.split('.')[1].length > 8)) {
+            cleanAmount = f.toFixed(8);
+          }
+        }
+      }
+
+      if (this.amount !== cleanAmount) {
+        setTimeout(() => {
+          // come off of the watch thread to set it
+          this.amount = cleanAmount;
+        }, 10);
+      }
+    },
+
     send() {
       this.sending = true;
 
@@ -175,6 +204,14 @@ export default {
   watch: {
     address() {
       this.contact = this.$services.contacts.findContactByAddress(this.address);
+    },
+
+    currency() {
+      this.cleanAmount();
+    },
+
+    amount() {
+      this.cleanAmount();
     },
   },
 };
