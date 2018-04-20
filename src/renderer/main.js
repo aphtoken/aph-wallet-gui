@@ -7,11 +7,12 @@ import accounting from 'accounting';
 import axios from 'axios';
 import moment from 'moment';
 
-// Services.
+// Services, etc.
 import { contacts, settings, wallets } from './services';
 
 // Initial Vue Libraries.
 import './libraries';
+import './error-handler';
 import * as mixins from './mixins';
 import App from './App';
 import router from './router';
