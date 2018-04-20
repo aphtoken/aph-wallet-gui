@@ -151,7 +151,7 @@ export default {
       }
 
       sendTimeoutIntervalId = setTimeout(() => {
-        if (self.sending) {
+        if (this.sending) {
           this.end();
         }
       }, transactionTimeout);
