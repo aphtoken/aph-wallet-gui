@@ -191,6 +191,7 @@ export default {
         flex: 1;
         font-family: GilroySemibold;
         padding: $space;
+        min-height: 58px;
 
         .aph-icon {
           svg {
