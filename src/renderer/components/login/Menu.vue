@@ -3,7 +3,7 @@
     <router-link class="saved-wallet-btn" to="/login/saved-wallet">
       Saved wallet
     </router-link>
-    <router-link class="private-key-btn" to="/login/ledger">
+    <router-link class="private-key-btn" to="/login/ledger" v-if="ledgerSupported">
       Ledger
     </router-link>
     <router-link class="encrypted-key-btn" to="/login/encrypted-key">
@@ -17,6 +17,12 @@
 
 <script>
 export default {
+  computed: {
+    ledgerSupported() {
+      return process.platform !== 'darwin';
+    },
+  },
+
   mounted() {
     this.$store.commit('resetRequests');
   },
