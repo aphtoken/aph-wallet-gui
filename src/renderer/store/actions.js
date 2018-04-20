@@ -138,6 +138,15 @@ function fetchHoldings({ state, commit }) {
     .fetchHoldings(currentWallet.address)
     .then((data) => {
       commit('setHoldings', data.holdings);
+
+      if (!state.statsToken && state.holdings.length) {
+        state.statsToken = state.holdings[0];
+      } else if (state.statsToken) {
+        state.statsToken = _.find(state.holdings, (o) => {
+          return o.symbol === state.statsToken.symbol;
+        });
+      }
+
       commit('endRequest', { identifier: 'fetchHoldings' });
     })
     .catch((message) => {
