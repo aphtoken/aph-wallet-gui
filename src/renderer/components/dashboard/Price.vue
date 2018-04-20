@@ -36,6 +36,7 @@
 <script>
 import LineChart from '../charts/LineChart';
 let loadPriceDataIntervalId;
+let storeUnwatch;
 
 export default {
   components: { LineChart },
@@ -54,13 +55,16 @@ export default {
     };
   },
 
-  mounted() {
-    this.loadPriceData();
-    loadPriceDataIntervalId = setInterval(() => {
-      this.loadPriceData();
-    }, 60000);
+  computed: {
+    reloadInterval() {
+      return this.timeframeHours <= 24 ? 60 * 1000 : 15 * 60 * 1000;
+    },
+  },
 
-    this.$store.watch(
+  mounted() {
+    this.setReloadInterval();
+
+    storeUnwatch = this.$store.watch(
       () => {
         return this.$store.state.statsToken;
       }, () => {
@@ -70,9 +74,21 @@ export default {
 
   beforeDestroy() {
     clearInterval(loadPriceDataIntervalId);
+    storeUnwatch();
   },
 
   methods: {
+    setReloadInterval() {
+      if (loadPriceDataIntervalId) {
+        clearInterval(loadPriceDataIntervalId);
+      }
+
+      this.loadPriceData();
+      loadPriceDataIntervalId = setInterval(() => {
+        this.loadPriceData();
+      }, this.reloadInterval);
+    },
+
     changeTimeframe(timeframe) {
       this.timeframeOption = timeframe;
 
@@ -91,7 +107,7 @@ export default {
           break;
       }
 
-      this.loadPriceData();
+      this.setReloadInterval();
     },
     loadPriceData() {
       if (!this.$store.state.statsToken) {
