@@ -4,7 +4,7 @@
       <h1 class="underlined">Price</h1>
       <div class="current-value">
         <div class="label">{{ $formatDate(date) }}</div>
-        <div class="amount">{{ $store.state.statsToken.symbol }} {{ $formatMoney(current) }}</div>
+        <div class="amount">{{ $store.state.statsToken.symbol }} {{ $formatMoney($store.state.statsToken.unitValue) }}</div>
       </div>
     </div>
     <div class="sub-header">
@@ -14,11 +14,11 @@
       </div>
       <div class="low">
         <div class="label">Low</div>
-        <div class="value">{{ $formatMoney(low) }}</div>
+        <div class="value">{{ $formatMoney(low > $store.state.statsToken.unitValue ? $store.state.statsToken.unitValue : low) }}</div>
       </div>
       <div class="high">
         <div class="label">High</div>
-        <div class="value">{{ $formatMoney(high) }}</div>
+        <div class="value">{{ $formatMoney(high < $store.state.statsToken.unitValue ? $store.state.statsToken.unitValue : high) }}</div>
       </div>
     </div>
     <div class="body">
@@ -43,6 +43,7 @@ export default {
 
   data() {
     return {
+      symbol: '',
       timeframeOption: 'M',
       timeframeHours: 24 * 30,
       date: null,
@@ -57,7 +58,7 @@ export default {
 
   computed: {
     reloadInterval() {
-      return this.timeframeHours <= 24 ? 60 * 1000 : 15 * 60 * 1000;
+      return this.timeframeHours <= 24 ? (15 * 60 * 1000) : (30 * 60 * 1000);
     },
   },
 
@@ -68,7 +69,10 @@ export default {
       () => {
         return this.$store.state.statsToken;
       }, () => {
-        this.loadPriceData();
+        if (this.$store.state.statsToken
+          && this.$store.state.statsToken.symbol !== this.symbol) {
+          this.loadPriceData();
+        }
       });
   },
 
@@ -109,11 +113,13 @@ export default {
 
       this.setReloadInterval();
     },
+
     loadPriceData() {
       if (!this.$store.state.statsToken) {
         return;
       }
 
+      this.symbol = this.$store.state.statsToken.symbol;
       this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol,
         this.timeframeHours, 7)
         .then((priceData) => {
