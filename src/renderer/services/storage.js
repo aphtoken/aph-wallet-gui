@@ -1,9 +1,8 @@
 import Store from 'electron-store';
 import { ipcRenderer } from 'electron';
-import { WSAEPROTOTYPE } from 'constants';
 
 const store = new Store();
-const localStore = store.store;
+let localStore = store.store;
 
 export default {
   delete(key) {

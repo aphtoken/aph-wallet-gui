@@ -28,9 +28,6 @@ export default {
   computed: {
     transactions() {
       return this.$store.state.recentTransactions
-        .filter(({ value }) => {
-          return value !== parseFloat(0);
-        })
         .map((transaction) => {
           return _.merge(transaction, {
             address: transaction.value >= 0 ? transaction.from : transaction.to,
