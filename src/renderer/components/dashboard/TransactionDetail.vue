@@ -27,21 +27,6 @@
         </div>
       </div>
       <div class="section">
-        <!-- these need to be re-thought, where does the value come from? the fiat value at the time of the transaction?
-            also a single transaction can transfer more than one asset, should these be a list, like inputs/outputs?
-        <div class="row">
-          <div class="column">
-            <div class="label">Token</div>
-            <div class="value red">{{ $formatNumber(transaction.amount) }} {{ transaction.currency }}</div>
-          </div>
-          <div class="column">
-            <div class="label">Value</div>
-            <div class="value">{{ $formatMoney(transaction.usd) }} {{ $store.state.currency }}</div>
-          </div>
-        </div>
-        -->
-      </div>
-      <div class="section">
         <div class="row">
           <div class="column">
             <div class="label">From</div>

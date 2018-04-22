@@ -1,10 +1,12 @@
 <template>
   <modal-wrapper id="aph-add-edit-contact-modal">
+    <div class="header" v-if="prevAddress">
+      <div class="remove" @click="remove">Remove</div>
+    </div>
     <div class="body">
       <aph-icon name="create"></aph-icon>
       <aph-input placeholder="Name" :light="true" v-model="name"></aph-input>
       <aph-input placeholder="Address" v-model="address"></aph-input>
-      <div class="remove" @click="remove" v-if="prevAddress">Remove</div>
     </div>
     <div class="footer">
       <button class="cancel-btn" @click="onCancel">Cancel</button>
@@ -89,6 +91,20 @@ export default {
 
 <style lang="scss">
 #aph-add-edit-contact-modal {
+  .header {
+    padding: $space-lg $space-lg 0;
+
+    .remove {
+      cursor: pointer;
+      font-family: GilroyMedium;
+      text-align: right;
+
+      &:hover {
+        color: $red;
+      }
+    }
+  }
+
   .body {
     padding: $space-lg;
     text-align: center;
@@ -131,19 +147,6 @@ export default {
     }
   }
 
-  .remove {
-    color: $grey;
-    cursor: pointer;
-    display: flow;
-    font-family: GilroyMedium;
-    margin: $space-sm;
-    padding-top: $space;
-    transition: $transition;
-
-    &:hover {
-      color: $red;
-    }
-  }
   .cancel-btn {
     @extend %btn-footer-light;
 
