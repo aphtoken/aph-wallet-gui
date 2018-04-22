@@ -229,6 +229,7 @@ function setShowWalletBackupModal(state, value) {
 function setStatsToken(state, token) {
   state.statsToken = token;
   state.showPriceTile = true;
+  state.activeTransaction = null;
 }
 
 function setWallets(state, wallets) {

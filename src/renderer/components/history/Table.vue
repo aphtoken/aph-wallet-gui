@@ -10,16 +10,16 @@
     <div class="body">
       <div v-for="(transaction, index) in transactions()" :key="index"
            :class="['transaction', {active: transaction.active, increase: transaction.amount > 0}]">
-        <div class="summary">
-          <div class="cell date" @click="toggleTransaction(transaction)">{{ $formatDate(transaction.block_time) }}</div>
-          <div class="cell token" @click="toggleTransaction(transaction)">{{ transaction.symbol }}</div>
-          <div :class="['cell', 'amount', {decrease: transaction.value < 0, increase: transaction.value > 0}]" @click="toggleTransaction(transaction)">
+        <div class="summary" @click="toggleTransaction(transaction)">
+          <div class="cell date">{{ $formatDate(transaction.block_time) }}</div>
+          <div class="cell token">{{ transaction.symbol }}</div>
+          <div :class="['cell', 'amount', {decrease: transaction.value < 0, increase: transaction.value > 0}]">
             {{ $formatNumber(transaction.value) }}
           </div>
           <!--<div class="cell total">{{ $formatMoney(transaction.value) }}</div>-->
-          <div class="cell status" v-if="transaction.details">
+          <div class="cell status" v-if="transaction.details" @click.stop>
             <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
-            <aph-icon name="unconfirmed" v-else=""></aph-icon>
+            <aph-icon name="unconfirmed" v-else></aph-icon>
           </div>
         </div>
         <div class="details" v-if="transaction.details">
@@ -91,7 +91,6 @@
 
 <script>
 let loadTransactionsIntervalId;
-let currentOpenedTransaction;
 
 export default {
   beforeDestroy() {
@@ -106,40 +105,32 @@ export default {
     }, this.$constants.intervals.POLLING);
   },
 
-  methods: {
-    transactions() {
-      return this.$store.state.searchTransactions.map((transaction) => {
-        const active = transaction.details.txid === _.get(this.$store.state.activeTransaction, 'txid')
-          && transaction.symbol === _.get(this.$store.state.activeTransaction, 'symbol');
+  data() {
+    return {
+      activeTxid: null,
+    };
+  },
 
-        return _.merge(transaction, {
-          active,
-          address: transaction.hash,
-        });
-      });
+  methods: {
+    isActive({ details }) {
+      return this.activeTxid === details.txid;
     },
 
     loadTransactions() {
       this.$store.dispatch('findTransactions');
     },
 
-    toggleTransaction(transaction) {
-      if (transaction === currentOpenedTransaction) {
-        if (this.$store.state.activeTransaction) {
-          this.$store.state.activeTransaction.active = false;
-        }
-        currentOpenedTransaction = null;
-        this.$store.commit('setActiveTransaction', null);
-      } else {
-        currentOpenedTransaction = transaction;
-        if (this.$store.state.activeTransaction) {
-          this.$store.state.activeTransaction.active = false;
-        }
-        this.$store.commit('setActiveTransaction', transaction.details);
-      }
+    toggleTransaction({ details }) {
+      this.activeTxid = this.activeTxid === details.txid ? null : details.txid;
     },
-    closeTransaction() {
-      this.$store.state.activeTransaction.active = false;
+
+    transactions() {
+      return this.$store.state.searchTransactions.map((transaction) => {
+        return _.merge(transaction, {
+          active: this.isActive(transaction),
+          address: transaction.hash,
+        });
+      });
     },
   },
 };

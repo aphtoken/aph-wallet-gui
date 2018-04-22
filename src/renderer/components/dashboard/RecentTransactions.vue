@@ -30,6 +30,7 @@ export default {
       return this.$store.state.recentTransactions
         .map((transaction) => {
           return _.merge(transaction, {
+            active: this.isActive(transaction),
             address: transaction.value >= 0 ? transaction.from : transaction.to,
           });
         });
@@ -37,6 +38,10 @@ export default {
   },
 
   methods: {
+    isActive({ details }) {
+      return _.get(this.$store.state.activeTransaction, 'txid') === details.txid;
+    },
+
     loadTransactions() {
       this.$store.dispatch('fetchRecentTransactions');
     },

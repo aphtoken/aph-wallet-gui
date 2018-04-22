@@ -1,6 +1,6 @@
 <template>
   <table class="transactions-table" :class="{'is-clickable': isClickable}">
-    <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)">
+    <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)" :class="[{active: transaction.active}]">
       <td width="40%" class="address truncate" v-if="transaction.block_time">{{ transaction.address }}</td>
       <td width="40%" class="address" v-else>{{ transaction.address }}</td>
       <td v-if="transaction.block_time">{{ $formatDate(transaction.block_time) }}</td>
@@ -105,7 +105,7 @@ export default {
         }
       }
 
-      &:hover {
+      &:hover , &.active {
         td {
           background: $background;
 
