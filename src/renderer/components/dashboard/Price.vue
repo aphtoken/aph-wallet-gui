@@ -4,7 +4,7 @@
       <h1 class="underlined">Price</h1>
       <div class="current-value">
         <div class="label">{{ $formatDate(date) }}</div>
-        <div class="amount">{{ $store.state.statsToken.symbol }} {{ $formatMoney(current) }}</div>
+        <div class="amount">{{ $store.state.statsToken.symbol }} {{ $formatMoney($store.state.statsToken.unitValue) }}</div>
       </div>
     </div>
     <div class="sub-header">
@@ -14,11 +14,11 @@
       </div>
       <div class="low">
         <div class="label">Low</div>
-        <div class="value">{{ $formatMoney(low) }}</div>
+        <div class="value">{{ $formatMoney(low > $store.state.statsToken.unitValue ? $store.state.statsToken.unitValue : low) }}</div>
       </div>
       <div class="high">
         <div class="label">High</div>
-        <div class="value">{{ $formatMoney(high) }}</div>
+        <div class="value">{{ $formatMoney(high < $store.state.statsToken.unitValue ? $store.state.statsToken.unitValue : high) }}</div>
       </div>
     </div>
     <div class="body">
@@ -36,12 +36,14 @@
 <script>
 import LineChart from '../charts/LineChart';
 let loadPriceDataIntervalId;
+let storeUnwatch;
 
 export default {
   components: { LineChart },
 
   data() {
     return {
+      symbol: '',
       timeframeOption: 'M',
       timeframeHours: 24 * 30,
       date: null,
@@ -54,25 +56,43 @@ export default {
     };
   },
 
-  mounted() {
-    this.loadPriceData();
-    loadPriceDataIntervalId = setInterval(() => {
-      this.loadPriceData();
-    }, 60000);
+  computed: {
+    reloadInterval() {
+      return this.timeframeHours <= 24 ? (15 * 60 * 1000) : (30 * 60 * 1000);
+    },
+  },
 
-    this.$store.watch(
+  mounted() {
+    this.setReloadInterval();
+
+    storeUnwatch = this.$store.watch(
       () => {
         return this.$store.state.statsToken;
       }, () => {
-        this.loadPriceData();
+        if (this.$store.state.statsToken
+          && this.$store.state.statsToken.symbol !== this.symbol) {
+          this.loadPriceData();
+        }
       });
   },
 
   beforeDestroy() {
     clearInterval(loadPriceDataIntervalId);
+    storeUnwatch();
   },
 
   methods: {
+    setReloadInterval() {
+      if (loadPriceDataIntervalId) {
+        clearInterval(loadPriceDataIntervalId);
+      }
+
+      this.loadPriceData();
+      loadPriceDataIntervalId = setInterval(() => {
+        this.loadPriceData();
+      }, this.reloadInterval);
+    },
+
     changeTimeframe(timeframe) {
       this.timeframeOption = timeframe;
 
@@ -91,13 +111,15 @@ export default {
           break;
       }
 
-      this.loadPriceData();
+      this.setReloadInterval();
     },
+
     loadPriceData() {
       if (!this.$store.state.statsToken) {
         return;
       }
 
+      this.symbol = this.$store.state.statsToken.symbol;
       this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol,
         this.timeframeHours, 7)
         .then((priceData) => {
