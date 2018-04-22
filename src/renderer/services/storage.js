@@ -6,12 +6,11 @@ const store = new Store();
 const localStore = store.store;
 
 export default {
-  clear() {
-    return store.clear();
-  },
-
   delete(key) {
-    return store.delete(key);
+    localStore = _.omit(localStore, key);
+    ipcRenderer.send('storage.delete', key);
+
+    return this;
   },
 
   get(key, defaultValue = null) {
