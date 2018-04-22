@@ -95,11 +95,19 @@ export default {
       td {
         background: transparent;
         transition: $transition;
+
+        &:first-child {
+          padding-left: $space;
+        }
+
+        &:last-child {
+          padding-right: $space;
+        }
       }
 
       &:hover, &.active {
         td {
-          background: $light-grey;
+          background: $background;
 
           &:not(.amount) {
             color: $purple;

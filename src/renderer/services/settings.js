@@ -7,38 +7,38 @@ import storage from './storage';
 const SETTINGS_STORAGE_KEY = 'settings';
 const CURRENCY_STORAGE_KEY = `${SETTINGS_STORAGE_KEY}.currency`;
 const CURRENCY_SYMBOL_STORAGE_KEY = `${SETTINGS_STORAGE_KEY}.currencySymbol`;
-const CURRENCIES = [
-  {
+const CURRENCIES = {
+  USD: {
     label: 'USD',
     symbol: '$',
     value: 'USD',
   },
-  {
+  EUR: {
     label: 'EUR',
     symbol: '€',
     value: 'EUR',
   },
-  {
+  JPY: {
     label: 'JPY',
     symbol: '¥',
     value: 'JPY',
   },
-  {
+  GBP: {
     label: 'GBP',
     symbol: '£',
     value: 'GBP',
   },
-  {
+  CHF: {
     label: 'CHF',
     symbol: null,
     value: 'CHF',
   },
-  {
+  CAD: {
     label: 'CAD',
     symbol: '$',
     value: 'CAD',
   },
-];
+};
 
 export default {
 
@@ -46,12 +46,16 @@ export default {
     return CURRENCIES;
   },
 
+  getCurrenciesAsArray() {
+    return _.values(CURRENCIES);
+  },
+
   getCurrency() {
     return storage.get(CURRENCY_STORAGE_KEY, defaultSettings.CURRENCY);
   },
 
   getCurrencySymbol() {
-    return _.find(CURRENCIES, { value: this.getCurrency() }).symbol;
+    return CURRENCIES[this.getCurrency()].symbol;
   },
 
   setCurrency(currency) {

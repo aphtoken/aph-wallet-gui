@@ -1,6 +1,8 @@
 import Store from 'electron-store';
+import { ipcRenderer } from 'electron';
 
 const store = new Store();
+const localStore = store.store;
 
 export default {
   clear() {
@@ -12,18 +14,17 @@ export default {
   },
 
   get(key, defaultValue = null) {
-    return store.get(key, defaultValue);
+    return _.get(localStore, key, defaultValue);
   },
 
   has(key) {
-    return store.has(key);
-  },
-
-  path() {
-    return store.path;
+    return _.has(localStore, key);
   },
 
   set(key, value) {
-    return store.set(key, value);
+    _.set(localStore, key, value);
+    ipcRenderer.send('storage.set', key, value);
+
+    return this;
   },
 };

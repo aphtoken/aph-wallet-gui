@@ -177,7 +177,8 @@ export default {
 
     .transaction {
       background: transparent;
-      border-top: 1px solid $light-grey;
+      border-top: 1px solid $background;
+      transition: $transition;
 
       .summary {
         align-items: center;
@@ -191,7 +192,6 @@ export default {
         flex: 1;
         font-family: GilroySemibold;
         padding: $space;
-        min-height: 58px;
 
         .aph-icon {
           svg {
@@ -233,13 +233,7 @@ export default {
       }
 
       &:hover, &.active {
-        background: $light-grey;
-      }
-
-      &.active {
-        .summary:hover .cell {
-          background: #cccccc;
-        }
+        background: $background;
       }
 
       .details {

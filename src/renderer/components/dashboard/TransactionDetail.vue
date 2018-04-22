@@ -2,9 +2,6 @@
   <section id="dashboard--transaction-detail">
     <div class="header">
       <h1 class="underlined">Transaction</h1>
-      <div class="close" @click="close()">
-        close
-      </div>
     </div>
     <div class="body" v-if="$store.state.activeTransaction">
       <div class="section">
@@ -109,15 +106,6 @@ export default {
       return this.$store.state.activeTransaction.vout;
     },
   },
-
-  methods: {
-    close() {
-      if (this.$store.state.activeTransaction) {
-        this.$store.state.activeTransaction.active = false;
-      }
-      this.$store.commit('clearActiveTransaction');
-    },
-  },
 };
 </script>
 
@@ -138,13 +126,6 @@ export default {
 
       flex: 1;
       margin-bottom: 0;
-    }
-    .close {
-      position: absolute;
-      right: 3px;
-      top: 3px;
-      padding: 10px;
-      cursor: pointer;
     }
   }
 
