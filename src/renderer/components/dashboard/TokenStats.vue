@@ -88,6 +88,7 @@ export default {
     display: flex;
     flex: 1;
     padding: 0 $space-lg;
+    position: relative;
 
     .aph-token-icon {
       $width: toRem(125px);
@@ -140,11 +141,16 @@ export default {
       margin-left: $space-lg;
       font-family: Gilroy;
       font-size: toRem(20px);
+      position: absolute;
+      right: $space;
+      top: 0;
 
       .available {
         @extend %small-uppercase-grey-label;
 
         margin-bottom: $space-sm;
+        max-width: 15rem;
+        text-align: center;
       }
     }
     .claim-btn {
