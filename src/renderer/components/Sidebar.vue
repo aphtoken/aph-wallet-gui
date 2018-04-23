@@ -43,7 +43,7 @@
         <div class="last-update">
           <div v-if="showNetworkError" class="network-error">Unable to Reach Network</div>
           <div v-else>
-            <aph-timestamp-from-now :timestamp="network.lastReceivedBlock"></aph-timestamp-from-now>
+            <aph-timestamp-from-now :timestamp="network.lastSuccessfulRequest"></aph-timestamp-from-now>
           </div>
         </div>
       </div>
