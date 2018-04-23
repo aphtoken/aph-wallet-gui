@@ -33,7 +33,6 @@
             <div class="value">{{ address }}</div>
           </div>
         </div>
-        <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal" :onCancel="end"></aph-send-with-ledger-modal>
       </div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
@@ -66,15 +65,9 @@
 </template>
 
 <script>
-import AphSendWithLedgerModal from '../modals/SendWithLedgerModal';
-
 let sendTimeoutIntervalId;
 
 export default {
-  components: {
-    AphSendWithLedgerModal,
-  },
-
   computed: {
     currencies() {
       return this.$store.state.holdings.reduce(
