@@ -4,11 +4,13 @@
     <div class="content">
       <portfolio-header v-if="$store.state.showPortfolioHeader"></portfolio-header>
       <router-view></router-view>
+      <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal" :onCancel="end"></aph-send-with-ledger-modal>
     </div>
   </section>
 </template>
 
 <script>
+import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
 import PortfolioHeader from './PortfolioHeader';
 import Sidebar from './Sidebar';
 
@@ -16,6 +18,7 @@ export default {
   components: {
     PortfolioHeader,
     Sidebar,
+    AphSendWithLedgerModal,
   },
 
   data() {
