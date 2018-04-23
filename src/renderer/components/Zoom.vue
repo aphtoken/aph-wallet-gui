@@ -35,7 +35,7 @@ export default {
 <style lang="scss">
 #zoom {
   align-items: center;
-  background: darken($background, 10%);
+  background: darken($background, 5%);
   border-radius: $border-radius;
   display: flex;
   flex-direction: column;
