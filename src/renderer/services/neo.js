@@ -828,11 +828,16 @@ export default {
       });
     }
 
+    // force neonDB for these, neoscan seems to be unreliable
+    api.setApiSwitch(1);
+    api.setSwitchFreeze(true);
+
     lastClaimSent = new Date();
     return this.fetchHoldings(wallets.getCurrentWallet().address, 'NEO')
       .then((h) => {
         if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
           alerts.error('No NEO to claim from.');
+          api.setSwitchFreeze(false);
           return;
         }
 
@@ -853,19 +858,23 @@ export default {
                 .then((res) => {
                   alerts.success('Gas Claim Sent.');
                   h.availableToClaim = 0;
+                  api.setSwitchFreeze(false);
                   return res;
                 })
                 .catch((e) => {
                   alerts.exception(e);
+                  api.setSwitchFreeze(false);
                 });
             }, 30 * 1000);
           })
           .catch((e) => {
             alerts.exception(e);
+            api.setSwitchFreeze(false);
           });
       })
       .catch((e) => {
         alerts.exception(e);
+        api.setSwitchFreeze(false);
       });
   },
 
