@@ -106,7 +106,8 @@ export default {
     }
 
     .balance {
-      flex: 1;
+      flex: none;
+
       .name {
         color: $purple;
         font-family: GilroyMedium;
@@ -137,13 +138,10 @@ export default {
     }
 
     .claim {
-      flex: none;
+      flex: 1;
       margin-left: $space-lg;
       font-family: Gilroy;
       font-size: toRem(20px);
-      position: absolute;
-      right: $space;
-      top: 0;
 
       .available {
         @extend %small-uppercase-grey-label;
