@@ -188,13 +188,25 @@
       </g>
     </svg>
 
-    <!-- show -->
-    <svg class="icon show" v-if="name === 'show'" xxmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7">
+    <!-- reset -->
+    <svg class="icon reset" v-if="name === 'reset'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
+      <g>
+        <polygon class="stroke st0" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 	"/>
+      </g>
+    </svg>
+
+    <!-- plus -->
+    <svg class="icon plus" v-if="name === 'plus'" xxmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7">
       <path class="fill cls-1" d="M25,28.5a.5.5,0,0,1-.5-.5V22a.5.5,0,0,1,1,0v6A.5.5,0,0,1,25,28.5Z" transform="translate(-21.5 -21.5)"
       />
       <path class="fill cls-1" d="M28,25.5H22a.5.5,0,0,1,0-1h6a.5.5,0,0,1,0,1Z" transform="translate(-21.5 -21.5)" />
     </svg>
 
+    <!-- minus -->
+    <svg class="icon minus" v-if="name === 'minus'" xxmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7">
+      <path class="fill cls-1" d="M28,25.5H22a.5.5,0,0,1,0-1h6a.5.5,0,0,1,0,1Z" transform="translate(-21.5 -21.5)" />
+    </svg>
 
     <!-- unconfirmed -->
     <svg class="icon unconfirmed" v-if="name === 'unconfirmed'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -297,7 +309,7 @@ export default {
   }
 
   .stroke {
-    fill: $dark;
+    stroke: $dark;
   }
 
   .logo {
@@ -373,6 +385,7 @@ export default {
   .dashboard,
   .send,
   .receive,
+  .reset,
   .confirmed {
     .stroke {
       stroke: $dark;
@@ -388,6 +401,12 @@ export default {
       fill: none;
       stroke-linejoin: round;
       stroke-miterlimit: 10;
+    }
+  }
+
+  .reset {
+    .stroke {
+      stroke-width: 1.9;
     }
   }
 
@@ -414,7 +433,7 @@ export default {
     stroke: $dark;
   }
 
-  .show {
+  .plus {
     .fill {
       fill: $dark;
     }

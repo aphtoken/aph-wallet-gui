@@ -126,7 +126,7 @@ export default {
       color: white;
       cursor: pointer;
       display: flex;
-      font-size: toRem(20px);
+      font-size: toRem(16px);
       padding: $space-sm 0;
       transition: $transition;
       height: toRem(70px);
@@ -192,7 +192,7 @@ export default {
     color: white;
     flex: none;
     font-family: GilroyMedium;
-    font-size: toRem(14px);
+    font-size: toRem(12px);
     padding-bottom: $space;
     text-transform: uppercase;
     text-align: center;

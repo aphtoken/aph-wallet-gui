@@ -16,7 +16,7 @@
             <p>Import a wallet</p>
           </div>
           <div class="btn-circle">
-            <aph-icon name="show"></aph-icon>
+            <aph-icon name="plus"></aph-icon>
           </div>
         </div>
       </div>
