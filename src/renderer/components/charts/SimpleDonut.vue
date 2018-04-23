@@ -1,10 +1,10 @@
 <template>
-  <svg class="simple-donut" viewBox="0 0 150 150">
-    <circle class="base-circle" cx="75" cy="75" :r="radius" stroke-width="5" fill="none" />
-    <circle :class="['value-circle', {increase: percent > 0, decrease: percent < 0}]" cx="75" cy="75" :r="radius" stroke-width="5" fill="none" :stroke-dasharray="strokeDashArray" />
+  <svg class="simple-donut" viewBox="0 0 140 140" preserveAspectRatio="xMinYMax meet">
+    <circle class="base-circle" cx="70" cy="70" :r="radius" stroke-width="6" fill="none" />
+    <circle :class="['value-circle', {increase: percent > 0, decrease: percent < 0}]" cx="70" cy="70" :r="radius" stroke-width="6" fill="none" :stroke-dasharray="strokeDashArray" />
     <g class="info">
-      <text x="75" y="55" alignment-baseline="central" text-anchor="middle" class="label">{{ label }}</text>
-      <text x="75" y="85" alignment-baseline="central" text-anchor="middle" :class="['percent', {increase: percent > 0, decrease: percent < 0}]">{{ formattedPercent }}%</text>
+      <text x="70" y="55" alignment-baseline="central" text-anchor="middle" class="label">{{ label }}</text>
+      <text x="70" y="85" alignment-baseline="central" text-anchor="middle" :class="['percent', {increase: percent > 0, decrease: percent < 0}]">{{ formattedPercent }}%</text>
     </g>
   </svg>
 </template>
@@ -34,7 +34,7 @@ export default {
 
   data() {
     return {
-      radius: 60,
+      radius: 65,
     };
   },
 
@@ -76,13 +76,12 @@ export default {
   .label {
     fill: $grey;
     font-family: GilroyMedium;
-    font-size: toRem(12px);
+    font-size: toRem(16px);
     text-transform: uppercase;
   }
 
   .percent {
     font-size: toRem(30px);
-    // font-family: GilroyMedium;
 
     &.decrease {
       fill: $red;

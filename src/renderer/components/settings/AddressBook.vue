@@ -39,7 +39,7 @@
     <div class="add-contact">
       <div class="cta">Add contact</div>
       <div class="btn-circle" @click="showAddContactModal">
-        <aph-icon name="show"></aph-icon>
+        <aph-icon name="plus"></aph-icon>
       </div>
     </div>
     <aph-add-edit-contact-modal v-if="$store.state.showAddContactModal" :onCancel="hideAddContactModal"></aph-add-edit-contact-modal>
