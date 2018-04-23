@@ -854,6 +854,11 @@ export default {
 
             // send the claim gas
             setTimeout(() => {
+              if (wallets.getCurrentWallet().isLedger === true) {
+                config.signingFunction = ledger.signWithLedger;
+                alerts.success('Creating Gas Claim Transaction.');
+              }
+
               api.claimGas(config)
                 .then((res) => {
                   alerts.success('Gas Claim Sent.');
