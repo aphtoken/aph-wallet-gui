@@ -2,9 +2,6 @@
   <section id="dashboard--transaction-detail">
     <div class="header">
       <h1 class="underlined">Transaction</h1>
-      <div class="close" @click="close()">
-        close
-      </div>
     </div>
     <div class="body" v-if="$store.state.activeTransaction">
       <div class="section">
@@ -28,21 +25,6 @@
             <div class="value purple">{{ $formatNumber($store.state.activeTransaction.block) }}</div>
           </div>
         </div>
-      </div>
-      <div class="section">
-        <!-- these need to be re-thought, where does the value come from? the fiat value at the time of the transaction?
-            also a single transaction can transfer more than one asset, should these be a list, like inputs/outputs?
-        <div class="row">
-          <div class="column">
-            <div class="label">Token</div>
-            <div class="value red">{{ $formatNumber(transaction.amount) }} {{ transaction.currency }}</div>
-          </div>
-          <div class="column">
-            <div class="label">Value</div>
-            <div class="value">{{ $formatMoney(transaction.usd) }} {{ $store.state.currency }}</div>
-          </div>
-        </div>
-        -->
       </div>
       <div class="section">
         <div class="row">
@@ -109,15 +91,6 @@ export default {
       return this.$store.state.activeTransaction.vout;
     },
   },
-
-  methods: {
-    close() {
-      if (this.$store.state.activeTransaction) {
-        this.$store.state.activeTransaction.active = false;
-      }
-      this.$store.commit('clearActiveTransaction');
-    },
-  },
 };
 </script>
 
@@ -138,13 +111,6 @@ export default {
 
       flex: 1;
       margin-bottom: 0;
-    }
-    .close {
-      position: absolute;
-      right: 3px;
-      top: 3px;
-      padding: 10px;
-      cursor: pointer;
     }
   }
 

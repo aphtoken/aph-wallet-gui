@@ -1,22 +1,23 @@
 import Store from 'electron-store';
+import { ipcRenderer } from 'electron';
 
 const store = new Store();
+let localStore = store.store;
 
 export default {
-  clear() {
-    return store.clear();
-  },
-
   delete(key) {
-    return store.delete(key);
+    localStore = _.omit(localStore, key);
+    ipcRenderer.send('storage.delete', key);
+
+    return this;
   },
 
   get(key, defaultValue = null) {
-    return store.get(key, defaultValue);
+    return _.get(localStore, key, defaultValue);
   },
 
   has(key) {
-    return store.has(key);
+    return _.has(localStore, key);
   },
 
   path() {
@@ -24,6 +25,9 @@ export default {
   },
 
   set(key, value) {
-    return store.set(key, value);
+    _.set(localStore, key, value);
+    ipcRenderer.send('storage.set', key, value);
+
+    return this;
   },
 };

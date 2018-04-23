@@ -7,7 +7,6 @@ import router from '../router';
 
 export {
   addToken,
-  changeWallet,
   claimGas,
   createWallet,
   deleteWallet,
@@ -18,10 +17,10 @@ export {
   findTransactions,
   importWallet,
   openEncryptedKey,
-  verifyLedgerConnection,
   openLedger,
   openPrivateKey,
   openSavedWallet,
+  verifyLedgerConnection,
 };
 
 function addToken({ commit, dispatch, state }, { done, hashOrSymbol }) {
@@ -66,13 +65,6 @@ function addToken({ commit, dispatch, state }, { done, hashOrSymbol }) {
   done();
 
   return commit('endRequest', { identifier: 'addToken' });
-}
-
-function changeWallet({ dispatch }, wallet) {
-  wallets.setCurrentWallet(wallet).sync();
-  dispatch('fetchHoldings');
-  dispatch('fetchPortfolio');
-  dispatch('fetchRecentTransactions');
 }
 
 function claimGas({ commit }) {

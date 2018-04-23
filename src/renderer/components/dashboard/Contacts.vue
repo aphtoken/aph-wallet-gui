@@ -95,7 +95,7 @@ export default {
         .contact {
           align-items: center;
           background: transparent;
-          border-top: 1px solid $light-grey;
+          border-top: 1px solid $background;
           display: flex;
           transition: $transition;
           flex-wrap: wrap;
@@ -111,7 +111,7 @@ export default {
           }
 
           &:hover, &.active {
-            background: $light-grey;
+            background: $background;
           }
 
         }

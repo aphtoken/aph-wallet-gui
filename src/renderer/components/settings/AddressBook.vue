@@ -195,7 +195,7 @@ export default {
 
         .contact {
           background: transparent;
-          border-top: 1px solid $light-grey;
+          border-top: 1px solid $background;
           transition: $transition;
 
           .summary {
@@ -212,7 +212,7 @@ export default {
           }
 
           &:hover, &.active {
-            background: $light-grey;
+            background: $background;
           }
 
           .name {

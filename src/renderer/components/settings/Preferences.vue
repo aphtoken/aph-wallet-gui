@@ -20,7 +20,7 @@
 <script>
 export default {
   beforeMount() {
-    this.currencies = this.$services.settings.getCurrencies();
+    this.currencies = this.$services.settings.getCurrenciesAsArray();
     this.networks = this.$services.network.getNetworks();
     this.selectedCurrency = this.$services.settings.getCurrency();
     this.selectedNetwork = _.find(this.networks, (o) => {

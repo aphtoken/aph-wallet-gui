@@ -27,19 +27,21 @@ export default {
 
   computed: {
     transactions() {
-      return this.$store.state.recentTransactions.map((transaction) => {
-        const active = transaction.details.txid === _.get(this.$store.state.activeTransaction, 'txid')
-          && transaction.symbol === _.get(this.$store.state.activeTransaction, 'symbol');
-
-        return _.merge(transaction, {
-          active,
-          address: transaction.value > 0 ? transaction.from : transaction.to,
+      return this.$store.state.recentTransactions
+        .map((transaction) => {
+          return _.merge(transaction, {
+            active: this.isActive(transaction),
+            address: transaction.value >= 0 ? transaction.from : transaction.to,
+          });
         });
-      });
     },
   },
 
   methods: {
+    isActive({ details }) {
+      return _.get(this.$store.state.activeTransaction, 'txid') === details.txid;
+    },
+
     loadTransactions() {
       this.$store.dispatch('fetchRecentTransactions');
     },

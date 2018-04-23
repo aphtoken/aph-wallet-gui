@@ -148,9 +148,7 @@ export default {
       }
     }
     .claim-btn {
-      @extend %btn-outline;
-
-      color: $purple;
+      @extend %btn;
     }
   }
 

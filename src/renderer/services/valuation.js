@@ -4,7 +4,7 @@ import alerts from './alerts';
 import settings from './settings';
 
 const CMC_BASE_URL = 'https://api.coinmarketcap.com/v1/';
-const DEFAULT_APH_TOTAL_SUPPLY = 75000000;
+const DEFAULT_APH_TOTAL_SUPPLY = 70000000;
 
 let coinTickerList = [];
 let lastCheckedTicker = null;
