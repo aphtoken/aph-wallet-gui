@@ -2,7 +2,7 @@
   <div :class="['aph-input', {focused: isFocused || value.length > 0, 'has-error': hasError}]">
     <input :type="computedType" @input="onInput" v-bind:value="value" @keyup.enter="onEnter" :disabled="disabled" @blur="onBlur" @focus="onFocus" ref="input"/>
     <div v-if="type === 'password'" class="visibility-toggle" @click="toggleIsVisible">
-      <aph-icon :name="iconName"></aph-icon>
+      <aph-icon :name="iconName" :title="iconTitle"></aph-icon>
     </div>
     <div class="placeholder" v-if="placeholder">{{ placeholder }}</div>
   </div>
@@ -17,6 +17,10 @@ export default {
 
     iconName() {
       return this.isVisible ? 'eye-closed' : 'eye-open';
+    },
+
+    iconTitle() {
+      return this.isVisible ? 'Hide Password' : 'Show Password';
     },
   },
 
