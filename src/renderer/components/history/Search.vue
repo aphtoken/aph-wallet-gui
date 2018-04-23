@@ -49,6 +49,11 @@ export default {
   },
 
   watch: {
+    fromDate() {
+      this.$store.commit('setSearchTransactionFromDate', this.fromDate);
+      this.$store.dispatch('findTransactions');
+    },
+
     selectedDateRange() {
       if (this.selectedDateRange === 'custom') {
         this.$refs.fromDate.setDay(this.fromDate);
@@ -64,10 +69,7 @@ export default {
       this.fromDate = moment().startOf('day').subtract(daysBack, 'days');
       this.toDate = moment().startOf('day');
     },
-    fromDate() {
-      this.$store.commit('setSearchTransactionFromDate', this.fromDate);
-      this.$store.dispatch('findTransactions');
-    },
+
     toDate() {
       this.$store.commit('setSearchTransactionToDate', this.toDate);
       this.$store.dispatch('findTransactions');

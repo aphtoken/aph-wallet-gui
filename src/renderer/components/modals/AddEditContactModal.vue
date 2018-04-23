@@ -50,7 +50,6 @@ export default {
         address: this.address.trim(),
       }).sync();
 
-      this.$store.dispatch('fetchHoldings');
       this.onCancel();
     },
 
@@ -61,7 +60,6 @@ export default {
           address: this.address.trim(),
         }).sync();
 
-      this.$store.dispatch('fetchHoldings');
       this.onCancel();
     },
 

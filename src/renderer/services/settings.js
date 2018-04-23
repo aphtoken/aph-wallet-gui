@@ -38,6 +38,11 @@ const CURRENCIES = {
     symbol: '$',
     value: 'CAD',
   },
+  AUD: {
+    label: 'AUD',
+    symbol: '$',
+    value: 'AUD',
+  },
 };
 
 export default {
@@ -61,7 +66,6 @@ export default {
   setCurrency(currency) {
     storage.set(CURRENCY_STORAGE_KEY, currency);
     this.setCurrencySymbol(this.getCurrencySymbol());
-    store.dispatch('fetchPortfolio');
 
     return this;
   },

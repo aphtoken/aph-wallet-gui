@@ -4,7 +4,7 @@
     <div class="ticker">
       <h1 class="underlined">My Portfolio</h1>
       <div class="balance">
-        <span class="symbol">{{ $store.state.currencySymbol }}</span><span class="amount">{{ $formatNumberShort($store.state.portfolio.balance) }}</span><span class="currency">{{ $store.state.currency }}</span>
+        <span class="amount">{{ $formatMoney($store.state.portfolio.balance) }}</span><span class="currency">{{ $store.state.currency }}</span>
       </div>
       <div class="change">
         <div class="label">24h change</div>
@@ -117,7 +117,7 @@ h1.underlined {
         margin: 0 $space 0 $space-sm;
       }
 
-      .currency, .symbol {
+      .currency {
         font-size: toRem(30px);
       }
     }
