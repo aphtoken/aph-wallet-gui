@@ -65,7 +65,11 @@ export default {
   },
 
   mounted() {
-    if (this.initialValue && this.initialValue.value) {
+    if (this.value && this.value.value) {
+      this.selectedOption = this.value.value;
+    } else if (this.value) {
+      this.selectedOption = this.value;
+    } else if (this.initialValue && this.initialValue.value) {
       this.selectedOption = this.initialValue.value;
     } else if (this.initialValue) {
       this.selectedOption = this.initialValue;
@@ -73,6 +77,10 @@ export default {
   },
 
   props: {
+    value: {
+      default: null,
+    },
+
     allowEmptyValue: {
       default: false,
       type: Boolean,
