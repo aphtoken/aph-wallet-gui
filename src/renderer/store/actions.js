@@ -1,5 +1,4 @@
 /* eslint-disable no-use-before-define */
-/* eslint-disable */
 import moment from 'moment';
 
 import { alerts, neo, network, storage, tokens, wallets, ledger } from '../services';
