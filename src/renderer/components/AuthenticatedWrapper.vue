@@ -4,8 +4,8 @@
     <div class="content">
       <portfolio-header v-if="$store.state.showPortfolioHeader"></portfolio-header>
       <router-view></router-view>
-      <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal"></aph-send-with-ledger-modal>
       <aph-claim-gas-modal v-if="$store.state.showGasClaimModal"></aph-claim-gas-modal>
+      <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal"></aph-send-with-ledger-modal>
     </div>
   </section>
 </template>
