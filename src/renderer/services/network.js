@@ -1,8 +1,6 @@
 import _ from 'lodash';
 import moment from 'moment';
-import {
-  rpc,
-} from '@cityofzion/neon-js';
+import { rpc } from '@cityofzion/neon-js';
 
 import { store } from '../store';
 import storage from './storage';
