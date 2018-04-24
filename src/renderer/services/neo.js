@@ -275,7 +275,6 @@ export default {
     });
   },
 
-
   fetchSystemTransactions(address) {
     return new Promise((resolve, reject) => {
       try {
