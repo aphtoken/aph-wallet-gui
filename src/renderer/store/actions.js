@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import moment from 'moment';
 
-import { alerts, neo, network, storage, tokens, wallets, ledger } from '../services';
+import { alerts, db, neo, network, tokens, wallets, ledger } from '../services';
 import { timeouts } from '../constants';
 import router from '../router';
 
@@ -107,8 +107,15 @@ function createWallet({ commit }, { name, passphrase, passphraseConfirm }) {
   }, timeouts.NEO_API_CALL);
 }
 
-function fetchHoldings({ state, commit }) {
+async function fetchCachedData(id, defaultValue) {
+  const result = await db.get(id, defaultValue);
+
+  return result;
+}
+
+async function fetchHoldings({ state, commit }) {
   const currentWallet = wallets.getCurrentWallet();
+  let holdings;
 
   if (!currentWallet) {
     return;
@@ -117,38 +124,27 @@ function fetchHoldings({ state, commit }) {
   commit('startRequest', { identifier: 'fetchHoldings' });
 
   const holdingsStorageKey = `holdings.${currentWallet.address}.${state.currentNetwork.net}`;
-  const localHoldings = storage.get(holdingsStorageKey);
-  if (localHoldings) {
-    state.holdings = localHoldings;
 
-    if (!state.statsToken && state.holdings.length) {
-      state.statsToken = state.holdings[0];
-    }
+  try {
+    holdings = await fetchCachedData(holdingsStorageKey);
+    commit('setHoldings', holdings);
+  } catch (holdings) {
+    commit('setHoldings', holdings);
   }
 
-  neo
-    .fetchHoldings(currentWallet.address)
-    .then((data) => {
-      commit('setHoldings', data.holdings);
-
-      if (!state.statsToken && state.holdings.length) {
-        state.statsToken = state.holdings[0];
-      } else if (state.statsToken) {
-        state.statsToken = _.find(state.holdings, (o) => {
-          return o.symbol === state.statsToken.symbol;
-        });
-      }
-
-      commit('endRequest', { identifier: 'fetchHoldings' });
-    })
-    .catch((message) => {
-      alerts.exception(message);
-      commit('failRequest', { identifier: 'fetchHoldings', message });
-    });
+  try {
+    holdings = await neo.fetchHoldings(currentWallet.address);
+    commit('setHoldings', holdings.holdings);
+    commit('endRequest', { identifier: 'fetchHoldings' });
+  } catch (message) {
+    alerts.exception(message);
+    commit('failRequest', { identifier: 'fetchHoldings', message });
+  }
 }
 
-function fetchPortfolio({ state, commit }) {
+async function fetchPortfolio({ state, commit }) {
   const currentWallet = wallets.getCurrentWallet();
+  let portfolio;
 
   if (!currentWallet) {
     return;
@@ -157,28 +153,32 @@ function fetchPortfolio({ state, commit }) {
   commit('startRequest', { identifier: 'fetchPortfolio' });
 
   const portfolioStorageKey = `portfolios.${currentWallet.address}.${state.currentNetwork.net}`;
-  const localPortfolio = storage.get(portfolioStorageKey);
-  if (localPortfolio) {
-    state.portfolio = localPortfolio;
+
+  try {
+    portfolio = await fetchCachedData(portfolioStorageKey);
+    commit('setPortfolio', portfolio);
+  } catch (portfolio) {
+    commit('setPortfolio', portfolio);
   }
 
-  neo
-    .fetchHoldings(currentWallet.address)
-    .then((data) => {
-      commit('setPortfolio', {
-        balance: data.totalBalance,
-        changePercent: data.change24hrPercent,
-        changeValue: data.change24hrValue.toFixed(2),
-      });
-      commit('endRequest', { identifier: 'fetchPortfolio' });
-    })
-    .catch((e) => {
-      commit('failRequest', { identifier: 'fetchPortfolio', message: e });
+  try {
+    const holdings = await neo.fetchHoldings(currentWallet.address);
+    commit('setPortfolio', {
+      balance: holdings.totalBalance,
+      changePercent: holdings.change24hrPercent,
+      changeValue: holdings.change24hrValue.toFixed(2),
     });
+    commit('endRequest', { identifier: 'fetchPortfolio' });
+  } catch (message) {
+    alerts.exception(message);
+    commit('failRequest', { identifier: 'fetchPortfolio', message });
+  }
 }
 
-function fetchRecentTransactions({ state, commit }) {
+async function fetchRecentTransactions({ state, commit }) {
   const currentWallet = wallets.getCurrentWallet();
+  let lastBlockIndex = 0;
+  let recentTransactions;
 
   if (!currentWallet) {
     return;
@@ -187,25 +187,27 @@ function fetchRecentTransactions({ state, commit }) {
   commit('startRequest', { identifier: 'fetchRecentTransactions' });
 
   const transactionsStorageKey = `txs.${currentWallet.address}.${state.currentNetwork.net}`;
-  const localTransactions = storage.get(transactionsStorageKey);
 
-  let lastBlockIndex = 0;
-  if (localTransactions && localTransactions.length > 0) {
-    lastBlockIndex = localTransactions[0].block_index;
-    state.recentTransactions = localTransactions;
+  try {
+    recentTransactions = await fetchCachedData(transactionsStorageKey);
+
+    if (!_.isEmpty(recentTransactions)) {
+      lastBlockIndex = recentTransactions[0].block_index;
+    }
+
+    commit('setRecentTransactions', recentTransactions);
+  } catch (recentTransactions) {
+    commit('setRecentTransactions', recentTransactions);
   }
 
-  neo
-    .fetchRecentTransactions(currentWallet.address, false,
-      moment().subtract(30, 'days'), null, lastBlockIndex + 1, null)
-    .then((data) => {
-      commit('setRecentTransactions', data);
-      commit('endRequest', { identifier: 'fetchRecentTransactions' });
-    })
-    .catch((message) => {
-      alerts.exception(message);
-      commit('failRequest', { identifier: 'fetchRecentTransactions', message });
-    });
+  try {
+    recentTransactions = await neo.fetchRecentTransactions(currentWallet.address, false, moment().subtract(30, 'days'), null, lastBlockIndex + 1); // eslint-disable-line
+    commit('setRecentTransactions', recentTransactions);
+    commit('endRequest', { identifier: 'fetchRecentTransactions' });
+  } catch (message) {
+    alerts.exception(message);
+    commit('failRequest', { identifier: 'fetchRecentTransactions', message });
+  }
 }
 
 function findTransactions({ state, commit }) {
@@ -310,6 +312,7 @@ function openSavedWallet({ commit }, { name, passphrase, done }) {
     wallets.openSavedWallet(name, passphrase)
       .then(() => {
         done();
+        commit('clearActiveTransaction');
         commit('endRequest', { identifier: 'openSavedWallet' });
       })
       .catch((e) => {

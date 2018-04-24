@@ -1,8 +1,8 @@
 import { app, Menu, BrowserWindow } from 'electron';
 import path from 'path';
 
+import './services';
 import menuTemplate from './menu';
-import './services/storage';
 
 /**
  * Set `__static` path to static files in production
@@ -23,13 +23,13 @@ function createWindow() {
    */
   mainWindow = new BrowserWindow({
     height: 900,
+    icon: path.join(__dirname, 'assets/img/icons/icon.png'),
     minHeight: 768,
     minWidth: 1366,
     title: 'Aphelion Desktop Wallet',
     titleBarStyle: 'hidden',
     useContentSize: true,
     width: 1375,
-    icon: path.join(__dirname, 'assets/img/icons/icon.png'),
   });
 
   mainWindow.loadURL(winURL);

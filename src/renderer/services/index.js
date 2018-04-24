@@ -1,17 +1,20 @@
 import alerts from './alerts';
 import contacts from './contacts';
+import db from './db';
+import ledger from './ledger';
 import neo from './neo';
+import network from './network';
 import settings from './settings';
 import storage from './storage';
 import tokens from './tokens';
 import valuation from './valuation';
 import wallets from './wallets';
-import network from './network';
-import ledger from './ledger';
 
 export {
   alerts,
   contacts,
+  db,
+  ledger,
   neo,
   network,
   settings,
@@ -19,5 +22,4 @@ export {
   tokens,
   valuation,
   wallets,
-  ledger,
 };
