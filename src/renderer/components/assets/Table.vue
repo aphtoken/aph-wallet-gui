@@ -4,7 +4,7 @@
       <aph-icon name="search"></aph-icon>
       <input placeholder="Search" v-model="searchBy">
     </div>
-    <div class="add-token-btn" v-if="$store.state.holdings.length === 0">Add token</div>
+    <button class="add-token-btn" v-if="$store.state.holdings.length === 0" @click="showAddTokenModal">Add token</button>
     <div class="holdings">
       <div v-for="(holding, index) in filteredHoldings" class="holding" :key="index">
         <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
@@ -62,6 +62,10 @@ export default {
       this.$services.tokens.remove(holding.asset, this.$store.state.currentNetwork.net);
       this.$services.alerts.success(`Removed ${holding.symbol}`);
       this.loadHoldings();
+    },
+
+    showAddTokenModal() {
+      this.$store.commit('setShowAddTokenModal', true);
     },
   },
 

@@ -21,19 +21,6 @@ const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969
 let lastClaimSent;
 
 export default {
-  /**
-   * @param {String} passphrase
-   * @param {String} passphraseConfirm
-   * @return Promise
-   *
-   * Response passed to Promise ideally looks like this:
-   *  {String} encrypted_key
-   *  {String} encrypted_private_key_qr
-   *  {String} passhrase
-   *  {String} private_key
-   *  {String} public_address
-   *  {String} public_address_qr
-   */
   createWallet(name, passphrase, passphraseConfirm) {
     return new Promise((resolve, reject) => {
       // TODO: abstract validation
@@ -69,18 +56,6 @@ export default {
     });
   },
 
-  /**
-   * Fetch address's recent transactions.
-   *
-   * @param {String} address
-   * @return Promise
-   *
-   *  {String} hash
-   *  {String} block_index
-   *  {String} symbol
-   *  {String} amount
-   *  {String} block_time
-   */
   fetchRecentTransactions(address, forSearch, fromDate, toDate, fromBlock, toBlock) {
     return new Promise((resolve, reject) => {
       try {
@@ -89,6 +64,7 @@ export default {
             this.fetchNEP5Transfers(address, fromDate, toDate, fromBlock, toBlock)
               .then((nep5) => {
                 const splitTransactions = [];
+
                 nep5.data.transfers.forEach((t) => {
                   res.push({
                     txid: t.transactionHash.replace('0x', ''),
@@ -298,6 +274,8 @@ export default {
       }
     });
   },
+
+
   fetchSystemTransactions(address) {
     return new Promise((resolve, reject) => {
       try {
@@ -321,23 +299,6 @@ export default {
     });
   },
 
-  /**
-   * Fetches transaction details for the given hash
-   *
-   * @param string hash
-   * @return Promise
-   *
-   *  {String} txid
-   *  {Float} net_fee
-   *  {Float} sys_fee
-   *  {Number} block
-   *  {Number} size
-   *  {Number} confirmations
-   *  {Array} vin
-   *  {Array} vout
-   *  {Boolean} confirmed
-   *  {Integer} blocktime
-   */
   fetchTransactionDetails(hash) {
     return new Promise((resolve, reject) => {
       try {
@@ -394,19 +355,6 @@ export default {
     });
   },
 
-
-  /**
-   * Fetches holdings...
-   *
-   * @param {String} address
-   * @return Promise
-   *
-   * Response passed to Promise ideally looks like this:
-   *    {Float} value
-   *    {String} icon_url
-   *    {String} name
-   *    {String} symbol
-   */
   fetchHoldings(address, restrictToSymbol) {
     return new Promise((resolve, reject) => {
       try {

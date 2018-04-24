@@ -1,22 +1,21 @@
-import path from 'path';
 import PouchDB from 'pouchdb';
-import { app, ipcMain } from 'electron';
+import PouchDBUpsert from 'pouchdb-upsert';
 import _ from 'lodash';
+import ipcPromise from 'ipc-promise';
+import path from 'path';
+import { app } from 'electron';
 
-const db = new PouchDB(path.join(app.getPath('userData'), 'aphelion'));
+import { database } from '../../renderer/constants';
 
-db
-  .allDocs()
-  .then((result) => {
-    console.log(result);
-  })
-  .catch((e) => {
-    console.log(e);
-  });
+// PouchDB plugins
+PouchDB.plugin(PouchDBUpsert);
+
+// Create database
+const db = new PouchDB(path.join(app.getPath('userData'), database.NAME));
 
 const service = {
-  get(_id) {
-    return db.get(_id);
+  get(id) {
+    return db.get(id);
   },
 
   put(_id, value) {
@@ -26,21 +25,33 @@ const service = {
     ));
   },
 
-  remove(_id) {
-    return db.remove(_id);
+  remove(id) {
+    return db.remove(id);
+  },
+
+  upsert(id, value) {
+    const promise = db.upsert(id, (doc) => {
+      return _.merge({}, doc, value);
+    });
+
+    return promise;
   },
 };
 
-ipcMain.on('db.get', (event, key) => {
-  event.returnValue = service.get(key);
+ipcPromise.on('db.get', (id) => {
+  return service.get(id);
 });
 
-ipcMain.on('db.put', (event, key, value) => {
-  event.returnValue = service.put(key, value);
+ipcPromise.on('db.put', (id, value) => {
+  return service.put(id, value);
 });
 
-ipcMain.on('db.remove', (event, key) => {
-  event.returnValue = service.remove(key);
+ipcPromise.on('db.remove', (id) => {
+  return service.remove(id);
+});
+
+ipcPromise.on('db.upsert', (id) => {
+  return service.upsert(id);
 });
 
 export default service;
