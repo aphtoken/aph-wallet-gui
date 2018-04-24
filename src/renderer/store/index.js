@@ -32,10 +32,13 @@ const state = {
   showSendAddressModal: false,
   showSendRequestLedgerSignature: false,
   showSendWithLedgerModal: false,
+  sendInProgress: false,
   showWalletBackupModal: false,
   statsToken: null,
   version: pjson.version,
   wallets: [],
+  gasClaim: null,
+  showGasClaimModal: false,
 };
 
 const store = new Vuex.Store({

@@ -8,6 +8,7 @@ export {
   clearActiveTransaction,
   clearRecentTransactions,
   clearSearchTransactions,
+  startRequest,
   endRequest,
   failRequest,
   resetRequests,
@@ -32,10 +33,12 @@ export {
   setShowSendAddressModal,
   setShowSendRequestLedgerSignature,
   setShowSendWithLedgerModal,
+  setSendInProgress,
   setShowWalletBackupModal,
   setStatsToken,
   setWallets,
-  startRequest,
+  setGasClaim,
+  setShowGasClaimModal,
 };
 
 function clearActiveTransaction(state) {
@@ -225,6 +228,10 @@ function setShowSendRequestLedgerSignature(state, value) {
   state.showSendRequestLedgerSignature = value;
 }
 
+function setSendInProgress(state, value) {
+  state.sendInProgress = value;
+}
+
 function setShowWalletBackupModal(state, value) {
   state.showWalletBackupModal = value;
 }
@@ -237,6 +244,13 @@ function setStatsToken(state, token) {
 
 function setWallets(state, wallets) {
   state.wallets = wallets;
+}
+
+function setGasClaim(state, value) {
+  state.gasClaim = value;
+}
+function setShowGasClaimModal(state, value) {
+  state.showGasClaimModal = value;
 }
 
 function startRequest(state, payload) {
