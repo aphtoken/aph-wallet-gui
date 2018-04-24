@@ -3,11 +3,11 @@ import _ from 'lodash';
 import { ipcRenderer } from 'electron';
 
 const store = new Store();
-const allowedKeys = [
-  'wallets',
-  'tokens',
-  'network',
-  'settings',
+const keysToRemove = [
+  'holdings',
+  'portfolios',
+  'token',
+  'txs',
 ];
 let localStore = store.store;
 
@@ -40,8 +40,6 @@ const service = {
 };
 
 function clean() {
-  const keysToRemove = _.difference(_.keys(localStore), allowedKeys);
-
   console.log(`Cleaning deprecated storage keys: ${keysToRemove.join()}`);
 
   keysToRemove.forEach((key) => {
