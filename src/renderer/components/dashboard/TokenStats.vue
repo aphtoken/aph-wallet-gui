@@ -2,6 +2,11 @@
   <section id="dashboard--token-stats" v-if="$store.state.statsToken">
     <div class="header">
       <h1 class="underlined">Token Stats</h1>
+      <div class="gas" v-if="$store.state.statsToken.availableToClaim">
+        <div class="label">{{ $formatNumber($store.state.statsToken.availableToClaim) }} Gas</div>
+        <div class="claiming" v-if="$isPending('claimGas')">Claiming Gas...</div>
+        <a href="" class="claim" @click.prevent="claim" v-else>Claim Gas</a>
+      </div>
       <div class="current-value">
         <div class="label">Current Value</div>
         <div class="amount">{{ $formatMoney($store.state.statsToken.unitValue) }}</div>
@@ -13,10 +18,6 @@
         <div class="name">{{ $store.state.statsToken.name }}</div>
         <div class="amount">{{ formattedAmount }}<span class="currency">{{ $store.state.statsToken.symbol }}</span></div>
         <div class="value">{{ $formatMoney($store.state.statsToken.totalValue, null, `${$store.state.currencySymbol }0.00`) }}<span class="currency">{{ $store.state.currency }}</span></div>
-      </div>
-      <div class="claim" v-if="$store.state.statsToken.availableToClaim">
-        <div class="available">{{ $formatNumber($store.state.statsToken.availableToClaim) }} Gas Available</div>
-        <button class="claim-btn" @click="claim" :disabled="$isPending('claimGas')">{{ buttonLabel }}</button>
       </div>
     </div>
     <div class="footer">
@@ -79,11 +80,22 @@ export default {
 
       flex: 1;
       margin-bottom: 0;
+      white-space: nowrap;
+    }
+
+    .gas {
+      flex: 2;
+      text-align: center;
+
+      .claim, .claiming {
+        font-family: GilroyMedium;
+      }
     }
 
     .current-value {
-      flex: none;
+      flex: 1;
       text-align: right;
+      white-space: nowrap;
 
       .amount {
         color: $purple;
