@@ -2,7 +2,7 @@
 import Vue from 'vue';
 
 import { requests } from '../constants';
-import { alerts, storage } from '../services';
+import { alerts, db } from '../services';
 
 export {
   clearActiveTransaction,
@@ -39,7 +39,6 @@ export {
 };
 
 function clearActiveTransaction(state) {
-  state.activeTransactionHash = null;
   state.showPriceTile = true;
 }
 
@@ -102,12 +101,16 @@ function setCurrentNetwork(state, network) {
 }
 
 function setHoldings(state, holdings) {
-  if (holdings && holdings.length > 0) {
+  if (!_.isEmpty(holdings)) {
     state.holdings = holdings;
   }
 
-  if (!state.statsToken && state.holdings.length) {
-    state.statsToken = state.holdings[0];
+  if (!state.statsToken && !_.isEmpty(holdings)) {
+    state.statsToken = holdings[0];
+  } else if (state.statsToken) {
+    state.statsToken = _.find(state.holdings, (o) => {
+      return o.symbol === state.statsToken.symbol;
+    });
   }
 
   if (!state.currentWallet || !state.currentNetwork) {
@@ -115,7 +118,7 @@ function setHoldings(state, holdings) {
   }
 
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  storage.set(holdingsStorageKey, state.holdings);
+  db.upsert(holdingsStorageKey, state.holdings);
 }
 
 function setPortfolio(state, data) {
@@ -128,7 +131,7 @@ function setPortfolio(state, data) {
   }
 
   const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  storage.set(portfolioStorageKey, state.portfolio);
+  db.upsert(portfolioStorageKey, state.portfolio);
 }
 
 function setRecentTransactions(state, transactions) {
@@ -151,7 +154,7 @@ function setRecentTransactions(state, transactions) {
   }
 
   const transactionsStorageKey = `txs.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  storage.set(transactionsStorageKey, state.recentTransactions);
+  db.upsert(transactionsStorageKey, state.recentTransactions);
 }
 
 function clearLocalNetworkState(state, newNetwork) {
@@ -161,13 +164,13 @@ function clearLocalNetworkState(state, newNetwork) {
   state.recentTransactions = [];
 
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${newNetwork.net}`;
-  storage.set(holdingsStorageKey, null);
+  db.remove(holdingsStorageKey);
 
   const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${newNetwork.net}`;
-  storage.set(portfolioStorageKey, null);
+  db.remove(portfolioStorageKey);
 
   const transactionsStorageKey = `txs.${state.currentWallet.address}.${newNetwork.net}`;
-  storage.set(transactionsStorageKey, null);
+  db.remove(transactionsStorageKey);
 }
 
 function setLatestVersion(state, version) {

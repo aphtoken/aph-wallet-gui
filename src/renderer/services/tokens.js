@@ -1,6 +1,6 @@
 import storage from './storage';
 
-const TOKENS_STORAGE_KEY = 'token';
+const TOKENS_STORAGE_KEY = 'tokens';
 
 export default {
 
