@@ -852,6 +852,7 @@ export default {
         if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
           alerts.error('No NEO to claim from.');
           api.setSwitchFreeze(false);
+          store.commit('setShowGasClaimModal', false);
           return;
         }
 
