@@ -2,6 +2,10 @@
 import { Line, mixins } from 'vue-chartjs';
 const { reactiveProp } = mixins;
 
+const DEFAULT_OPTIONS = {
+  animation: false,
+};
+
 export default {
   beforeDestroy() {
     window.removeEventListener('resize', this.debouncedRender);
@@ -22,7 +26,7 @@ export default {
   methods: {
     render() {
       setTimeout(() => {
-        this.renderChart(this.chartData, this.options);
+        this.renderChart(this.chartData, _.merge(DEFAULT_OPTIONS, this.options));
       }, this.$constants.timeouts.RENDER_CHART);
     },
   },
