@@ -2,6 +2,10 @@ const charts = {
   DEBOUNCE: 500,
 };
 
+const database = {
+  NAME: 'aphelion.db',
+};
+
 const defaultSettings = {
   CURRENCY: 'USD',
 };
@@ -41,6 +45,7 @@ const timeouts = {
 
 export {
   charts,
+  database,
   defaultSettings,
   formats,
   intervals,

@@ -73,10 +73,6 @@
 <script>
 export default {
   computed: {
-    activeTransactionHash() {
-      return this.$store.state.activeTransactionHash;
-    },
-
     fromTransactions() {
       if (!this.$store.state.activeTransaction) {
         return [];
