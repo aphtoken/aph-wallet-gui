@@ -9,9 +9,9 @@
     </div>
     <div class="body">
       <aph-token-icon :symbol="$store.state.statsToken.symbol"></aph-token-icon>
-      <div class="balance">
+      <div :class="balanceClass">
         <div class="name">{{ $store.state.statsToken.name }}</div>
-        <div class="amount">{{ $formatNumber($store.state.statsToken.balance) }}<span class="currency">{{ $store.state.statsToken.symbol }}</span></div>
+        <div class="amount">{{ formattedAmount }}<span class="currency">{{ $store.state.statsToken.symbol }}</span></div>
         <div class="value">{{ $formatMoney($store.state.statsToken.totalValue, null, `${$store.state.currencySymbol }0.00`) }}<span class="currency">{{ $store.state.currency }}</span></div>
       </div>
       <div class="claim" v-if="$store.state.statsToken.availableToClaim">
@@ -37,10 +37,20 @@
 </template>
 
 <script>
+const AMOUNT_LENGTH_LIMIT = 15;
+
 export default {
   computed: {
+    balanceClass() {
+      return this.formattedAmount.length > AMOUNT_LENGTH_LIMIT ? ['balance', 'small'] : ['balance'];
+    },
+
     buttonLabel() {
       return this.$isPending('claimGas') ? 'Claiming...' : 'Claim';
+    },
+
+    formattedAmount() {
+      return this.$formatNumber(this.$store.state.statsToken.balance);
     },
   },
 
@@ -134,6 +144,20 @@ export default {
         .currency {
           margin-left: $space-xsm;
         }
+      }
+
+      &.small {
+        .amount {
+          font-size: toRem(22px);
+
+          .currency {
+            font-size: toRem(16px);
+          }
+        }
+      }
+
+      .value {
+        font-size: toRem(16px);
       }
     }
 
