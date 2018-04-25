@@ -1,16 +1,10 @@
 <template>
-  <modal-wrapper id="aph-claim-gas-modal" identifier="claimGas" dialogWidth="600px">
+  <modal-wrapper id="aph-claim-gas-modal" identifier="claimGas">
     <template>
       <div class="body" v-if="$store.state.gasClaim">
-        <p>
-          Claiming GAS which has accumulated from your NEO holdings takes several steps. We've automated the process for you but it may take up to 5 minutes.
-        </p>
-        <p>
-          Please wait for the GAS claim to complete.
-        </p>
-        <p>
-          Closing your wallet during this process may result in the GAS claim failing and require you to run it again.
-        </p>
+        <p>Claiming GAS which has accumulated from your NEO holdings takes several steps. We've automated the process for you but it may take up to 5 minutes.</p>
+        <p>Please wait for the GAS claim to complete.</p>
+        <p>Closing your wallet during this process may result in the GAS claim failing and require you to run it again.</p>
         <div class="checklist">
           <div class="checklist-header">Steps:</div>
           <ol>
@@ -48,6 +42,7 @@ export default {
       }
       return 'Cancel';
     },
+
     step1Label() {
       if (this.$store.state.gasClaim && this.$store.state.gasClaim.step > 1) {
         return `Transferred ${this.$store.state.gasClaim.neoTransferAmount} NEO to yourself.`;
@@ -64,6 +59,7 @@ export default {
       }
       return 'Wait for NEO transfer confirmation.';
     },
+
     step3Label() {
       if (this.$store.state.gasClaim && this.$store.state.gasClaim.step > 3) {
         return `Sent claim for ~${this.$store.state.gasClaim.gasClaimAmount} GAS.`;
@@ -72,6 +68,7 @@ export default {
       }
       return 'Send GAS claim.';
     },
+
     step4Label() {
       if (this.$store.state.gasClaim && this.$store.state.gasClaim.step > 4) {
         return 'GAS claim confirmed.';
@@ -80,6 +77,7 @@ export default {
       }
       return 'Wait for GAS claim confirmation.';
     },
+
     step5Label() {
       if (this.$store.state.gasClaim && this.$store.state.gasClaim.step === 5) {
         return 'Success!';
@@ -100,6 +98,10 @@ export default {
 
 <style lang="scss">
 #aph-claim-gas-modal {
+  .content {
+    width: toRem(600px);
+  }
+
   .header {
     padding: $space-lg $space-lg 0;
   }
@@ -130,12 +132,12 @@ export default {
         margin-top: $space-xl;
       }
     }
-    
+
     .checklist {
       max-width: toRem(450px);
       margin: 0 auto;
       text-align: left;
-        
+
       .checklist-header {
         font-weight: bold;
         margin: 2rem;
@@ -155,13 +157,13 @@ export default {
               font-size: larger;
             }
           }
-          
+
           &.complete {
             text-decoration: line-through;
           }
         }
-      }  
-      
+      }
+
       .error {
         color: $red;
       }

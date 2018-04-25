@@ -1,6 +1,6 @@
 <template>
   <div class="aph-modal-wrapper">
-    <div class="content" :style="{ width: dialogWidth }">
+    <div class="content">
       <slot></slot>
     </div>
     <request-error-message v-if="identifier" :identifier="identifier"></request-error-message>
@@ -23,10 +23,6 @@ export default {
 
   props: {
     identifier: {
-      type: String,
-    },
-    dialogWidth: {
-      default: '400px',
       type: String,
     },
   },
@@ -53,6 +49,7 @@ export default {
     background: white;
     border-radius: $border-radius;
     flex: none;
+    width: toRem(400px);
   }
 
   > .aph-request-status-message {
