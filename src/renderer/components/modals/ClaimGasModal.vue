@@ -8,11 +8,11 @@
         <div class="checklist">
           <div class="checklist-header">Steps:</div>
           <ol>
-            <li :class="[{'in-progress': $store.state.gasClaim.step == 1}, {complete: $store.state.gasClaim.step > 1}]">{{step1Label}}</li>
-            <li :class="[{'in-progress': $store.state.gasClaim.step == 2}, {complete: $store.state.gasClaim.step > 2}]">{{step2Label}}</li>
-            <li :class="[{'in-progress': $store.state.gasClaim.step == 3}, {complete: $store.state.gasClaim.step > 3}]">{{step3Label}}</li>
-            <li :class="[{'in-progress': $store.state.gasClaim.step == 4}, {complete: $store.state.gasClaim.step > 4}]">{{step4Label}}</li>
-            <li :class="[{'in-progress': $store.state.gasClaim.step == 5}, {complete: $store.state.gasClaim.step > 5}]">{{step5Label}}</li>
+            <li :class="stepClass(1)">{{step1Label}}</li>
+            <li :class="stepClass(2)">{{step2Label}}</li>
+            <li :class="stepClass(3)">{{step3Label}}</li>
+            <li :class="stepClass(4)">{{step4Label}}</li>
+            <li :class="stepClass(5)">{{step5Label}}</li>
           </ol>
 
           <div class="error" v-if="$store.state.gasClaim.error">
@@ -89,7 +89,19 @@ export default {
   methods: {
     close() {
       this.$store.commit('setSendInProgress', false);
-      this.$store.commit('setShowGasClaimModal', false);
+      this.$store.commit('setShowClaimGasModal', false);
+    },
+
+    stepClass(step) {
+      if (this.$store.state.gasClaim.step === step) {
+        return ['in-progress'];
+      }
+
+      if (this.$store.state.gasClaim.step > step) {
+        return ['complete'];
+      }
+
+      return [];
     },
   },
 };
@@ -107,19 +119,23 @@ export default {
   }
 
   .body {
-    padding: $space-lg;
-    text-align: center;
     display: block;
+    padding: $space-lg;
     position: relative;
+    text-align: center;
 
     p {
-      margin-bottom: $space-lg;
       line-height: $line-height;
+      margin: 0;
 
       &:first-child {
         span {
           font-family: GilroySemibold;
         }
+      }
+
+      & + p {
+        margin-top: $space-lg;
       }
     }
 
@@ -134,31 +150,35 @@ export default {
     }
 
     .checklist {
-      max-width: toRem(450px);
       margin: 0 auto;
+      max-width: toRem(450px);
       text-align: left;
 
       .checklist-header {
-        font-weight: bold;
-        margin: 2rem;
+        font-size: toRem(20px);
+        font-family: GilroyMedium;
+        padding: $space-lg;
         text-align: center;
-        font-size: larger;
       }
 
       ol {
+        margin: 0;
+
         li {
-          padding: toRem(3px);
+          color: $grey;
+          padding: $space-sm 0;
 
           &.in-progress {
-            font-weight: bold;
+            color: $dark;
+            font-family: GilroySemibold;
 
             &:last-child {
               color: $green;
-              font-size: larger;
             }
           }
 
           &.complete {
+            color: $dark;
             text-decoration: line-through;
           }
         }
@@ -182,6 +202,7 @@ export default {
     @extend %btn-footer-light;
 
     border-bottom-left-radius: $border-radius;
+    border-bottom-right-radius: $border-radius;
   }
 }
 </style>

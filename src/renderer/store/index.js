@@ -15,6 +15,7 @@ const state = {
   currentEditContact: null,
   currentLoginToWallet: null,
   currentWallet: {},
+  gasClaim: null,
   holdings: [],
   latestVersion: null,
   portfolio: null,
@@ -23,8 +24,10 @@ const state = {
   searchTransactionFromDate: null,
   searchTransactionToDate: null,
   searchTransactions: [],
+  sendInProgress: false,
   showAddContactModal: false,
   showAddTokenModal: false,
+  showClaimGasModal: false,
   showImportAWalletModal: false,
   showLoginToWalletModal: false,
   showPortfolioHeader: true,
@@ -32,13 +35,10 @@ const state = {
   showSendAddressModal: false,
   showSendRequestLedgerSignature: false,
   showSendWithLedgerModal: false,
-  sendInProgress: false,
   showWalletBackupModal: false,
   statsToken: null,
   version: pjson.version,
   wallets: [],
-  gasClaim: null,
-  showGasClaimModal: false,
 };
 
 const store = new Vuex.Store({

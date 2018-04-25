@@ -787,7 +787,7 @@ export default {
       step: 0,
     };
     store.commit('setGasClaim', gasClaim);
-    store.commit('setShowGasClaimModal', true);
+    store.commit('setShowClaimGasModal', true);
 
     // force neonDB for these, neoscan seems to be unreliable
     api.setApiSwitch(1);
@@ -799,7 +799,7 @@ export default {
         if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
           alerts.error('No NEO to claim from.');
           api.setSwitchFreeze(false);
-          store.commit('setShowGasClaimModal', false);
+          store.commit('setShowClaimGasModal', false);
           return;
         }
 

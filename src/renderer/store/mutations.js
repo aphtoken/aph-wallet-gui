@@ -38,7 +38,7 @@ export {
   setStatsToken,
   setWallets,
   setGasClaim,
-  setShowGasClaimModal,
+  setShowClaimGasModal,
 };
 
 function clearActiveTransaction(state) {
@@ -249,8 +249,8 @@ function setWallets(state, wallets) {
 function setGasClaim(state, value) {
   state.gasClaim = value;
 }
-function setShowGasClaimModal(state, value) {
-  state.showGasClaimModal = value;
+function setShowClaimGasModal(state, value) {
+  state.showClaimGasModal = value;
 }
 
 function startRequest(state, payload) {
