@@ -269,14 +269,26 @@ function verifyLedgerConnection({ commit }, { done, failed }) {
 function openLedger({ commit }, { done, failed }) {
   commit('startRequest', { identifier: 'openLedger' });
 
-  ledger.open()
+  ledger.close()
     .then(() => {
-      ledger.getPublicKey()
-        .then((publicKey) => {
-          wallets.openLedger(publicKey)
-            .then(() => {
-              done();
-              commit('endRequest', { identifier: 'openLedger' });
+      ledger.open()
+        .then(() => {
+          ledger.getPublicKey()
+            .then((publicKey) => {
+              wallets.openLedger(publicKey)
+                .then(() => {
+                  done();
+
+                  setTimeout(() => {
+                    ledger.close();
+                  }, 5 * 1000);
+
+                  commit('endRequest', { identifier: 'openLedger' });
+                })
+                .catch((e) => {
+                  failed(e);
+                  commit('failRequest', { identifier: 'openLedger', message: e });
+                });
             })
             .catch((e) => {
               failed(e);
