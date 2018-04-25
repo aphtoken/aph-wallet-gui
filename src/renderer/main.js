@@ -8,7 +8,7 @@ import axios from 'axios';
 import moment from 'moment';
 
 // Services, etc.
-import { contacts, settings, wallets } from './services';
+import { contacts, network, settings, wallets } from './services';
 
 // Initial Vue Libraries.
 import './libraries';
@@ -62,6 +62,7 @@ Vue.component('aph-token-icon', TokenIcon);
 
 // Sync local storage to store.
 contacts.sync();
+network.sync();
 settings.sync();
 wallets.sync();
 
