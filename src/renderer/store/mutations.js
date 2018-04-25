@@ -249,6 +249,7 @@ function setWallets(state, wallets) {
 function setGasClaim(state, value) {
   state.gasClaim = value;
 }
+
 function setShowClaimGasModal(state, value) {
   state.showClaimGasModal = value;
 }
