@@ -66,8 +66,12 @@
 
 <script>
 let sendTimeoutIntervalId;
+let storeUnwatch;
 
 export default {
+  components: {
+  },
+
   computed: {
     currencies() {
       return this.$store.state.holdings.reduce(
@@ -206,6 +210,23 @@ export default {
     amount() {
       this.cleanAmount();
     },
+  },
+
+
+  mounted() {
+    storeUnwatch = this.$store.watch(
+      () => {
+        return this.$store.state.sendInProgress;
+      }, () => {
+        if (this.$store.state.sendInProgress === false
+          && this.sending === true) {
+          this.end();
+        }
+      });
+  },
+
+  beforeDestroy() {
+    storeUnwatch();
   },
 };
 </script>

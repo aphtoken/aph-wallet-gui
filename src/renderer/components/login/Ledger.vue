@@ -48,6 +48,10 @@ export default {
 
   methods: {
     checkLedgerStatus() {
+      if (this.connected === true) {
+        return;
+      }
+
       this.$store.dispatch('verifyLedgerConnection', {
         done: () => {
           this.connected = true;
