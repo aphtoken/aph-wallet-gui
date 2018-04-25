@@ -865,11 +865,16 @@ export default {
             gasClaim.error = e;
             alerts.exception(e);
             api.setSwitchFreeze(false);
+            lastClaimSent = null;
+            store.commit('setGasClaim', gasClaim);
           });
       })
       .catch((e) => {
+        gasClaim.error = e;
         alerts.exception(e);
         api.setSwitchFreeze(false);
+        lastClaimSent = null;
+        store.commit('setGasClaim', gasClaim);
       });
   },
 

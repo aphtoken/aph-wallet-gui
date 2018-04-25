@@ -27,16 +27,8 @@ export default {
   methods: {
     cancel() {
       this.$services.ledger.close();
-      this.onCancel();
       this.$store.commit('setSendInProgress', false);
       this.$store.commit('setShowSendWithLedgerModal', false);
-    },
-  },
-
-  props: {
-    onCancel: {
-      required: true,
-      type: Function,
     },
   },
 };

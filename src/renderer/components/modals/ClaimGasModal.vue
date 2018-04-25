@@ -15,8 +15,8 @@
             <li :class="stepClass(5)">{{step5Label}}</li>
           </ol>
 
-          <div class="error" v-if="$store.state.gasClaim.error">
-            {{$store.state.gasClaim.error}}
+          <div class="error" v-if="error !== null">
+            {{error}}
           </div>
         </div>
       </div>
@@ -37,10 +37,18 @@ export default {
 
   computed: {
     closeLabel() {
-      if (this.$store.state.gasClaim && this.$store.state.gasClaim.step >= 5) {
+      if (this.$store.state.gasClaim
+        && (this.$store.state.gasClaim.step >= 5 || this.$store.state.gasClaim.error !== null)) {
         return 'Close';
       }
       return 'Cancel';
+    },
+
+    error() {
+      if (this.$store.state.gasClaim && this.$store.state.gasClaim.error !== null) {
+        return this.$store.state.gasClaim.error;
+      }
+      return null;
     },
 
     step1Label() {
@@ -186,6 +194,10 @@ export default {
 
       .error {
         color: $red;
+        font-size: toRem(15px);
+        font-family: GilroySemibold;
+        text-align: center;
+        padding: $space;
       }
     }
   }
