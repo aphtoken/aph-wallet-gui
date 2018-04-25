@@ -276,9 +276,11 @@ export default {
   },
 
   fetchSystemTransactions(address) {
+    const currentNetwork = network.getSelectedNetwork();
+
     return new Promise((resolve, reject) => {
       try {
-        return api.neonDB.getTransactionHistory(network.getSelectedNetwork().net, address)
+        return api.neonDB.getTransactionHistory(currentNetwork.net, address)
           .then((res) => {
             resolve(res);
           })
@@ -299,11 +301,13 @@ export default {
   },
 
   fetchTransactionDetails(hash) {
+    const rpcClient = network.getRpcClient();
+
     return new Promise((resolve, reject) => {
       try {
-        return network.getSelectedNetwork().rpcClient.getBlockCount()
+        return rpcClient.getBlockCount()
           .then((blockCount) => {
-            network.getSelectedNetwork().rpcClient.getRawTransaction(hash, 1)
+            rpcClient.getRawTransaction(hash, 1)
               .then((transaction) => {
                 transaction.currentBlockHeight = blockCount;
                 if (transaction.confirmations > 0) {
@@ -326,7 +330,7 @@ export default {
                 // pull information for inputs from their previous outputs
                 const inputPromises = [];
                 transaction.vin.forEach((input) => {
-                  inputPromises.push(network.getSelectedNetwork().rpcClient
+                  inputPromises.push(rpcClient
                     .getRawTransaction(input.txid, 1)
                     .then((inputTransaction) => {
                       const inputSource = inputTransaction.vout[input.vout];
@@ -355,9 +359,13 @@ export default {
   },
 
   fetchHoldings(address, restrictToSymbol) {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
+    const rpcClient = network.getRpcClient();
+
     return new Promise((resolve, reject) => {
       try {
-        return network.getSelectedNetwork().rpcClient.query({ method: 'getaccountstate', params: [address] })
+        return rpcClient.query({ method: 'getaccountstate', params: [address] })
           .then((res) => {
             const holdings = [];
             const promises = [];
@@ -393,9 +401,9 @@ export default {
               }
               if (h.symbol === 'NEO') {
                 promises.push(api.getMaxClaimAmountFrom({
-                  net: network.getSelectedNetwork().net,
-                  address: wallets.getCurrentWallet().address,
-                  privateKey: wallets.getCurrentWallet().privateKey,
+                  net: currentNetwork.net,
+                  address: currentWallet.address,
+                  privateKey: currentWallet.privateKey,
                 }, api.neonDB)
                   .then((res) => {
                     h.availableToClaim = toBigNumber(res).toNumber();
@@ -408,7 +416,7 @@ export default {
             });
 
             tokens.getAllAsArray().forEach((nep5) => {
-              if (nep5.network !== network.getSelectedNetwork().net) {
+              if (nep5.network !== currentNetwork.net) {
                 return;
               }
               promises.push(this.fetchNEP5Balance(address, nep5.assetId)
@@ -436,7 +444,7 @@ export default {
                 })
                 .catch((e) => {
                   if (e.message.indexOf('Expected a hexstring but got') > -1) {
-                    tokens.remove(nep5.assetId, network.getSelectedNetwork().net);
+                    tokens.remove(nep5.assetId, currentNetwork.net);
                   }
                   alerts.exception(e);
                   reject(e);
@@ -498,6 +506,8 @@ export default {
   },
 
   fetchNEP5Tokens() {
+    const currentNetwork = network.getSelectedNetwork();
+
     return new Promise((resolve, reject) => {
       try {
         const defaultList = [{
@@ -517,14 +527,14 @@ export default {
           tokens.add(t);
         });
         try {
-          return axios.get(`${network.getSelectedNetwork().aph}/tokens`)
+          return axios.get(`${currentNetwork.aph}/tokens`)
             .then((res) => {
               res.data.tokens.forEach((t) => {
                 tokens.add({
                   symbol: t.symbol,
                   assetId: t.scriptHash.replace('0x', ''),
                   isCustom: false,
-                  network: network.getSelectedNetwork().net,
+                  network: currentNetwork.net,
                 });
               });
             })
@@ -540,8 +550,10 @@ export default {
   },
 
   fetchNEP5Balance(address, assetId) {
+    const currentNetwork = network.getSelectedNetwork();
+
     return new Promise((resolve) => {
-      return api.nep5.getToken(network.getSelectedNetwork().rpc, assetId, address)
+      return api.nep5.getToken(currentNetwork.rpc, assetId, address)
         .then((token) => {
           resolve({
             name: token.name,
@@ -558,14 +570,16 @@ export default {
   },
 
   fetchNEP5Transfers(address, fromDate, toDate, fromBlock, toBlock) {
+    const currentNetwork = network.getSelectedNetwork();
+
     return new Promise((resolve) => {
       try {
         /* eslint-disable max-len */
-        const requestUrl = `${network.getSelectedNetwork().aph}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}&fromBlock=${fromBlock}&toBlock=${toBlock}`;
+        const requestUrl = `${currentNetwork.aph}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}&fromBlock=${fromBlock}&toBlock=${toBlock}`;
         /* eslint-enable max-len */
         return axios.get(requestUrl)
           .then((res) => {
-            network.getSelectedNetwork().lastSuccessfulRequest = moment.utc();
+            currentNetwork.lastSuccessfulRequest = moment.utc();
             resolve(res);
           })
           .catch(() => {
@@ -644,7 +658,10 @@ export default {
   },
 
   sendSystemAsset(toAddress, neoAmount, gasAmount) {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
     const intentAmounts = {};
+
     if (neoAmount > 0) {
       intentAmounts.NEO = neoAmount;
     }
@@ -652,27 +669,26 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    const currentWallet = wallets.getCurrentWallet();
     return api.getBalanceFrom({
-      net: network.getSelectedNetwork().net,
+      net: currentNetwork.net,
       address: currentWallet.address,
     }, api.neonDB)
     // or api.neoscan? sometimes these apis go down or are unreliable
     // maybe we should stand up our own version ?
       .then((balance) => {
-        if (balance.net !== network.getSelectedNetwork().net) {
+        if (balance.net !== currentNetwork.net) {
           alerts.error('Unable to read address balance from neonDB. Please try again later.');
           return null;
         }
         const config = {
-          net: network.getSelectedNetwork().net,
-          address: wallets.getCurrentWallet().address,
-          privateKey: wallets.getCurrentWallet().privateKey,
+          net: currentNetwork.net,
+          address: currentWallet.address,
+          privateKey: currentWallet.privateKey,
           balance: balance.balance,
           intents: api.makeIntent(intentAmounts, toAddress),
         };
 
-        if (wallets.getCurrentWallet().isLedger === true) {
+        if (currentWallet.isLedger === true) {
           config.signingFunction = ledger.signWithLedger;
         }
 
@@ -688,6 +704,9 @@ export default {
   },
 
   sendNep5Transfer(toAddress, assetId, amount) {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
+
     const gasAmount = _.find(store.state.holdings, (o) => {
       return o.asset === gasAssetId;
     }).balance;
@@ -700,12 +719,12 @@ export default {
     }
 
     const config = {
-      net: network.getSelectedNetwork().net,
+      net: currentNetwork.net,
       script: {
         scriptHash: assetId,
         operation: 'transfer',
         args: [
-          u.reverseHex(wallet.getScriptHashFromAddress(wallets.getCurrentWallet().address)),
+          u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address)),
           u.reverseHex(wallet.getScriptHashFromAddress(toAddress)),
           new u.Fixed8(amount).toReverseHex(),
         ],
@@ -713,9 +732,9 @@ export default {
       gas: 0,
     };
 
-    if (wallets.getCurrentWallet().isLedger === true) {
+    if (currentWallet.isLedger === true) {
       config.signingFunction = ledger.signWithLedger;
-      config.address = wallets.getCurrentWallet().address;
+      config.address = currentWallet.address;
       const intents = api.makeIntent({ GAS: 0.00000001 }, config.address);
       config.intents = intents;
 
@@ -726,9 +745,9 @@ export default {
         });
     }
 
-    const account = new wallet.Account(wallets.getCurrentWallet().wif);
+    const account = new wallet.Account(currentWallet.wif);
+    const intents = api.makeIntent({ GAS: 0.00000001 }, currentWallet.address);
     config.account = account;
-    const intents = api.makeIntent({ GAS: 0.00000001 }, wallets.getCurrentWallet().address);
     config.intents = intents;
 
     return api.doInvoke(config)
@@ -768,6 +787,9 @@ export default {
   },
 
   claimGas() {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
+
     if (new Date() - lastClaimSent < 5 * 60 * 1000) { // 5 minutes ago
       return new Promise((reject) => {
         alerts.error('May only claim GAS once every 5 minutes.');
@@ -780,7 +802,7 @@ export default {
     api.setSwitchFreeze(true);
 
     lastClaimSent = new Date();
-    return this.fetchHoldings(wallets.getCurrentWallet().address, 'NEO')
+    return this.fetchHoldings(currentWallet.address, 'NEO')
       .then((h) => {
         if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
           alerts.error('No NEO to claim from.');
@@ -791,17 +813,17 @@ export default {
         const neoAmount = h.holdings[0].balance;
         alerts.success(`Transfering ${neoAmount} NEO to self.`);
         // send neo to ourself to make all gas available for claim
-        this.sendFunds(wallets.getCurrentWallet().address, neoAssetId, neoAmount, false)
+        this.sendFunds(currentWallet.address, neoAssetId, neoAmount, false)
           .then(() => {
             const config = {
-              net: network.getSelectedNetwork().net,
-              address: wallets.getCurrentWallet().address,
-              privateKey: wallets.getCurrentWallet().privateKey,
+              net: currentNetwork.net,
+              address: currentWallet.address,
+              privateKey: currentWallet.privateKey,
             };
 
             // send the claim gas
             setTimeout(() => {
-              if (wallets.getCurrentWallet().isLedger === true) {
+              if (currentWallet.isLedger === true) {
                 config.signingFunction = ledger.signWithLedger;
                 alerts.success('Creating Gas Claim Transaction.');
               }

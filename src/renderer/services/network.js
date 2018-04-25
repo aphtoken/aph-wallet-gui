@@ -26,60 +26,34 @@ const NETWORKS = [
 ];
 
 let loadNetworkStatusIntervalId;
-let currentNetwork;
 
 export default {
-
   getNetworks() {
     return _.sortBy(NETWORKS, 'label');
   },
 
+  getRpcClient() {
+    return rpc.default.create.rpcClient(this.getSelectedNetwork().rpc);
+  },
+
   getSelectedNetwork() {
-    if (!currentNetwork) {
-      const storedNetwork = storage.get(NETWORK_STORAGE_KEY);
-      if (storedNetwork) {
-        this.setSelectedNetwork(storedNetwork);
-      } else {
-        this.setSelectedNetwork(_.first(NETWORKS).value);
-      }
-    }
-    return currentNetwork;
-  },
-
-  setSelectedNetwork(network) {
-    if (loadNetworkStatusIntervalId) {
-      clearInterval(loadNetworkStatusIntervalId);
-    }
-
-    currentNetwork = network;
-    network.rpcClient = rpc.default.create.rpcClient(network.rpc);
-    currentNetwork.lastSuccessfulRequest = moment.utc();
-
-    this.loadStatus();
-    loadNetworkStatusIntervalId = setInterval(() => {
-      this.loadStatus();
-    }, 10 * 1000);
-
-    storage.set(NETWORK_STORAGE_KEY, network);
-    this.sync();
-    return this;
-  },
-
-  sync() {
-    store.commit('setCurrentNetwork', currentNetwork);
+    return storage.get(NETWORK_STORAGE_KEY) || _.first(NETWORKS).value;
   },
 
   loadStatus() {
-    currentNetwork.rpcClient.getBestBlockHash()
+    const network = this.getSelectedNetwork();
+    const rpcClient = this.getRpcClient();
+
+    rpcClient.getBestBlockHash()
       .then((blockHash) => {
-        currentNetwork.rpcClient.getBlock(blockHash)
+        rpcClient.getBlock(blockHash)
           .then((data) => {
-            if (currentNetwork.bestBlock && currentNetwork.bestBlock.index === data.index) {
+            if (network.bestBlock && network.bestBlock.index === data.index) {
               return;
             }
-            currentNetwork.bestBlock = data;
-            currentNetwork.lastReceivedBlock = moment();
-            storage.set(NETWORK_STORAGE_KEY, currentNetwork);
+            network.bestBlock = data;
+            network.lastReceivedBlock = moment();
+            this.normalizeAndStore(network);
           })
           .catch((e) => {
             console.log(e);
@@ -88,6 +62,32 @@ export default {
       .catch((e) => {
         console.log(e);
       });
+  },
+
+  normalizeAndStore(network) {
+    storage.set(NETWORK_STORAGE_KEY, network);
+  },
+
+  setSelectedNetwork(network) {
+    if (loadNetworkStatusIntervalId) {
+      clearInterval(loadNetworkStatusIntervalId);
+    }
+
+    network.lastSuccessfulRequest = moment.utc();
+
+    this.loadStatus();
+    loadNetworkStatusIntervalId = setInterval(() => {
+      this.loadStatus();
+    }, 10 * 1000);
+
+    this.normalizeAndStore(network);
+    this.sync();
+
+    return this;
+  },
+
+  sync() {
+    store.commit('setCurrentNetwork', storage.get(NETWORK_STORAGE_KEY));
   },
 
 };
