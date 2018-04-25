@@ -18,7 +18,7 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "postinstall": "electron-builder install-app-deps && electron-rebuild --force --module_dir . -w node-hid -v 1.8.4",
+    "postinstall": "electron-builder install-app-deps",
     "start": "npm run dev",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js"

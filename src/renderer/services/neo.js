@@ -589,7 +589,7 @@ export default {
   /**
    * @return Promise
    */
-  sendFunds(toAddress, assetId, amount, isNep5) {
+  sendFunds(toAddress, assetId, amount, isNep5, sent) {
     return new Promise((resolve, reject) => {
       let sendPromise = null;
       try {
@@ -619,12 +619,20 @@ export default {
       }
 
       try {
+        store.commit('setSendInProgress', true);
         sendPromise
           .then((res) => {
             if (!res || !res.tx) {
               return reject('Failed to create transaction.');
             }
             alerts.success(`Transaction Hash: ${res.tx.hash} Sent, waiting for confirmation.`);
+
+            if (sent) {
+              setTimeout(() => {
+                sent();
+              }, 100);
+            }
+
             return this.monitorTransactionConfirmation(res.tx.hash)
               .then(() => {
                 return resolve(res.tx);
@@ -775,6 +783,12 @@ export default {
       });
     }
 
+    const gasClaim = {
+      step: 0,
+    };
+    store.commit('setGasClaim', gasClaim);
+    store.commit('setShowClaimGasModal', true);
+
     // force neonDB for these, neoscan seems to be unreliable
     api.setApiSwitch(1);
     api.setSwitchFreeze(true);
@@ -785,13 +799,19 @@ export default {
         if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
           alerts.error('No NEO to claim from.');
           api.setSwitchFreeze(false);
+          store.commit('setShowClaimGasModal', false);
           return;
         }
 
         const neoAmount = h.holdings[0].balance;
-        alerts.success(`Transfering ${neoAmount} NEO to self.`);
+        gasClaim.neoTransferAmount = neoAmount;
+        gasClaim.step = 1;
+
         // send neo to ourself to make all gas available for claim
-        this.sendFunds(wallets.getCurrentWallet().address, neoAssetId, neoAmount, false)
+        this.sendFunds(wallets.getCurrentWallet().address, neoAssetId, neoAmount, false,
+          () => {
+            gasClaim.step = 2;
+          })
           .then(() => {
             const config = {
               net: network.getSelectedNetwork().net,
@@ -803,30 +823,58 @@ export default {
             setTimeout(() => {
               if (wallets.getCurrentWallet().isLedger === true) {
                 config.signingFunction = ledger.signWithLedger;
-                alerts.success('Creating Gas Claim Transaction.');
               }
 
-              api.claimGas(config)
+              api.getMaxClaimAmountFrom({
+                net: network.getSelectedNetwork().net,
+                address: wallets.getCurrentWallet().address,
+                privateKey: wallets.getCurrentWallet().privateKey,
+              }, api.neonDB)
                 .then((res) => {
-                  alerts.success('Gas Claim Sent.');
-                  h.availableToClaim = 0;
-                  api.setSwitchFreeze(false);
-                  return res;
+                  gasClaim.gasClaimAmount = toBigNumber(res).toNumber();
+                  gasClaim.step = 3;
+
+                  api.claimGas(config)
+                    .then((res) => {
+                      gasClaim.step = 4;
+                      h.availableToClaim = 0;
+                      api.setSwitchFreeze(false);
+                      this.monitorTransactionConfirmation(res.claims.claims[0].txid)
+                        .then(() => {
+                          store.dispatch('fetchRecentTransactions');
+                          gasClaim.step = 5;
+                        })
+                        .catch((e) => {
+                          gasClaim.error = e;
+                          alerts.error(e);
+                        });
+                    })
+                    .catch((e) => {
+                      gasClaim.error = e;
+                      alerts.exception(e);
+                      api.setSwitchFreeze(false);
+                    });
                 })
                 .catch((e) => {
+                  gasClaim.error = e;
                   alerts.exception(e);
-                  api.setSwitchFreeze(false);
                 });
             }, 30 * 1000);
           })
           .catch((e) => {
+            gasClaim.error = e;
             alerts.exception(e);
             api.setSwitchFreeze(false);
+            lastClaimSent = null;
+            store.commit('setGasClaim', gasClaim);
           });
       })
       .catch((e) => {
+        gasClaim.error = e;
         alerts.exception(e);
         api.setSwitchFreeze(false);
+        lastClaimSent = null;
+        store.commit('setGasClaim', gasClaim);
       });
   },
 
