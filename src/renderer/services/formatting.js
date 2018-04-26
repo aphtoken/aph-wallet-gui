@@ -36,17 +36,15 @@ export default {
   },
 
   formatNumber(value, format = formats.NUMBER, defaultValue = 'N/A') {
-    try {
-      if (nullOrUndefined(value)) {
-        return defaultValue;
-      }
-      console.log(Object.prototype.toString.call(value));
-      return numeral(toBigNumber(value)).format(format);
-    } catch (e) {
-      console.log(e);
-      console.log(value);
-      return 'Error';
+    if (nullOrUndefined(value)) {
+      return defaultValue;
     }
+    const bigNumber = toBigNumber(value);
+    if (bigNumber.e <= -6) {
+      // seeing weird behavior from numeral.format on very small negative numbers, adding this hack for now
+      return bigNumber.toFixed(8);
+    }
+    return numeral(bigNumber).format(format);
   },
 
   formatTime(timestamp, defaultValue = '--') {
