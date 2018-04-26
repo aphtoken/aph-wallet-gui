@@ -9,6 +9,7 @@ const keysToRemove = [
   'portfolios',
   'token',
   'txs',
+  'network.rpcClient',
 ];
 
 ipcMain.on('storage.clean', (event) => {
