@@ -6,6 +6,10 @@ export default {
       return formatting.formatDate.apply(null, args);
     },
 
+    $formatDateShort(...args) {
+      return formatting.formatDateShort.apply(null, args);
+    },
+
     $formatMoney(...args) {
       return formatting.formatMoney.apply(null, args);
     },

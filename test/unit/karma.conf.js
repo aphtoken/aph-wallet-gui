@@ -43,8 +43,7 @@ module.exports = config => {
     },
     customLaunchers: {
       'visibleElectron': {
-        base: 'Electron',
-        // flags: ['--show']
+        base: 'Electron'
       }
     },
     frameworks: ['mocha', 'chai'],

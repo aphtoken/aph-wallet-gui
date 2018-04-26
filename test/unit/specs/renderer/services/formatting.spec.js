@@ -1,5 +1,9 @@
 /** eslint-disable no-unused-expressions */
+import { BigNumber } from 'bignumber.js';
+
 import { formatting } from '@/services';
+
+const toBigNumber = value => new BigNumber(String(value));
 
 describe('services/formatting', () => {
   describe('formatDate', () => {
@@ -10,6 +14,17 @@ describe('services/formatting', () => {
       expect(formatting.formatDate(undefined)).to.be.eql('--');
       expect(formatting.formatDate(null, 'default')).to.eql('default');
       expect(formatting.formatDate(undefined, 'default')).to.be.eql('default');
+    });
+  });
+
+  describe('formatDateShort', () => {
+    it('should properly format', () => {
+      expect(formatting.formatDateShort(1524752757)).to.eql('26-04');
+      expect(formatting.formatDateShort('1524752757')).to.eql('26-04');
+      expect(formatting.formatDateShort(null)).to.eql('--');
+      expect(formatting.formatDateShort(undefined)).to.be.eql('--');
+      expect(formatting.formatDateShort(null, 'default')).to.eql('default');
+      expect(formatting.formatDateShort(undefined, 'default')).to.be.eql('default');
     });
   });
 
@@ -25,6 +40,7 @@ describe('services/formatting', () => {
       expect(formatting.formatMoney('100000000')).to.eql('$100,000,000.00');
       expect(formatting.formatMoney(100000000, '^^')).to.eql('^^100,000,000.00');
       expect(formatting.formatMoney('100000000', '^^')).to.eql('^^100,000,000.00');
+      expect(formatting.formatMoney(toBigNumber(100000000000000.0000000000001))).to.eql('$100,000,000,000,000.00');
       expect(formatting.formatMoney(null)).to.eql('N/A');
       expect(formatting.formatMoney(undefined)).to.be.eql('N/A');
       expect(formatting.formatMoney(null, null, 'default')).to.eql('default');
@@ -44,6 +60,7 @@ describe('services/formatting', () => {
       expect(formatting.formatNumber('-100000000')).to.be.eql('-100,000,000');
       expect(formatting.formatNumber(100000000.00000001)).to.be.eql('100,000,000.00000001');
       expect(formatting.formatNumber('100000000.00000001')).to.be.eql('100,000,000.00000001');
+      expect(formatting.formatNumber(toBigNumber(100000000000000.0000000000001))).to.eql('100,000,000,000,000');
       expect(formatting.formatNumber(1e-13)).to.be.eql('0.0000000000001');
       expect(formatting.formatNumber(null)).to.be.eql('N/A');
       expect(formatting.formatNumber(undefined)).to.be.eql('N/A');

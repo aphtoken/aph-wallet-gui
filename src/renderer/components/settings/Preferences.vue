@@ -39,7 +39,8 @@ export default {
 
   watch: {
     selectedCurrency(currency) {
-      this.$services.settings.setCurrency(currency).sync();
+      this.$services.settings.setCurrency(currency);
+      this.$store.dispatch('fetchPortfolio');
     },
 
     selectedNetwork(network) {
