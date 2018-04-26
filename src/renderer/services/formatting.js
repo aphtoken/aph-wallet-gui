@@ -36,11 +36,17 @@ export default {
   },
 
   formatNumber(value, format = formats.NUMBER, defaultValue = 'N/A') {
-    if (nullOrUndefined(value)) {
-      return defaultValue;
+    try {
+      if (nullOrUndefined(value)) {
+        return defaultValue;
+      }
+      console.log(Object.prototype.toString.call(value));
+      return numeral(toBigNumber(value)).format(format);
+    } catch (e) {
+      console.log(e);
+      console.log(value);
+      return 'Error';
     }
-
-    return numeral(toBigNumber(value)).format(format);
   },
 
   formatTime(timestamp, defaultValue = '--') {
