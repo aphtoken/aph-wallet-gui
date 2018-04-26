@@ -48,6 +48,7 @@ export default {
       }
 
       this.$services.network.setSelectedNetwork(network);
+      this.$store.dispatch('fetchPortfolio');
     },
   },
 };

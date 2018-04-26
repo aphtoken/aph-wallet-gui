@@ -7,6 +7,8 @@ export const currentLoginToWallet = state => state.currentLoginToWallet;
 export const currentNetwork = state => state.currentNetwork;
 export const currentWallet = state => state.currentWallet;
 export const holdings = state => state.holdings;
+export const lastReceivedBlock = state => state.lastReceivedBlock;
+export const lastSuccessfulRequest = state => state.lastSuccessfulRequest;
 export const latestVersion = state => state.latestVersion;
 export const portfolio = state => state.portfolio;
 export const recentTransactions = state => state.recentTransactions;

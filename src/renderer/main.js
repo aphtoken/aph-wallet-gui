@@ -62,7 +62,7 @@ Vue.component('aph-token-icon', TokenIcon);
 
 // Sync local storage to store.
 contacts.sync();
-network.sync();
+network.init();
 settings.sync();
 wallets.sync();
 

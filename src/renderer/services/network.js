@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import moment from 'moment';
 import { rpc } from '@cityofzion/neon-js';
 
 import { store } from '../store';
 import storage from './storage';
+import { intervals } from '../constants';
 
 const NETWORK_STORAGE_KEY = 'network';
 const NETWORKS = [
@@ -37,7 +37,11 @@ export default {
   },
 
   getSelectedNetwork() {
-    return storage.get(NETWORK_STORAGE_KEY) || _.first(NETWORKS).value;
+    return storage.get(NETWORK_STORAGE_KEY, _.first(NETWORKS).value);
+  },
+
+  init() {
+    this.setSelectedNetwork(this.getSelectedNetwork());
   },
 
   loadStatus() {
@@ -52,8 +56,9 @@ export default {
               return;
             }
             network.bestBlock = data;
-            network.lastReceivedBlock = moment();
-            this.normalizeAndStore(network);
+            store.commit('setLastReceivedBlock');
+            store.commit('setLastSuccessfulRequest');
+            this.normalizeAndStore(network).sync();
           })
           .catch((e) => {
             console.log(e);
@@ -66,6 +71,8 @@ export default {
 
   normalizeAndStore(network) {
     storage.set(NETWORK_STORAGE_KEY, network);
+
+    return this;
   },
 
   setSelectedNetwork(network) {
@@ -73,21 +80,18 @@ export default {
       clearInterval(loadNetworkStatusIntervalId);
     }
 
-    network.lastSuccessfulRequest = moment.utc();
+    this.normalizeAndStore(network).sync();
 
     this.loadStatus();
     loadNetworkStatusIntervalId = setInterval(() => {
       this.loadStatus();
-    }, 10 * 1000);
-
-    this.normalizeAndStore(network);
-    this.sync();
+    }, intervals.NETWORK_STATUS);
 
     return this;
   },
 
   sync() {
-    store.commit('setCurrentNetwork', storage.get(NETWORK_STORAGE_KEY));
+    store.commit('setCurrentNetwork', this.getSelectedNetwork());
   },
 
 };

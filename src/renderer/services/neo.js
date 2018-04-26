@@ -580,7 +580,7 @@ export default {
         /* eslint-enable max-len */
         return axios.get(requestUrl)
           .then((res) => {
-            currentNetwork.lastSuccessfulRequest = moment.utc();
+            store.commit('setLastSuccessfulRequest');
             resolve(res);
           })
           .catch(() => {

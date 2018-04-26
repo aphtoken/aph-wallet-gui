@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import Vue from 'vue';
+import moment from 'moment';
 
 import { requests } from '../constants';
 import { alerts, db } from '../services';
@@ -8,7 +9,6 @@ export {
   clearActiveTransaction,
   clearRecentTransactions,
   clearSearchTransactions,
-  startRequest,
   endRequest,
   failRequest,
   resetRequests,
@@ -18,27 +18,30 @@ export {
   setCurrencySymbol,
   setCurrentNetwork,
   setCurrentWallet,
+  setGasClaim,
   setHoldings,
+  setLastReceivedBlock,
+  setLastSuccessfulRequest,
   setLatestVersion,
   setPortfolio,
   setRecentTransactions,
   setSearchTransactionFromDate,
   setSearchTransactionToDate,
   setSearchTransactions,
+  setSendInProgress,
   setShowAddContactModal,
   setShowAddTokenModal,
+  setShowClaimGasModal,
   setShowEditContactModal,
   setShowImportAWalletModal,
   setShowLoginToWalletModal,
   setShowSendAddressModal,
   setShowSendRequestLedgerSignature,
   setShowSendWithLedgerModal,
-  setSendInProgress,
   setShowWalletBackupModal,
   setStatsToken,
   setWallets,
-  setGasClaim,
-  setShowClaimGasModal,
+  startRequest,
 };
 
 function clearActiveTransaction(state) {
@@ -103,7 +106,7 @@ function setCurrentNetwork(state, network) {
   state.currentNetwork = network;
 }
 
-function setHoldings(state, holdings) {
+async function setHoldings(state, holdings) {
   if (!_.isEmpty(holdings)) {
     state.holdings = holdings;
   }
@@ -121,12 +124,20 @@ function setHoldings(state, holdings) {
   }
 
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  db.upsert(holdingsStorageKey, state.holdings);
+  db.upsert(holdingsStorageKey, holdings);
 }
 
-function setPortfolio(state, data) {
-  if (data) {
-    state.portfolio = data;
+function setLastReceivedBlock(state) {
+  state.lastReceivedBlock = moment().utc().toString();
+}
+
+function setLastSuccessfulRequest(state) {
+  state.lastSuccessfulRequest = moment().utc().toString();
+}
+
+function setPortfolio(state, portfolio) {
+  if (portfolio) {
+    state.portfolio = portfolio;
   }
 
   if (!state.currentWallet || !state.currentNetwork) {
@@ -134,7 +145,7 @@ function setPortfolio(state, data) {
   }
 
   const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  db.upsert(portfolioStorageKey, state.portfolio);
+  db.upsert(portfolioStorageKey, portfolio);
 }
 
 function setRecentTransactions(state, transactions) {
