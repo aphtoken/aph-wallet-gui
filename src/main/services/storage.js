@@ -1,7 +1,22 @@
 import Store from 'electron-store';
+import _ from 'lodash';
 import { ipcMain } from 'electron';
 
 const store = new Store();
+const keysToRemove = [
+  'aph',
+  'holdings',
+  'portfolios',
+  'token',
+  'txs',
+];
+
+ipcMain.on('storage.clean', (event) => {
+  console.log(`Cleaning deprecated storage keys: ${keysToRemove.join()}`);
+
+  event.returnValue = store.store = _.omit(store.store, keysToRemove);
+});
+
 
 ipcMain.on('storage.delete', (event, key) => {
   store.delete(key);

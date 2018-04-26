@@ -3,12 +3,6 @@ import _ from 'lodash';
 import { ipcRenderer } from 'electron';
 
 const store = new Store();
-const keysToRemove = [
-  'holdings',
-  'portfolios',
-  'token',
-  'txs',
-];
 let localStore = store.store;
 
 const service = {
@@ -40,11 +34,7 @@ const service = {
 };
 
 function clean() {
-  console.log(`Cleaning deprecated storage keys: ${keysToRemove.join()}`);
-
-  keysToRemove.forEach((key) => {
-    service.delete(key);
-  });
+  localStore = ipcRenderer.sendSync('storage.clean');
 }
 
 clean();
