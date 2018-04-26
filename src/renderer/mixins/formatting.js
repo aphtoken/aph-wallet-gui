@@ -1,52 +1,21 @@
-// import accounting from 'accounting';
-import moment from 'moment';
-import numeral from 'numeral';
-import { formats } from '../constants';
-import { settings } from '../services';
+import { formatting } from '../services';
 
 export default {
   methods: {
-    $formatDate(timestamp) {
-      return moment(timestamp, 'X').format(formats.DATE);
+    $formatDate(...args) {
+      return formatting.formatDate.apply(null, args);
     },
 
-    $formatDateShow(timestamp) {
-      return moment(timestamp, 'X').format(formats.DATE_SHORT);
+    $formatMoney(...args) {
+      return formatting.formatMoney.apply(null, args);
     },
 
-    $formatMoney(value, symbol, defaultValue = 'N/A') {
-      if (value === null) {
-        return defaultValue;
-      }
-      return accounting.formatMoney(value, symbol || settings.getCurrencySymbol());
+    $formatNumber(...args) {
+      return formatting.formatNumber.apply(null, args);
     },
 
-    $formatNumber(value, format = formats.NUMBER, defaultValue = 'N/A') {
-      if (value === null) {
-        return defaultValue;
-      }
-
-      if (value.toString().indexOf('e') > -1) {
-        return parseFloat(value.toString()).toFixed(8);
-      }
-      if (numeral(value).format(format || formats) === 'NaN') {
-        return parseFloat(value.toString()).toFixed(8);
-      }
-      return numeral(value).format(format || formats);
-    },
-
-    $formatNumberShort(value) {
-      if (value.toString().indexOf('e') > -1) {
-        return parseFloat(value.toString()).toFixed(2);
-      }
-      if (numeral(value).format(formats.NUMBER_SHORT) === 'NaN') {
-        return parseFloat(value.toString()).toFixed(2);
-      }
-      return numeral(value).format(formats.NUMBER_SHORT);
-    },
-
-    $formatTime(timestamp) {
-      return moment(timestamp, 'X').format(formats.TIME);
+    $formatTime(...args) {
+      return formatting.formatTime.apply(null, args);
     },
   },
 };

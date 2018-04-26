@@ -16,6 +16,7 @@ import { store } from '../store';
 import { timeouts } from '../constants';
 
 const toBigNumber = value => new BigNumber(String(value));
+const toFormattedBigNumber = value => toBigNumber(value).toString();
 const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 
@@ -70,7 +71,7 @@ export default {
                   res.push({
                     txid: t.transactionHash.replace('0x', ''),
                     symbol: t.symbol,
-                    value: new BigNumber(t.received - t.sent).toFormat(8),
+                    value: toFormattedBigNumber(t.received - t.sent),
                     block_index: t.blockIndex,
                     blockHeight: t.blockIndex,
                     block_time: t.blockTime,
@@ -80,12 +81,12 @@ export default {
                     vin: [{
                       address: t.fromAddress,
                       symbol: t.symbol,
-                      value: new BigNumber(Math.abs(t.received - t.sent)).toFormat(8),
+                      value: toFormattedBigNumber(Math.abs(t.received - t.sent)),
                     }],
                     vout: [{
                       address: t.toAddress,
                       symbol: t.symbol,
-                      value: new BigNumber(Math.abs(t.received - t.sent)).toFormat(8),
+                      value: toFormattedBigNumber(Math.abs(t.received - t.sent)),
                     }],
                   });
                 });
@@ -116,8 +117,8 @@ export default {
                       if (t.isNep5 !== true) {
                         let movedNEO = false;
                         let movedGAS = false;
-                        let outNEO = new BigNumber(0);
-                        let outGAS = new BigNumber(0);
+                        let outNEO = toBigNumber(0);
+                        let outGAS = toBigNumber(0);
 
                         transactionDetails.vin.forEach((i) => {
                           if (i.address === address && i.symbol === 'NEO') {
@@ -130,8 +131,8 @@ export default {
                           }
                         });
 
-                        let inNEO = new BigNumber(0);
-                        let inGAS = new BigNumber(0);
+                        let inNEO = toBigNumber(0);
+                        let inGAS = toBigNumber(0);
                         transactionDetails.vout.forEach((o) => {
                           if (o.address === address && o.symbol === 'NEO') {
                             inNEO = inNEO.plus(o.value);
@@ -184,7 +185,7 @@ export default {
                             hash: t.txid,
                             block_index: transactionDetails.block,
                             symbol: transactionDetails.symbol,
-                            value: neoChange,
+                            value: toFormattedBigNumber(neoChange),
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
                             isNep5: false,
@@ -224,7 +225,7 @@ export default {
                             hash: t.txid,
                             block_index: transactionDetails.block,
                             symbol: transactionDetails.symbol,
-                            value: gasChange,
+                            value: toFormattedBigNumber(gasChange),
                             block_time: transactionDetails.blocktime,
                             details: transactionDetails,
                             isNep5: false,
@@ -240,7 +241,7 @@ export default {
                           hash: t.txid,
                           block_index: transactionDetails.block,
                           symbol: t.symbol,
-                          value: t.value,
+                          value: toFormattedBigNumber(t.value),
                           block_time: transactionDetails.blocktime,
                           details: transactionDetails,
                           from: t.from,
@@ -407,7 +408,7 @@ export default {
                   privateKey: currentWallet.privateKey,
                 }, api.neonDB)
                   .then((res) => {
-                    h.availableToClaim = toBigNumber(res).toNumber();
+                    h.availableToClaim = toFormattedBigNumber(res);
                   })
                   .catch((e) => {
                     alerts.exception(e);
@@ -852,7 +853,7 @@ export default {
                 privateKey: wallets.getCurrentWallet().privateKey,
               }, api.neonDB)
                 .then((res) => {
-                  gasClaim.gasClaimAmount = toBigNumber(res).toNumber();
+                  gasClaim.gasClaimAmount = toFormattedBigNumber(res);
                   gasClaim.step = 3;
 
                   api.claimGas(config)

@@ -128,11 +128,11 @@ async function setHoldings(state, holdings) {
 }
 
 function setLastReceivedBlock(state) {
-  state.lastReceivedBlock = moment().utc().toString();
+  state.lastReceivedBlock = moment().unix();
 }
 
 function setLastSuccessfulRequest(state) {
-  state.lastSuccessfulRequest = moment().utc().toString();
+  state.lastSuccessfulRequest = moment().unix();
 }
 
 function setPortfolio(state, portfolio) {
@@ -150,6 +150,7 @@ function setPortfolio(state, portfolio) {
 
 function setRecentTransactions(state, transactions) {
   const existingIsEmpty = !state.recentTransactions || state.recentTransactions.length === 0;
+
   _.sortBy(transactions, 'block_index').forEach((t) => {
     const existingTransaction = _.find(state.recentTransactions, (o) => {
       return o.hash === t.hash && o.symbol === t.symbol;

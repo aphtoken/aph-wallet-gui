@@ -63,9 +63,9 @@ export default {
       }
 
       const blockSecondsAgo = moment.utc()
-        .diff(moment(this.$store.state.lastReceivedBlock), 'seconds');
+        .diff(moment.unix(this.$store.state.lastReceivedBlock), 'seconds');
       const apiSuccessfulRequestSecondsAgo = moment
-        .utc().diff(moment(this.$store.state.lastSuccessfulRequest), 'seconds');
+        .utc().diff(moment.unix(this.$store.state.lastSuccessfulRequest), 'seconds');
 
       return blockSecondsAgo > SECONDS_BEFORE_NETWORK_ERROR
         && apiSuccessfulRequestSecondsAgo > SECONDS_BEFORE_NETWORK_ERROR;

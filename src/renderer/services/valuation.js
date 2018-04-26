@@ -104,7 +104,7 @@ export default {
             }
             res.data.Data.forEach((d) => {
               if (i % mod === 0) {
-                returnData.dates.push(moment(d.time, 'X').format(formats.DATE_SHORT));
+                returnData.dates.push(moment.unix(d.time).format(formats.DATE_SHORT));
                 returnData.prices.push(d.close);
               }
 
