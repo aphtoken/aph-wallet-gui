@@ -39,8 +39,12 @@ export default {
     if (nullOrUndefined(value)) {
       return defaultValue;
     }
-
-    return numeral(toBigNumber(value)).format(format);
+    const bigNumber = toBigNumber(value);
+    if (bigNumber.e <= -6) {
+      // seeing weird behavior from numeral.format on very small negative numbers, adding this hack for now
+      return bigNumber.toFixed(8);
+    }
+    return numeral(bigNumber).format(format);
   },
 
   formatTime(timestamp, defaultValue = '--') {
