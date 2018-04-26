@@ -1,7 +1,6 @@
 /* eslint-disable no-use-before-define */
 import Vue from 'vue';
 import moment from 'moment';
-import { BigNumber } from 'bignumber.js';
 
 import { requests } from '../constants';
 import { alerts, db } from '../services';
@@ -43,17 +42,6 @@ export {
   setStatsToken,
   setWallets,
   startRequest,
-};
-
-const bigNumberToStringForStorage = (value) => {
-  if (_.has(value, 'c')) {
-    const number = new BigNumber(0);
-    number.c = value.c;
-    number.e = value.e;
-    number.s = value.s;
-    return number.toFixed(8);
-  }
-  return new BigNumber(String(value)).toFixed(8);
 };
 
 function clearActiveTransaction(state) {
@@ -182,51 +170,7 @@ function setRecentTransactions(state, transactions) {
 
   const transactionsStorageKey = `txs.${state.currentWallet.address}.${state.currentNetwork.net}`;
 
-
-  db.upsert(transactionsStorageKey, state.recentTransactions.map((transaction) => {
-    return {
-      address: transaction.address,
-      block_index: transaction.block_index,
-      block_time: transaction.block_time,
-      from: transaction.from,
-      hash: transaction.hash,
-      isNep5: transaction.isNep5,
-      symbol: transaction.symbol,
-      to: transaction.to,
-      value: bigNumberToStringForStorage(transaction.value),
-      details: {
-        attributes: transaction.details.attributes,
-        block: transaction.details.block,
-        blockhash: transaction.details.blockhash,
-        blocktime: transaction.details.blocktime,
-        confirmed: transaction.details.confirmed,
-        gas: transaction.details.gas,
-        net_fee: transaction.details.net_fee,
-        script: transaction.details.script,
-        scripts: transaction.details.scripts,
-        size: transaction.details.size,
-        symbol: transaction.details.symbol,
-        sys_fee: transaction.details.sys_fee,
-        txid: transaction.details.txid,
-        type: transaction.details.type,
-        version: transaction.details.version,
-        vin: transaction.details.vin.map((i) => {
-          return {
-            address: i.address,
-            symbol: i.symbol,
-            value: bigNumberToStringForStorage(i.value),
-          };
-        }),
-        vout: transaction.details.vout.map((o) => {
-          return {
-            address: o.address,
-            symbol: o.symbol,
-            value: bigNumberToStringForStorage(o.value),
-          };
-        }),
-      },
-    };
-  }));
+  db.upsert(transactionsStorageKey, normalizeRecentTransactions(state.recentTransactions));
 }
 
 function clearLocalNetworkState(state, newNetwork) {
@@ -329,6 +273,26 @@ function startRequest(state, payload) {
 
 
 // Local functions
+function normalizeRecentTransactions(transactions) {
+  return transactions.map((transaction) => {
+    return _.merge(transaction, {
+      value: transaction.value.toString(),
+      details: {
+        vin: transaction.details.vin.map((i) => {
+          return {
+            value: i.value.toString(),
+          };
+        }),
+        vout: transaction.details.vout.map((o) => {
+          return {
+            value: o.value.toString(),
+          };
+        }),
+      },
+    });
+  });
+}
+
 function updateRequest(state, { identifier, message }, status) {
   Vue.set(state.requests, identifier, { status, message });
 }

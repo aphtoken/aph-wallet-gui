@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import moment from 'moment';
+import { BigNumber } from 'bignumber.js';
 
 import { alerts, db, neo, network, tokens, wallets, ledger } from '../services';
 import { timeouts } from '../constants';
@@ -181,7 +182,7 @@ async function fetchRecentTransactions({ commit }) {
       lastBlockIndex = recentTransactions[0].block_index;
     }
 
-    commit('setRecentTransactions', recentTransactions);
+    commit('setRecentTransactions', normalizeRecentTransactions(recentTransactions));
   } catch (recentTransactions) {
     commit('setRecentTransactions', recentTransactions);
   }
@@ -360,4 +361,28 @@ function fetchLatestVersion({ commit }) {
       console.log(e);
       commit('failRequest', { identifier: 'fetchLatestVersion', message: e });
     });
+}
+
+
+// Local functions
+function normalizeRecentTransactions(transactions) {
+  return transactions.map((transaction) => {
+    const changes = {
+      value: new BigNumber(transaction.value),
+      details: {
+        vin: transaction.details.vin.map((i) => {
+          return {
+            value: new BigNumber(i.value),
+          };
+        }),
+        vout: transaction.details.vout.map((o) => {
+          return {
+            value: new BigNumber(o.value),
+          };
+        }),
+      },
+    };
+
+    return _.merge(transaction, changes);
+  });
 }
