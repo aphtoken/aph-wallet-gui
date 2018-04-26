@@ -69,12 +69,6 @@ function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
 }
 
 function claimGas({ commit }) {
-  const currentWallet = wallets.getCurrentWallet();
-
-  if (!currentWallet) {
-    return;
-  }
-
   commit('startRequest', { identifier: 'claimGas' });
 
   setTimeout(() => {
@@ -119,10 +113,6 @@ async function fetchHoldings({ commit }) {
   const currentWallet = wallets.getCurrentWallet();
   let holdings;
 
-  if (!currentWallet) {
-    return;
-  }
-
   commit('startRequest', { identifier: 'fetchHoldings' });
 
   const holdingsStorageKey = `holdings.${currentWallet.address}.${currentNetwork.net}`;
@@ -148,10 +138,6 @@ async function fetchPortfolio({ commit }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let portfolio;
-
-  if (!currentWallet) {
-    return;
-  }
 
   commit('startRequest', { identifier: 'fetchPortfolio' });
 
@@ -184,10 +170,6 @@ async function fetchRecentTransactions({ commit }) {
   let lastBlockIndex = 0;
   let recentTransactions;
 
-  if (!currentWallet) {
-    return;
-  }
-
   commit('startRequest', { identifier: 'fetchRecentTransactions' });
 
   const transactionsStorageKey = `txs.${currentWallet.address}.${currentNetwork.net}`;
@@ -216,10 +198,6 @@ async function fetchRecentTransactions({ commit }) {
 
 function findTransactions({ state, commit }) {
   const currentWallet = wallets.getCurrentWallet();
-
-  if (!currentWallet) {
-    return;
-  }
 
   commit('startRequest', { identifier: 'findTransactions' });
 

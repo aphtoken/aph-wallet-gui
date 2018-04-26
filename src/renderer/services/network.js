@@ -55,10 +55,9 @@ export default {
             if (network.bestBlock && network.bestBlock.index === data.index) {
               return;
             }
-            network.bestBlock = data;
             store.commit('setLastReceivedBlock');
             store.commit('setLastSuccessfulRequest');
-            this.normalizeAndStore(network).sync();
+            this.normalizeAndStore(_.set(network, 'bestBlock', data)).sync();
           })
           .catch((e) => {
             console.log(e);
@@ -76,11 +75,11 @@ export default {
   },
 
   setSelectedNetwork(network) {
+    this.normalizeAndStore(network).sync();
+
     if (loadNetworkStatusIntervalId) {
       clearInterval(loadNetworkStatusIntervalId);
     }
-
-    this.normalizeAndStore(network).sync();
 
     this.loadStatus();
     loadNetworkStatusIntervalId = setInterval(() => {

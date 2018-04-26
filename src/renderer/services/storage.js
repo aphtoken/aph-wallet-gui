@@ -2,10 +2,14 @@ import Store from 'electron-store';
 import _ from 'lodash';
 import { ipcRenderer } from 'electron';
 
-const store = new Store();
-let localStore = store.store;
+let store;
+let localStore;
 
-const service = {
+export default {
+  clean() {
+    localStore = ipcRenderer.sendSync('storage.clean');
+  },
+
   delete(key) {
     localStore = _.omit(localStore, key);
     ipcRenderer.send('storage.delete', key);
@@ -21,6 +25,13 @@ const service = {
     return _.has(localStore, key);
   },
 
+  init() {
+    store = new Store();
+    localStore = store.store;
+
+    this.clean();
+  },
+
   path() {
     return store.path;
   },
@@ -32,11 +43,3 @@ const service = {
     return this;
   },
 };
-
-function clean() {
-  localStore = ipcRenderer.sendSync('storage.clean');
-}
-
-clean();
-
-export default service;
