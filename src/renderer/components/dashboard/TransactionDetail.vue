@@ -88,7 +88,6 @@ export default {
     },
 
     confirmations() {
-      console.log(this.$store.state.activeTransaction);
       if (!this.$store.state.activeTransaction) {
         return 0;
       }
