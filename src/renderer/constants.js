@@ -15,6 +15,9 @@ const formats = {
   DATE_SHORT: 'DD-MM',
   MONEY: '$0,0.00',
   NUMBER: '0,0[.]0[00000000]',
+  WHOLE_NUMBER: '0,0',
+  FRACTIONAL_NUMBER: '[.]0[00000000]',
+  FRACTIONAL_NEGATIVE_NUMBER: '0[.]0[00000000]',
   TIME: 'LTC',
 };
 

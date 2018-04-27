@@ -35,16 +35,22 @@ export default {
     return accounting.formatMoney(toBigNumber(value), symbol || settings.getCurrencySymbol());
   },
 
-  formatNumber(value, format = formats.NUMBER, defaultValue = 'N/A') {
+  formatNumber(value,
+    defaultValue = 'N/A') {
     if (nullOrUndefined(value)) {
       return defaultValue;
     }
-    const bigNumber = toBigNumber(value);
-    if (bigNumber.e <= -6) {
-      // seeing weird behavior from numeral.format on very small negative numbers, adding this hack for now
-      return bigNumber.toFixed(8);
+    let bigNumber = toBigNumber(value);
+    const isNegative = bigNumber.isNegative();
+    bigNumber = bigNumber.abs();
+    let wholeNumber = bigNumber.integerValue(BigNumber.ROUND_FLOOR);
+    const fractionalNumber = bigNumber.minus(wholeNumber);
+    if (!wholeNumber.isZero()) {
+      wholeNumber = isNegative ? wholeNumber.multipliedBy(-1) : wholeNumber;
+      return `${numeral(wholeNumber).format(formats.WHOLE_NUMBER)}`
+        + `${numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER)}`;
     }
-    return numeral(bigNumber).format(format);
+    return (isNegative ? '-' : '') + numeral(fractionalNumber).format(formats.FRACTIONAL_NEGATIVE_NUMBER);
   },
 
   formatTime(timestamp, defaultValue = '--') {
