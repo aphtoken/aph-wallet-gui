@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
+import { wallets } from '../services';
+
 Vue.use(Router);
 
 export default new Router({
@@ -69,6 +71,13 @@ export default new Router({
     {
       path: '/authenticated',
       component: require('@/components/AuthenticatedWrapper').default,
+      beforeEnter: (to, from, next) => { // eslint-disable-line
+        if (wallets.getCurrentWallet()) {
+          return next();
+        }
+
+        return next('/login');
+      },
       children: [
         {
           path: 'dashboard',

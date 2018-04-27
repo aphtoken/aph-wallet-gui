@@ -14,7 +14,7 @@ export default {
         return '--';
       }
 
-      const seconds = this.now.diff(moment.utc(this.timestamp), 'seconds');
+      const seconds = this.now.diff(moment.unix(this.timestamp), 'seconds');
 
       switch (true) {
         case seconds <= 1:
@@ -22,7 +22,7 @@ export default {
         case seconds < 60:
           return `${seconds} seconds ago`;
         default:
-          return moment.utc(this.timestamp).fromNow();
+          return moment.unix(this.timestamp).fromNow();
       }
     },
   },
@@ -33,11 +33,7 @@ export default {
     };
   },
 
-  props: {
-    timestamp: {
-      type: [Object, String],
-    },
-  },
+  props: ['timestamp'],
 
   created() {
     this.now = moment.utc();

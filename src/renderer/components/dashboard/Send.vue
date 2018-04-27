@@ -65,6 +65,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 let sendTimeoutIntervalId;
 let storeUnwatch;
 
@@ -136,15 +137,11 @@ export default {
 
       if (cleanAmount && cleanAmount.length > 0) {
         if (this.currency && this.currency.symbol === 'NEO') {
-          cleanAmount = Math.floor(parseFloat(cleanAmount)).toFixed(0);
+          cleanAmount = Math.floor(new BigNumber(cleanAmount)).toFixed(0);
         } else if (cleanAmount[cleanAmount.length - 1] !== '.'
           && cleanAmount[cleanAmount.length - 1] !== '0') {
-          const f = parseFloat(cleanAmount);
-          cleanAmount = f.toString();
-          if (cleanAmount.indexOf('e') > -1
-              || (cleanAmount.indexOf('.') > -1 && cleanAmount.split('.')[1].length > 8)) {
-            cleanAmount = f.toFixed(8);
-          }
+          const n = new BigNumber(cleanAmount);
+          cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
         }
       }
 
@@ -171,9 +168,9 @@ export default {
           });
       }, this.$constants.timeouts.NEO_API_CALL);
 
-      let transactionTimeout = this.$constants.intervals.TRANSACTIONTIMEOUT;
+      let transactionTimeout = this.$constants.timeouts.TRANSACTION;
       if (this.$services.wallets.getCurrentWallet().isLedger === true) {
-        transactionTimeout = this.$constants.intervals.TRANSACTIONTIMEOUTWITHHARDWARE;
+        transactionTimeout = this.$constants.timeouts.TRANSACTION_WITH_HARDWARE;
       }
 
       sendTimeoutIntervalId = setTimeout(() => {

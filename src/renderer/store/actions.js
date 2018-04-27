@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import moment from 'moment';
+import { BigNumber } from 'bignumber.js';
 
 import { alerts, db, neo, network, tokens, wallets, ledger } from '../services';
 import { timeouts } from '../constants';
@@ -23,8 +24,9 @@ export {
   verifyLedgerConnection,
 };
 
-function addToken({ commit, dispatch, state }, { done, hashOrSymbol }) {
+function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
   const allTokens = tokens.getAllAsArray();
+  const currentNetwork = network.getSelectedNetwork();
   let token;
 
   commit('startRequest', { identifier: 'addToken' });
@@ -32,24 +34,24 @@ function addToken({ commit, dispatch, state }, { done, hashOrSymbol }) {
   hashOrSymbol = hashOrSymbol.replace('0x', '');
 
   token = _.find(allTokens, (o) => {
-    return o.symbol === hashOrSymbol && o.network === state.currentNetwork.net;
+    return o.symbol === hashOrSymbol && o.network === currentNetwork.net;
   });
 
   if (!token) {
     token = _.find(allTokens, (o) => {
-      return o.assetId === hashOrSymbol && o.network === state.currentNetwork.net;
+      return o.assetId === hashOrSymbol && o.network === currentNetwork.net;
     });
   }
 
   if (!token) {
     /* eslint-disable max-len */
-    return commit('failRequest', { identifier: 'addToken', message: `Unable to find a token with the symbol or script hash of '${hashOrSymbol}' on ${state.currentNetwork.net}` });
+    return commit('failRequest', { identifier: 'addToken', message: `Unable to find a token with the symbol or script hash of '${hashOrSymbol}' on ${currentNetwork.net}` });
     /* eslint-enable max-len */
   }
 
   if (token.isCustom) {
     /* eslint-disable max-len */
-    return commit('failRequest', { identifier: 'addToken', message: `'${hashOrSymbol}' is already in your token list ${state.currentNetwork.net}` });
+    return commit('failRequest', { identifier: 'addToken', message: `'${hashOrSymbol}' is already in your token list ${currentNetwork.net}` });
     /* eslint-enable max-len */
   }
 
@@ -68,12 +70,6 @@ function addToken({ commit, dispatch, state }, { done, hashOrSymbol }) {
 }
 
 function claimGas({ commit }) {
-  const currentWallet = wallets.getCurrentWallet();
-
-  if (!currentWallet) {
-    return;
-  }
-
   commit('startRequest', { identifier: 'claimGas' });
 
   setTimeout(() => {
@@ -113,17 +109,14 @@ async function fetchCachedData(id, defaultValue) {
   return result;
 }
 
-async function fetchHoldings({ state, commit }) {
+async function fetchHoldings({ commit }) {
+  const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let holdings;
 
-  if (!currentWallet) {
-    return;
-  }
-
   commit('startRequest', { identifier: 'fetchHoldings' });
 
-  const holdingsStorageKey = `holdings.${currentWallet.address}.${state.currentNetwork.net}`;
+  const holdingsStorageKey = `holdings.${currentWallet.address}.${currentNetwork.net}`;
 
   try {
     holdings = await fetchCachedData(holdingsStorageKey);
@@ -142,17 +135,14 @@ async function fetchHoldings({ state, commit }) {
   }
 }
 
-async function fetchPortfolio({ state, commit }) {
+async function fetchPortfolio({ commit }) {
+  const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let portfolio;
 
-  if (!currentWallet) {
-    return;
-  }
-
   commit('startRequest', { identifier: 'fetchPortfolio' });
 
-  const portfolioStorageKey = `portfolios.${currentWallet.address}.${state.currentNetwork.net}`;
+  const portfolioStorageKey = `portfolios.${currentWallet.address}.${currentNetwork.net}`;
 
   try {
     portfolio = await fetchCachedData(portfolioStorageKey);
@@ -175,18 +165,15 @@ async function fetchPortfolio({ state, commit }) {
   }
 }
 
-async function fetchRecentTransactions({ state, commit }) {
+async function fetchRecentTransactions({ commit }) {
+  const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let lastBlockIndex = 0;
   let recentTransactions;
 
-  if (!currentWallet) {
-    return;
-  }
-
   commit('startRequest', { identifier: 'fetchRecentTransactions' });
 
-  const transactionsStorageKey = `txs.${currentWallet.address}.${state.currentNetwork.net}`;
+  const transactionsStorageKey = `txs.${currentWallet.address}.${currentNetwork.net}`;
 
   try {
     recentTransactions = await fetchCachedData(transactionsStorageKey);
@@ -195,7 +182,7 @@ async function fetchRecentTransactions({ state, commit }) {
       lastBlockIndex = recentTransactions[0].block_index;
     }
 
-    commit('setRecentTransactions', recentTransactions);
+    commit('setRecentTransactions', normalizeRecentTransactions(recentTransactions));
   } catch (recentTransactions) {
     commit('setRecentTransactions', recentTransactions);
   }
@@ -212,10 +199,6 @@ async function fetchRecentTransactions({ state, commit }) {
 
 function findTransactions({ state, commit }) {
   const currentWallet = wallets.getCurrentWallet();
-
-  if (!currentWallet) {
-    return;
-  }
 
   commit('startRequest', { identifier: 'findTransactions' });
 
@@ -378,4 +361,28 @@ function fetchLatestVersion({ commit }) {
       console.log(e);
       commit('failRequest', { identifier: 'fetchLatestVersion', message: e });
     });
+}
+
+
+// Local functions
+function normalizeRecentTransactions(transactions) {
+  return transactions.map((transaction) => {
+    const changes = {
+      value: new BigNumber(transaction.value),
+      details: {
+        vin: transaction.details.vin.map((i) => {
+          return {
+            value: new BigNumber(i.value),
+          };
+        }),
+        vout: transaction.details.vout.map((o) => {
+          return {
+            value: new BigNumber(o.value),
+          };
+        }),
+      },
+    };
+
+    return _.merge(transaction, changes);
+  });
 }

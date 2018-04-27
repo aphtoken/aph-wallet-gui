@@ -39,14 +39,17 @@ export default {
 
   watch: {
     selectedCurrency(currency) {
-      this.$services.settings.setCurrency(currency).sync();
+      this.$services.settings.setCurrency(currency);
+      this.$store.dispatch('fetchPortfolio');
     },
 
     selectedNetwork(network) {
-      if (network.net === this.$store.state.currentNetwork.net) {
+      if (network.net === _.get(this.$store.state.currentNetwork, 'net')) {
         return;
       }
+
       this.$services.network.setSelectedNetwork(network);
+      this.$store.dispatch('fetchPortfolio');
     },
   },
 };
