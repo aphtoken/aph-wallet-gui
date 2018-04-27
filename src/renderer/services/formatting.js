@@ -50,7 +50,7 @@ export default {
       return `${numeral(wholeNumber).format(wholeNumberFormat)}`
         + `${numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER)}`;
     }
-    return (isNegative ? '-' : '') + numeral(fractionalNumber).format(formats.FRACTIONAL_NEGATIVE_NUMBER);
+    return (isNegative ? '-0' : '0') + numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER);
   },
 
   formatTime(timestamp, defaultValue = '--') {
