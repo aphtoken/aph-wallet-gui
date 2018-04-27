@@ -58,7 +58,7 @@
         <div class="row has-equal-columns">
           <div class="column" v-if="this.$store.state.activeTransaction.confirmed">
             <div class="label">Confirmations</div>
-            <div class="value">{{ $formatNumber($store.state.activeTransaction.confirmations) }}</div>
+            <div class="value">{{ $formatNumber(confirmations) }}</div>
           </div>
           <div class="column confirmed" v-if="this.$store.state.activeTransaction.confirmed">
             <aph-icon name="confirmed"></aph-icon>
@@ -85,6 +85,14 @@ export default {
         return [];
       }
       return this.$store.state.activeTransaction.vout;
+    },
+
+    confirmations() {
+      console.log(this.$store.state.activeTransaction);
+      if (!this.$store.state.activeTransaction) {
+        return 0;
+      }
+      return this.$store.state.currentNetwork.bestBlock.index - this.$store.state.activeTransaction.block;
     },
   },
 };
