@@ -531,12 +531,21 @@ export default {
           return axios.get(`${currentNetwork.aph}/tokens`)
             .then((res) => {
               res.data.tokens.forEach((t) => {
-                tokens.add({
+                const token = {
                   symbol: t.symbol,
                   assetId: t.scriptHash.replace('0x', ''),
                   isCustom: false,
                   network: currentNetwork.net,
+                };
+                let isDefaultToken = false;
+                defaultList.forEach((defaultToken) => {
+                  if (defaultToken.assetId === token.assetId) {
+                    isDefaultToken = true;
+                  }
                 });
+                if (!isDefaultToken) {
+                  tokens.add(token);
+                }
               });
             })
             .catch(() => {
