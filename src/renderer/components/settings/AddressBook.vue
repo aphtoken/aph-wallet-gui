@@ -120,7 +120,6 @@ export default {
 #settings--address-book {
   display: flex;
   flex-direction: column;
-  margin-top: $space-lg;
   overflow: hidden;
 
   .contacts-table {
