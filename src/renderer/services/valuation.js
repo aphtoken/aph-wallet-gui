@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { formats } from '../constants';
+
 import alerts from './alerts';
 import settings from './settings';
 
@@ -104,7 +104,7 @@ export default {
             }
             res.data.Data.forEach((d) => {
               if (i % mod === 0) {
-                returnData.dates.push(moment(d.time, 'X').format(formats.DATE_SHORT));
+                returnData.dates.push(d.time);
                 returnData.prices.push(d.close);
               }
 

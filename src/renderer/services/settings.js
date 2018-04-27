@@ -66,6 +66,7 @@ export default {
   setCurrency(currency) {
     storage.set(CURRENCY_STORAGE_KEY, currency);
     this.setCurrencySymbol(this.getCurrencySymbol());
+    this.sync();
 
     return this;
   },

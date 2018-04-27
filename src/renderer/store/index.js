@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+
 import * as actions from './actions';
 import * as getters from './getters';
 import * as mutations from './mutations';
@@ -7,6 +8,7 @@ import * as mutations from './mutations';
 Vue.use(Vuex);
 
 const pjson = require('../../../package.json');
+
 const state = {
   activeTransaction: null,
   contacts: [],
@@ -14,9 +16,12 @@ const state = {
   currencySymbol: null,
   currentEditContact: null,
   currentLoginToWallet: null,
-  currentWallet: {},
+  currentNetwork: null,
+  currentWallet: null,
   gasClaim: null,
   holdings: [],
+  lastReceivedBlock: null,
+  lastSuccessfulRequest: null,
   latestVersion: null,
   portfolio: null,
   recentTransactions: [],

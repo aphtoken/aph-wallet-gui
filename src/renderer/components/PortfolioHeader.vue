@@ -41,16 +41,6 @@ export default {
     Zoom,
   },
 
-  data() {
-    return {
-      portfolio: {
-        balance: 0,
-        changeValue: 0,
-        changePercent: 0,
-      },
-    };
-  },
-
   methods: {
     fetchPortfolio() {
       this.$store.dispatch('fetchPortfolio');

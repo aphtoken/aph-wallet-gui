@@ -203,7 +203,7 @@ export default {
   },
 
   sync() {
-    store.commit('setCurrentWallet', currentWallet);
+    store.commit('setCurrentWallet', this.getCurrentWallet());
     store.commit('setWallets', this.getAllAsArray());
   },
 

@@ -36,36 +36,48 @@
       </a>
     </div>
     <div class="footer link-list">
-      <div class="network-status" v-if="network">
+      <div class="network-status">
         <div class="block">
-          <span class="network">{{network.net}} block</span><span class="index">{{blockIndex}}</span>
+          <span class="network">{{ currentNetwork.net }} block</span><span class="index">{{ currentNetwork.bestBlock.index }}</span>
         </div>
         <div class="last-update">
           <div v-if="showNetworkError" class="network-error">Unable to Reach Network</div>
           <div v-else>
-            <aph-timestamp-from-now :timestamp="network.lastSuccessfulRequest"></aph-timestamp-from-now>
+            <aph-timestamp-from-now :timestamp="lastReceivedBlock"></aph-timestamp-from-now>
           </div>
         </div>
       </div>
-      <div class="version-number">{{$store.state.version}}</div>
+      <div class="version-number">{{ version }}</div>
     </div>
   </section>
 </template>
 
 <script>
-let loadNetworkStatusIntervalId;
+import { mapGetters } from 'vuex';
+
+const SECONDS_BEFORE_NETWORK_ERROR = 120;
 
 export default {
-  beforeDestroy() {
-    clearInterval(loadNetworkStatusIntervalId);
-  },
+  computed: {
+    showNetworkError() {
+      if (!this.$store.state.lastReceivedBlock || !this.$store.state.lastSuccessfulRequest) {
+        return false;
+      }
 
-  beforeMount() {
-    this.loadStatus();
+      const blockSecondsAgo = moment.utc()
+        .diff(moment.unix(this.$store.state.lastReceivedBlock), 'seconds');
+      const apiSuccessfulRequestSecondsAgo = moment
+        .utc().diff(moment.unix(this.$store.state.lastSuccessfulRequest), 'seconds');
 
-    loadNetworkStatusIntervalId = setInterval(() => {
-      this.loadStatus();
-    }, 1000);
+      return blockSecondsAgo > SECONDS_BEFORE_NETWORK_ERROR
+        && apiSuccessfulRequestSecondsAgo > SECONDS_BEFORE_NETWORK_ERROR;
+    },
+
+    ...mapGetters([
+      'currentNetwork',
+      'lastReceivedBlock',
+      'version',
+    ]),
   },
 
   methods: {
@@ -73,28 +85,8 @@ export default {
       this.$services.wallets.clearCurrentWallet();
       this.$router.push('/login');
     },
-
-    loadStatus() {
-      this.network = this.$services.network.getSelectedNetwork();
-
-      if (this.network.bestBlock) {
-        this.blockIndex = this.network.bestBlock.index;
-        this.blockSecondsAgo = moment.utc().diff(moment.utc(this.network.lastReceivedBlock), 'seconds');
-        const apiSuccessfulRequestSecondsAgo =
-          moment.utc().diff(moment.utc(this.network.lastSuccessfulRequest), 'seconds');
-        this.showNetworkError = this.blockSecondsAgo > 120 && apiSuccessfulRequestSecondsAgo > 120;
-      }
-    },
   },
 
-  data() {
-    return {
-      network: null,
-      blockIndex: 0,
-      blockSecondsAgo: 0,
-      showNetworkError: false,
-    };
-  },
 };
 </script>
 
@@ -199,6 +191,10 @@ export default {
 
     .network-status {
       .block {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+
         .network {
           color: $dark;
           font-family: GilroySemibold;
