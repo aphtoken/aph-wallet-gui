@@ -35,7 +35,7 @@ export default {
     return accounting.formatMoney(toBigNumber(value), symbol || settings.getCurrencySymbol());
   },
 
-  formatNumber(value,
+  formatNumber(value, wholeNumberFormat = formats.WHOLE_NUMBER,
     defaultValue = 'N/A') {
     if (nullOrUndefined(value)) {
       return defaultValue;
@@ -47,7 +47,7 @@ export default {
     const fractionalNumber = bigNumber.minus(wholeNumber);
     if (!wholeNumber.isZero()) {
       wholeNumber = isNegative ? wholeNumber.multipliedBy(-1) : wholeNumber;
-      return `${numeral(wholeNumber).format(formats.WHOLE_NUMBER)}`
+      return `${numeral(wholeNumber).format(wholeNumberFormat)}`
         + `${numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER)}`;
     }
     return (isNegative ? '-' : '') + numeral(fractionalNumber).format(formats.FRACTIONAL_NEGATIVE_NUMBER);

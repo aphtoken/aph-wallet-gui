@@ -65,6 +65,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 let sendTimeoutIntervalId;
 let storeUnwatch;
 
@@ -136,17 +137,11 @@ export default {
 
       if (cleanAmount && cleanAmount.length > 0) {
         if (this.currency && this.currency.symbol === 'NEO') {
-          cleanAmount = Math.floor(parseFloat(cleanAmount)).toFixed(0);
+          cleanAmount = Math.floor(new BigNumber(cleanAmount)).toFixed(0);
         } else if (cleanAmount[cleanAmount.length - 1] !== '.'
           && cleanAmount[cleanAmount.length - 1] !== '0') {
-          const f = parseFloat(cleanAmount);
-          cleanAmount = f.toString();
-          console.log(cleanAmount);
-          if (cleanAmount.indexOf('e') > -1
-              || (cleanAmount.indexOf('.') > -1 && cleanAmount.split('.')[1].length > 8)) {
-            const precision = Number.parseInt(cleanAmount.split('-')[1], 10);
-            cleanAmount = f.toFixed(precision);
-          }
+          const n = new BigNumber(cleanAmount);
+          cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
         }
       }
 
