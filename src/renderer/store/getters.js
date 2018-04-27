@@ -22,4 +22,5 @@ export const showPortfolioHeader = state => state.showPortfolioHeader;
 export const showSendAddressModal = state => state.showSendAddressModal;
 export const showWalletBackupModal = state => state.showWalletBackupModal;
 export const statsToken = state => state.statsToken;
+export const version = state => state.version;
 export const wallets = state => state.wallets;

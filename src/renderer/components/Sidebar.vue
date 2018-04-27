@@ -38,21 +38,23 @@
     <div class="footer link-list">
       <div class="network-status">
         <div class="block">
-          <span class="network">{{ $store.state.currentNetwork.net }} block</span><span class="index">{{ $store.state.currentNetwork.bestBlock.index }}</span>
+          <span class="network">{{ currentNetwork.net }} block</span><span class="index">{{ currentNetwork.bestBlock.index }}</span>
         </div>
         <div class="last-update">
           <div v-if="showNetworkError" class="network-error">Unable to Reach Network</div>
           <div v-else>
-            <aph-timestamp-from-now :timestamp="$store.state.lastReceivedBlock"></aph-timestamp-from-now>
+            <aph-timestamp-from-now :timestamp="lastReceivedBlock"></aph-timestamp-from-now>
           </div>
         </div>
       </div>
-      <div class="version-number">{{ $store.state.version }}</div>
+      <div class="version-number">{{ version }}</div>
     </div>
   </section>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 const SECONDS_BEFORE_NETWORK_ERROR = 120;
 
 export default {
@@ -70,6 +72,12 @@ export default {
       return blockSecondsAgo > SECONDS_BEFORE_NETWORK_ERROR
         && apiSuccessfulRequestSecondsAgo > SECONDS_BEFORE_NETWORK_ERROR;
     },
+
+    ...mapGetters([
+      'currentNetwork',
+      'lastReceivedBlock',
+      'version',
+    ]),
   },
 
   methods: {
@@ -78,6 +86,7 @@ export default {
       this.$router.push('/login');
     },
   },
+
 };
 </script>
 
