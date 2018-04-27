@@ -4,21 +4,24 @@
     <div class="content">
       <portfolio-header v-if="$store.state.showPortfolioHeader"></portfolio-header>
       <router-view></router-view>
-      <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal" :onCancel="end"></aph-send-with-ledger-modal>
+      <aph-claim-gas-modal v-if="$store.state.showClaimGasModal"></aph-claim-gas-modal>
+      <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal"></aph-send-with-ledger-modal>
     </div>
   </section>
 </template>
 
 <script>
-import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
 import PortfolioHeader from './PortfolioHeader';
 import Sidebar from './Sidebar';
+import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
+import AphClaimGasModal from './modals/ClaimGasModal';
 
 export default {
   components: {
     PortfolioHeader,
     Sidebar,
     AphSendWithLedgerModal,
+    AphClaimGasModal,
   },
 
   data() {
@@ -30,10 +33,6 @@ export default {
 
   mounted() {
     this.$services.neo.fetchNEP5Tokens();
-
-    if (!this.$services.wallets.getCurrentWallet()) {
-      this.$router.push('/login');
-    }
   },
 };
 </script>

@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import Vue from 'vue';
+import moment from 'moment';
 
 import { requests } from '../constants';
 import { alerts, db } from '../services';
@@ -17,15 +18,20 @@ export {
   setCurrencySymbol,
   setCurrentNetwork,
   setCurrentWallet,
+  setGasClaim,
   setHoldings,
+  setLastReceivedBlock,
+  setLastSuccessfulRequest,
   setLatestVersion,
   setPortfolio,
   setRecentTransactions,
   setSearchTransactionFromDate,
   setSearchTransactionToDate,
   setSearchTransactions,
+  setSendInProgress,
   setShowAddContactModal,
   setShowAddTokenModal,
+  setShowClaimGasModal,
   setShowEditContactModal,
   setShowImportAWalletModal,
   setShowLoginToWalletModal,
@@ -100,7 +106,7 @@ function setCurrentNetwork(state, network) {
   state.currentNetwork = network;
 }
 
-function setHoldings(state, holdings) {
+async function setHoldings(state, holdings) {
   if (!_.isEmpty(holdings)) {
     state.holdings = holdings;
   }
@@ -118,12 +124,20 @@ function setHoldings(state, holdings) {
   }
 
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  db.upsert(holdingsStorageKey, state.holdings);
+  db.upsert(holdingsStorageKey, holdings);
 }
 
-function setPortfolio(state, data) {
-  if (data) {
-    state.portfolio = data;
+function setLastReceivedBlock(state) {
+  state.lastReceivedBlock = moment().unix();
+}
+
+function setLastSuccessfulRequest(state) {
+  state.lastSuccessfulRequest = moment().unix();
+}
+
+function setPortfolio(state, portfolio) {
+  if (portfolio) {
+    state.portfolio = portfolio;
   }
 
   if (!state.currentWallet || !state.currentNetwork) {
@@ -131,11 +145,12 @@ function setPortfolio(state, data) {
   }
 
   const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  db.upsert(portfolioStorageKey, state.portfolio);
+  db.upsert(portfolioStorageKey, portfolio);
 }
 
 function setRecentTransactions(state, transactions) {
   const existingIsEmpty = !state.recentTransactions || state.recentTransactions.length === 0;
+
   _.sortBy(transactions, 'block_index').forEach((t) => {
     const existingTransaction = _.find(state.recentTransactions, (o) => {
       return o.hash === t.hash && o.symbol === t.symbol;
@@ -154,7 +169,8 @@ function setRecentTransactions(state, transactions) {
   }
 
   const transactionsStorageKey = `txs.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  db.upsert(transactionsStorageKey, state.recentTransactions);
+
+  db.upsert(transactionsStorageKey, normalizeRecentTransactions(state.recentTransactions));
 }
 
 function clearLocalNetworkState(state, newNetwork) {
@@ -225,6 +241,10 @@ function setShowSendRequestLedgerSignature(state, value) {
   state.showSendRequestLedgerSignature = value;
 }
 
+function setSendInProgress(state, value) {
+  state.sendInProgress = value;
+}
+
 function setShowWalletBackupModal(state, value) {
   state.showWalletBackupModal = value;
 }
@@ -239,12 +259,40 @@ function setWallets(state, wallets) {
   state.wallets = wallets;
 }
 
+function setGasClaim(state, value) {
+  state.gasClaim = value;
+}
+
+function setShowClaimGasModal(state, value) {
+  state.showClaimGasModal = value;
+}
+
 function startRequest(state, payload) {
   updateRequest(state, payload, requests.PENDING);
 }
 
 
 // Local functions
+function normalizeRecentTransactions(transactions) {
+  return transactions.map((transaction) => {
+    return _.merge(transaction, {
+      value: transaction.value.toString(),
+      details: {
+        vin: transaction.details.vin.map((i) => {
+          return {
+            value: i.value.toString(),
+          };
+        }),
+        vout: transaction.details.vout.map((o) => {
+          return {
+            value: o.value.toString(),
+          };
+        }),
+      },
+    });
+  });
+}
+
 function updateRequest(state, { identifier, message }, status) {
   Vue.set(state.requests, identifier, { status, message });
 }

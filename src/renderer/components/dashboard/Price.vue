@@ -115,6 +115,8 @@ export default {
     },
 
     loadPriceData() {
+      const _this = this;
+
       if (!this.$store.state.statsToken) {
         return;
       }
@@ -153,7 +155,7 @@ export default {
                   },
                   ticks: {
                     callback(label, index) {
-                      return index % 2 === 0 ? window.accounting.formatMoney(label) : '';
+                      return index % 2 === 0 ? _this.$formatMoney(label) : '';
                     },
                     autoSkip: true,
                     fontColor: '#19193A',
@@ -173,6 +175,9 @@ export default {
                     tickMarkLength: 20,
                   },
                   ticks: {
+                    callback(label) {
+                      return _this.$formatDateShort(label);
+                    },
                     fontColor: '#66688D',
                     fontFamily: 'GilroySemibold',
                     fontSize: 12,

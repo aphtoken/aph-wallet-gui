@@ -1,6 +1,5 @@
 import LedgerNode from '@ledgerhq/hw-transport-node-hid';
 import { tx, wallet, u } from '@cityofzion/neon-js';
-import alerts from './alerts';
 import wallets from './wallets';
 import { store } from '../store';
 
@@ -47,24 +46,35 @@ export default {
               });
           })
           .catch(({ message }) => {
-            alerts.exception(message);
             return reject(message);
           });
       } catch ({ message }) {
-        console.log(message);
         return reject(message);
       }
     });
   },
 
   close() {
-    store.commit('setShowSendWithLedgerModal', false);
-    store.commit('setShowSendRequestLedgerSignature', false);
+    return new Promise((resolve, reject) => {
+      store.commit('setShowSendWithLedgerModal', false);
+      store.commit('setShowSendRequestLedgerSignature', false);
 
-    if (currentDevice) {
-      return currentDevice.close();
-    }
-    return Promise.resolve();
+      if (!currentDevice) {
+        currentDevice = null;
+        resolve();
+        return;
+      }
+
+      currentDevice.close()
+        .then(() => {
+          currentDevice = null;
+          resolve();
+        })
+        .catch((e) => {
+          console.log(e);
+          return reject(e);
+        });
+    });
   },
 
   getDeviceInfo() {
@@ -149,18 +159,15 @@ export default {
                 currentLedger.close();
               })
               .catch((e) => {
-                alerts.error(e);
                 currentLedger.close();
                 reject(e);
               });
           })
           .catch((e) => {
-            alerts.error(e);
             currentLedger.close();
             reject(e);
           });
       } catch (e) {
-        alerts.exception(e);
         currentLedger.close();
         reject(e);
       }

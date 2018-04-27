@@ -1,29 +1,17 @@
 import ipcPromise from 'ipc-promise';
 import _ from 'lodash';
 
-function formatResponse(response) {
-  return _.values(_.omit(
-    response,
-    ['_id', '_rev'],
-  ));
+function formatResponse(response, defaultValue) {
+  return _.get(response, 'data', defaultValue);
 }
 
 export default {
   async get(id, defaultValue = null) {
     try {
       const response = await ipcPromise.send('db.get', id);
-
-      return Promise.resolve(formatResponse(response));
+      return Promise.resolve(formatResponse(response, defaultValue));
     } catch (e) {
       return Promise.resolve(defaultValue);
-    }
-  },
-
-  async put(id, value) {
-    try {
-      await ipcPromise.send('db.put', id, value);
-    } catch (e) {
-      console.log(e);
     }
   },
 
@@ -35,9 +23,9 @@ export default {
     }
   },
 
-  async upsert(id, value) {
+  async upsert(id, data) {
     try {
-      await ipcPromise.send('db.upsert', id, value);
+      await ipcPromise.send('db.upsert', { id, data });
     } catch (e) {
       console.log(e);
     }

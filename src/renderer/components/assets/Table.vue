@@ -4,7 +4,7 @@
       <aph-icon name="search"></aph-icon>
       <input placeholder="Search" v-model="searchBy">
     </div>
-    <button class="add-token-btn" v-if="$store.state.holdings.length === 0" @click="showAddTokenModal">Add token</button>
+    <button class="add-token-btn" v-if="shouldShowAddTokenButton" @click="showAddTokenModal">Add token</button>
     <div class="holdings">
       <div v-for="(holding, index) in filteredHoldings" class="holding" :key="index">
         <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
@@ -44,6 +44,10 @@ export default {
           canRemove,
         });
       });
+    },
+
+    shouldShowAddTokenButton() {
+      return this.$store.state.holdings.length === 0 && this.$isDone('fetchHoldings');
     },
   },
 

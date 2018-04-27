@@ -1,6 +1,7 @@
 import alerts from './alerts';
 import contacts from './contacts';
 import db from './db';
+import formatting from './formatting';
 import ledger from './ledger';
 import neo from './neo';
 import network from './network';
@@ -14,6 +15,7 @@ export {
   alerts,
   contacts,
   db,
+  formatting,
   ledger,
   neo,
   network,
