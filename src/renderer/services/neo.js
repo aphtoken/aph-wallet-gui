@@ -350,7 +350,9 @@ export default {
                   .then(() => resolve(transaction))
                   .catch(e => reject(e));
               })
-              .catch(e => reject(e));
+              .catch((e) => {
+                reject(new Error(`NEO RPC Network Error: ${e.message}`));
+              });
           })
           .catch(() => resolve(null));
       } catch (e) {
@@ -499,7 +501,9 @@ export default {
               })
               .catch(e => reject(e));
           })
-          .catch(e => reject(e));
+          .catch((e) => {
+            reject(new Error(`NEO RPC Network Error: ${e.message}`));
+          });
       } catch (e) {
         return reject(e);
       }
@@ -548,7 +552,8 @@ export default {
                 }
               });
             })
-            .catch(() => {
+            .catch((e) => {
+              alerts.exception(new Error(`APH API Error: ${e.message}`));
             });
         } catch (e) {
           return reject(e);
@@ -592,7 +597,8 @@ export default {
             store.commit('setLastSuccessfulRequest');
             resolve(res);
           })
-          .catch(() => {
+          .catch((e) => {
+            alerts.exception(new Error(`APH API Error: ${e.message}`));
             resolve({
               data: {
                 transfers: [],
