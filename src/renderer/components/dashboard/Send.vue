@@ -297,7 +297,7 @@ export default {
         top: toRem(18px);
         right: 0;
       }
-      
+
       .max {
         bottom: toRem(16px);
         color: $grey;
