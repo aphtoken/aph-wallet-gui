@@ -4,8 +4,7 @@
       <h1 class="underlined">Token Stats</h1>
       <div class="gas" v-if="$store.state.statsToken.availableToClaim">
         <div class="label">{{ $formatNumber($store.state.statsToken.availableToClaim) }} Gas</div>
-        <div class="claiming" v-if="$isPending('claimGas')">Claiming Gas...</div>
-        <a href="" class="claim" @click.prevent="claim" v-else>Claim Gas</a>
+        <button class="claim" @click.prevent="claim" :disabled="$isPending('claimGas')">{{ claimButtonLabel }}</button>
       </div>
       <div class="current-value">
         <div class="label">Current Value</div>
@@ -46,8 +45,8 @@ export default {
       return this.formattedAmount.length > AMOUNT_LENGTH_LIMIT ? ['balance', 'small'] : ['balance'];
     },
 
-    buttonLabel() {
-      return this.$isPending('claimGas') ? 'Claiming...' : 'Claim';
+    claimButtonLabel() {
+      return this.$isPending('claimGas') ? 'Claiming Gas...' : 'Claim Gas';
     },
 
     formattedAmount() {
@@ -89,6 +88,19 @@ export default {
 
       .claim, .claiming {
         font-family: GilroyMedium;
+      }
+
+      .claim {
+        @extend %btn;
+
+        border: none;
+        font-size: toRem(10px);
+        height: auto;
+        line-height: initial;
+        padding: toRem(3px) 0;
+        position: relative;
+        top: toRem(-2px);
+        width: 50%;
       }
     }
 
@@ -171,24 +183,6 @@ export default {
       .value {
         font-size: toRem(16px);
       }
-    }
-
-    .claim {
-      flex: 1;
-      margin-left: $space-lg;
-      font-family: Gilroy;
-      font-size: toRem(20px);
-
-      .available {
-        @extend %small-uppercase-grey-label;
-
-        margin-bottom: $space-sm;
-        max-width: 15rem;
-        text-align: center;
-      }
-    }
-    .claim-btn {
-      @extend %btn;
     }
   }
 
