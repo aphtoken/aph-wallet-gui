@@ -4,38 +4,24 @@
       <h1 class="underlined">Contacts</h1>
     </div>
     <div class="body">
-      <section id="contacts--table">
-        <div class="body">
-          <div v-for="(contact, index) in filteredContacts" :key="index"
-             @click="useContact(contact)" class="contact">
-            <div class="cell name">{{ contact.name }}</div>
-            <div class="cell copy">
-              <aph-copy-text :text="contact.address"></aph-copy-text>
-            </div>
+      <div v-if="!$store.state.contacts.length" class="zero-state">
+        <aph-icon name="user"></aph-icon>
+        <div class="label">No contacts</div>
+      </div>
+      <div v-else class="table">
+        <div v-for="(contact, index) in $store.state.contacts" :key="index" @click="useContact(contact)" class="contact">
+          <div class="cell name">{{ contact.name }}</div>
+          <div class="cell copy">
+            <aph-copy-text :text="contact.address"></aph-copy-text>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   </section>
 </template>
 
 <script>
 export default {
-  computed: {
-    filteredContacts() {
-      const searchBy = this.searchBy.toLowerCase();
-      const list = _.filter(this.$services.contacts.getAllAsArray(), ({ name, address }) => {
-        if (!name || !address) {
-          return false;
-        }
-
-        return name.toLowerCase().indexOf(searchBy) > -1
-          || address.toLowerCase().indexOf(searchBy) > -1;
-      });
-      return list;
-    },
-  },
-
   data() {
     return {
       searchBy: '',
@@ -73,47 +59,60 @@ export default {
   .body {
     padding: 0 $space-lg;
     overflow: auto;
+    height: 100%;
 
-    #contacts--table {
-      .header {
-        display: flex;
-        padding: 0;
+    > .zero-state {
+      align-items: center;
+      display: flex;
+      height: 100%;
+      justify-content: center;
+      flex-direction: column;
 
-        .cell {
-          @extend %small-uppercase-grey-label;
+      .aph-icon {
+        svg {
+          height: toRem(60px);
 
-          flex: 1;
-          padding: $space;
+          .fill {
+            fill: $purple;
+          }
+
+          .stroke {
+            stroke: $purple;
+          }
         }
       }
 
-      .body {
-        height: 90%;
-        overflow-y: auto;
-        padding: 0;
+      .label {
+        color: $purple;
+        font-weight: GilroyMedium;
+        margin-top: $space-lg;
+      }
+    }
 
-        .contact {
-          align-items: center;
-          background: transparent;
-          border-top: 1px solid $background;
-          display: flex;
-          transition: $transition;
-          flex-wrap: wrap;
+    .table {
+      display: flex;
+      flex-direction: column;
 
-          .cell {
-            flex: 1;
-            font-family: GilroySemibold;
-            padding: $space;
+      .contact {
+        align-items: center;
+        background: transparent;
+        border-top: 1px solid $background;
+        display: flex;
+        transition: $transition;
+        flex-wrap: wrap;
 
-            &.copy {
-              flex: none;
-            }
+        .cell {
+          flex: 1;
+          font-family: GilroySemibold;
+          padding: $space;
+
+          &.copy {
+            flex: none;
           }
+        }
 
-          &:hover, &.active {
-            background: $background;
-          }
-
+        &:hover, &.active {
+          background: $background;
         }
       }
     }
