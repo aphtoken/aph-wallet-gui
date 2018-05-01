@@ -48,6 +48,7 @@
   }
 
   &.disabled, &:disabled {
+    background: rgba($purple-hover, 0.5);
     color: white;
     cursor: not-allowed;
   }
