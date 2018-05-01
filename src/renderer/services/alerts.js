@@ -46,6 +46,11 @@ export default {
         // maybe some other kind of offline indicator?
         return;
       }
+      if (e.message.indexOf('Request failed with status code') > -1) {
+        this.error('Error reaching NEO data server. Please try again later.');
+        console.log(e);
+        return;
+      }
       this.error(e.message);
     }
   },
