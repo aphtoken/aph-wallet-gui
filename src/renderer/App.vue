@@ -94,7 +94,12 @@ export default {
 }
 
 a {
+  color: $purple;
   text-decoration: none;
+
+  &:hover {
+    color: $purple-hover;
+  }
 
   &:focus {
     outline: none;
@@ -136,6 +141,10 @@ a {
   a {
     color: white;
     cursor: pointer;
+
+    &:hover {
+      color: white;
+    }
   }
 }
 
