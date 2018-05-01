@@ -51,6 +51,14 @@ export default {
       margin-left: $space-lg;
     }
   }
+
+  #settings--wallet-actions {
+    flex: none;
+  }
+
+  #settings--address-book {
+    flex: 1;
+  }
 }
 </style>
 

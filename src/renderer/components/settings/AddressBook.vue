@@ -351,7 +351,7 @@ export default {
   }
 
   .add-contact {
-    flex: 1;
+    flex: none;
 
     .cta {
       @extend %tile-light;

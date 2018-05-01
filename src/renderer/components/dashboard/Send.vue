@@ -297,7 +297,7 @@ export default {
         top: toRem(18px);
         right: 0;
       }
-
+      
       .max {
         bottom: toRem(16px);
         color: $grey;
@@ -307,7 +307,6 @@ export default {
         right: 0;
         z-index: 0;
       }
-    }
 
     .estimated-value {
       display: flex;
