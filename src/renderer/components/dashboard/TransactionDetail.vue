@@ -30,13 +30,13 @@
         <div class="row">
           <div class="column">
             <div class="label">From</div>
-            <aph-simple-transactions :transactions="fromTransactions"></aph-simple-transactions>
+            <aph-simple-transactions :transactions="fromTransactions" :show-block-time="false"></aph-simple-transactions>
           </div>
         </div>
         <div class="row">
           <div class="column">
             <div class="label">To</div>
-            <aph-simple-transactions :transactions="toTransactions"></aph-simple-transactions>
+            <aph-simple-transactions :transactions="toTransactions" :show-block-time="false"></aph-simple-transactions>
           </div>
         </div>
       </div>

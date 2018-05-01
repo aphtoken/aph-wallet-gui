@@ -50,6 +50,7 @@
         <div class="amount">
           <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
           <div class="symbol">{{ currency ? currency.value : '' }}</div>
+          <div class="max" v-if="currency" @click="setAmountToMax">max</div>
         </div>
         <div class="estimated-value">
           <div class="label">Estimated</div>
@@ -90,6 +91,7 @@ export default {
               isNep5,
               label: `${name} (${balance})`,
               unitValue,
+              balance,
             },
             asset,
             isNep5,
@@ -126,6 +128,12 @@ export default {
         return;
       }
       this.showConfirmation = true;
+    },
+
+    setAmountToMax() {
+      if (this.currency) {
+        this.amount = this.currency.balance.toString();
+      }
     },
 
     cleanAmount() {
@@ -279,7 +287,7 @@ export default {
 
       input {
         box-sizing: border-box;
-        padding-right: $space-xl;
+        padding-right: $space-lg;
       }
 
       .symbol {
@@ -288,6 +296,16 @@ export default {
         position: absolute;
         top: toRem(18px);
         right: 0;
+      }
+
+      .max {
+        bottom: toRem(16px);
+        color: $grey;
+        cursor: pointer;
+        font-size: toRem(10px);
+        position: absolute;
+        right: 0;
+        z-index: 0;
       }
     }
 
@@ -299,9 +317,9 @@ export default {
         @extend %small-uppercase-grey-label;
       }
       .value {
-        margin-left: $space-sm;
         font-family: GilroySemibold;
         font-size: toRem(12px);
+        margin-left: $space-sm;
       }
     }
 

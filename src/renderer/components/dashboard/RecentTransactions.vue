@@ -4,7 +4,11 @@
       <h1 class="underlined">Recent transactions</h1>
     </div>
     <div class="body">
-      <aph-simple-transactions :transactions="transactions" :onClick="viewTransaction"></aph-simple-transactions>
+      <div v-if="!transactions.length" class="zero-state">
+        <aph-icon name="no-transactions"></aph-icon>
+        <div class="label">No transactions</div>
+      </div>
+      <aph-simple-transactions v-else :transactions="transactions" :onClick="viewTransaction"></aph-simple-transactions>
     </div>
   </section>
 </template>
@@ -63,6 +67,7 @@ export default {
   padding-bottom: $space-lg;
 
   .header {
+    flex: none;
     padding: $space-lg;
 
     h1.underlined {
@@ -74,8 +79,37 @@ export default {
   }
 
   .body {
-    padding: 0 $space-lg;
+    flex: 1;
     overflow: auto;
+    padding: 0 $space-lg;
+
+    > .zero-state {
+      align-items: center;
+      display: flex;
+      height: 100%;
+      justify-content: center;
+      flex-direction: column;
+
+      .aph-icon {
+        svg {
+          height: toRem(60px);
+
+          .fill {
+            fill: $purple;
+          }
+
+          .stroke {
+            stroke: $purple;
+          }
+        }
+      }
+
+      .label {
+        color: $purple;
+        font-weight: GilroyMedium;
+        margin-top: $space-lg;
+      }
+    }
   }
 }
 </style>
