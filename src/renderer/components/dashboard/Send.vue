@@ -131,7 +131,7 @@ export default {
     },
 
     setAmountToMax() {
-      if (this.currency && this.currency.balance) {
+      if (this.currency) {
         this.amount = this.currency.balance.toString();
       }
     },
@@ -287,7 +287,7 @@ export default {
 
       input {
         box-sizing: border-box;
-        padding-right: $space-xl;
+        padding-right: $space-lg;
       }
 
       .symbol {
@@ -297,15 +297,15 @@ export default {
         top: toRem(18px);
         right: 0;
       }
-      
+
       .max {
+        bottom: toRem(16px);
         color: $grey;
-        padding: toRem(10px);
+        cursor: pointer;
+        font-size: toRem(10px);
         position: absolute;
-        top: toRem(10px);
         right: 0;
         z-index: 0;
-        cursor: pointer;
       }
     }
 
@@ -317,9 +317,9 @@ export default {
         @extend %small-uppercase-grey-label;
       }
       .value {
-        margin-left: $space-sm;
         font-family: GilroySemibold;
         font-size: toRem(12px);
+        margin-left: $space-sm;
       }
     }
 
