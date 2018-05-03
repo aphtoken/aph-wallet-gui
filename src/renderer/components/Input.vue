@@ -122,11 +122,7 @@ export default {
 
   .aph-icon {
     svg {
-      height: toRem(16px);
-
-      &.eye-closed {
-        height: toRem(17px);
-      }
+      height: toRem(17px);
     }
 
     .fill {

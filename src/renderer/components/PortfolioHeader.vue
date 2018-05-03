@@ -154,10 +154,6 @@ h1.underlined {
     height: toRem(160px);
 
     .aph-icon {
-      svg {
-        height: toRem(57px);
-      }
-
       .fill {
         fill: $dark;
       }

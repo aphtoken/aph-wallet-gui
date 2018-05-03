@@ -16,7 +16,6 @@
           <div :class="['cell', 'amount', {decrease: transaction.value < 0, increase: transaction.value > 0}]">
             {{ $formatNumber(transaction.value) }}
           </div>
-          <!--<div class="cell total">{{ $formatMoney(transaction.value) }}</div>-->
           <div class="cell status" v-if="transaction.details" @click.stop>
             <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
             <aph-icon name="unconfirmed" v-else></aph-icon>
@@ -193,17 +192,13 @@ export default {
             height: toRem(30px);
           }
           .confirmed {
-            .stroke {
-              stroke: $green;
-              stroke-width: 1.8;
+            .fill {
+              fill: $green;
             }
           }
           .unconfirmed {
             .fill {
               fill: $red;
-            }
-            .stroke {
-              stroke: $red;
             }
           }
         }
@@ -294,8 +289,8 @@ export default {
                 svg {
                   height: toRem(40px);
 
-                  .stroke {
-                    stroke: $green;
+                  .fill {
+                    fill: $green;
                   }
                 }
               }

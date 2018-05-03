@@ -6,7 +6,7 @@
     </div>
     <button class="add-token-btn" v-if="shouldShowAddTokenButton" @click="showAddTokenModal">Add token</button>
     <div class="holdings">
-      <aph-holding v-for="(holding, index) in filteredHoldings" :holding="holding" :key="index"></aph-holding>
+      <aph-holding v-for="(holding, index) in filteredHoldings" :holding="holding" :key="index" :onRemove="remove"></aph-holding>
     </div>
   </section>
 </template>
@@ -93,7 +93,7 @@ export default {
       margin: 0 $space;
 
       svg {
-        height: toRem(28px);
+        height: toRem(22px);
 
         .fill {
           fill: $purple;

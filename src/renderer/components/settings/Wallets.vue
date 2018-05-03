@@ -13,6 +13,7 @@
       <div class="right">
         <div class="import-wallet" @click="showImportAWalletModal">
           <div class="import-wallet-btn">
+            <aph-icon name="wallet"></aph-icon>
             <p>Import a wallet</p>
           </div>
           <div class="btn-circle">
@@ -97,7 +98,11 @@ export default {
           width: toRem(250px);
 
           .aph-icon {
-            margin-bottom: $space;
+            margin-bottom: $space-lg;
+
+            svg {
+              height: toRem(44px);
+            }
 
             .fill {
               fill: $dark;
@@ -112,6 +117,12 @@ export default {
               .fill {
                 fill: $dark;
               }
+            }
+          }
+
+          @include lowRes() {
+            .aph-icon {
+              display: none;
             }
           }
         }

@@ -4,7 +4,7 @@
       <div class="remove" @click="remove">Remove</div>
     </div>
     <div class="body">
-      <aph-icon name="create"></aph-icon>
+      <aph-icon name="user"></aph-icon>
       <aph-input placeholder="Name" :light="true" v-model="name"></aph-input>
       <aph-input placeholder="Address" v-model="address"></aph-input>
     </div>
@@ -108,11 +108,11 @@ export default {
   }
 
   .body {
-    padding: $space-lg;
+    padding: $space-xl $space-lg $space-lg;
     text-align: center;
 
     .aph-icon {
-      margin-bottom: $space-lg;
+      margin-bottom: $space-xl;
 
       svg {
         height: $space-xl;

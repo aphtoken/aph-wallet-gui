@@ -85,19 +85,26 @@ export default {
     cursor: pointer;
     min-height: auto;
 
-    path {
-      fill: $grey;
-      transition: $transition;
-    }
-
     svg {
-      height: $space;
+      height: toRem(17px);
+
+      .fill {
+        transition: $transition;
+
+        &.st0 {
+          fill: lighten($grey, 5%);
+        }
+
+        &.st1 {
+          fill: $grey;
+        }
+      }
     }
   }
 
   &:hover {
-    path {
-      fill: $purple;
+    .fill {
+      fill: $purple !important;
     }
   }
 }

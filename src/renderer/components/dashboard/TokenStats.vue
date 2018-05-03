@@ -123,13 +123,13 @@ export default {
     position: relative;
 
     .aph-token-icon {
-      $width: toRem(125px);
+      $iconSize: toRem(125px);
 
       padding: 0 $space-lg 0 0;
 
       img, .placeholder {
-        height: $width;
-        width: $width;
+        height: $iconSize;
+        width: $iconSize;
       }
 
       .placeholder-text {
@@ -182,6 +182,23 @@ export default {
 
       .value {
         font-size: toRem(16px);
+      }
+    }
+
+    @include lowRes() {
+      .aph-token-icon {
+        $iconSize: toRem(100px);
+
+        img, .placeholder {
+          height: $iconSize;
+          width: $iconSize;
+        }
+      }
+
+      .balance {
+        .name, .amount {
+          margin-bottom: $space-sm;
+        }
       }
     }
   }

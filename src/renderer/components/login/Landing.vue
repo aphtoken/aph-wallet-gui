@@ -56,6 +56,12 @@ export default {
     > .create-wallet-btn {
       margin-left: $space-xl;
     }
+
+    svg {
+      &.wallet {
+        height: toRem(44px);
+      }
+    }
   }
 }
 </style>

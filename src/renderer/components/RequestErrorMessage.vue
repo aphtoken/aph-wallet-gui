@@ -1,6 +1,6 @@
 <template>
   <div class="aph-request-status-message" v-if="hasErrorMessage">
-    <aph-icon name="unconfirmed"></aph-icon>
+    <aph-icon name="unconfirmed-big"></aph-icon>
     <div class="right">{{ message }}</div>
   </div>
 </template>
@@ -48,10 +48,6 @@ export default {
 
     .fill {
       fill: $red;
-    }
-
-    .stroke {
-      stroke: $red;
     }
   }
 

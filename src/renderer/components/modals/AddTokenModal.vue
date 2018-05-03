@@ -75,7 +75,7 @@ export default {
       margin-bottom: $space-xl;
 
       svg {
-        height: $space-xl;
+        height: toRem(52px);
       }
     }
 

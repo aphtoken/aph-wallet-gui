@@ -97,10 +97,6 @@ export default {
             .aph-icon {
               margin-bottom: $space;
 
-              svg.create {
-                height: toRem(57px);
-              }
-
               .fill {
                 fill: $dark;
               }

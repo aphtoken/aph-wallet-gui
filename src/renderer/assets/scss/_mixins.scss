@@ -1,26 +1,27 @@
 @mixin propertyValues($properties, $values) {
   @each $property in $properties {
-      @each $value in $values {
-          $kebabValue: strReplace($value, ' ', '-');
+    @each $value in $values {
+      $kebabValue: strReplace($value, ' ', '-');
 
-          ".#{$property}--#{$kebabValue}" {
-              #{$property}: #{$value};
-          }
-          ".#{$property}--#{$kebabValue}--important" {
-              #{$property}: #{$value} !important;
-          }
+      ".#{$property}--#{$kebabValue}" {
+        #{$property}: #{$value};
       }
+
+      ".#{$property}--#{$kebabValue}--important" {
+        #{$property}: #{$value} !important;
+      }
+    }
   }
 }
 
 @mixin truncate() {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @mixin lowRes() {
-    @media (max-width: $breakpoint) {
-        @content;
-    }
+  @media (max-width: $breakpoint), (max-height: $breakpoint-height) {
+    @content;
+  }
 }

@@ -150,7 +150,7 @@ export default {
   }
 
   .body {
-    padding: $space-lg;
+    padding: $space-xl $space-lg $space-lg;
     text-align: center;
     display: block;
     position: relative;
@@ -174,7 +174,7 @@ export default {
 
     .aph-icon {
       svg {
-        height: $space-xl;
+        height: toRem(44px);
       }
 
       & + p {

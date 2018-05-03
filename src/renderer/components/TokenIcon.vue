@@ -1,17 +1,13 @@
 <template>
   <div class="aph-token-icon">
     <img :src="imageUrl" @load="imageLoadOnComplete" class="image-preloader"/>
-    <template v-if="useImage">
-      <img :src="imageUrl" />
-    </template>
-    <template v-else>
-      <img src="~@/assets/img/token-icons/APH.png" v-if="symbol === 'APH'">
-      <img src="~@/assets/img/token-icons/GAS.png" v-else-if="symbol === 'GAS'">
-      <img src="~@/assets/img/token-icons/NEO.png" v-else-if="symbol === 'NEO'">
-      <div class="placeholder" v-else>
-        <div class="placeholder-text">{{ symbol }}</div>
-      </div>
-    </template>
+    <img src="~@/assets/img/token-icons/APH.png" v-if="symbol === 'APH'">
+    <img src="~@/assets/img/token-icons/GAS.png" v-else-if="symbol === 'GAS'">
+    <img src="~@/assets/img/token-icons/NEO.png" v-else-if="symbol === 'NEO'">
+    <img :src="imageUrl" v-else-if="useImage" />
+    <div class="placeholder" v-else>
+      <div class="placeholder-text">{{ symbol }}</div>
+    </div>
   </div>
 </template>
 
@@ -45,7 +41,7 @@ export default {
 
 <style lang="scss">
 .aph-token-icon {
-  $iconWidth: toRem(50px);
+  $iconSize: toRem(50px);
 
   font-size: 0;
 
@@ -54,8 +50,8 @@ export default {
   }
 
   img, .placeholder {
-    height: $iconWidth;
-    width: $iconWidth;
+    height: $iconSize;
+    width: $iconSize;
     border-radius: 50%;
   }
 
@@ -65,6 +61,7 @@ export default {
     color: white;
     display: flex;
     font-size: 0;
+    height: $iconSize;
     justify-content: center;
 
     > * {

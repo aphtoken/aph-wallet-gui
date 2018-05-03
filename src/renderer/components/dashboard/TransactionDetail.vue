@@ -7,8 +7,12 @@
       <div class="section">
         <div class="row">
           <div class="column confirmed" v-if="this.$store.state.activeTransaction.confirmed">
-            <aph-icon name="confirmed"></aph-icon>
+            <aph-icon name="confirmed-big"></aph-icon>
             <div class="label">Confirmed</div>
+          </div>
+          <div class="column unconfirmed" v-else>
+            <aph-icon name="unconfirmed-big"></aph-icon>
+            <div class="label">Unconfirmed</div>
           </div>
         </div>
         <div class="row">
@@ -177,7 +181,7 @@ export default {
           margin-left: $space-xl;
         }
 
-        &.confirmed {
+        &.confirmed, &.unconfirmed {
           align-items: center;
           display: flex;
           padding-bottom: $space;
@@ -191,8 +195,22 @@ export default {
             svg {
               height: toRem(40px);
 
-              .stroke {
-                stroke: $green;
+              .fill {
+                fill: $green;
+              }
+            }
+          }
+        }
+
+        &.unconfirmed {
+          .label {
+            color: $red;
+          }
+
+          .aph-icon {
+            svg {
+              .fill {
+                fill: $red;
               }
             }
           }

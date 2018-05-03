@@ -191,10 +191,10 @@ export default {
       flex: none;
 
       svg {
-        height: toRem(20px);
+        height: toRem(18px);
 
-        .stroke {
-          stroke: $purple;
+        .fill {
+          fill: $purple;
         }
       }
     }
@@ -271,7 +271,7 @@ export default {
           font-family: GilroyMedium;
           font-size: toRem(13px);
           justify-content: center;
-          padding: $space-sm;
+          margin: $space-xs;
           text-align: center;
           transition: $transition;
 
@@ -292,6 +292,10 @@ export default {
           &:hover, &.active {
             background: $purple;
             color: white;
+          }
+
+          @include lowRes() {
+            line-height: initial;
           }
         }
       }

@@ -28,12 +28,9 @@
         </span>
         <span class="label">Settings</span>
       </router-link>
-      <a class="logout" to="" @click.prevent="logout">
-        <span class="icon">
-          <aph-icon name="back"></aph-icon>
-        </span>
-        <span class="label">Log Out</span>
-      </a>
+    </div>
+    <div class="logout-wrapper" @click.prevent="logout">
+      <aph-icon name="logout"></aph-icon>
     </div>
     <div class="footer link-list">
       <div class="network-status">
@@ -132,10 +129,6 @@ export default {
             height: toRem(42px);
           }
 
-          &.back {
-            height: toRem(20px);
-          }
-
           &.wallet {
             height: toRem(35px);
           }
@@ -145,7 +138,7 @@ export default {
           }
 
           &.settings {
-            height: toRem(42px);
+            height: toRem(35px);
           }
         }
 
@@ -180,12 +173,29 @@ export default {
     flex: 1;
   }
 
+  .logout-wrapper {
+    cursor: pointer;
+    display: flex;
+    flex: none;
+    justify-content: center;
+    margin-bottom: $space-lg;
+
+    svg {
+      height: toRem(35px);
+    }
+
+    .fill {
+      fill: white;
+    }
+  }
+
   .footer {
+    background: $purple-hover;
     color: white;
     flex: none;
     font-family: GilroyMedium;
     font-size: toRem(12px);
-    padding-bottom: $space;
+    padding: $space-lg 0;
     text-transform: uppercase;
     text-align: center;
 
@@ -216,8 +226,6 @@ export default {
     }
 
     .version-number {
-      margin-bottom: $space;
-
       &:before {
         content: "V";
         color: $dark;

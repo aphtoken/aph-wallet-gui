@@ -48,7 +48,7 @@ export default {
 
     > .aph-icon {
       svg {
-        height: toRem(16px);
+        height: toRem(17px);
 
         &.reset {
           .stroke {

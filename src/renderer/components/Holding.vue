@@ -5,6 +5,7 @@
       <div class="name">{{ holding.name }}</div>
       <div class="currency">{{ holding.symbol }}</div>
     </div>
+    <div class="remove" v-if="canBeRemoved" @click="handleOnRemove">Remove</div>
     <div class="balance">
       <div class="amount">
         {{ $formatNumber(holding.balance) }}<span class="currency">{{ holding.symbol }}</span>
@@ -17,6 +18,10 @@
 <script>
 export default {
   computed: {
+    canBeRemoved() {
+      return this.holding.canRemove;
+    },
+
     isClickable() {
       return _.isFunction(this.onClick);
     },
@@ -28,6 +33,12 @@ export default {
         this.onClick(this.holding);
       }
     },
+
+    handleOnRemove() {
+      if (this.onRemove) {
+        this.onRemove(this.holding);
+      }
+    },
   },
 
   props: {
@@ -37,6 +48,10 @@ export default {
     },
 
     onClick: {
+      type: Function,
+    },
+
+    onRemove: {
       type: Function,
     },
   },
@@ -74,8 +89,22 @@ export default {
     }
   }
 
+  .remove {
+    @extend %small-uppercase-grey-label;
+
+    cursor: pointer;
+    opacity: 0;
+    padding: $space;
+    visibility: none;
+    transition: $transition;
+
+    &:hover {
+      color: $purple;
+    }
+  }
+
   .balance {
-    flex: none;
+    flex: 1;
     font-family: GilroyMedium;
     text-align: right;
 
@@ -124,6 +153,13 @@ export default {
 
     &:hover, &.active {
       border-color: $purple;
+    }
+  }
+
+  &:hover {
+    .remove {
+      opacity: 1;
+      visibility: visible;
     }
   }
 }

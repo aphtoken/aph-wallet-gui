@@ -18,7 +18,7 @@ $btn-circle-size: toRem(65px);
 
   .aph-icon {
     .icon {
-      height: toRem(20px);
+      height: toRem(19px);
     }
 
     path {
@@ -34,7 +34,7 @@ $btn-circle-size: toRem(65px);
   color: white;
   cursor: pointer;
   display: inline-block;
-  font-size: toRem(16px);
+  font-size: toRem(14px);
   height: $button-height;
   outline: none;
   padding: toRem(16px) 0;
@@ -61,7 +61,6 @@ $btn-circle-size: toRem(65px);
 
   background-color: transparent;
   color: white;
-  font-size: toRem(13px);
 
   &:hover {
     background-color: $purple;
@@ -97,7 +96,7 @@ $btn-circle-size: toRem(65px);
     justify-content: center;
 
     svg {
-      height: toRem(42px);
+      height: toRem(52px);
 
       &.create {
         height: toRem(50px);
