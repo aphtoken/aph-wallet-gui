@@ -908,4 +908,67 @@ export default {
       });
   },
 
+  participateInTokenSale(scriptHash, assetId, amount, callback) {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+        const currentWallet = wallets.getCurrentWallet();
+
+        const config = {
+          net: currentNetwork.net,
+          script: {
+            scriptHash,
+            operation: 'mintTokens',
+            args: [],
+          },
+          gas: 0,
+        };
+
+        const scriptHashAddress = wallet.getAddressFromScriptHash(scriptHash);
+
+        if (assetId === neoAssetId) {
+          config.intents = api.makeIntent({ NEO: amount }, scriptHashAddress);
+        } else if (assetId === gasAssetId) {
+          config.intents = api.makeIntent({ GAS: amount }, scriptHashAddress);
+        } else {
+          reject('Invalid asset used to participate in token sale. Must use NEO or GAS.');
+          return;
+        }
+
+        if (currentWallet.isLedger === true) {
+          config.signingFunction = ledger.signWithLedger;
+          config.address = currentWallet.address;
+        } else {
+          config.account = new wallet.Account(currentWallet.wif);
+        }
+
+        alerts.success('Sending Transaction');
+        api.doInvoke(config)
+          .then((res) => {
+            if (res.response.result === false) {
+              return reject('Token sale participation failed.');
+            }
+
+            alerts.success(`Transaction Hash: ${res.tx.hash} Sent, waiting for confirmation.`);
+            if (callback) {
+              setTimeout(() => callback(), timeouts.NEO_API_CALL);
+            }
+
+            return this.monitorTransactionConfirmation(res.tx.hash)
+              .then(() => {
+                return resolve(res.tx);
+              })
+              .catch((e) => {
+                reject(e);
+              });
+          })
+          .catch((e) => {
+            reject(e);
+          });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  },
+
 };
