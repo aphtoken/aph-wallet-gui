@@ -15,12 +15,18 @@
         <div class="symbol">{{ currency ? currency.value : '' }}</div>
         <div class="max" v-if="currency" @click="setAmountToMax">max</div>
       </div>
+      <div class="estimated-value">
+        <div class="label">Estimated Amount</div>
+        <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
+      </div>
     </div>
     <div class="disclaimer">
       <h2>Disclaimer - Urgent Instructions</h2>
       <p>Ensure that you are only sending tokens which are accepted for this ICO.</p>
       <p>Submitting multiple times could result in loss of funds.</p>
       <p>Aphelion is not responsible for loss of funds.</p>
+      <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
+      <label for="confirm-disclaimer">I Agree, I am responsible for this transfer of funds.</label>
     </div>
     <div class="footer">
       <button class="send-btn" @click="send()" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
@@ -32,11 +38,19 @@
 import { BigNumber } from 'bignumber.js';
 export default {
 
+  mounted() {
+    this.$store.state.showPortfolioHeader = false;
+  },
+  beforeDestroy() {
+    this.$store.state.showPortfolioHeader = true;
+  },
+
   data() {
     return {
       token: null,
       amount: '',
       currency: null,
+      agreed: false,
       sending: false,
     };
   },
@@ -81,7 +95,8 @@ export default {
     },
 
     shouldDisableSendButton() {
-      return !this.token || !this.amount || !this.currency || !parseFloat(this.amount) || this.sending === true;
+      return !this.token || !this.amount || !this.currency
+      || !parseFloat(this.amount) || this.agreed === false || this.sending === true;
     },
   },
 
@@ -146,10 +161,6 @@ export default {
 </script>
 
 <style lang="scss">
-#portfolio-header {
-  display: none;
-}
-
 #token-sale {
   display: flex;
   flex-direction: column;
@@ -159,7 +170,7 @@ export default {
 
   .header {
     color: $purple;
-    margin-top: 20%;
+    margin-top: toRem(200px);
     text-align: center;
     font-family: GilroySemibold;
     padding: $space;
@@ -181,7 +192,6 @@ export default {
 
   
   .body {
-    overflow: auto;
     padding: 0 $space-lg 0;
     width: toRem(500px);
     margin: $space auto;
@@ -233,16 +243,18 @@ export default {
 
       .label {
         @extend %small-uppercase-grey-label;
+        color: $purple;
       }
       .value {
         font-family: GilroySemibold;
         font-size: toRem(12px);
         margin-left: $space-sm;
+        color: white;
       }
     }
 
-    .currency {
-      margin-bottom: $space;
+    .token, .currency {
+      margin-bottom: $space-lg;
     }
 
     .row {
@@ -306,18 +318,23 @@ export default {
   }
   
   .disclaimer {
-    padding: 0 $space-lg $space-lg;
+    padding: 0 $space-lg 0 $space-lg;
     margin: $space;
     text-align: center;
+    color: white;
     
     h2 {
       color: $purple;
       font-size: toRem(14px);
     }
     p {
-      color: white;
       font-size: toRem(12px);
       padding: 0;
+      margin: $space-sm;
+    }
+    input, label {
+      cursor: pointer;
+      margin: $space 0;
     }
   }
 }

@@ -24,7 +24,7 @@
       </router-link>
       <router-link to="/authenticated/token-sale">
         <span class="icon">
-          <aph-icon name="wallet"></aph-icon>
+          <aph-icon name="ico"></aph-icon>
         </span>
         <span class="label">Join ICO</span>
       </router-link>
@@ -143,6 +143,10 @@ export default {
           }
 
           &.wallet {
+            height: toRem(35px);
+          }
+
+          &.ico {
             height: toRem(35px);
           }
 
