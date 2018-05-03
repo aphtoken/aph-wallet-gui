@@ -16,17 +16,17 @@
         </span>
         <span class="label">Assets</span>
       </router-link>
-      <router-link to="/authenticated/token-sale">
-        <span class="icon">
-          <aph-icon name="wallet"></aph-icon>
-        </span>
-        <span class="label">Join an ICO</span>
-      </router-link>
       <router-link to="/authenticated/history">
         <span class="icon">
           <aph-icon name="history"></aph-icon>
         </span>
         <span class="label">History</span>
+      </router-link>
+      <router-link to="/authenticated/token-sale">
+        <span class="icon">
+          <aph-icon name="wallet"></aph-icon>
+        </span>
+        <span class="label">Join ICO</span>
       </router-link>
       <router-link to="/authenticated/settings">
         <span class="icon">

@@ -1,23 +1,29 @@
 <template>
-  <section id="assets">
+  <section id="token-sale">
     <div class="header">
-      <h1 class="underlined">Token Sale</h1>
+      <h1 class="underlined">Participate in an Initial Coin Offering (ICO)</h1>
     </div>
     <div class="body">
       <div class="token">
-        <aph-select :options="tokens" :light="true" placeholder="Select a token" v-model="token"></aph-select>
+        <aph-select :options="tokens" placeholder="Select ICO" v-model="token"></aph-select>
       </div>
       <div class="currency">
-        <aph-select :options="currencies" :light="true" placeholder="Select a currency" v-model="currency"></aph-select>
+        <aph-select :options="currencies" placeholder="Buy With" v-model="currency"></aph-select>
       </div>
       <div class="amount">
         <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
         <div class="symbol">{{ currency ? currency.value : '' }}</div>
         <div class="max" v-if="currency" @click="setAmountToMax">max</div>
       </div>
-      <div class="footer">
-        <button class="send-btn" @click="send()" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
-      </div>
+    </div>
+    <div class="disclaimer">
+      <h2>Disclaimer - Urgent Instructions</h2>
+      <p>Ensure that you are only sending tokens which are accepted for this ICO.</p>
+      <p>Submitting multiple times could result in loss of funds.</p>
+      <p>Aphelion is not responsible for loss of funds.</p>
+    </div>
+    <div class="footer">
+      <button class="send-btn" @click="send()" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
     </div>
   </section>
 </template>
@@ -71,7 +77,7 @@ export default {
     },
 
     sendButtonLabel() {
-      return this.sending ? 'Waiting for confirmation...' : 'Send';
+      return this.sending ? 'Waiting for confirmation...' : 'Purchase Now';
     },
 
     shouldDisableSendButton() {
@@ -140,56 +146,62 @@ export default {
 </script>
 
 <style lang="scss">
-#assets {
+#portfolio-header {
+  display: none;
+}
+
+#token-sale {
   display: flex;
   flex-direction: column;
   flex: 1;
   height: 100%;
+  background-color: $dark-purple;
 
   .header {
-    padding: $space-lg $space-lg 0;
-
+    color: $purple;
+    margin-top: 20%;
+    text-align: center;
+    font-family: GilroySemibold;
+    padding: $space;
+    
     h1.underlined {
       @extend %underlined-header;
 
       flex: 1;
       margin-bottom: 0;
+      font-size: toRem(30px);
+      
+      &:after {
+        background: white;
+        width: toRem(200px);
+        margin: $space-lg auto;
+      }
     }
   }
 
   
   .body {
-    flex: 1;
     overflow: auto;
-    padding: 0 $space-lg $space-lg;
-    background-color: white;
+    padding: 0 $space-lg 0;
+    width: toRem(500px);
+    margin: $space auto;
 
     .aph-input {
-      border-color: $background;
-      margin: $space;
-
-      &.focused {
-        border-color: $purple;
-      }
-
-      input {
-        color: $dark;
-      }
-
+      margin: $space 0;
+      
       .placeholder {
-        color: $grey;
+        color: white;
         font-family: GilroyMedium;
       }
     }
 
     .aph-select {
-      margin: $space;
+      margin: $space 0;
     }
 
     .amount {
       position: relative;
       margin-top: $space;
-      width: 50%;
 
       input {
         box-sizing: border-box;
@@ -206,7 +218,7 @@ export default {
 
       .max {
         bottom: toRem(16px);
-        color: $grey;
+        color: white;
         cursor: pointer;
         font-size: toRem(10px);
         position: absolute;
@@ -273,6 +285,8 @@ export default {
     display: flex;
     flex: none;
     flex-direction: row;
+    width: toRem(500px);
+    margin: $space auto;
 
     > * {
       flex: 1;
@@ -285,9 +299,25 @@ export default {
     }
 
     .next-btn, .send-btn {
-      @extend %btn-footer;
+      @extend %btn;
 
       border-bottom-right-radius: $border-radius;
+    }
+  }
+  
+  .disclaimer {
+    padding: 0 $space-lg $space-lg;
+    margin: $space;
+    text-align: center;
+    
+    h2 {
+      color: $purple;
+      font-size: toRem(14px);
+    }
+    p {
+      color: white;
+      font-size: toRem(12px);
+      padding: 0;
     }
   }
 }
