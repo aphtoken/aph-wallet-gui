@@ -384,7 +384,6 @@ export default {
 <style lang="scss">
 .aph-icon {
   font-size: 0;
-  line-height: initial;
 
   .fill {
     fill: $dark;

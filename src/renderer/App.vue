@@ -98,7 +98,7 @@ html, body {
 * {
   box-sizing: border-box;
   letter-spacing: $letter-spacing;
-  line-height: 1.2em;
+  line-height: inherit;
 }
 
 a {

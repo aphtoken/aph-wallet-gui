@@ -2,10 +2,6 @@
   <section id="dashboard--token-stats" v-if="$store.state.statsToken">
     <div class="header">
       <h1 class="underlined">Token Stats</h1>
-      <div class="gas" v-if="$store.state.statsToken.availableToClaim">
-        <div class="label">{{ $formatNumber($store.state.statsToken.availableToClaim) }} Gas</div>
-        <button class="claim" @click.prevent="claim" :disabled="$isPending('claimGas')">{{ claimButtonLabel }}</button>
-      </div>
       <div class="current-value">
         <div class="label">Current Value</div>
         <div class="amount">{{ $formatMoney($store.state.statsToken.unitValue) }}</div>
@@ -17,6 +13,12 @@
         <div class="name">{{ $store.state.statsToken.name }}</div>
         <div class="amount">{{ formattedAmount }}<span class="currency">{{ $store.state.statsToken.symbol }}</span></div>
         <div class="value">{{ $formatMoney($store.state.statsToken.totalValue, null, `${$store.state.currencySymbol }0.00`) }}<span class="currency">{{ $store.state.currency }}</span></div>
+        <div class="claim-gas" v-if="$store.state.statsToken.availableToClaim">
+          <span class="label">Gas Available</span>
+          <span class="amount">{{ $formatNumber($store.state.statsToken.availableToClaim) }}</span>
+          <span class="claiming" v-if="$isPending('claimGas')">Claiming...</span>
+          <a class="claim" href="#" @click.prevent="claim" v-else>Claim</a>
+        </div>
       </div>
     </div>
     <div class="footer">
@@ -43,10 +45,6 @@ export default {
   computed: {
     balanceClass() {
       return this.formattedAmount.length > AMOUNT_LENGTH_LIMIT ? ['balance', 'small'] : ['balance'];
-    },
-
-    claimButtonLabel() {
-      return this.$isPending('claimGas') ? 'Claiming Gas...' : 'Claim Gas';
     },
 
     formattedAmount() {
@@ -82,27 +80,6 @@ export default {
       white-space: nowrap;
     }
 
-    .gas {
-      flex: 2;
-      text-align: center;
-
-      .claim, .claiming {
-        font-family: GilroyMedium;
-      }
-
-      .claim {
-        @extend %btn;
-
-        border: none;
-        font-size: toRem(10px);
-        height: auto;
-        padding: toRem(3px) 0;
-        position: relative;
-        top: toRem(-2px);
-        width: 50%;
-      }
-    }
-
     .current-value {
       flex: 1;
       text-align: right;
@@ -123,7 +100,7 @@ export default {
     position: relative;
 
     .aph-token-icon {
-      $iconSize: toRem(125px);
+      $iconSize: toRem(135px);
 
       padding: 0 $space-lg 0 0;
 
@@ -170,6 +147,33 @@ export default {
         }
       }
 
+      .value {
+        font-size: toRem(16px);
+        margin-bottom: $space;
+      }
+
+      .claim-gas {
+        flex: 2;
+        text-align: center;
+
+        .amount {
+          @extend %small-uppercase-grey-label-dark;
+
+          color: $dark;
+          margin: 0 $space-sm;
+        }
+
+        .claim {
+          font-family: GilroyMedium;
+          font-size: toRem(12px);
+          text-transform: uppercase;
+        }
+
+        .claiming {
+          @extend %small-uppercase-grey-label;
+        }
+      }
+
       &.small {
         .amount {
           font-size: toRem(22px);
@@ -179,15 +183,11 @@ export default {
           }
         }
       }
-
-      .value {
-        font-size: toRem(16px);
-      }
     }
 
     @include lowRes() {
       .aph-token-icon {
-        $iconSize: toRem(100px);
+        $iconSize: toRem(110px);
 
         img, .placeholder {
           height: $iconSize;
@@ -196,8 +196,16 @@ export default {
       }
 
       .balance {
-        .name, .amount {
-          margin-bottom: $space-sm;
+        .name, .amount, .value {
+          margin-bottom: $space-xs;
+        }
+
+        .amount {
+          font-size: toRem(28px);
+
+          .currency {
+            font-size: toRem(16px);
+          }
         }
       }
     }
