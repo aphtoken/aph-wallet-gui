@@ -6,21 +6,7 @@
     </div>
     <button class="add-token-btn" v-if="shouldShowAddTokenButton" @click="showAddTokenModal">Add token</button>
     <div class="holdings">
-      <div v-for="(holding, index) in filteredHoldings" class="holding" :key="index">
-        <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
-        <div class="left">
-          <div class="currency">{{ holding.name }}</div>
-          <div class="meta">
-            <div class="symbol">{{ holding.symbol }}</div>
-            <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 0}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
-          </div>
-        </div>
-        <div class="remove-link" v-if="holding.canRemove" @click="remove(holding)">Remove</div>
-        <div class="right">
-          <div class="amount">{{ $formatNumber(holding.balance) }} {{ holding.symbol }}</div>
-          <div class="value">{{ $formatMoney(holding.unitValue) }} {{ $store.state.currency }}</div>
-        </div>
-      </div>
+      <aph-holding v-for="(holding, index) in filteredHoldings" :holding="holding" :key="index"></aph-holding>
     </div>
   </section>
 </template>
@@ -95,19 +81,19 @@ export default {
   position: relative;
 
   .search-field {
-    border-bottom: $border;
-    border-color: $grey;
+    border-bottom: $border-thin;
     display: flex;
     flex: none;
     margin: 0 $space $space-lg 0;
     padding: $space-sm 0;
+    width: 60%;
 
     .aph-icon {
       flex: none;
       margin: 0 $space;
 
       svg {
-        height: toRem(40px);
+        height: toRem(28px);
 
         .fill {
           fill: $purple;
@@ -145,93 +131,6 @@ export default {
     padding: 0 $space 0 0;
 
     .holding {
-      align-items: center;
-      background: white;
-      border-radius: $border-radius;
-      display: flex;
-      padding: $space;
-
-      .aph-token-icon {
-        flex: none;
-        margin-right: $space;
-
-        .placeholder, img {
-          height: toRem(60px);
-          width: toRem(60px);
-        }
-      }
-
-      .left {
-        flex: 1;
-
-        .currency {
-          font-family: GilroySemibold;
-          font-size: toRem(18px);
-        }
-
-        .meta {
-          display: flex;
-          margin-top: $space-sm;
-
-          .symbol {
-            @extend %small-uppercase-grey-label;
-          }
-
-          .change {
-            font-family: GilroySemibold;
-            font-size: toRem(12px);
-            margin-left: $space;
-
-            &.decrease {
-              color: $red;
-            }
-
-            &.increase {
-              color: $green;
-
-              &:before {
-                content: "+";
-              }
-            }
-          }
-        }
-      }
-
-      .remove-link {
-        color: $grey;
-        cursor: pointer;
-        flex: none;
-        font-family: GilroyMedium;
-        opacity: 0;
-        transition: $transition;
-        visibility: hidden;
-
-        &:hover {
-          color: $purple;
-        }
-      }
-      &:hover {
-        .remove-link {
-          opacity: 1;
-          visibility: visible;
-        }
-      }
-
-      .right {
-        flex: 1;
-        text-align: right;
-
-        .amount {
-          font-size: toRem(20px);
-        }
-
-        .value {
-            @extend %small-uppercase-grey-label;
-
-            margin-top: $space-sm;
-        }
-      }
-
       & + .holding {
         margin-top: $space-lg;
       }

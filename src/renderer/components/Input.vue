@@ -99,7 +99,7 @@ export default {
     border: none;
     color: white;
     font-size: toRem(14px);
-    letter-spacing: .5px;
+    letter-spacing: toRem(0.5px);
     outline: none;
     padding: $space 0 $space-sm;
     width: 100%;
@@ -107,7 +107,7 @@ export default {
 
   .placeholder {
     color: white;
-    padding-top: toRem(16px);
+    padding-top: toRem(20px);
     pointer-events: none;
     position: absolute;
     top: 0;
@@ -140,7 +140,8 @@ export default {
     .placeholder {
       color: $grey;
       font-size: toRem(12px);
-      top: toRem(-18px);
+      padding: 0;
+      top: 0;
     }
   }
 

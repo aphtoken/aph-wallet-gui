@@ -1,3 +1,5 @@
+$btn-circle-size: toRem(65px);
+
 %btn-circle {
   align-items: center;
   background-color: $purple;
@@ -5,10 +7,10 @@
   color: white;
   cursor: pointer;
   display: inline-flex;
-  height: toRem(69px);
+  height: $btn-circle-size;
   justify-content: center;
   transition: $transition;
-  width: toRem(69px);
+  width: $btn-circle-size;
 
   &:hover {
     background-color: $purple-hover;
@@ -35,7 +37,7 @@
   font-size: toRem(16px);
   height: $button-height;
   outline: none;
-  padding: toRem(16px);
+  padding: toRem(16px) 0;
   text-align: center;
   transition: $transition;
   user-select: none;
@@ -59,6 +61,7 @@
 
   background-color: transparent;
   color: white;
+  font-size: toRem(13px);
 
   &:hover {
     background-color: $purple;
@@ -113,7 +116,7 @@
   }
 
   p {
-    font-size: toRem(16px);
+    font-size: toRem(14px);
     margin: $space 0;
     text-align: center;
   }
@@ -141,17 +144,16 @@
 
 %btn-footer {
   background-color: $purple;
+  border: none;
   color: white;
   cursor: pointer;
   font-family: GilroyMedium;
   font-size: toRem(16px);
   height: $button-height;
-  line-height: $button-height;
   outline: none;
-  padding: 0 $space * 1.2;
+  padding: toRem(16px) 0;
   text-align: center;
   transition: $transition;
-  border: none;
 
   &:hover {
     background-color: $purple-hover;

@@ -87,6 +87,7 @@ export default {
 
     path {
       fill: $grey;
+      transition: $transition;
     }
 
     svg {

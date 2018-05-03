@@ -1,44 +1,38 @@
+// Colors
 $background: #EEEEF9;
-$dark: #171629;
+$border-grey: #EEEEFA;
+$dark: #1A193B;
+$darker-grey: #66688D;
 $green: #00E18A;
-$grey: #66688D;
-$purple-hover: #8139FF;
-$light-grey: #F9F9FD;
+$grey: #B5B5CA;
+$light-grey: #F4F4FC;
 $orange: #FF9800;
+$purple-hover: #8139FF;
 $purple: #752BF7;
 $red: #FF2F54;
 $softer-dark: #424258;
-$border-grey: #EEEEFA;
-$footer-button-disabled-color: #F4F4FC;
 
-$border-width: 3px;
-$border-width-thin: 2px;
-$border: $border-width solid $purple;
-$border-thin: $border-width-thin solid $purple;
 $border-radius: 4px;
-
-$box-shadow: 0px 0px 150px 40px rgba($purple, 0.1);
-$box-shadow-small: 0px 0px 40px 5px rgba($purple, 0.1);
-
-$font-size: 14px;
-
-$letter-spacing: 1.5px;
-$line-height: 150%;
-
-$space: 1rem;
-$space-xsm: $space * .25;
-$space-sm: $space * .5;
-$space-lg: $space * 2;
-$space-xl: $space * 4;
-$space-xxl: $space * 6;
-
-$transition: all .3s ease-in-out;
-$transition-fast: all .1s ease-in-out;
-
+$border-width-thick: toRem(5px);
+$border-width-thin: toRem(2px);
+$border-width: toRem(3px);
+$border-thin: $border-width-thin solid $purple;
+$border: $border-width solid $purple;
+$box-shadow: toRem(0px) toRem(10px) toRem(40px) toRem(5px) rgba($purple, 0.05);
+$box-shadow-lg: toRem(0px) toRem(15px) toRem(150px) toRem(40px) rgba($purple, 0.1);
+$box-shadow-sm: toRem(0px) toRem(10px) toRem(20px) toRem(10px) rgba($purple, 0.1);
+$breakpoint: 1500px;
 $button-height: toRem(52px);
 $input-height: toRem(52px);
-
 $left-sidebar-width: toRem(300px);
+$letter-spacing: toRem(1.5px);
+$line-height: 150%;
 $right-sidebar-width: toRem(400px);
-
-$breakpoint: 1500px;
+$space: $font-size;
+$space-lg: $space * 2;
+$space-sm: $space * .5;
+$space-xl: $space * 4;
+$space-xs: $space * .25;
+$space-xxl: $space * 6;
+$transition-fast: all .1s ease-in-out;
+$transition: all .3s ease-in-out;

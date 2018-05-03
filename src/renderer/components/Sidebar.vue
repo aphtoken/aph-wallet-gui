@@ -114,11 +114,11 @@ export default {
 
     a {
       align-items: center;
-      border-left: 3px solid transparent;
+      border-left: $border-width-thick solid transparent;
       color: white;
       cursor: pointer;
       display: flex;
-      font-size: toRem(16px);
+      font-size: toRem(17px);
       padding: $space-sm 0;
       transition: $transition;
       height: toRem(70px);
@@ -206,7 +206,7 @@ export default {
       }
 
       .last-update {
-        margin: $space-lg 0;
+        margin: $space 0;
       }
     }
 
@@ -216,6 +216,8 @@ export default {
     }
 
     .version-number {
+      margin-bottom: $space;
+
       &:before {
         content: "V";
         color: $dark;

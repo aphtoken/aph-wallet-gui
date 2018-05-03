@@ -25,6 +25,14 @@
         <div class="details" v-if="transaction.details">
           <div class="section">
             <div class="row">
+              <div class="column confirmed" v-if="transaction.details.confirmed">
+                <aph-icon name="confirmed"></aph-icon>
+                <div class="label">Confirmed</div>
+              </div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="row">
               <div class="column">
                 <div class="label">Time</div>
                 <div class="value">{{ $formatTime(transaction.details.blocktime) }}</div>
@@ -76,10 +84,6 @@
               <div class="column">
                 <div class="label">Confirmed in Block</div>
                 <div class="value purple">{{ $formatNumber(transaction.details.block) }}</div>
-              </div>
-              <div class="column confirmed" v-if="transaction.details.confirmed">
-                <aph-icon name="confirmed"></aph-icon>
-                <div class="label">Confirmed</div>
               </div>
             </div>
           </div>
@@ -168,7 +172,7 @@ export default {
 
     .transaction {
       background: transparent;
-      border-top: 1px solid $background;
+      border-top: toRem(1px) solid $background;
       transition: $transition;
 
       .summary {
@@ -181,7 +185,7 @@ export default {
 
       .cell {
         flex: 1;
-        font-family: GilroySemibold;
+        font-family: GilroyMedium;
         padding: $space;
 
         .aph-icon {
@@ -224,7 +228,7 @@ export default {
       }
 
       &:hover, &.active {
-        background: $background;
+        background: $light-grey;
       }
 
       .details {
@@ -250,7 +254,7 @@ export default {
             flex: 1;
 
             .label {
-              @extend %small-uppercase-grey-label;
+              @extend %small-uppercase-grey-label-dark;
 
               margin-bottom: $space-sm;
             }
@@ -279,6 +283,7 @@ export default {
             &.confirmed {
               align-items: center;
               display: flex;
+              padding-bottom: $space;
 
               .label {
                 color: $green;
@@ -287,7 +292,7 @@ export default {
 
               .aph-icon {
                 svg {
-                  height: toRem(30px);
+                  height: toRem(40px);
 
                   .stroke {
                     stroke: $green;
@@ -319,8 +324,23 @@ export default {
           width: 100%;
 
           .transactions-table {
-            .address {
-              width: 60%!important;
+            td {
+              border: none;
+              padding: 0;
+
+              &.amount {
+                text-align: left;
+              }
+
+              &.address {
+                width: 60% !important;
+              }
+            }
+
+            tr + tr {
+              td {
+                padding-top: $space-sm;
+              }
             }
           }
         }

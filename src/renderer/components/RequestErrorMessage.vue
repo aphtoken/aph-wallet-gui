@@ -58,7 +58,6 @@ export default {
   .right {
     margin-left: $space-lg;
     color: $red;
-    line-height: $line-height;
   }
 }
 </style>

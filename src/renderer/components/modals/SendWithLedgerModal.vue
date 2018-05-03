@@ -43,7 +43,7 @@ export default {
     display: block;
 
     .aph-input {
-      border-color: $dark;
+      border-color: $grey;
       height: 50px;
       width: 100%;
 

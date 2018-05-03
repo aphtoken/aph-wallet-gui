@@ -75,6 +75,10 @@ export default {
     right: 0;
     top: 0;
 
+    &.login {
+      background: none;
+    }
+
     &.login-wallet-created {
       background: $background;
     }

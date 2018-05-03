@@ -241,7 +241,7 @@ export default {
 #dashboard--send {
   @extend %tile-light;
 
-  box-shadow: $box-shadow-small;
+  box-shadow: $box-shadow;
   display: flex;
   flex-direction: column;
 
@@ -265,6 +265,7 @@ export default {
 
     .aph-input {
       border-color: $background;
+      padding-left: toRem(16px);
 
       &.focused {
         border-color: $purple;
@@ -305,18 +306,26 @@ export default {
         font-size: toRem(10px);
         position: absolute;
         right: 0;
+        text-transform: uppercase;
+        transition: $transition;
         z-index: 0;
+
+        &:hover {
+          color: $purple;
+        }
       }
     }
 
     .estimated-value {
       display: flex;
-      margin-top: $space;
+      margin-top: $space-lg;
+      padding-left: toRem(16px);
 
       .label {
         @extend %small-uppercase-grey-label;
       }
       .value {
+        color: $darker-grey;
         font-family: GilroySemibold;
         font-size: toRem(12px);
         margin-left: $space-sm;
@@ -358,7 +367,7 @@ export default {
       }
 
       & + .row {
-        margin-top: $space;
+        margin-top: $space-lg;
       }
     }
   }

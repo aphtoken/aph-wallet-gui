@@ -112,7 +112,7 @@ h1.underlined {
     .balance {
       .amount {
         font-size: toRem(45px);
-        margin: 0 $space 0 $space-sm;
+        margin: 0 $space 0 0;
       }
 
       .currency {
@@ -126,7 +126,7 @@ h1.underlined {
       margin-top: $space;
 
       .label {
-        @extend %small-uppercase-grey-label;
+        @extend %small-uppercase-grey-label-dark;
       }
 
       .amount {
@@ -177,7 +177,7 @@ h1.underlined {
     margin-left: $space-lg;
 
     &:hover {
-      box-shadow: 0px 0px 50px 15px rgba($purple, 0.3);
+      box-shadow: $box-shadow-lg;
     }
 
     p {

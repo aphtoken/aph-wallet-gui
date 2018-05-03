@@ -32,6 +32,10 @@ export default {
 
   .backup-wallet {
     @extend %btn;
+
+    &:hover {
+      box-shadow: $box-shadow-sm;
+    }
   }
 }
 </style>

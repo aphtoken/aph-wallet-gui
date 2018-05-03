@@ -32,13 +32,13 @@ export default {
   }
 
   .version-number {
-    @extend %small-uppercase-grey-label;
+    @extend %small-uppercase-grey-label-dark;
   }
 
   .login-btn, .create-wallet-btn {
     @extend %btn-square;
 
-    box-shadow: $box-shadow;
+    box-shadow: $box-shadow-lg;
   }
 
   .settings-btn {

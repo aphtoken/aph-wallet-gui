@@ -48,6 +48,26 @@ describe('services/formatting', () => {
     });
   });
 
+  describe('formatMoneyWithoutCents', () => {
+    it('should properly format', () => {
+      expect(formatting.formatMoneyWithoutCents(100000000.000001)).to.eql('$100,000,000');
+      expect(formatting.formatMoneyWithoutCents('100000000.000001')).to.eql('$100,000,000');
+      expect(formatting.formatMoneyWithoutCents(100000000.1)).to.eql('$100,000,000');
+      expect(formatting.formatMoneyWithoutCents('100000000.1')).to.eql('$100,000,000');
+      expect(formatting.formatMoneyWithoutCents(100000000.01)).to.eql('$100,000,000');
+      expect(formatting.formatMoneyWithoutCents('100000000.01')).to.eql('$100,000,000');
+      expect(formatting.formatMoneyWithoutCents(100000000)).to.eql('$100,000,000');
+      expect(formatting.formatMoneyWithoutCents('100000000')).to.eql('$100,000,000');
+      expect(formatting.formatMoneyWithoutCents(100000000, '^^')).to.eql('^^100,000,000');
+      expect(formatting.formatMoneyWithoutCents('100000000', '^^')).to.eql('^^100,000,000');
+      expect(formatting.formatMoneyWithoutCents(toBigNumber(100000000000000.0000000000001))).to.eql('$100,000,000,000,000');
+      expect(formatting.formatMoneyWithoutCents(null)).to.eql('N/A');
+      expect(formatting.formatMoneyWithoutCents(undefined)).to.be.eql('N/A');
+      expect(formatting.formatMoneyWithoutCents(null, null, 'default')).to.eql('default');
+      expect(formatting.formatMoneyWithoutCents(undefined, null, 'default')).to.be.eql('default');
+    });
+  });
+
   describe('formatNumber', () => {
     it('should properly format', () => {
       expect(formatting.formatNumber(0.0000000000000001)).to.be.eql('0.0000000000000001');

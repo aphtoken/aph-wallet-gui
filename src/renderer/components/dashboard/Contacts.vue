@@ -96,10 +96,11 @@ export default {
       .contact {
         align-items: center;
         background: transparent;
-        border-top: 1px solid $background;
+        border-top: toRem(1px) solid $background;
         display: flex;
-        transition: $transition;
         flex-wrap: wrap;
+        font-size: toRem(12px);
+        transition: $transition;
 
         .cell {
           flex: 1;

@@ -135,12 +135,16 @@ export default {
     padding: $space-lg $space-lg 0;
 
     .remove {
+      color: $grey;
       cursor: pointer;
       font-family: GilroyMedium;
+      font-size: toRem(10px);
       text-align: right;
+      text-transform: uppercase;
+      transition: $transition;
 
       &:hover {
-        color: $red;
+        color: $purple;
       }
     }
   }
@@ -152,6 +156,7 @@ export default {
     position: relative;
 
     .wallet-name {
+      color: $purple;
       font-family: GilroyMedium;
       font-size: toRem(18px);
       padding: $space-lg 0;
@@ -159,7 +164,6 @@ export default {
 
     p {
       margin-bottom: $space-lg;
-      line-height: $line-height;
 
       &:first-child {
         span {
@@ -183,7 +187,7 @@ export default {
     }
 
     .aph-input {
-      border-color: $dark;
+      border-color: $grey;
       margin-top: $space-lg;
       width: 100%;
 

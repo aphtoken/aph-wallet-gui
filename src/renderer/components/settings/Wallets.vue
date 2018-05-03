@@ -122,6 +122,12 @@ export default {
           margin-left: 50%;
           transform: translate(-50%, -50%);
         }
+
+        &:hover {
+          .btn-circle {
+            box-shadow: $box-shadow-sm;
+          }
+        }
       }
     }
 
@@ -134,15 +140,15 @@ export default {
       .wallet {
         align-items: center;
         background: white;
-        border-left: 3px solid transparent;
+        border-left: $border-width-thick solid transparent;
         border-radius: $border-radius;
         cursor: pointer;
         display: flex;
-        padding: $space $space-lg;
+        padding: $space-lg;
         transition: $transition;
 
         .name {
-          font-family: GilroySemibold;
+          font-family: GilroyMedium;
           font-size: toRem(18px);
         }
 

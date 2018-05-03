@@ -93,12 +93,16 @@ export default {
     padding: $space-lg $space-lg 0;
 
     .remove {
+      color: $grey;
       cursor: pointer;
       font-family: GilroyMedium;
+      font-size: toRem(10px);
       text-align: right;
+      text-transform: uppercase;
+      transition: $transition;
 
       &:hover {
-        color: $red;
+        color: $purple;
       }
     }
   }
@@ -116,7 +120,7 @@ export default {
     }
 
     .aph-input {
-      border-color: $dark;
+      border-color: $grey;
 
       &.focused {
         border-color: $purple;

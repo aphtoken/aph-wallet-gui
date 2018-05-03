@@ -145,19 +145,18 @@ export default {
     }
 
     .search-field {
-        border-bottom: $border;
-        border-color: $grey;
-        display: flex;
-        flex: none;
-        margin: 0 $space-lg $space-lg;
-        padding: $space 0;
+      border-bottom: $border-thin;
+      display: flex;
+      flex: none;
+      margin: 0 $space-lg $space-lg;
+      padding: $space-sm 0;
 
       .aph-icon {
         flex: none;
         margin: 0 $space;
 
         svg {
-          height: toRem(40px);
+          height: toRem(28px);
 
           .fill {
             fill: $purple;
@@ -186,7 +185,7 @@ export default {
       flex: 1;
       margin: 0 $space-lg;
       height: 95%;
-      overflow: auto;
+      overflow-y: auto;
 
       .body {
         height: 90%;
@@ -194,7 +193,7 @@ export default {
 
         .contact {
           background: transparent;
-          border-top: 1px solid $background;
+          border-top: toRem(1px) solid $background;
           transition: $transition;
 
           .summary {
@@ -239,7 +238,7 @@ export default {
               }
 
               svg {
-                height: $space;
+                height: toRem(12px);
               }
             }
 
@@ -370,6 +369,12 @@ export default {
 
       margin-left: 50%;
       transform: translate(-50%, -50%);
+    }
+
+    &:hover {
+      .btn-circle {
+        box-shadow: $box-shadow-sm;
+      }
     }
   }
 }

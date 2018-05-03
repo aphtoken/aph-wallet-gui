@@ -179,7 +179,6 @@ export default {
     display: flex;
     font-family: GilroyMedium;
     height: $input-height;
-    line-height: $input-height;
     padding: 0 $space;
 
     .value {
@@ -192,7 +191,7 @@ export default {
       flex: none;
 
       svg {
-        height: $input-height / 2;
+        height: toRem(20px);
 
         .stroke {
           stroke: $purple;
@@ -205,7 +204,7 @@ export default {
     align-items: center;
     background: white;
     border-radius: $border-radius;
-    box-shadow: $box-shadow-small;
+    box-shadow: $box-shadow;
     left: 0;
     margin: $space 0 0;
     padding: 0;
@@ -220,7 +219,7 @@ export default {
       .left, .right {
         cursor: pointer;
         flex: none;
-        padding: $space;
+        padding: $space-lg $space;
 
         svg {
           height: toRem(14px);
@@ -245,10 +244,10 @@ export default {
     .weekdays {
       background: $background;
       display: flex;
-      padding: $space-sm;
+      padding: $space $space-sm;
 
       > div {
-        @extend %small-uppercase-grey-label;
+        @extend %small-uppercase-grey-label-dark;
 
         flex: 1;
         padding: $space-sm;

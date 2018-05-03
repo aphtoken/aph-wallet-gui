@@ -126,8 +126,8 @@ export default {
     position: relative;
     text-align: center;
     p {
-      line-height: $line-height;
       margin: 0;
+
       &:first-child {
         span {
           font-family: GilroySemibold;
@@ -161,7 +161,7 @@ export default {
         li {
           color: $grey;
           padding: $space-sm 0;
-          
+
           span {
             padding: $space-sm;
           }
@@ -174,7 +174,7 @@ export default {
           }
           &.complete {
             color: $dark;
-          
+
             span {
               color: $green;
             }

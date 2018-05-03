@@ -101,7 +101,6 @@ export default {
     color: $purple;
     font-family: GilroySemibold;
     font-size: toRem(12px);
-    line-height: $line-height;
     text-align: center;
     text-transform: uppercase;
   }

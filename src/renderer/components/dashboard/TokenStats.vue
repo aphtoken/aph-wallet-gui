@@ -26,7 +26,7 @@
       </div>
       <div class="market-cap">
         <div class="label">Market Cap</div>
-        <div class="amount">{{ $formatMoney($store.state.statsToken.marketCap) }}</div>
+        <div class="amount">{{ $formatMoneyWithoutCents($store.state.statsToken.marketCap) }}</div>
       </div>
       <div class="change">
         <div class="label">24h Change</div>
@@ -96,7 +96,6 @@ export default {
         border: none;
         font-size: toRem(10px);
         height: auto;
-        line-height: initial;
         padding: toRem(3px) 0;
         position: relative;
         top: toRem(-2px);
@@ -111,8 +110,7 @@ export default {
 
       .amount {
         color: $purple;
-
-        font-family: GilroyMedium;
+        font-size: toRem(20px);
       }
     }
   }
@@ -134,8 +132,9 @@ export default {
         width: $width;
       }
 
-      .placeholder {
+      .placeholder-text {
         font-size: toRem(30px);
+        top: toRem(4px);
       }
     }
 
@@ -162,11 +161,12 @@ export default {
       }
 
       .value {
+        color: $darker-grey;
         font-family: GilroyMedium;
         font-size: toRem(20px);
 
         .currency {
-          margin-left: $space-xsm;
+          margin-left: $space-xs;
         }
       }
 
@@ -192,11 +192,7 @@ export default {
     padding: $space-lg;
 
     > div {
-      flex: none;
-
-      & + div {
-        margin-left: $space-lg;
-      }
+      flex: 1;
 
       &.total-supply {
         min-width: toRem(125px);
@@ -204,7 +200,7 @@ export default {
     }
 
     .amount {
-      font-family: GilroySemibold;
+      font-family: GilroyMedium;
       font-size: toRem(18px);
     }
 

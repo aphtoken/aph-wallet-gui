@@ -1,3 +1,5 @@
+$font-size: 14px;
+
 @import "~normalize.css/normalize";
 
 @import 'functions';
@@ -10,9 +12,3 @@
 @import 'tiles';
 @import 'type';
 @import 'lowres';
-
-html, body {
-  font-family: Gilroy;
-  font-size: $font-size;
-  height: 100%;
-}
