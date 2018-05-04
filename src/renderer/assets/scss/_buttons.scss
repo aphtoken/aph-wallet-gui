@@ -1,6 +1,8 @@
 $btn-circle-size: toRem(65px);
 
 %btn-circle {
+  @include transition(background-color, border, box-shadow, color);
+
   align-items: center;
   background-color: $purple;
   border-radius: 100%;
@@ -9,7 +11,6 @@ $btn-circle-size: toRem(65px);
   display: inline-flex;
   height: $btn-circle-size;
   justify-content: center;
-  transition: $transition;
   width: $btn-circle-size;
 
   &:hover {
@@ -28,6 +29,8 @@ $btn-circle-size: toRem(65px);
 }
 
 %btn {
+  @include transition(background-color, border, box-shadow, color);
+
   background-color: $purple;
   border-radius: $border-radius;
   border: $border-thin;
@@ -39,7 +42,6 @@ $btn-circle-size: toRem(65px);
   outline: none;
   padding: toRem(16px) 0;
   text-align: center;
-  transition: $transition;
   user-select: none;
   vertical-align: middle;
   white-space: nowrap;
@@ -76,6 +78,8 @@ $btn-circle-size: toRem(65px);
 }
 
 %btn-square {
+  @include transition(background-color, border, box-shadow, color);
+
   background-color: white;
   border-radius: $border-radius;
   border: none;
@@ -86,7 +90,6 @@ $btn-circle-size: toRem(65px);
   font-family: GilroyMedium;
   height: toRem(175px);
   outline: none;
-  transition: $transition;
   width: toRem(175px);
 
   .aph-icon {
@@ -132,6 +135,8 @@ $btn-circle-size: toRem(65px);
 }
 
 %btn-footer {
+  @include transition(background-color, border, box-shadow, color);
+
   background-color: $purple;
   border: none;
   color: white;
@@ -142,7 +147,6 @@ $btn-circle-size: toRem(65px);
   outline: none;
   padding: toRem(16px) 0;
   text-align: center;
-  transition: $transition;
 
   &:hover {
     background-color: $purple-hover;

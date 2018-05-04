@@ -149,6 +149,8 @@ export default {
       padding-right: $space;
 
       .wallet {
+        @include transition(border-color);
+
         align-items: center;
         background: white;
         border-left: $border-width-thick solid transparent;
@@ -156,7 +158,6 @@ export default {
         cursor: pointer;
         display: flex;
         padding: $space-lg;
-        transition: $transition;
 
         .name {
           font-family: GilroyMedium;

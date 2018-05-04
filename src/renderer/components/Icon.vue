@@ -384,8 +384,9 @@ export default {
   font-size: 0;
 
   .fill {
+    @include transition(fill);
+
     fill: $dark;
-    transition: $transition-fill;
   }
 
   .logo {

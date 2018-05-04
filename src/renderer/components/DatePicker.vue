@@ -262,8 +262,10 @@ export default {
         display: flex;
 
         .day {
+          @include transition(background-color, color);
+
           align-items: center;
-          background: transparent;
+          background-color: transparent;
           border-radius: 50%;
           cursor: pointer;
           display: flex;
@@ -273,7 +275,6 @@ export default {
           justify-content: center;
           margin: $space-xs;
           text-align: center;
-          transition: $transition;
 
           &:before{
             content: "";
@@ -286,11 +287,11 @@ export default {
           }
 
           &.is-today {
-            background: $background;
+            background-color: $background;
           }
 
           &:hover, &.active {
-            background: $purple;
+            background-color: $purple;
             color: white;
           }
 

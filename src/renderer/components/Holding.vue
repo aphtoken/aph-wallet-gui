@@ -72,7 +72,6 @@ export default {
   border-radius: $border-radius;
   display: flex;
   padding: 1.5rem;
-  transition: $transition;
 
   .left, .right {
     flex: 1;
@@ -107,12 +106,12 @@ export default {
 
   .remove {
     @extend %small-uppercase-grey-label;
+    @include transition(background-color, color, opacity, visibility);
 
     cursor: pointer;
     opacity: 0;
     padding: $space;
     visibility: none;
-    transition: $transition;
 
     &:hover {
       color: $purple;

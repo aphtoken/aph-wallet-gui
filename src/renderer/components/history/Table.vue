@@ -170,15 +170,15 @@ export default {
     overflow-y: auto;
 
     .transaction {
-      background: transparent;
+      @include transition(background-color);
+
+      background-color: transparent;
       border-top: toRem(1px) solid $background;
-      transition: $transition;
 
       .summary {
         align-items: center;
         cursor: pointer;
         display: flex;
-        transition: $transition;
         flex-wrap: wrap;
       }
 
@@ -223,7 +223,7 @@ export default {
       }
 
       &:hover, &.active {
-        background: $light-grey;
+        background-color: $light-grey;
       }
 
       .details {

@@ -192,9 +192,10 @@ export default {
         overflow-y: auto;
 
         .contact {
-          background: transparent;
+          @include transition(background-color);
+
+          background-color: transparent;
           border-top: toRem(1px) solid $background;
-          transition: $transition;
 
           .summary {
             align-items: center;
@@ -210,7 +211,7 @@ export default {
           }
 
           &:hover, &.active {
-            background: $background;
+            background-color: $background;
           }
 
           .name {
@@ -296,8 +297,9 @@ export default {
                   font-family: GilroySemibold;
 
                   .edit {
+                    @include transition(color);
+
                     display: flex;
-                    transition: $transition;
 
                     .aph-icon {
                       margin-right: $space-sm;

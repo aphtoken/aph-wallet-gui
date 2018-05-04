@@ -300,6 +300,8 @@ export default {
       }
 
       .max {
+        @include transition(color);
+
         bottom: toRem(16px);
         color: $grey;
         cursor: pointer;
@@ -307,7 +309,6 @@ export default {
         position: absolute;
         right: 0;
         text-transform: uppercase;
-        transition: $transition;
         z-index: 0;
 
         &:hover {

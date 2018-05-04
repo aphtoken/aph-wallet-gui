@@ -44,7 +44,6 @@ export default {
     cursor: pointer;
     flex: 1;
     padding: $space toRem(20px);
-    transition: $transition;
 
     > .aph-icon {
       svg {
@@ -54,10 +53,8 @@ export default {
 
     &:hover {
       > .aph-icon {
-        .plus, .minus {
-          .fill {
-            fill: $purple;
-          }
+        .fill {
+          fill: $purple;
         }
       }
     }

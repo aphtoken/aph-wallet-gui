@@ -90,13 +90,14 @@ export default {
       flex-direction: column;
 
       .contact {
+        @include transition(background-color);
+
         align-items: center;
-        background: transparent;
+        background-color: transparent;
         border-top: toRem(1px) solid $background;
         display: flex;
         flex-wrap: wrap;
         font-size: toRem(12px);
-        transition: $transition;
 
         .cell {
           flex: 1;
@@ -109,7 +110,7 @@ export default {
         }
 
         &:hover, &.active {
-          background: $background;
+          background-color: $background;
         }
       }
     }

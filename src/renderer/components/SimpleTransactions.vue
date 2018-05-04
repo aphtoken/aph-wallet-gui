@@ -93,8 +93,9 @@ export default {
       cursor: pointer;
 
       td {
-        background: transparent;
-        transition: $transition;
+        @include transition(background-color);
+
+        background-color: transparent;
 
         &:first-child {
           padding-left: $space;
@@ -107,7 +108,7 @@ export default {
 
       &:hover , &.active {
         td {
-          background: $background;
+          background-color: $background;
 
           &:not(.amount) {
             color: $purple;

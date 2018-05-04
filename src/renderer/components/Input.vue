@@ -92,7 +92,6 @@ export default {
   display: flex;
   height: $input-height;
   position: relative;
-  transition: $transition;
 
   input {
     background: none;
@@ -106,12 +105,13 @@ export default {
   }
 
   .placeholder {
+    @include transitionFast(all);
+
     color: white;
     padding-top: toRem(20px);
     pointer-events: none;
     position: absolute;
     top: 0;
-    transition: $transition-fast;
     z-index: 0;
   }
 

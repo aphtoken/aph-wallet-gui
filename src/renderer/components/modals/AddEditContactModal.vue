@@ -93,13 +93,14 @@ export default {
     padding: $space-lg $space-lg 0;
 
     .remove {
+      @include transition(color);
+
       color: $grey;
       cursor: pointer;
       font-family: GilroyMedium;
       font-size: toRem(10px);
       text-align: right;
       text-transform: uppercase;
-      transition: $transition;
 
       &:hover {
         color: $purple;

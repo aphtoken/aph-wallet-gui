@@ -111,6 +111,8 @@ export default {
     padding: 0;
 
     a {
+      @include transition(border-color);
+
       align-items: center;
       border-left: $border-width-thick solid transparent;
       color: white;
@@ -118,7 +120,6 @@ export default {
       display: flex;
       font-size: toRem(17px);
       padding: $space-sm 0;
-      transition: $transition;
       height: toRem(70px);
 
       .icon {
