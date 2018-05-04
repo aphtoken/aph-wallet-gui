@@ -80,6 +80,7 @@ export default {
   methods: {
     logout() {
       this.$services.wallets.clearCurrentWallet();
+      this.$store.commit('handleLogout');
       this.$router.push('/login');
     },
   },
