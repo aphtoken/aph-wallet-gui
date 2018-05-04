@@ -1,9 +1,9 @@
 <template>
   <table class="transactions-table" :class="{'is-clickable': isClickable}">
     <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)" :class="[{active: transaction.active}]">
-      <td width="50%" class="address truncate" v-if="transaction.block_time">{{ transaction.address }}</td>
+      <td width="50%" class="address truncate" v-if="showBlockTime">{{ transaction.address }}</td>
       <td width="50%" class="address" v-else>{{ transaction.address }}</td>
-      <td v-if="transaction.block_time">{{ $formatDate(transaction.block_time) }}</td>
+      <td v-if="showBlockTime">{{ $formatDate(transaction.block_time) }}</td>
       <td class="currency">{{ transaction.symbol }}</td>
       <td v-if="transaction.block_time" :class="['amount', {sent: transaction.value < 0, received: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</td>
       <td width="25%" class="amount" v-else>{{ $formatNumber(transaction.value) }}</td>
@@ -30,6 +30,11 @@ export default {
   props: {
     onClick: {
       type: Function,
+    },
+
+    showBlockTime: {
+      default: true,
+      type: Boolean,
     },
 
     transactions: {
