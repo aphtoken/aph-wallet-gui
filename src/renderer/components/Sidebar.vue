@@ -35,7 +35,8 @@
     <div class="footer link-list">
       <div class="network-status">
         <div class="block">
-          <span class="network">{{ currentNetwork.net }} block</span><span class="index">{{ currentNetwork.bestBlock.index }}</span>
+          <span class="network">{{ currentNetwork ? currentNetwork.net : 0 }} block</span>
+          <span class="index">{{ currentNetwork && currentNetwork.bestBlock ? currentNetwork.bestBlock.index : 0}}</span>
         </div>
         <div class="last-update">
           <div v-if="showNetworkError" class="network-error">Unable to Reach Network</div>
