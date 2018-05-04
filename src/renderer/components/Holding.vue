@@ -164,6 +164,8 @@ export default {
   }
 
   &.is-clickable {
+    @include transition(border-color);
+
     cursor: pointer;
 
     &:hover, &.active {
