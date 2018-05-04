@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import moment from 'moment';
 import LineChart from '../charts/LineChart';
 let loadPriceDataIntervalId;
 let storeUnwatch;
@@ -125,7 +126,7 @@ export default {
       this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol,
         this.timeframeHours, 7)
         .then((priceData) => {
-          this.date = new Date();
+          this.date = moment().unix();
           this.current = priceData.last;
           this.high = priceData.high;
           this.low = priceData.low;
