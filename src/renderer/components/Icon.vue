@@ -62,21 +62,19 @@
     </svg>
 
     <!-- create -->
-    <svg class="icon create" v-if="name === 'create'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 24">
-      <path class="fill create--path" d="M25,37a.46.46,0,0,1-.23-.06l-10.5-5.5A.48.48,0,0,1,14,31V19a.48.48,0,0,1,.27-.44l10.5-5.5a.47.47,0,0,1,.46,0l10.5,5.5A.48.48,0,0,1,36,19V31a.48.48,0,0,1-.27.44l-10.5,5.5A.46.46,0,0,1,25,37ZM15,30.7l10,5.24L35,30.7V19.3L25,14.06,15,19.3Z" transform="translate(-14 -13)"/>
-      <path class="fill create--path" d="M20.25,25.25a.5.5,0,0,1,.5-.5h6a.5.5,0,0,1,0,1h-6A.5.5,0,0,1,20.25,25.25Z" transform="translate(-14 -13)"/>
-      <path class="fill create--path" d="M22.75,25.25a.5.5,0,0,1,.5-.5h6a.5.5,0,0,1,0,1h-6A.5.5,0,0,1,22.75,25.25Z" transform="translate(-14 -13)"/>
-      <path class="fill create--path" d="M25,30a.5.5,0,0,1-.5-.5v-6a.5.5,0,0,1,1,0v6A.5.5,0,0,1,25,30Z" transform="translate(-14 -13)"/>
-      <path class="fill create--path" d="M25,27.5a.5.5,0,0,1-.5-.5V21a.5.5,0,0,1,1,0v6A.5.5,0,0,1,25,27.5Z" transform="translate(-14 -13)"/>
+    <svg class="icon create" v-if="name === 'create'" viewBox="0 0 22 24" xmlns="http://www.w3.org/2000/svg">
+      <g class="fill">
+        <path d="m10.5 7.6v3.9h-3.9a.5.5 0 0 0 0 1h3.9v3.9a.5.5 0 0 0 1 0v-3.9h3.9a.5.5 0 0 0 0-1h-3.9v-3.9a.5.5 0 0 0 -1 0z" />
+        <path d="m21.73 5.56-10.5-5.5a.47.47 0 0 0 -.46 0l-10.5 5.5a.48.48 0 0 0 -.27.44v12a.48.48 0 0 0 .27.44l10.5 5.5a.47.47 0 0 0 .46 0l10.5-5.5a.48.48 0 0 0 .27-.44v-12a.48.48 0 0 0 -.27-.44zm-.73 12.14-10 5.24-10-5.24v-11.4l10-5.24 10 5.24z"
+        />
+      </g>
     </svg>
 
     <!-- wallet -->
     <svg class="icon wallet" v-if="name === 'wallet'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20">
-      <path class="fill wallet--path" d="M36.5,29h-10a.47.47,0,0,1-.35-.15l-2.5-2.5a.48.48,0,0,1,0-.7l2.5-2.5A.47.47,0,0,1,26.5,23h10a.5.5,0,0,1,.5.5v5A.5.5,0,0,1,36.5,29Zm-9.79-1H36V24H26.71l-2,2Z" transform="translate(-13 -15)"/>
-      <path class="fill wallet--path" d="M32.5,35h-19a.5.5,0,0,1-.5-.5v-17a.5.5,0,0,1,.5-.5h19a.5.5,0,0,1,.5.5v6a.5.5,0,0,1-1,0V18H14V34H32V28.5a.5.5,0,0,1,1,0v6A.5.5,0,0,1,32.5,35Z" transform="translate(-13 -15)"/>
-      <path class="fill wallet--path" d="M34.5,33h-2a.5.5,0,0,1,0-1H34V29a.5.5,0,0,1,1,0v3.5A.5.5,0,0,1,34.5,33Z" transform="translate(-13 -15)"/>
-      <path class="fill wallet--path" d="M34.5,24a.5.5,0,0,1-.5-.5V16H15.71l-1.86,1.85a.49.49,0,0,1-.7-.7l2-2A.47.47,0,0,1,15.5,15h19a.5.5,0,0,1,.5.5v8A.5.5,0,0,1,34.5,24Z" transform="translate(-13 -15)"/>
-      <path class="fill wallet--path" d="M27.5,27a.5.5,0,0,1-.5-.5v-1a.5.5,0,0,1,1,0v1A.5.5,0,0,1,27.5,27Z" transform="translate(-13 -15)"/>
+      <path class="fill cls-1" d="M23,12H21.5V4.5A.5.5,0,0,0,21,4H2a.47.47,0,0,0-.35.15l-2,2a.36.36,0,0,0-.11.16.41.41,0,0,0,0,.19v17A.5.5,0,0,0,0,24H19a.5.5,0,0,0,.5-.5V22H21a.5.5,0,0,0,.5-.5V18H23a.5.5,0,0,0,.5-.5v-5A.5.5,0,0,0,23,12ZM2.21,5H20.5v7h-1V6.5A.5.5,0,0,0,19,6H1.21ZM18.5,23H.5V7h18v5H13a.47.47,0,0,0-.35.15l-2.5,2.5a.48.48,0,0,0,0,.7l2.5,2.5A.47.47,0,0,0,13,18h5.5Zm2-2h-1V18h1Zm2-4H13.21l-2-2,2-2H22.5Z"
+        transform="translate(0.5 -4)" />
+      <path class="fill cls-1" d="M14,16a.5.5,0,0,0,.5-.5v-1a.5.5,0,0,0-1,0v1A.5.5,0,0,0,14,16Z" transform="translate(0.5 -4)" />
     </svg>
 
     <!-- back -->
@@ -86,22 +84,26 @@
 
     <!-- arrow-down -->
     <svg class="icon arrow-down" v-if="name === 'arrow-down'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 5">
-      <path class="fill arrow--path" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" transform="translate(-20.5 -22.5)" />
+      <path class="fill cls-1" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z"
+        transform="translate(-20.5 -22.5)" />
     </svg>
 
     <!-- arrow-up -->
     <svg class="icon arrow-up" v-if="name === 'arrow-up'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 5">
-      <path class="fill arrow--path" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" />
+      <path class="fill cls-1" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z"
+        transform="translate(-20.5 -22.5)" />
     </svg>
 
     <!-- arrow-left -->
     <svg class="icon arrow-left" v-if="name === 'arrow-left'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 9">
-      <path class="fill arrow--path" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" transform="translate(-20.5 -22.5)" />
+      <path class="fill cls-1" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z"
+        transform="translate(-20.5 -22.5)" />
     </svg>
 
     <!-- arrow-right -->
     <svg class="icon arrow-right" v-if="name === 'arrow-right'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 9">
-      <path class="fill arrow--path" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" />
+      <path class="fill cls-1" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z"
+        transform="translate(-20.5 -22.5)" />
     </svg>
 
     <!-- add -->
@@ -118,82 +120,57 @@
 
     <!-- copy -->
     <svg class="icon copy" v-if="name === 'copy'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.49 13">
-      <path class="fill copy--path" d="M23.25,31.5a.5.5,0,0,1-.35-.15l-6-6a.5.5,0,0,1,0-.7l6-6a.5.5,0,0,1,.71,0l6,6a.5.5,0,0,1,0,.7l-6,6A.51.51,0,0,1,23.25,31.5ZM18,25l5.29,5.29L28.55,25l-5.3-5.29Z" transform="translate(-16.75 -18.5)" />
-      <path class="fill copy--path" d="M27.1,31.49a.45.45,0,0,1-.36-.13l-6.31-5.67a.5.5,0,0,1,0-.71l5.68-6.31a.49.49,0,0,1,.7,0l6.31,5.67a.5.5,0,0,1,0,.71l-5.68,6.31A.52.52,0,0,1,27.1,31.49Zm-5.63-6.21,5.56,5,5-5.57-5.56-5Z" transform="translate(-16.75 -18.5)" />
+      <path class="fill st0" d="M23.25,31.5a.5.5,0,0,1-.35-.15l-6-6a.5.5,0,0,1,0-.7l6-6a.5.5,0,0,1,.71,0l6,6a.5.5,0,0,1,0,.7l-6,6A.51.51,0,0,1,23.25,31.5ZM18,25l5.29,5.29L28.55,25l-5.3-5.29Z" transform="translate(-16.75 -18.5)" />
+      <path class="fill st1" d="M27.1,31.49a.45.45,0,0,1-.36-.13l-6.31-5.67a.5.5,0,0,1,0-.71l5.68-6.31a.49.49,0,0,1,.7,0l6.31,5.67a.5.5,0,0,1,0,.71l-5.68,6.31A.52.52,0,0,1,27.1,31.49Zm-5.63-6.21,5.56,5,5-5.57-5.56-5Z" transform="translate(-16.75 -18.5)" />
     </svg>
 
     <!-- dashboard -->
-    <svg class="icon dashboard" v-if="name === 'dashboard'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <rect x="12.3" y="11.8" transform="matrix(0.7071 0.7071 -0.7071 0.7071 12.9964 -5.6762)" class="stroke st0" width="2.1" height="2.1"/>
-        <polygon class="stroke st1" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 	"/>
-        <polygon class="stroke st0" points="15.4,17.4 11.4,17.4 6.4,12.9 11.4,8.4 15.4,8.4 20.4,12.9 	"/>
-      </g>
+    <svg class="icon dashboard" v-if="name === 'dashboard'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 24">
+      <path class="fill cls-1" d="M9.4,10.73l1.5,1.5a.48.48,0,0,0,.7,0l1.5-1.5a.5.5,0,0,0,0-.71l-1.5-1.5a.5.5,0,0,0-.7,0L9.4,10A.5.5,0,0,0,9.4,10.73Zm1.85-1.15.79.8-.79.79-.79-.79Z"
+        transform="translate(-0.25 1.63)" />
+      <path class="fill cls-1" d="M22,3.93l-10.5-5.5a.53.53,0,0,0-.46,0L.52,3.93a.5.5,0,0,0-.27.45v12a.5.5,0,0,0,.27.44L11,22.32a.47.47,0,0,0,.46,0L22,16.82a.5.5,0,0,0,.27-.44v-12A.5.5,0,0,0,22,3.93Zm-.73,12.14-10,5.24-10-5.24V4.68l10-5.24,10,5.24Z"
+        transform="translate(-0.25 1.63)" />
+      <path class="fill cls-1" d="M8.92,5.5l-5,4.5a.5.5,0,0,0-.17.38.5.5,0,0,0,.17.37l5,4.5a.51.51,0,0,0,.33.13h4a.51.51,0,0,0,.33-.13l5-4.5a.5.5,0,0,0,.17-.37.5.5,0,0,0-.17-.38l-5-4.5a.5.5,0,0,0-.33-.12h-4A.5.5,0,0,0,8.92,5.5Zm4.14.88,4.44,4-4.44,4H9.44L5,10.38l4.44-4Z"
+        transform="translate(-0.25 1.63)" />
     </svg>
 
     <!-- history -->
-    <svg class="icon history" v-if="name === 'history'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 24 28.3" style="enable-background:new 0 0 24 28.3;" xml:space="preserve">
-      <g>
-        <polygon class="stroke st0" points="8.5,6.6 5.5,4.6 8.5,2.6 15.5,2.6 18.5,4.6 15.5,6.6 	"/>
-        <polyline class="stroke st0" points="18.5,4.6 18.5,9.1 12,14.1 5.5,9.1 5.5,4.6 	"/>
-        <polygon class="stroke st0" points="5.5,23.6 5.5,19.1 12,14.1 18.5,19.1 18.5,23.6 15.5,25.6 8.5,25.6 	"/>
-        <polyline class="stroke st1" points="14.5,9.1 12,11.1 9.5,9.1 	"/>
-        <polyline class="stroke st1" points="16.5,22.6 15,22.6 12,21.1 9,22.6 7.5,22.6 	"/>
-        <line class="stroke st1" x1="12" y1="17.1" x2="12" y2="18.1"/>
-        <line class="stroke st1" x1="12" y1="20.1" x2="12" y2="21.1"/>
-      </g>
+    <svg class="icon history" v-if="name === 'history'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 24">
+      <path class="fill cls-1" d="M19,7V2.5a.51.51,0,0,0-.22-.42l-3-2A.54.54,0,0,0,15.5,0h-7a.54.54,0,0,0-.28.08l-3,2A.51.51,0,0,0,5,2.5V7a.49.49,0,0,0,.2.4l6,4.6-6,4.6A.49.49,0,0,0,5,17v4.5a.51.51,0,0,0,.22.42l3,2A.54.54,0,0,0,8.5,24h7a.54.54,0,0,0,.28-.08l3-2A.51.51,0,0,0,19,21.5V17a.49.49,0,0,0-.2-.4l-6-4.6,6-4.6A.49.49,0,0,0,19,7ZM8.65,1h6.7L17.6,2.5,15.35,4H8.65L6.4,2.5ZM18,21.23,15.35,23H8.65L6,21.23v-4l6-4.62,6,4.62Zm-6-9.86L6,6.75V3.43L8.22,4.92A.54.54,0,0,0,8.5,5h7a.54.54,0,0,0,.28-.08L18,3.43V6.75Z"
+        transform="translate(-5)" />
+      <path class="fill cls-1" d="M14.19,6.61,12,8.36,9.81,6.61a.5.5,0,0,0-.62.78l2.5,2a.49.49,0,0,0,.62,0l2.5-2a.5.5,0,1,0-.62-.78Z"
+        transform="translate(-5)" />
+      <path class="fill cls-1" d="M11.5,15v1a.5.5,0,0,0,1,0V15a.5.5,0,0,0-1,0Z" transform="translate(-5)" />
+      <path class="fill cls-1" d="M12.5,18a.5.5,0,0,0-1,0v.69L8.88,20H7.5a.5.5,0,0,0,0,1H9A.54.54,0,0,0,9.22,21L12,19.56,14.78,21A.54.54,0,0,0,15,21h1.5a.5.5,0,0,0,0-1H15.12L12.5,18.69Z"
+        transform="translate(-5)" />
     </svg>
 
     <!-- settings -->
-    <svg class="icon settings" v-if="name === 'settings'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <polygon class="stroke st0" points="7.4,22.4 1.9,12.9 7.4,3.4 19.4,3.4 24.9,12.9 19.4,22.4 	"/>
-        <polygon class="stroke st0" points="24.9,12.9 17.4,8.4 7.4,3.4 6.4,14.4 7.4,22.4 17.9,20.4 	"/>
-        <polygon class="stroke st0" points="17.4,8.4 6.4,14.4 17.9,20.4 	"/>
-        <line class="stroke st0" x1="19.4" y1="22.4" x2="17.9" y2="20.4"/>
-        <line class="stroke st0" x1="1.9" y1="12.9" x2="6.4" y2="14.4"/>
-        <line class="stroke st0" x1="19.4" y1="3.4" x2="17.4" y2="8.4"/>
-      </g>
+    <svg class="icon settings" v-if="name === 'settings'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20">
+      <path class="fill cls-1" d="M76,15.06A.28.28,0,0,0,76,15v0a.61.61,0,0,0,0-.12s0,0,0-.06l-5.5-9.5A.5.5,0,0,0,70,5H58a.46.46,0,0,0-.23.06h0l0,0a.57.57,0,0,0-.13.14h0l-5.5,9.5a.5.5,0,0,0,0,.5l5.5,9.5h0a.4.4,0,0,0,.14.15s0,0,0,0A.51.51,0,0,0,58,25H70a.48.48,0,0,0,.43-.25l5.5-9.5a.06.06,0,0,0,0,0A.28.28,0,0,0,76,15.06Zm-18.4.55.85-9.34,8.49,4.25Zm10-4.29L68,21.66l-9.9-5.17Zm-.54,11-8.56,1.63-.82-6.53ZM70.08,6.64l4,6.94-5.48-3.29ZM67.74,9.81,60.12,6h9.14Zm-11.18,6-3.32-1.11,4.06-7Zm0,1,.66,5.24-3.61-6.23Zm11.75,6.17L69,24H63.3Zm.25-11.64,6.17,3.7L69,21.28ZM70,23.59l-.8-1.06,3.71-4Z"
+        transform="translate(-52 -5)" />
     </svg>
 
     <!-- send -->
-    <svg class="icon send" v-if="name === 'send'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <polyline class="stroke st0" points="9.4,11.4 13.4,7.4 17.4,11.4 	"/>
-        <line class="stroke st0" x1="13.4" y1="7.4" x2="13.4" y2="18.4"/>
-      </g>
-      <polygon class="stroke st1" points="2.9,6.9 13.4,1.4 23.9,6.9 23.9,18.9 13.4,24.4 2.9,18.9 "/>
+    <svg class="icon send" v-if="name === 'send'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 24">
+      <path class="fill cls-1" d="M13.59,6.94a.5.5,0,0,0-.38,0,.36.36,0,0,0-.16.11l-4,4a.49.49,0,0,0,.7.7L12.9,8.61V18.4a.5.5,0,0,0,1,0V8.61l3.15,3.14a.48.48,0,0,0,.7,0,.48.48,0,0,0,0-.7l-4-4A.36.36,0,0,0,13.59,6.94Z"
+        transform="translate(-2.4 -0.9)" />
+      <path class="fill cls-1" d="M24.13,6.46,13.63,1a.47.47,0,0,0-.46,0L2.67,6.46a.48.48,0,0,0-.27.44v12a.48.48,0,0,0,.27.44l10.5,5.5a.47.47,0,0,0,.46,0l10.5-5.5a.48.48,0,0,0,.27-.44V6.9A.48.48,0,0,0,24.13,6.46ZM23.4,18.6l-10,5.24L3.4,18.6V7.2L13.4,2l10,5.24Z"
+        transform="translate(-2.4 -0.9)" />
     </svg>
 
     <!-- receive -->
-    <svg class="icon receive" v-if="name === 'receive'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <polyline class="stroke st0" points="17.4,14.4 13.4,18.4 9.4,14.4 	"/>
-        <line class="stroke st0" x1="13.4" y1="18.4" x2="13.4" y2="7.4"/>
-      </g>
-      <polygon class="stroke st1" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 "/>
-    </svg>
-
-    <!-- confirmed -->
-    <svg class="icon confirmed" v-if="name === 'confirmed'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <polygon class="stroke st0" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 	"/>
-        <polyline class="stroke st1" points="7.9,12.9 11.9,16.9 19.9,8.9 	"/>
-      </g>
+    <svg class="icon receive" v-if="name === 'receive'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 23.96">
+      <path class="fill cls-1" d="M10.81,18a.5.5,0,0,0,.38,0,.36.36,0,0,0,.16-.11l4-4a.49.49,0,1,0-.7-.7L11.5,16.33V6.54a.5.5,0,1,0-1,0v9.79L7.35,13.19a.49.49,0,0,0-.68,0l0,0a.49.49,0,0,0,0,.68l0,0,4,4A.36.36,0,0,0,10.81,18Z"
+        transform="translate(0 -0.04)" />
+      <path class="fill cls-1" d="M.27,18.48l10.5,5.46a.47.47,0,0,0,.46,0l10.5-5.46A.48.48,0,0,0,22,18V6a.48.48,0,0,0-.27-.44L11.23.1a.47.47,0,0,0-.46,0L.27,5.6A.48.48,0,0,0,0,6V18A.48.48,0,0,0,.27,18.48ZM1,6.34,11,1.1,21,6.34v11.4l-10,5.2L1,17.7Z"
+        transform="translate(0 -0.04)" />
     </svg>
 
     <!-- reset -->
-    <svg class="icon reset" v-if="name === 'reset'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <polygon class="stroke st0" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 	"/>
-      </g>
+    <svg class="icon reset" v-if="name === 'reset'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8.25 9">
+      <path class="fill cls-1" d="M8.25,2H8.3a.47.47,0,0,1,.25.07l3.57,2a.51.51,0,0,1,.26.43v4a.49.49,0,0,1-.27.44L8.49,11A.64.64,0,0,1,8,11l-3.57-2a.51.51,0,0,1-.26-.44v-4A.52.52,0,0,1,4.39,4L8,2.07A.53.53,0,0,1,8.25,2Zm3.13,2.83L8.27,3.07,5.12,4.77V8.18L8.23,10l3.15-1.69Z"
+        transform="translate(-4.13 -2.01)" />
     </svg>
 
     <!-- plus -->
@@ -208,94 +185,62 @@
       <path class="fill cls-1" d="M28,25.5H22a.5.5,0,0,1,0-1h6a.5.5,0,0,1,0,1Z" transform="translate(-21.5 -21.5)" />
     </svg>
 
-    <!-- unconfirmed -->
-    <svg class="icon unconfirmed" v-if="name === 'unconfirmed'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	    viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <polygon class="stroke st0" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 	"/>
-      </g>
-      <g>
-        <path class="stroke st1" d="M16.6,15.4l-1.7-1.7c0,0,0,0,0,0l-4.2-4.2c-0.2-0.2-0.5-0.2-0.7,0s-0.2,0.5,0,0.7l1.7,1.7l2.5,2.5l1.7,1.7
-          c0.2,0.2,0.5,0.2,0.7,0C16.8,15.9,16.8,15.6,16.6,15.4z"/>
-        <path class="fill stroke st1" d="M16.7,9.5c-0.2-0.2-0.5-0.2-0.7,0l-6,6c-0.2,0.2-0.2,0.5,0,0.7s0.5,0.2,0.7,0l6-6C16.9,10,16.9,9.7,16.7,9.5z"
-          />
-      </g>
+    <!-- confirmed-big -->
+    <svg class="icon confirmed-big" v-if="name === 'confirmed-big'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.26 24.24">
+      <path class="fill cls-1" d="M11.13,24.22a.6.6,0,0,1-.29-.08L.34,18.64A.61.61,0,0,1,0,18.09v-12a.61.61,0,0,1,.34-.55L10.84.07a.6.6,0,0,1,.58,0l10.5,5.5a.61.61,0,0,1,.34.55v12a.61.61,0,0,1-.34.55l-10.5,5.55A.71.71,0,0,1,11.13,24.22ZM1.25,17.74l9.88,5.18L21,17.74V6.5L11.13,1.33,1.25,6.5Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M9.63,16.75h0a.6.6,0,0,1-.44-.19l-4-4a.62.62,0,0,1,.88-.88h0l3.56,3.54,7.56-7.56a.62.62,0,1,1,.88.88h0l-8,8A.62.62,0,0,1,9.63,16.75Z"
+        transform="translate(0 0)" />
+    </svg>
+
+    <!-- confirmed -->
+    <svg class="icon confirmed" v-if="name === 'confirmed'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.51 24.49">
+      <path class="fill cls-1" d="M22.51,10,12,4.54a.73.73,0,0,0-.7,0L.82,10a.73.73,0,0,0-.41.67v12a.77.77,0,0,0,.4.67l10.5,5.49a.67.67,0,0,0,.34.1l.15,0,.21,0,10.5-5.55a.74.74,0,0,0,.41-.66v-12A.75.75,0,0,0,22.51,10Zm-1.09,1.12V22.24l-9.76,5.11L1.91,22.24V11.15l9.75-5.1Z"
+        transform="translate(-0.41 -4.45)" />
+      <path class="fill cls-1" d="M18.19,12.15a.75.75,0,0,0-.53-.22h0a.75.75,0,0,0-.53.22L9.66,19.62,6.19,16.17A.75.75,0,0,0,5.66,16h0a.75.75,0,0,0-.75.75.77.77,0,0,0,.22.53l4,4a.72.72,0,0,0,.53.23h0a.73.73,0,0,0,.52-.24l8-8a.77.77,0,0,0,.22-.53A.75.75,0,0,0,18.19,12.15Z"
+        transform="translate(-0.41 -4.45)" />
     </svg>
 
     <!-- calendar -->
-    <svg class="icon calendar" v-if="name === 'calendar'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <g>
-          <path class="stroke st0" d="M25.1,11.5c-0.3,0-0.5-0.2-0.5-0.5V6.5h-22V11c0,0.3-0.2,0.5-0.5,0.5c-0.3,0-0.5-0.2-0.5-0.5V6
-            c0-0.3,0.2-0.5,0.5-0.5h23c0.3,0,0.5,0.2,0.5,0.5v5C25.6,11.3,25.4,11.5,25.1,11.5z"/>
-        </g>
-        <g>
-          <path class="stroke st0" d="M13.1,8.5c-0.3,0-0.5-0.2-0.5-0.5V5c0-0.3,0.2-0.5,0.5-0.5c0.3,0,0.5,0.2,0.5,0.5v3
-            C13.6,8.3,13.4,8.5,13.1,8.5z"/>
-        </g>
-        <g>
-          <path class="stroke st0" d="M19.1,8.5c-0.3,0-0.5-0.2-0.5-0.5V5c0-0.3,0.2-0.5,0.5-0.5c0.3,0,0.5,0.2,0.5,0.5v3
-            C19.6,8.3,19.4,8.5,19.1,8.5z"/>
-        </g>
-        <g>
-          <path class="stroke st0" d="M7.1,8.5C6.8,8.5,6.6,8.3,6.6,8V5c0-0.3,0.2-0.5,0.5-0.5c0.3,0,0.5,0.2,0.5,0.5v3C7.6,8.3,7.4,8.5,7.1,8.5z"
-            />
-        </g>
-        <g>
-          <path class="stroke st0" d="M2.6,12.5v-2h22v2h1V10c0-0.3-0.2-0.5-0.5-0.5h-23c-0.3,0-0.5,0.2-0.5,0.5v2.5H2.6z"/>
-          <path class="stroke st0" d="M24.6,12v9h-22v-9h-1v9.5c0,0.3,0.2,0.5,0.5,0.5h23c0.3,0,0.5-0.2,0.5-0.5V12H24.6z"/>
-        </g>
-      </g>
-      <g>
-        <g>
-          <path class="stroke st0" d="M10.9,14.5h-2c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h2c0.3,0,0.5,0.2,0.5,0.5S11.2,14.5,10.9,14.5z"/>
-        </g>
-        <g>
-          <path class="stroke st0" d="M18.4,14.5h-5c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h5c0.3,0,0.5,0.2,0.5,0.5S18.7,14.5,18.4,14.5z"/>
-        </g>
-        <g>
-          <path class="stroke st0" d="M10.9,17.5h-2c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h2c0.3,0,0.5,0.2,0.5,0.5S11.2,17.5,10.9,17.5z"/>
-        </g>
-        <g>
-          <path class="stroke st0" d="M18.4,17.5h-5c-0.3,0-0.5-0.2-0.5-0.5s0.2-0.5,0.5-0.5h5c0.3,0,0.5,0.2,0.5,0.5S18.7,17.5,18.4,17.5z"/>
-        </g>
-      </g>
+    <svg class="icon calendar" v-if="name === 'calendar'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24.75 18.25">
+      <path class="fill cls-1" d="M25.1,5.12H20V5a.88.88,0,1,0-1.75,0v.12H14V5a.88.88,0,1,0-1.75,0v.12H8V5A.88.88,0,1,0,6.23,5v.12H2.1A.84.84,0,0,0,1.23,6V21.5a.83.83,0,0,0,.87.87h23A.83.83,0,0,0,26,21.5V6A.84.84,0,0,0,25.1,5.12ZM7.1,8.87A.84.84,0,0,0,8,8V6.87h4.25V8A.88.88,0,0,0,14,8V6.87h4.24V8A.88.88,0,0,0,20,8V6.87h4.25V9.12H3V6.87H6.23V8A.83.83,0,0,0,7.1,8.87ZM3,20.62V10.87H24.22v9.75Z"
+        transform="translate(-1.23 -4.12)" />
+      <path class="fill cls-1" d="M10.9,13.12h-2a.88.88,0,1,0,0,1.75h2a.88.88,0,0,0,0-1.75Z" transform="translate(-1.23 -4.12)" />
+      <path class="fill cls-1" d="M18.4,13.12h-5a.88.88,0,1,0,0,1.75h5a.88.88,0,1,0,0-1.75Z" transform="translate(-1.23 -4.12)" />
+      <path class="fill cls-1" d="M10.9,16.12h-2a.88.88,0,1,0,0,1.75h2a.88.88,0,0,0,0-1.75Z" transform="translate(-1.23 -4.12)" />
+      <path class="fill cls-1" d="M18.4,16.12h-5a.88.88,0,1,0,0,1.75h5a.88.88,0,1,0,0-1.75Z" transform="translate(-1.23 -4.12)" />
     </svg>
 
     <!-- search -->
-    <svg class="icon search" v-if="name === 'search'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 15 14.2" style="enable-background:new 0 0 15 14.2;" xml:space="preserve">
-      <path class="fill st0" d="M8.4,8.7l2.8,2.8c0.2,0.2,0.5,0.2,0.7,0c0.2-0.2,0.2-0.5,0-0.7L9.1,8L8.4,8.7z"/>
-      <path class="fill st0" d="M9.4,9.1C9.4,9.1,9.3,9.2,9.2,9.2l-3.9,1.1c-0.2,0-0.4,0-0.5-0.1L2,7.3C1.9,7.2,1.8,7,1.9,6.8L3,2.9
-        c0-0.2,0.2-0.3,0.4-0.4l3.9-1.1c0.2,0,0.4,0,0.5,0.1l2.8,2.8c0.1,0.1,0.2,0.3,0.1,0.5L9.6,8.8C9.6,8.9,9.5,9,9.4,9.1 M5.4,9.2
-        l3.3-0.9L9.6,5L7.2,2.6L3.8,3.5L2.9,6.8L5.4,9.2z"/>
+    <svg class="icon search" v-if="name === 'search'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8.99 10.89">
+      <path class="fill cls-1" d="M17,7.46,15,4.15a.48.48,0,0,0-.43-.25H10.52a.5.5,0,0,0-.44.26L8.13,7.73a.5.5,0,0,0,0,.5l2,3.31a.5.5,0,0,0,.43.25h3.78L16,14.55a.47.47,0,0,0,.42.24.49.49,0,0,0,.43-.75l-1.64-2.77L17,8A.5.5,0,0,0,17,7.46ZM14.3,10.78H10.82L9.14,8,10.81,4.9H14.3L16,7.72Z"
+        transform="translate(-8.06 -3.9)" />
     </svg>
 
     <!-- eye-open -->
-    <svg class="icon eye-open" v-if="name === 'eye-open'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17.6 10.47">
-      <path class="fill cls-1" d="M381.58,701.35l1.72,1.73a.5.5,0,0,0,.36.14.49.49,0,0,0,.35-.14l1.72-1.73a.48.48,0,0,0,0-.7L384,698.92a.51.51,0,0,0-.71,0l-1.72,1.73A.48.48,0,0,0,381.58,701.35Zm2.08-1.37,1,1-1,1-1-1Z"
-        transform="translate(-374.85 -695.76)" />
-      <path class="fill cls-1" d="M392.31,700.65l-4.67-4.74a.53.53,0,0,0-.36-.15H380a.51.51,0,0,0-.35.15L375,700.65a.5.5,0,0,0,0,.7l4.68,4.74a.51.51,0,0,0,.35.15h7.25a.53.53,0,0,0,.36-.15l4.67-4.74A.48.48,0,0,0,392.31,700.65Zm-4.56.35-4.09,4.14-4.1-4.14,4.1-4.14Zm-11.69,0,4.18-4.24h2.1l-3.83,3.89a.48.48,0,0,0,0,.7l3.83,3.89h-2.1Zm11,4.24H385l3.84-3.89a.5.5,0,0,0,0-.7L385,696.76h2.1l4.19,4.24Z"
-        transform="translate(-374.85 -695.76)" />
+    <svg class="icon eye-open" v-if="name === 'eye-open'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.97 10.62">
+      <path class="fill cls-1" d="M8.32,3.34a.5.5,0,0,0-.67,0l-1.6,1.6a.5.5,0,0,0,0,.71h0l1.6,1.61A.46.46,0,0,0,8,7.4a.41.41,0,0,0,.31-.14L9.93,5.65a.5.5,0,0,0,.14-.35.54.54,0,0,0-.14-.36ZM8,6.19l-.9-.89L8,4.4l.89.9Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M15.81,4.94,10.46.12A.5.5,0,0,0,10.13,0H5.85a.54.54,0,0,0-.34.12L.17,4.94a.49.49,0,0,0,0,.74l5.34,4.81a.55.55,0,0,0,.34.13h4.28a.51.51,0,0,0,.33-.13l5.35-4.81a.51.51,0,0,0,0-.74ZM9.93,9.62H6L1.3,5.31,6,1H9.93l4.8,4.31Z"
+        transform="translate(0 0)" />
     </svg>
 
     <!-- eye-closed -->
-    <svg class="icon eye-closed" v-if="name === 'eye-closed'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17.6 14.09">
-      <path class="fill cls-1" d="M368.44,700.78,364.66,697l2-2a.48.48,0,0,0,0-.7.5.5,0,0,0-.71,0l-2,2-.2-.2a.47.47,0,0,0-.35-.15h-7.25a.48.48,0,0,0-.36.15l-4.68,4.74a.5.5,0,0,0,0,.7l3.78,3.82-2,2a.51.51,0,0,0,0,.71.49.49,0,0,0,.35.14.5.5,0,0,0,.36-.14l2-2,.2.21a.51.51,0,0,0,.36.15h7.25a.51.51,0,0,0,.35-.15l4.68-4.74A.5.5,0,0,0,368.44,700.78ZM363.25,697,362.2,698l-1.11-1.12h2.11Zm-4.49,4.18,1-1,.16.16-1,1Zm1.88-.16.16.16-1,1-.15-.15Zm-1.21,2.24a.52.52,0,0,0,.35.14.5.5,0,0,0,.35-.14l1.73-1.73a.51.51,0,0,0,0-.71l-.51-.5.84-.84,1.68,1.7-4.09,4.14-1.71-1.73.85-.84Zm1.21-3.65-.51-.51a.48.48,0,0,0-.7,0l-1.73,1.72a.54.54,0,0,0-.14.36.5.5,0,0,0,.14.35l.51.51-.84.84-1.68-1.7,4.09-4.15,1.71,1.73Zm-8.46,1.57,4.19-4.24h2.1l-3.84,3.89a.5.5,0,0,0,0,.7l2,2.06-1.05,1.06Zm4.13,4.18,1.06-1.06,1.1,1.12h-2.1Zm6.89.06h-2.11l3.84-3.89a.5.5,0,0,0,0-.7l-2-2.06,1.06-1.06,3.42,3.47Z"
-        transform="translate(-350.98 -694.08)" />
+    <svg class="icon eye-closed" v-if="name === 'eye-closed'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.97 10.62">
+      <path class="fill cls-1" d="M7.65,3.34l-1.6,1.6a.5.5,0,0,0,0,.71h0l1.6,1.61A.46.46,0,0,0,8,7.4a.41.41,0,0,0,.31-.14L9.93,5.65a.5.5,0,0,0,.14-.35.54.54,0,0,0-.14-.36L8.32,3.34A.5.5,0,0,0,7.65,3.34ZM8,6.19l-.9-.89L8,4.4l.89.9Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M15.81,4.94,10.46.12A.5.5,0,0,0,10.13,0H5.85a.54.54,0,0,0-.34.12L.17,4.94a.49.49,0,0,0,0,.74l5.34,4.81a.55.55,0,0,0,.34.13h4.28a.51.51,0,0,0,.33-.13l5.35-4.81a.51.51,0,0,0,0-.74ZM9.93,9.62H6L1.3,5.31,6,1H9.93l4.8,4.31Z"
+        transform="translate(0 0)" />
+      <path class="fill ls-1" d="M3.28,10.51a.52.52,0,0,1-.35-.14.5.5,0,0,1,0-.71L12.33.25a.51.51,0,0,1,.71,0A.5.5,0,0,1,13,1l-9.4,9.41A.54.54,0,0,1,3.28,10.51Z"
+        transform="translate(0 0)" />
     </svg>
 
     <!-- user -->
-    <svg class="icon user" v-if="name === 'user'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <polygon class="stroke st0" points="23.7,19 13.4,24.6 3.2,19 3.2,6.8 13.4,1.2 23.7,6.8 	"/>
-        <polyline class="stroke st0" points="21.7,20 15.6,18 15.6,15.9 19.3,13.9 19.3,8.9 13.4,5.8 7.5,8.9 7.5,13.9 11.2,15.9 11.2,18
-          5.3,20.1 	"/>
-        <polyline class="stroke st1 fill" points="11.2,12.9 13.4,13.9 15.6,12.9 	"/>
-        <line class="stroke st1 fill" x1="19.3" y1="9.9" x2="7.5" y2="8.9"/>
-      </g>
+    <svg clas s="icon user" v-if="name === 'user'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.5 24.4">
+      <path class="fill cls-1" d="M23.94,6.36,13.64.76a.51.51,0,0,0-.48,0L3,6.36a.51.51,0,0,0-.26.44V19a.51.51,0,0,0,.26.44L13.16,25a.5.5,0,0,0,.24.06.53.53,0,0,0,.24-.06l10.3-5.6A.51.51,0,0,0,24.2,19V6.8A.51.51,0,0,0,23.94,6.36ZM13.4,24,6.46,20.22l4.91-1.75A.5.5,0,0,0,11.7,18V15.9a.51.51,0,0,0-.26-.44L8,13.6V9.44l10.8.92V13.6l-3.44,1.86a.51.51,0,0,0-.26.44V18a.51.51,0,0,0,.34.48l5.1,1.67ZM18.8,9.36,9.25,8.55,13.4,6.36,18.8,9.2Zm4.4,9.34-1.45.79L16.1,17.64V16.2l3.44-1.86a.51.51,0,0,0,.26-.44v-5a.48.48,0,0,0-.27-.44l-5.9-3.1a.47.47,0,0,0-.46,0l-5.9,3.1,0,0a.41.41,0,0,0-.14.12l0,0A.52.52,0,0,0,7,8.86s0,0,0,0v5a.51.51,0,0,0,.26.44L10.7,16.2v1.45L5.29,19.57,3.7,18.7V7.1l9.7-5.33L23.2,7.1Z"
+        transform="translate(-2.7 -0.7)" />
+      <path class="fill cls-1" d="M16.05,12.69a.5.5,0,0,0-.66-.25l-2,.91-2-.91a.5.5,0,0,0-.66.25.49.49,0,0,0,.24.66l2.2,1a.57.57,0,0,0,.42,0l2.2-1A.49.49,0,0,0,16.05,12.69Z"
+        transform="translate(-2.7 -0.7)" />
     </svg>
 
     <!-- no-transactions -->
@@ -340,7 +285,85 @@
       />
     </svg>
 
+    <!-- logout -->
+    <svg class="icon logout" v-if="name === 'logout'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17.36 17">
+      <path class="fill cls-1" d="M11.75,20.5a.5.5,0,0,1-.24-.06l-8.18-4.5a.51.51,0,0,1-.26-.44v-9a.5.5,0,0,1,.5-.5.5.5,0,0,1,.5.5v8.7l7.68,4.23,7.68-4.23V6.5a.5.5,0,0,1,.5-.5.5.5,0,0,1,.5.5v9a.51.51,0,0,1-.26.44L12,20.44A.5.5,0,0,1,11.75,20.5Z"
+        transform="translate(-3.07 -3.5)" />
+      <path class="fill cls-1" d="M16.1,9.65a.48.48,0,0,0-.7,0l-3.15,3.14V4a.5.5,0,0,0-1,0v8.79L8.1,9.65a.49.49,0,0,0-.7.7l4,4a.36.36,0,0,0,.16.11.47.47,0,0,0,.38,0,.36.36,0,0,0,.16-.11l4-4A.48.48,0,0,0,16.1,9.65Z"
+        transform="translate(-3.07 -3.5)" />
+    </svg>
 
+    <!-- no-contacts -->
+    <svg class="icon no-contacts" v-if="name === 'no-contacts'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 24">
+      <path class="fill cls-1" d="M6.57,14a.5.5,0,0,0,.24.43l3.94,2.33a.5.5,0,0,0,.5,0l3.94-2.33a.5.5,0,0,0,.24-.43v-3.8a.49.49,0,0,0-.24-.42l-4-2.44a.53.53,0,0,0-.52,0L6.78,9.63h0a.44.44,0,0,0-.13.14h0a.63.63,0,0,0-.08.23ZM11,15.7l-3.43-2v-3l6.86.68v2.33Zm0-7.4,3.31,2L8.57,9.7Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M18.88,18.85a.46.46,0,0,0-.23.06l-1.76.91a.5.5,0,0,0-.22.67.51.51,0,0,0,.68.22l1.75-.89h0a.49.49,0,0,0,.17-.67A.5.5,0,0,0,18.88,18.85Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M15.42,20.73a.45.45,0,0,0-.23,0l-1.75.92a.49.49,0,0,0-.18.59h0a.49.49,0,0,0,.64.28l1.75-.91a.49.49,0,0,0-.23-.88Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M5.17,19.82l-1.76-.91a.46.46,0,0,0-.23-.06.51.51,0,0,0-.51.51.5.5,0,0,0,.24.43h0l1.75.89a.51.51,0,0,0,.68-.22A.49.49,0,0,0,5.17,19.82Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M8.62,21.65l-1.75-.92a.45.45,0,0,0-.23,0,.49.49,0,0,0-.41.56h0a.49.49,0,0,0,.18.32l1.75.91a.49.49,0,0,0,.64-.27h0A.48.48,0,0,0,8.62,21.65Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M21.55,16.5H21.5a.5.5,0,0,0-.5.5v.7l-.62.32a.51.51,0,0,0-.2.68h0a.48.48,0,0,0,.43.26.49.49,0,0,0,.24,0l.88-.47a.48.48,0,0,0,.27-.44v-1a.5.5,0,0,0-.45-.55Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M11.65,22.59l-.65.35-.65-.35a.52.52,0,0,0-.68.21.51.51,0,0,0,.21.68l.89.46a.47.47,0,0,0,.46,0l.89-.46a.51.51,0,0,0,.21-.68.5.5,0,0,0-.68-.21Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M1.65,18,1,17.7V17a.5.5,0,0,0-.5-.5A.5.5,0,0,0,0,17v1a.48.48,0,0,0,.27.44l.88.47a.49.49,0,0,0,.24,0,.51.51,0,0,0,.44-.26A.5.5,0,0,0,1.65,18Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M.5,15.5A.5.5,0,0,0,1,15V13a.5.5,0,0,0-.5-.5A.5.5,0,0,0,0,13v2A.5.5,0,0,0,.5,15.5Z" transform="translate(0 0)"
+      />
+      <path class="fill cls-1" d="M.5,11.5A.5.5,0,0,0,1,11V9a.5.5,0,0,0-.5-.5A.5.5,0,0,0,0,9v2A.5.5,0,0,0,.5,11.5Z" transform="translate(0 0)"
+      />
+      <path class="fill cls-1" d="M1.18,5.11.3,5.56A.48.48,0,0,0,0,6V7a.51.51,0,0,0,.5.5A.5.5,0,0,0,1,7V6.3L1.65,6a.52.52,0,0,0,.21-.68.5.5,0,0,0-.68-.21Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M10.11,1.46a.52.52,0,0,0,.24-.05L11,1.06l.65.35a.52.52,0,0,0,.68-.21.52.52,0,0,0-.21-.68L11.23.06a.47.47,0,0,0-.46,0L9.88.52a.51.51,0,0,0-.21.68A.51.51,0,0,0,10.11,1.46Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M4.71,3.26,3,4.15H3a.5.5,0,0,0-.17.67.53.53,0,0,0,.44.27A.46.46,0,0,0,3.5,5l1.76-.91a.5.5,0,0,0,.21-.67.49.49,0,0,0-.67-.22Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M6.64,3.24a.45.45,0,0,0,.23,0l1.75-.92a.49.49,0,0,0,.18-.59h0a.49.49,0,0,0-.63-.28h0l-1.75.91a.51.51,0,0,0-.06.72.48.48,0,0,0,.29.17Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M19.15,4.18h0L17.4,3.29a.5.5,0,1,0-.46.89h0l1.76.91a.46.46,0,0,0,.23.06.54.54,0,0,0,.44-.27.49.49,0,0,0-.17-.67Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M13.9,1.44a.49.49,0,0,0-.64.28h0a.49.49,0,0,0,.18.59l1.75.92a.45.45,0,0,0,.23,0,.5.5,0,0,0,.23-.89Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M21.73,5.56l-.88-.47a.52.52,0,0,0-.68.21.51.51,0,0,0,.21.68L21,6.3V7a.5.5,0,0,0,.5.5A.5.5,0,0,0,22,7V6A.48.48,0,0,0,21.73,5.56Z"
+        transform="translate(0 0)" />
+      <path class="fill cls-1" d="M21.5,12.5a.5.5,0,0,0-.5.5v2a.5.5,0,0,0,.5.5A.5.5,0,0,0,22,15V13A.5.5,0,0,0,21.5,12.5Z" transform="translate(0 0)"
+      />
+      <path class="fill cls-1" d="M21.5,8.5A.5.5,0,0,0,21,9v2a.5.5,0,0,0,.5.5A.5.5,0,0,0,22,11V9A.5.5,0,0,0,21.5,8.5Z" transform="translate(0 0)"
+      />
+    </svg>
+
+    <!-- unconfirmed -->
+    <svg class="icon unconfirmed" v-if="name === 'unconfirmed'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.51 24.49">
+      <path class="fill cls-1" d="M22,5.47,11.47,0a.71.71,0,0,0-.69,0L.28,5.47a.73.73,0,0,0-.41.66v12a.73.73,0,0,0,.41.66l10.49,5.5a.69.69,0,0,0,.34.09l.15,0a.76.76,0,0,0,.21,0L22,18.79a.73.73,0,0,0,.41-.66v-12A.73.73,0,0,0,22,5.47ZM20.88,6.59V17.67l-9.76,5.12L1.37,17.67V6.59l9.75-5.11Z"
+        transform="translate(0.13 0.12)" />
+      <path class="fill cls-1" d="M11.11,11,8.28,8.2a.77.77,0,0,0-1.08,0,.78.78,0,0,0,0,1.08L10,12.11,7.2,14.94A.79.79,0,0,0,7.2,16a.77.77,0,0,0,1.08,0l2.83-2.83L14,16.05a.78.78,0,0,0,1.08,0,.75.75,0,0,0,.22-.54.76.76,0,0,0-.22-.54l-2.87-2.86L15,9.28A.76.76,0,1,0,13.94,8.2Z"
+        transform="translate(0.13 0.12)" />
+    </svg>
+
+    <!-- unconfirmed-big -->
+    <svg class="icon unconfirmed-big" v-if="name === 'unconfirmed-big'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.26 24.24">
+      <path class="fill cls-1" d="M12.12,24.22a.6.6,0,0,1-.29-.08l-10.5-5.5A.61.61,0,0,1,1,18.09v-12a.61.61,0,0,1,.34-.55L11.83.07a.6.6,0,0,1,.58,0l10.5,5.5a.61.61,0,0,1,.34.55v12a.61.61,0,0,1-.34.55l-10.5,5.55A.71.71,0,0,1,12.12,24.22ZM2.24,17.74l9.88,5.18L22,17.74V6.5L12.12,1.33,2.24,6.5Z"
+        transform="translate(-0.99 0)" />
+      <path class="fill cls-1" d="M15.06,8.79l-2.92,2.92L9.22,8.79a.64.64,0,1,0-.9.9l2.92,2.92-3,3a.65.65,0,0,0,0,.9.63.63,0,0,0,.9,0l3-3,2.92,2.92a.63.63,0,0,0,.89-.9L13,12.61,16,9.69a.63.63,0,0,0,0-.9A.62.62,0,0,0,15.06,8.79Z"
+        transform="translate(-0.99 0)" />
+    </svg>
+
+    <!-- ico -->
+    <svg class="icon ico" v-if="name === 'ico'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 22.75">
+      <path class="fill cls-1" d="M17.71,6.25,21.35,2.6a.47.47,0,0,0,.11-.54A.5.5,0,0,0,21,1.75H9.5V.5a.5.5,0,0,0-1,0v13L.77,17.56A.49.49,0,0,0,.5,18a.5.5,0,0,0,.27.44l8,4.25a.47.47,0,0,0,.46,0l8-4.25A.5.5,0,0,0,17.5,18a.49.49,0,0,0-.27-.44L9.5,13.45v-2.7H21a.5.5,0,0,0,.46-.31.47.47,0,0,0-.11-.54ZM15.93,18,9,21.68,2.07,18,8.5,14.58v3.67a.5.5,0,0,0,1,0V14.58ZM9.5,9.75v-7H19.79L16.65,5.9a.48.48,0,0,0,0,.7l3.14,3.15Z"
+        transform="translate(-0.5)" />
+    </svg>
+
+    <!-- dex -->
+    <svg class="icon dex" v-if="name === 'dex'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 24">
+      <path class="fill cls-1" d="M22.29,5.66,11.79.16a.53.53,0,0,0-.46,0L.83,5.66a.52.52,0,0,0-.27.45v12a.52.52,0,0,0,.27.44l10.5,5.5a.47.47,0,0,0,.46,0l10.5-5.5a.5.5,0,0,0,.27-.44v-12A.5.5,0,0,0,22.29,5.66ZM21.56,17.8,11.56,23l-10-5.24V6.41l10-5.24,10,5.24Z"
+        transform="translate(-0.56 -0.11)" />
+      <path class="fill cls-1" d="M13.69,12.61h3L14.38,15a.5.5,0,0,0,0,.7.5.5,0,0,0,.71,0l3.2-3.2a.42.42,0,0,0,.11-.16.5.5,0,0,0,0-.38.39.39,0,0,0-.11-.17l-3.2-3.2a.5.5,0,0,0-.35-.15.51.51,0,0,0-.36.15.51.51,0,0,0,0,.71l2.35,2.35H6.39L8.74,9.26a.5.5,0,0,0,0-.71.48.48,0,0,0-.7,0l-3.21,3.2a.71.71,0,0,0-.11.17.5.5,0,0,0,0,.38.91.91,0,0,0,.11.16L8,15.66a.49.49,0,1,0,.7-.7L6.39,12.61h7.3Z"
+        transform="translate(-0.56 -0.11)" />
+    </svg>
 
   </div>
 </template>
@@ -361,11 +384,9 @@ export default {
   font-size: 0;
 
   .fill {
-    fill: $dark;
-  }
+    @include transition(fill);
 
-  .stroke {
-    stroke: $dark;
+    fill: $dark;
   }
 
   .logo {
@@ -404,130 +425,9 @@ export default {
     }
   }
 
-  .dashboard {
-    .dashboard--rect {
-      fill: none;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-      stroke: $dark;
-    }
-    .dashboard--line {
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-      stroke: $dark;
-    }
-  }
 
-  .history {
-    .stroke {
-      stroke: $dark;
-    }
-    .st0 {
-      fill: none;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-    }
-    .st1 {
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-    }
-  }
-
-  .settings,
-  .dashboard,
-  .send,
-  .receive,
-  .reset,
-  .confirmed {
-    .stroke {
-      stroke: $dark;
-    }
-
-    .st0 {
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-    }
-    .st1 {
-      fill: none;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-    }
-  }
-
-  .reset {
-    .stroke {
-      stroke-width: 1.9;
-    }
-  }
-
-  .unconfirmed {
-    .st0 {
-      fill: none;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-      stroke-width: 1.9;
-      stroke: $dark;
-    }
-    .st1 {
-      fill: $dark;
-      stroke-miterlimit: 10;
-      stroke-width: 0.75;
-      stroke: $dark;
-    }
-  }
-
-  .calendar {
-    fill: $dark;
-    stroke-miterlimit: 10;
-    stroke-width: 0.75;
-    stroke: $dark;
-  }
-
-  .plus {
-    .fill {
-      fill: $dark;
-    }
-  }
-
-  .search {
-    .fill {
-      fill: $dark;
-    }
-  }
-
-  .eye-open, .eye-closed {
-    .fill {
-      fill: $dark;
-    }
-  }
-
-  .user {
-    .st0 {
-      fill: none;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-      stroke: $dark;
-    }
-
-    .st1 {
-      fill: $dark;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-      stroke: $dark;
-    }
-  }
-
-  .no-transactions {
-    .cls-1 {
-      fill: $dark;
-    }
+  .logout {
+    transform: rotate(90deg);
   }
 }
 </style>

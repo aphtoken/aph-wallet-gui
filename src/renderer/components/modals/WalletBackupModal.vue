@@ -103,7 +103,6 @@ export default {
     color: $purple;
     font-family: GilroySemibold;
     font-size: toRem(12px);
-    line-height: $line-height;
     text-transform: uppercase;
   }
 
@@ -154,29 +153,10 @@ export default {
           right: 0;
           top: $space * .4;
           transform: translate(100%, 0);
-
-          .aph-icon {
-            min-height: auto;
-          }
         }
 
         .aph-icon {
-          cursor: pointer;
           margin-left: $space-sm;
-
-          path {
-            fill: $grey;
-          }
-
-          svg {
-            height: $space;
-          }
-
-          &:hover {
-            path {
-              fill: $purple;
-            }
-          }
         }
       }
 

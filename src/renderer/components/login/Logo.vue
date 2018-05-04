@@ -38,6 +38,10 @@ export default {
     position: absolute;
     transform: translate(-50%, -50%);
     z-index: 100;
+
+    &:hover {
+      box-shadow: $box-shadow-sm;
+    }
   }
 }
 </style>

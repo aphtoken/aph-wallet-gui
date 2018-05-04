@@ -76,7 +76,7 @@ export default {
   .create {
     @extend %btn-outline;
 
-    margin-top: $space-lg;
+    margin-top: $space-xl;
   }
 }
 </style>

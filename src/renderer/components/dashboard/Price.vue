@@ -10,7 +10,7 @@
     <div class="sub-header">
       <div class="volume">
         <div class="label">Volume</div>
-        <div class="value">{{ $formatMoney(volume) }}</div>
+        <div class="value">{{ $formatMoneyWithoutCents(volume) }}</div>
       </div>
       <div class="low">
         <div class="label">Low</div>
@@ -159,7 +159,7 @@ export default {
                       return index % 2 === 0 ? _this.$formatMoney(label) : '';
                     },
                     autoSkip: true,
-                    fontColor: '#19193A',
+                    fontColor: '#66688D',
                     fontFamily: 'GilroySemibold',
                     fontSize: 12,
                     max: this.high,
@@ -179,7 +179,7 @@ export default {
                     callback(label) {
                       return _this.$formatDateShort(label);
                     },
-                    fontColor: '#66688D',
+                    fontColor: '#B5B5CA',
                     fontFamily: 'GilroySemibold',
                     fontSize: 12,
                   },
@@ -237,7 +237,7 @@ export default {
 
       .amount {
         color: $purple;
-        font-family: GilroyMedium;
+        font-size: toRem(20px);
       }
     }
   }
@@ -258,7 +258,7 @@ export default {
     }
 
     .label {
-      margin: 0 $space-xsm 0 0;
+      margin: 0 $space-xs 0 0;
     }
 
     .value {
@@ -279,27 +279,20 @@ export default {
 
   .footer {
     display: flex;
+    justify-content: space-around;
 
     .option {
-      border-bottom: 3px solid transparent;
+      border-bottom: $border-width-thick solid transparent;
       color: $purple;
       cursor: pointer;
-      flex: 1;
+      flex: none;
       font-family: GilroyMedium;
       font-size: toRem(14px);
-      padding: $space-sm 0;
+      padding: $space-sm $space-lg;
       text-align: center;
 
       &:hover, &.active {
         border-color: $purple;
-      }
-
-      &:first-child {
-        border-bottom-left-radius: $border-radius;
-      }
-
-      &:last-child {
-        border-bottom-right-radius: $border-radius;
       }
     }
   }

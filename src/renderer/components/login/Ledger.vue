@@ -4,7 +4,7 @@
       <button class="login" @click="login" v-if="connected" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
     </login-form-wrapper>
     <div class="aph-request-status-message" v-if="connected === null">
-      <aph-icon name="unconfirmed"></aph-icon>
+      <aph-icon name="unconfirmed-big"></aph-icon>
       <div class="right">No Ledger device found. Please plugin your Ledger in, unlock it and open the NEO application.</div>
     </div>
   </section>

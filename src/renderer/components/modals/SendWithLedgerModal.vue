@@ -38,38 +38,9 @@ export default {
 <style lang="scss">
 #aph-send-with-ledger-modal {
   .body {
-    padding: $space-lg;
+    padding: $space-xl;
     text-align: center;
     display: block;
-
-    .aph-input {
-      border-color: $dark;
-      height: 50px;
-      width: 100%;
-
-      &.focused {
-        border-color: $purple;
-      }
-
-      input {
-        color: $dark;
-      }
-
-      .aph-icon {
-        .fill {
-          fill: $dark;
-        }
-      }
-
-      .placeholder {
-        color: $grey;
-        font-family: GilroyMedium;
-      }
-
-      & + .aph-input {
-        margin-top: $space;
-      }
-    }
   }
 
 

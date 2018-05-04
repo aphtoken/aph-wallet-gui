@@ -88,9 +88,17 @@ export default {
   background: $purple;
 }
 
+html, body {
+  color: $dark;
+  font-family: Gilroy;
+  font-size: $font-size;
+  height: 100%;
+}
+
 * {
   box-sizing: border-box;
   letter-spacing: $letter-spacing;
+  line-height: inherit;
 }
 
 a {
@@ -157,13 +165,12 @@ a {
 }
 
 .flash__message {
-  background-color: $dark !important;
+  background: rgba($dark, .9) !important;
   border-radius: $border-radius;
-  border: $border;
-  font-family: GilroyMedium;
+  border: none;
+  line-height: 150%;
   margin: 0;
   padding: $space-lg;
-  font-size: toRem(18px);
   word-wrap: break-word;
 
 
@@ -172,22 +179,18 @@ a {
   }
 
   &.error {
-    border-color: $red;
     color: $red;
   }
 
   &.info {
-    border-color: $purple;
     color: $purple;
   }
 
   &.success {
-    border-color: $green;
     color: $green;
   }
 
   &.warning {
-    border-color: $orange;
     color: $orange;
   }
 

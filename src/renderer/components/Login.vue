@@ -63,8 +63,10 @@ export default {
   }
 
   .right-content {
+    @include transition(background-color);
+
     align-items: center;
-    background: rgba($dark, .7);
+    background-color: rgba($dark, .7);
     bottom: 0;
     display: flex;
     flex-direction: column;
@@ -75,8 +77,12 @@ export default {
     right: 0;
     top: 0;
 
+    &.login {
+      background: none;
+    }
+
     &.login-wallet-created {
-      background: $background;
+      background-color: $background;
     }
   }
 }

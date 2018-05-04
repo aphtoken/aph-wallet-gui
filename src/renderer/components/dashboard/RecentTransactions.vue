@@ -92,14 +92,10 @@ export default {
 
       .aph-icon {
         svg {
-          height: toRem(60px);
+          height: toRem(52px);
 
           .fill {
             fill: $purple;
-          }
-
-          .stroke {
-            stroke: $purple;
           }
         }
       }
