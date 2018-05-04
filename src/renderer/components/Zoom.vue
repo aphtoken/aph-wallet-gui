@@ -49,31 +49,11 @@ export default {
     > .aph-icon {
       svg {
         height: toRem(17px);
-
-        &.reset {
-          .stroke {
-            stroke-width: 2.6;
-          }
-        }
-      }
-
-      .stroke {
-        stroke: $dark;
-      }
-
-      .plus, .minus {
-        .fill {
-          fill: $dark;
-        }
       }
     }
 
     &:hover {
       > .aph-icon {
-        .stroke {
-          stroke: $purple;
-        }
-
         .plus, .minus {
           .fill {
             fill: $purple;

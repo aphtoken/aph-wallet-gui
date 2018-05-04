@@ -97,10 +97,6 @@ export default {
           .fill {
             fill: $purple;
           }
-
-          .stroke {
-            stroke: $purple;
-          }
         }
       }
 

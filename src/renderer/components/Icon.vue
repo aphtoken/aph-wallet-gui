@@ -168,11 +168,9 @@
     </svg>
 
     <!-- reset -->
-    <svg class="icon reset" v-if="name === 'reset'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-      viewBox="0 0 26.7 25.7" style="enable-background:new 0 0 26.7 25.7;" xml:space="preserve">
-      <g>
-        <polygon class="stroke st0" points="23.9,18.9 13.4,24.4 2.9,18.9 2.9,6.9 13.4,1.4 23.9,6.9 	"/>
-      </g>
+    <svg class="icon reset" v-if="name === 'reset'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8.25 9">
+      <path class="fill cls-1" d="M8.25,2H8.3a.47.47,0,0,1,.25.07l3.57,2a.51.51,0,0,1,.26.43v4a.49.49,0,0,1-.27.44L8.49,11A.64.64,0,0,1,8,11l-3.57-2a.51.51,0,0,1-.26-.44v-4A.52.52,0,0,1,4.39,4L8,2.07A.53.53,0,0,1,8.25,2Zm3.13,2.83L8.27,3.07,5.12,4.77V8.18L8.23,10l3.15-1.69Z"
+        transform="translate(-4.13 -2.01)" />
     </svg>
 
     <!-- plus -->
@@ -387,10 +385,7 @@ export default {
 
   .fill {
     fill: $dark;
-  }
-
-  .stroke {
-    stroke: $dark;
+    transition: $transition-fill;
   }
 
   .logo {
@@ -429,24 +424,6 @@ export default {
     }
   }
 
-  .reset {
-    .stroke {
-      stroke: $dark;
-      stroke-width: 1.9;
-    }
-
-    .st0 {
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-    }
-    .st1 {
-      fill: none;
-      stroke-linejoin: round;
-      stroke-miterlimit: 10;
-    }
-  }
 
   .logout {
     transform: rotate(90deg);

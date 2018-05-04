@@ -160,14 +160,6 @@ h1.underlined {
     }
   }
 
-  .receive-btn {
-    .aph-icon {
-      .stroke {
-        stroke: $dark !important;
-      }
-    }
-  }
-
   .send-btn {
     background: $purple;
     margin-left: $space-lg;
@@ -178,12 +170,6 @@ h1.underlined {
 
     p {
       color: white;
-    }
-
-    .aph-icon {
-      .stroke {
-        stroke: $dark !important;
-      }
     }
   }
 }

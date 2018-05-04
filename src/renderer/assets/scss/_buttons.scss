@@ -105,12 +105,6 @@ $btn-circle-size: toRem(65px);
 
     .fill {
       fill: $dark;
-      transition: $transition;
-    }
-
-    .stroke {
-      stroke: $purple;
-      transition: $transition;
     }
   }
 
@@ -127,10 +121,6 @@ $btn-circle-size: toRem(65px);
     .aph-icon {
       .fill {
         fill: white;
-      }
-
-      .stroke {
-        stroke: white;
       }
     }
   }

@@ -141,10 +141,6 @@ export default {
             height: toRem(35px);
           }
         }
-
-        .fill, .stroke {
-          transition: $transition;
-        }
       }
 
       .label {
@@ -155,9 +151,6 @@ export default {
         border-color: white;
 
         .icon {
-          .stroke {
-            stroke: white;
-          }
           .fill {
             fill: white;
           }

@@ -89,8 +89,6 @@ export default {
       height: toRem(17px);
 
       .fill {
-        transition: $transition;
-
         &.st0 {
           fill: lighten($grey, 5%);
         }

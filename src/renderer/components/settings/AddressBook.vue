@@ -168,7 +168,7 @@ export default {
         background: none;
         border: none;
         color: $dark;
-        font-family: GilroySemibold;
+        font-family: GilroyMedium;
         font-size: toRem(15px);
         outline: none;
         padding: 0;
@@ -232,20 +232,19 @@ export default {
               margin-left: $space-sm;
               display: inline-block;
 
-              path {
-                fill: $grey;
-                transition: $transition;
-              }
-
               svg {
                 height: toRem(12px);
+
+                .fill {
+                  fill: $grey;
+                }
               }
             }
 
             &:hover {
               color: $purple;
 
-              path {
+              .fill {
                 fill: $purple;
               }
             }

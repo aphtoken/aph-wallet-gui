@@ -31,6 +31,7 @@ export default {
   },
 
   error(message) {
+    debugger;
     Vue.prototype.$flashStorage.flash(message, 'error', {
       timeout: calculateTimeout(message),
     });

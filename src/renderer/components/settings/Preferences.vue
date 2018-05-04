@@ -50,6 +50,9 @@ export default {
 
       this.$services.network.setSelectedNetwork(network);
       this.$store.dispatch('fetchPortfolio');
+      this.$store.commit('setHoldings', []);
+      this.$store.commit('setRecentTransactions', []);
+      this.$store.commit('setSearchTransactions', []);
     },
   },
 };

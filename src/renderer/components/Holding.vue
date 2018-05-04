@@ -1,16 +1,22 @@
 <template>
   <div :class="['holding', {'is-clickable': isClickable}]" @click="handleOnClick">
-    <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
-    <div class="token">
-      <div class="name">{{ holding.name }}</div>
-      <div class="currency">{{ holding.symbol }}</div>
-    </div>
-    <div class="remove" v-if="canBeRemoved" @click="handleOnRemove">Remove</div>
-    <div class="balance">
-      <div class="amount">
-        {{ $formatNumber(holding.balance) }}<span class="currency">{{ holding.symbol }}</span>
+    <div class="left">
+      <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
+      <div class="token">
+        <div class="name">{{ holding.name }}</div>
+        <div class="currency">{{ holding.symbol }}</div>
       </div>
-      <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 0}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
+    </div>
+    <div class="center">
+      <div class="remove" v-if="canBeRemoved" @click="handleOnRemove">Remove</div>
+    </div>
+    <div class="right">
+      <div class="balance">
+        <div class="amount">
+          {{ $formatNumber(holding.balance) }}<span class="currency">{{ holding.symbol }}</span>
+        </div>
+        <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 0}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -67,6 +73,16 @@ export default {
   display: flex;
   padding: 1.5rem;
   transition: $transition;
+
+  .left, .right {
+    flex: 1;
+    display: flex;
+  }
+
+  .center {
+    flex: none;
+    display: flex;
+  }
 
   .aph-token-icon {
     flex: none;

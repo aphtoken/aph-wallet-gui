@@ -105,7 +105,7 @@ export default {
       background: none;
       border: none;
       color: $dark;
-      font-family: GilroySemibold;
+      font-family: GilroyMedium;
       font-size: toRem(15px);
       outline: none;
       padding: 0;
