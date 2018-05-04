@@ -1,5 +1,12 @@
 <template>
   <section id="token-sale">
+    <div class="intro-illustration">
+      <div class="circles-illustration">
+        <img class="icon-circle icon-circle-3" src="~@/assets/img/circle-3.svg" />
+        <img class="icon-circle icon-circle-2" src="~@/assets/img/circle-2.svg" />
+        <img class="icon-circle icon-circle-1" src="~@/assets/img/circle-1.svg" />
+      </div>
+    </div>
     <div class="header">
       <h1 class="underlined">Participate in an Initial Coin Offering (ICO)</h1>
     </div>
@@ -167,6 +174,7 @@ export default {
   flex: 1;
   height: 100%;
   background-color: $dark-purple;
+  position: relative;
 
   .header {
     color: $purple;
@@ -177,6 +185,7 @@ export default {
     
     h1.underlined {
       @extend %underlined-header;
+      margin-top: $space-lg;
 
       flex: 1;
       margin-bottom: 0;
@@ -185,7 +194,7 @@ export default {
       &:after {
         background: white;
         width: toRem(200px);
-        margin: $space-lg auto;
+        margin: $space-lg auto 0 auto;
       }
     }
   }
@@ -257,40 +266,6 @@ export default {
       margin-bottom: $space-lg;
     }
 
-    .row {
-      display: flex;
-
-      .column {
-        flex: 1;
-
-        .label {
-          @extend %small-uppercase-grey-label;
-
-          margin-bottom: $space-sm;
-        }
-
-        .value {
-          font-family: GilroySemibold;
-          font-size: toRem(12px);
-
-          &.purple {
-            color: $purple;
-          }
-
-          &.truncate {
-            @include truncate();
-          }
-        }
-
-        & + .column {
-          margin-left: $space-xl;
-        }
-      }
-
-      & + .row {
-        margin-top: $space;
-      }
-    }
   }
 
   .footer {
@@ -304,13 +279,7 @@ export default {
       flex: 1;
     }
 
-    .cancel-btn, .back-btn {
-      @extend %btn-footer-light;
-
-      border-bottom-left-radius: $border-radius;
-    }
-
-    .next-btn, .send-btn {
+    .send-btn {
       @extend %btn;
 
       border-bottom-right-radius: $border-radius;
@@ -335,6 +304,43 @@ export default {
     input, label {
       cursor: pointer;
       margin: $space 0;
+    }
+  }
+  
+  .intro-illustration {
+    position: absolute;
+    width: 100%;
+    height: toRem(850px);
+    margin-top: toRem(-675px);
+    
+    .circles-illustration {
+      position: relative;
+      width: toRem(850px);
+      height: toRem(850px);
+      margin: 0 auto;
+      
+      .icon-circle {
+        margin: 0 auto;
+        position: absolute;
+        
+        &.icon-circle-2 {
+          width: toRem(850px);
+          height: toRem(850px);
+          top: toRem(10px);
+        }
+        &.icon-circle-1 {
+          width: toRem(720px);
+          height: toRem(720px);
+          left: toRem(60px);
+          top: toRem(10px);
+        }
+        &.icon-circle-3 {
+          width: toRem(780px);
+          height: toRem(780px);
+          left: toRem(32px);
+          top: toRem(28px);
+        }
+      }
     }
   }
 }

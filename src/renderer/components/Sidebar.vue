@@ -147,7 +147,7 @@ export default {
           }
 
           &.ico {
-            height: toRem(35px);
+            height: toRem(42px);
           }
 
           &.history {
