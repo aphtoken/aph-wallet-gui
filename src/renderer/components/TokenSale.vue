@@ -201,7 +201,6 @@ export default {
 
   
   .body {
-    padding: 0 $space-lg 0;
     width: toRem(500px);
     margin: $space auto;
 
@@ -280,7 +279,7 @@ export default {
     }
 
     .send-btn {
-      @extend %btn;
+      @extend %btn-outline;
 
       border-bottom-right-radius: $border-radius;
     }
