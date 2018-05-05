@@ -6,6 +6,7 @@
       <span class="icon">
         <aph-icon name="plus"></aph-icon>
       </span>
+      <img src="~@/assets/img/Kucoin_icon.svg" />
     </div>
     <div class="header">
       <h1 class="underlined">APH Tokens Now Listed On Kucoin!</h1>
@@ -37,7 +38,7 @@ export default {
   },
   data() {
     return {
-      kucoinUrl: 'https://www.kucoin.com',
+      kucoinUrl: 'https://www.kucoin.com/#/?r=7dd6rw',
     };
   },
 };
