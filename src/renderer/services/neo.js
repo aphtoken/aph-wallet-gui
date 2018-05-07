@@ -845,7 +845,6 @@ export default {
             .catch((e) => {
               gasClaim.error = e;
               alerts.exception(e);
-              api.setSwitchFreeze(false);
               lastClaimSent = null;
               store.commit('setGasClaim', gasClaim);
             });
@@ -854,7 +853,6 @@ export default {
       .catch((e) => {
         gasClaim.error = e;
         alerts.exception(e);
-        api.setSwitchFreeze(false);
         lastClaimSent = null;
         store.commit('setGasClaim', gasClaim);
       });
@@ -900,7 +898,6 @@ export default {
           .catch((e) => {
             gasClaim.error = e;
             alerts.exception(e);
-            api.setSwitchFreeze(false);
           });
       })
       .catch((e) => {
