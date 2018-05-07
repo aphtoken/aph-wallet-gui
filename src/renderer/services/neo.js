@@ -281,7 +281,10 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        return api.neonDB.getTransactionHistory(currentNetwork.net, address)
+        return api.loadBalance(api.getTransactionHistoryFrom, {
+          address,
+          net: currentNetwork.net,
+        })
           .then((res) => {
             resolve(res);
           })
@@ -403,11 +406,11 @@ export default {
                 return;
               }
               if (h.symbol === 'NEO') {
-                promises.push(api.getMaxClaimAmountFrom({
+                promises.push(api.loadBalance(api.getMaxClaimAmountFrom, {
                   net: currentNetwork.net,
                   address: currentWallet.address,
                   privateKey: currentWallet.privateKey,
-                }, api.neonDB)
+                })
                   .then((res) => {
                     h.availableToClaim = toBigNumber(res);
                   })
@@ -691,15 +694,14 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    return api.getBalanceFrom({
+    return api.loadBalance(api.getBalanceFrom, {
       net: currentNetwork.net,
       address: currentWallet.address,
-    }, api.neonDB)
-    // or api.neoscan? sometimes these apis go down or are unreliable
+    })
     // maybe we should stand up our own version ?
       .then((balance) => {
         if (balance.net !== currentNetwork.net) {
-          alerts.error('Unable to read address balance from neonDB. Please try again later.');
+          alerts.error('Unable to read address balance from neonDB or neoscan api. Please try again later.');
           return null;
         }
         const config = {
@@ -784,22 +786,16 @@ export default {
       try {
         setTimeout(() => {
           const interval = setInterval(() => {
-            this.fetchTransactionDetails(hash)
-              .then((res) => {
-                if (res && res.confirmed === true) {
-                  alerts.success(`TX: ${hash} CONFIRMED`);
-                  clearInterval(interval);
-                  resolve(res);
-                }
-                return res;
-              })
-              .catch((e) => {
-                if (e.message === 'Unknown transaction') {
-                  return reject('Transaction failed. Please wait several blocks for balance to update and try again.');
-                }
-                return alerts.exception(e);
-              });
-          }, 5000);
+            const tx = _.find(store.state.recentTransactions, (o) => {
+              return o.hash === hash;
+            });
+
+            if (tx) {
+              alerts.success(`TX: ${hash} CONFIRMED`);
+              clearInterval(interval);
+              resolve(tx);
+            }
+          }, 1000);
         }, 15 * 1000); // wait a block for propagation
         return null;
       } catch (e) {
@@ -809,7 +805,6 @@ export default {
   },
 
   claimGas() {
-    const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
     if (new Date() - lastClaimSent < 5 * 60 * 1000) { // 5 minutes ago
@@ -825,20 +820,9 @@ export default {
     store.commit('setGasClaim', gasClaim);
     store.commit('setShowClaimGasModal', true);
 
-    // force neonDB for these, neoscan seems to be unreliable
-    api.setApiSwitch(1);
-    api.setSwitchFreeze(true);
-
     lastClaimSent = new Date();
     return this.fetchHoldings(currentWallet.address, 'NEO')
       .then((h) => {
-        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
-          alerts.error('No NEO to claim from.');
-          api.setSwitchFreeze(false);
-          store.commit('setShowClaimGasModal', false);
-          return;
-        }
-
         const neoAmount = h.holdings[0].balance;
         const callback = () => {
           gasClaim.step = 2;
@@ -846,71 +830,79 @@ export default {
         gasClaim.neoTransferAmount = neoAmount;
         gasClaim.step = 1;
 
-        // send neo to ourself to make all gas available for claim
-        this.sendFunds(currentWallet.address, neoAssetId, neoAmount, false, callback)
-          .then(() => {
-            const config = {
-              net: currentNetwork.net,
-              address: currentWallet.address,
-              privateKey: currentWallet.privateKey,
-            };
 
-            // send the claim gas
-            setTimeout(() => {
-              if (currentWallet.isLedger === true) {
-                config.signingFunction = ledger.signWithLedger;
-              }
+        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
+          this.sendClaimGas(gasClaim);
+        } else {
+          // send neo to ourself to make all gas available for claim
+          this.sendFunds(currentWallet.address, neoAssetId, neoAmount, false, callback)
+            .then(() => {
+              setTimeout(() => {
+                // send the claim gas
+                this.sendClaimGas(gasClaim);
+              }, 30 * 1000);
+            })
+            .catch((e) => {
+              gasClaim.error = e;
+              alerts.exception(e);
+              lastClaimSent = null;
+              store.commit('setGasClaim', gasClaim);
+            });
+        }
+      })
+      .catch((e) => {
+        gasClaim.error = e;
+        alerts.exception(e);
+        lastClaimSent = null;
+        store.commit('setGasClaim', gasClaim);
+      });
+  },
 
-              api.getMaxClaimAmountFrom({
-                net: network.getSelectedNetwork().net,
-                address: wallets.getCurrentWallet().address,
-                privateKey: wallets.getCurrentWallet().privateKey,
-              }, api.neonDB)
-                .then((res) => {
-                  gasClaim.gasClaimAmount = toBigNumber(res);
-                  gasClaim.step = 3;
+  sendClaimGas(gasClaim) {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
 
-                  api.claimGas(config)
-                    .then((res) => {
-                      gasClaim.step = 4;
-                      h.availableToClaim = 0;
-                      api.setSwitchFreeze(false);
-                      this.monitorTransactionConfirmation(res.claims.claims[0].txid)
-                        .then(() => {
-                          store.dispatch('fetchRecentTransactions');
-                          gasClaim.step = 5;
-                        })
-                        .catch((e) => {
-                          gasClaim.error = e;
-                          alerts.error(e);
-                        });
-                    })
-                    .catch((e) => {
-                      gasClaim.error = e;
-                      alerts.exception(e);
-                      api.setSwitchFreeze(false);
-                    });
-                })
-                .catch((e) => {
-                  gasClaim.error = e;
-                  alerts.exception(e);
-                });
-            }, 30 * 1000);
+    const config = {
+      net: currentNetwork.net,
+      address: currentWallet.address,
+      privateKey: currentWallet.privateKey,
+    };
+
+    if (currentWallet.isLedger === true) {
+      config.signingFunction = ledger.signWithLedger;
+    }
+
+    api.loadBalance(api.getMaxClaimAmountFrom, {
+      net: network.getSelectedNetwork().net,
+      address: wallets.getCurrentWallet().address,
+      privateKey: wallets.getCurrentWallet().privateKey,
+    })
+      .then((res) => {
+        gasClaim.gasClaimAmount = toBigNumber(res);
+        gasClaim.step = 3;
+
+        api.claimGas(config)
+          .then((res) => {
+            gasClaim.step = 4;
+
+            this.monitorTransactionConfirmation(res.claims.claims[0].txid)
+              .then(() => {
+                store.dispatch('fetchRecentTransactions');
+                gasClaim.step = 5;
+              })
+              .catch((e) => {
+                gasClaim.error = e;
+                alerts.error(e);
+              });
           })
           .catch((e) => {
             gasClaim.error = e;
             alerts.exception(e);
-            api.setSwitchFreeze(false);
-            lastClaimSent = null;
-            store.commit('setGasClaim', gasClaim);
           });
       })
       .catch((e) => {
         gasClaim.error = e;
         alerts.exception(e);
-        api.setSwitchFreeze(false);
-        lastClaimSent = null;
-        store.commit('setGasClaim', gasClaim);
       });
   },
 
