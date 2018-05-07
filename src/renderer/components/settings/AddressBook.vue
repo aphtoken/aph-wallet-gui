@@ -332,11 +332,6 @@ export default {
                 margin-top: $space;
               }
             }
-
-
-            .inputs, .outputs {
-              max-width: 35rem;
-            }
           }
 
           &.active {
