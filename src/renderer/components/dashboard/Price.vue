@@ -123,8 +123,9 @@ export default {
       }
 
       this.symbol = this.$store.state.statsToken.symbol;
-      this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol,
-        this.timeframeHours, 7)
+
+      // eslint-disable-next-line
+      this.$services.valuation.getHistorical(this.$store.state.statsToken.symbol, this.timeframeHours)
         .then((priceData) => {
           this.date = moment().unix();
           this.current = priceData.last;
@@ -176,8 +177,22 @@ export default {
                     tickMarkLength: 20,
                   },
                   ticks: {
-                    callback(label) {
-                      return _this.$formatDateShort(label);
+                    callback(label, index) {
+                      if (index % 2 !== 0) {
+                        return '';
+                      }
+
+                      switch (_this.timeframeOption) {
+                        case 'D':
+                          return _this.$formatTime(label);
+                        case 'W':
+                          return _this.$formatWeekdayAndTime(label);
+                        case 'M':
+                          return _this.$formatDateShort(label);
+                        case '3M':
+                          return _this.$formatDateShort(label);
+                        default: return _this.$formatDateShort(label);
+                      }
                     },
                     fontColor: '#B5B5CA',
                     fontFamily: 'GilroySemibold',

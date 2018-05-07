@@ -68,4 +68,12 @@ export default {
 
     return moment.unix(timestamp).format(formats.TIME);
   },
+
+  formatWeekdayAndTime(timestamp, defaultValue = '--') {
+    if (nullOrUndefined(timestamp)) {
+      return defaultValue;
+    }
+
+    return moment.unix(timestamp).format(formats.WEEKDAY_AND_TIME);
+  },
 };

@@ -60,7 +60,9 @@ describe('services/formatting', () => {
       expect(formatting.formatMoneyWithoutCents('100000000')).to.eql('$100,000,000');
       expect(formatting.formatMoneyWithoutCents(100000000, '^^')).to.eql('^^100,000,000');
       expect(formatting.formatMoneyWithoutCents('100000000', '^^')).to.eql('^^100,000,000');
+      /* eslint-disable max-len */
       expect(formatting.formatMoneyWithoutCents(toBigNumber(100000000000000.0000000000001))).to.eql('$100,000,000,000,000');
+      /* eslint-enable max-len */
       expect(formatting.formatMoneyWithoutCents(null)).to.eql('N/A');
       expect(formatting.formatMoneyWithoutCents(undefined)).to.be.eql('N/A');
       expect(formatting.formatMoneyWithoutCents(null, null, 'default')).to.eql('default');
@@ -91,8 +93,8 @@ describe('services/formatting', () => {
 
   describe('formatTime', () => {
     it('should properly format', () => {
-      expect(formatting.formatTime(1524752757)).to.be.eql('8:25 AMC');
-      expect(formatting.formatTime('1524752757')).to.be.eql('8:25 AMC');
+      expect(formatting.formatTime(1524752757)).to.be.eql('8:57');
+      expect(formatting.formatTime('1524752757')).to.be.eql('8:57');
       expect(formatting.formatTime(null)).to.eql('--');
       expect(formatting.formatTime(undefined)).to.be.eql('--');
       expect(formatting.formatTime(null, 'default')).to.eql('default');
