@@ -281,7 +281,10 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        return api.neonDB.getTransactionHistory(currentNetwork.net, address)
+        return api.loadBalance(api.getTransactionHistoryFrom, {
+          address,
+          net: currentNetwork.net,
+        })
           .then((res) => {
             resolve(res);
           })
@@ -403,11 +406,11 @@ export default {
                 return;
               }
               if (h.symbol === 'NEO') {
-                promises.push(api.getMaxClaimAmountFrom({
+                promises.push(api.loadBalance(api.getMaxClaimAmountFrom, {
                   net: currentNetwork.net,
                   address: currentWallet.address,
                   privateKey: currentWallet.privateKey,
-                }, api.neonDB)
+                })
                   .then((res) => {
                     h.availableToClaim = toBigNumber(res);
                   })
@@ -691,15 +694,14 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    return api.getBalanceFrom({
+    return api.loadBalance(api.getBalanceFrom, {
       net: currentNetwork.net,
       address: currentWallet.address,
-    }, api.neonDB)
-    // or api.neoscan? sometimes these apis go down or are unreliable
+    })
     // maybe we should stand up our own version ?
       .then((balance) => {
         if (balance.net !== currentNetwork.net) {
-          alerts.error('Unable to read address balance from neonDB. Please try again later.');
+          alerts.error('Unable to read address balance from neonDB or neoscan api. Please try again later.');
           return null;
         }
         const config = {
@@ -784,22 +786,16 @@ export default {
       try {
         setTimeout(() => {
           const interval = setInterval(() => {
-            this.fetchTransactionDetails(hash)
-              .then((res) => {
-                if (res && res.confirmed === true) {
-                  alerts.success(`TX: ${hash} CONFIRMED`);
-                  clearInterval(interval);
-                  resolve(res);
-                }
-                return res;
-              })
-              .catch((e) => {
-                if (e.message === 'Unknown transaction') {
-                  return reject('Transaction failed. Please wait several blocks for balance to update and try again.');
-                }
-                return alerts.exception(e);
-              });
-          }, 5000);
+            const tx = _.find(store.state.recentTransactions, (o) => {
+              return o.hash === hash;
+            });
+
+            if (tx) {
+              alerts.success(`TX: ${hash} CONFIRMED`);
+              clearInterval(interval);
+              resolve(tx);
+            }
+          }, 1000);
         }, 15 * 1000); // wait a block for propagation
         return null;
       } catch (e) {
@@ -824,10 +820,6 @@ export default {
     };
     store.commit('setGasClaim', gasClaim);
     store.commit('setShowClaimGasModal', true);
-
-    // force neonDB for these, neoscan seems to be unreliable
-    api.setApiSwitch(1);
-    api.setSwitchFreeze(true);
 
     lastClaimSent = new Date();
     return this.fetchHoldings(currentWallet.address, 'NEO')
@@ -861,11 +853,11 @@ export default {
                 config.signingFunction = ledger.signWithLedger;
               }
 
-              api.getMaxClaimAmountFrom({
+              api.loadBalance(api.getMaxClaimAmountFrom, {
                 net: network.getSelectedNetwork().net,
                 address: wallets.getCurrentWallet().address,
                 privateKey: wallets.getCurrentWallet().privateKey,
-              }, api.neonDB)
+              })
                 .then((res) => {
                   gasClaim.gasClaimAmount = toBigNumber(res);
                   gasClaim.step = 3;
@@ -874,7 +866,7 @@ export default {
                     .then((res) => {
                       gasClaim.step = 4;
                       h.availableToClaim = 0;
-                      api.setSwitchFreeze(false);
+
                       this.monitorTransactionConfirmation(res.claims.claims[0].txid)
                         .then(() => {
                           store.dispatch('fetchRecentTransactions');
