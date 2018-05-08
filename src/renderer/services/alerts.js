@@ -1,4 +1,6 @@
+/** eslint-disable no-use-before-define */
 import Vue from 'vue';
+import _ from 'lodash';
 
 const MILLISECONDS_PER_WORD = 750;
 
@@ -8,6 +10,12 @@ function countWords(str) {
 
 function calculateTimeout(str) {
   return countWords(str) * MILLISECONDS_PER_WORD;
+}
+
+function errorAlreadyExists(content) {
+  return !!_.find(Vue.prototype.$flashStorage.storage, (item) => {
+    return item.type === 'error' && item.content === content;
+  });
 }
 
 export default {
@@ -31,6 +39,10 @@ export default {
   },
 
   error(message) {
+    if (errorAlreadyExists(message)) {
+      return;
+    }
+
     Vue.prototype.$flashStorage.flash(message, 'error', {
       timeout: calculateTimeout(message),
     });
