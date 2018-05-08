@@ -173,6 +173,12 @@ export default {
       & + a {
         margin-top: $space;
       }
+
+      @include lowRes() {
+        & + a {
+          margin-top: $space-sm;
+        }
+      }
     }
   }
   .menu {
