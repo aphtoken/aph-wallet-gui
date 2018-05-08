@@ -34,9 +34,7 @@
           </div>
         </div>
       </div>
-      <div class="waiting" v-if="$store.state.sendInProgress === true">
-        Waiting for transaction to appear on 3rd party block explorer.
-      </div>
+      <div class="waiting" v-if="$store.state.sendInProgress !== true">Waiting for transaction to appear on 3rd party block explorer....</div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
         <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
@@ -201,9 +199,11 @@ export default {
       this.currency = null;
       this.showConfirmation = false;
       this.$router.push('/authenticated/dashboard');
+
       if (this.$services.wallets.getCurrentWallet().isLedger === true) {
         this.$services.ledger.close();
       }
+
       this.$store.dispatch('fetchHoldings');
       clearInterval(sendTimeoutIntervalId);
     },
@@ -380,10 +380,10 @@ export default {
   }
 
   .waiting {
-    @extend %small-uppercase-grey-label;
-    
+    border-top: toRem(1px) solid $border-grey;
+    font-family: GilroyMedium;
+    padding: $space 0;
     text-align: center;
-    margin: $space;
   }
 
   .footer {
