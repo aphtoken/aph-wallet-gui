@@ -13,7 +13,7 @@ import valuation from './valuation';
 import wallets from './wallets';
 import ledger from './ledger';
 import { store } from '../store';
-import { timeouts } from '../constants';
+import { timeouts, intervals } from '../constants';
 
 const toBigNumber = value => new BigNumber(String(value));
 const GAS_ASSET_ID = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
@@ -655,16 +655,24 @@ export default {
         store.commit('setSendInProgress', true);
         sendPromise
           .then((res) => {
-            if (!res || !res.tx) {
+            if (!res || !res.tx || !res.response) {
+              this.$store.commit('setSendInProgress', false);
               return reject('Failed to create transaction.');
             }
-            alerts.success(`Transaction Hash: ${res.tx.hash} Sent, waiting for confirmation.`);
+
+            if (res.response.result !== true) {
+              this.$store.commit('setSendInProgress', false);
+              return reject('Transaction rejected by NEO network.');
+            }
+
+            alerts.success(`Transaction Hash: ${res.tx.hash} Successfully Sent, waiting for confirmation.`);
 
             if (callback) {
               setTimeout(() => callback(), timeouts.NEO_API_CALL);
             }
 
-            return this.monitorTransactionConfirmation(res.tx.hash)
+            res.tx.lastBroadcasted = moment().utc();
+            return this.monitorTransactionConfirmation(res.tx)
               .then(() => {
                 return resolve(res.tx);
               })
@@ -673,10 +681,12 @@ export default {
               });
           })
           .catch((e) => {
+            this.$store.commit('setSendInProgress', false);
             alerts.exception(e);
           });
         return sendPromise;
       } catch (e) {
+        this.$store.commit('setSendInProgress', false);
         return reject(e);
       }
     });
@@ -783,19 +793,28 @@ export default {
       });
   },
 
-  monitorTransactionConfirmation(hash) {
+  monitorTransactionConfirmation(tx) {
     return new Promise((resolve, reject) => {
       try {
         setTimeout(() => {
           const interval = setInterval(() => {
-            const tx = _.find(store.state.recentTransactions, (o) => {
-              return o.hash === hash;
+            if (moment().utc().diff(tx.lastBroadcasted, 'milliseconds') > intervals.REBROADCAST_TRANSACTIONS) {
+              tx.lastBroadcasted = moment().utc();
+              api.sendTx({
+                tx,
+                url: network.getSelectedNetwork().rpc,
+              });
+              return;
+            }
+
+            const txInHistory = _.find(store.state.recentTransactions, (o) => {
+              return o.hash === tx.hash;
             });
 
-            if (tx) {
-              alerts.success(`TX: ${hash} CONFIRMED`);
+            if (txInHistory) {
+              alerts.success(`TX: ${tx.hash} CONFIRMED`);
               clearInterval(interval);
-              resolve(tx);
+              resolve(txInHistory);
             }
           }, 1000);
         }, 15 * 1000); // wait a block for propagation
@@ -849,6 +868,7 @@ export default {
               alerts.exception(e);
               lastClaimSent = null;
               store.commit('setGasClaim', gasClaim);
+              store.commit('setShowClaimGasModal', false);
             });
         }
       })
@@ -857,6 +877,7 @@ export default {
         alerts.networkException(e);
         lastClaimSent = null;
         store.commit('setGasClaim', gasClaim);
+        store.commit('setShowClaimGasModal', false);
       });
   },
 
@@ -888,7 +909,8 @@ export default {
           .then((res) => {
             gasClaim.step = 4;
 
-            this.monitorTransactionConfirmation(res.claims.claims[0].txid)
+            res.tx.lastBroadcasted = moment().utc();
+            this.monitorTransactionConfirmation(res.tx)
               .then(() => {
                 store.dispatch('fetchRecentTransactions');
                 gasClaim.step = 5;

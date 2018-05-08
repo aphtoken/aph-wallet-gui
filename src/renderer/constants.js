@@ -25,6 +25,7 @@ const intervals = {
   NETWORK_STATUS: 10 * 1000,
   POLLING: 15000,
   WALLET_VERSION_CHECK: 10 * 60 * 1000,
+  REBROADCAST_TRANSACTIONS: 30 * 1000,
 };
 
 const loadStates = {
