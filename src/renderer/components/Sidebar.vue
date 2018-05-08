@@ -10,6 +10,12 @@
         </span>
         <span class="label">Dashboard</span>
       </router-link>
+      <router-link to="/authenticated/buy-aph">
+        <span class="icon">
+          <aph-icon name="dex"></aph-icon>
+        </span>
+        <span class="label">Buy Aph</span>
+      </router-link>
       <router-link to="/authenticated/assets">
         <span class="icon">
           <aph-icon name="wallet"></aph-icon>
@@ -129,6 +135,10 @@ export default {
 
         svg {
           &.dashboard {
+            height: toRem(42px);
+          }
+
+          &.dex {
             height: toRem(42px);
           }
 

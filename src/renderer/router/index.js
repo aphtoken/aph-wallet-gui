@@ -104,6 +104,10 @@ export default new Router({
           ],
         },
         {
+          path: 'buy-aph',
+          component: require('@/components/BuyAph').default,
+        },
+        {
           path: 'assets',
           component: require('@/components/Assets').default,
           children: [
