@@ -45,6 +45,7 @@ const timeouts = {
   RENDER_CHART: 100,
   TRANSACTION: 5 * 60 * 1000,
   TRANSACTION_WITH_HARDWARE: 8 * 60 * 1000,
+  MONITOR_TRANSACTIONS: 10 * 60 * 1000,
 };
 
 export {

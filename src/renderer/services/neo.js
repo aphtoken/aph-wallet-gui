@@ -797,7 +797,14 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         setTimeout(() => {
+          const startedMonitoring = moment().utc();
           const interval = setInterval(() => {
+            if (moment().utc().diff(startedMonitoring, 'milliseconds') > timeouts.MONITOR_TRANSACTIONS) {
+              clearInterval(interval);
+              reject('Timed out waiting for transaction to be returned third party block explorer');
+              return;
+            }
+
             if (moment().utc().diff(tx.lastBroadcasted, 'milliseconds') > intervals.REBROADCAST_TRANSACTIONS) {
               tx.lastBroadcasted = moment().utc();
               api.sendTx({
