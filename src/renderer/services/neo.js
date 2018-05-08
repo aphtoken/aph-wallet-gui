@@ -706,6 +706,7 @@ export default {
         }
         const config = {
           net: currentNetwork.net,
+          url: currentNetwork.rpc,
           address: currentWallet.address,
           privateKey: currentWallet.privateKey,
           balance: balance.balance,
