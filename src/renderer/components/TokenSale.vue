@@ -10,43 +10,57 @@
     <div class="header">
       <h1 class="underlined">Participate in an Initial Coin Offering (ICO)</h1>
     </div>
-    <div class="body">
-      <div class="token">
-        <aph-select :options="tokens" placeholder="Select ICO" v-model="token"></aph-select>
-      </div>
-      <div class="currency">
-        <aph-select :options="currencies" placeholder="Buy With" v-model="currency"></aph-select>
-      </div>
-      <div class="amount">
-        <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
-        <div class="symbol">{{ currency ? currency.value : '' }}</div>
-        <div class="max" v-if="currency" @click="setAmountToMax">max</div>
-      </div>
-      <div class="estimated-value">
-        <div class="label">Estimated Amount</div>
-        <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
+    <div v-if="tokens.length === 0">
+      <div class="none-open">
+        <h2>No Open Token Sales</h2>
+        <p>I'm sorry, doesn't appear that there are any token sale ICOs that are currently open.</p>
+        <p>Please check back again later.</p>
       </div>
     </div>
-    <div class="disclaimer">
-      <h2>Disclaimer - Urgent Instructions</h2>
-      <p>Ensure that you are only sending tokens which are accepted for this ICO.</p>
-      <p>Submitting multiple times could result in loss of funds.</p>
-      <p>Aphelion is not responsible for loss of funds.</p>
-      <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
-      <label for="confirm-disclaimer">I Agree, I am responsible for this transfer of funds.</label>
-    </div>
-    <div class="footer">
-      <button class="send-btn" @click="send()" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
+    <div v-else>
+      <div class="body">
+        <div class="token">
+          <aph-select :options="tokens" placeholder="Select ICO" v-model="token"></aph-select>
+        </div>
+        <div class="currency">
+          <aph-select :options="currencies" placeholder="Buy With" v-model="currency"></aph-select>
+        </div>
+        <div class="amount">
+          <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
+          <div class="symbol">{{ currency ? currency.value : '' }}</div>
+          <div class="max" v-if="currency" @click="setAmountToMax">max</div>
+        </div>
+        <div class="estimated-value">
+          <div class="label">Estimated Amount</div>
+          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
+        </div>
+      </div>
+      <div class="disclaimer">
+        <h2>Disclaimer - Urgent Instructions</h2>
+        <p>Ensure that you are only sending tokens which are accepted for this ICO.</p>
+        <p>Submitting multiple times could result in loss of funds.</p>
+        <p>Aphelion is not responsible for loss of funds.</p>
+        <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
+        <label for="confirm-disclaimer">I Agree, I am responsible for this transfer of funds.</label>
+      </div>
+      <div class="footer">
+        <button class="send-btn" @click="send()" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
+      </div>
     </div>
   </section>
 </template>
 
 <script>
 import { BigNumber } from 'bignumber.js';
-export default {
 
+export default {
   mounted() {
-    this.$store.state.showPortfolioHeader = false;
+    try {
+      console.log(this.tokens);
+      this.$store.state.showPortfolioHeader = false;
+    } catch (e) {
+      console.log(e);
+    }
   },
   beforeDestroy() {
     this.$store.state.showPortfolioHeader = true;
@@ -64,10 +78,24 @@ export default {
 
   computed: {
     tokens() {
-      return [{
-        label: 'APH',
-        value: '591eedcd379a8981edeefe04ef26207e1391904a',
-      }];
+      return this.$services.tokens.getAllAsArray().reduce(
+        (result, { symbol, assetId, network, sale }) => {
+          if (!sale || network !== this.$services.network.getSelectedNetwork().net
+              || moment(sale.endDate) < moment().utc) {
+            return result;
+          }
+
+          result.push({
+            label: symbol,
+            value: {
+              symbol,
+              assetId,
+              sale,
+            },
+          });
+
+          return result;
+        }, []);
     },
 
     currencies() {
@@ -75,6 +103,15 @@ export default {
         (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
           if (!name || !symbol || isNep5 === true) {
             return result;
+          }
+
+          if (!this.token) {
+            if (symbol === 'NEO' && this.token.sale.acceptsNeo !== true) {
+              return result;
+            }
+            if (symbol === 'GAS' && this.token.sale.acceptsGas !== true) {
+              return result;
+            }
           }
 
           result.push({
@@ -282,6 +319,24 @@ export default {
       @extend %btn-outline;
 
       border-bottom-right-radius: $border-radius;
+    }
+  }
+  
+  .none-open {
+    padding: 0 $space-lg 0 $space-lg;
+    margin: $space;
+    text-align: center;
+    color: white;
+    
+    h2 {
+      color: $purple;
+      font-size: toRem(18px);
+      margin-top: $space-lg * 2;
+    }
+    p {
+      font-size: toRem(16px);
+      padding: 0;
+      margin: $space-sm;
     }
   }
   

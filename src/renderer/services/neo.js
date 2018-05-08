@@ -543,6 +543,9 @@ export default {
                     isDefaultToken = true;
                   }
                 });
+                if (t.sale) {
+                  token.sale = t.sale;
+                }
                 if (!isDefaultToken) {
                   tokens.add(token);
                 }
