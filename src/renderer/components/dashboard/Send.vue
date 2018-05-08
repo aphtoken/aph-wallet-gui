@@ -34,7 +34,7 @@
           </div>
         </div>
       </div>
-      <div class="waiting" v-if="$store.state.sendInProgress !== true">Waiting for transaction to appear on 3rd party block explorer....</div>
+      <div class="waiting" v-if="$store.state.sendInProgress === true">Waiting for transaction to appear on 3rd party block explorer....</div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
         <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
