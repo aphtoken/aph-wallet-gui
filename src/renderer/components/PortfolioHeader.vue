@@ -16,10 +16,10 @@
         <aph-icon name="receive"></aph-icon>
         <p>Receive</p>
       </div>
-      <router-link class="send-btn" to="/authenticated/dashboard/send">
+      <div class="send-btn" @click="showSendView">
         <aph-icon name="send"></aph-icon>
         <p>Send</p>
-      </router-link>
+      </div>
     </div>
     <zoom></zoom>
     <address-modal v-if="this.$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></address-modal>
@@ -56,6 +56,14 @@ export default {
 
     showSendAddressModal() {
       this.$store.commit('setShowSendAddressModal', true);
+    },
+
+    showSendView() {
+      if (this.$store.state.sendInProgress === true) {
+        return;
+      }
+
+      this.$router.push('/authenticated/dashboard/send');
     },
   },
 

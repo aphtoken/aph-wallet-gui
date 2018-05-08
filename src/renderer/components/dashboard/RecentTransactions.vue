@@ -51,6 +51,9 @@ export default {
     },
 
     viewTransaction({ details }) {
+      if (this.$store.state.sendInProgress === true) {
+        return;
+      }
       this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setActiveTransaction', details);
     },

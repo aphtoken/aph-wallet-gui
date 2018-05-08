@@ -42,8 +42,8 @@ const requests = {
 const timeouts = {
   NEO_API_CALL: 500,
   RENDER_CHART: 100,
-  TRANSACTION: 30 * 1000,
-  TRANSACTION_WITH_HARDWARE: 3 * 60 * 1000,
+  TRANSACTION: 5 * 60 * 1000,
+  TRANSACTION_WITH_HARDWARE: 8 * 60 * 1000,
 };
 
 export {
