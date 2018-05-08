@@ -27,8 +27,9 @@ export default {
     });
 
     this.fetchLatestVersion();
-    fetchLatestVersionIntervalId =
-      setInterval(this.fetchLatestVersion(), this.$constants.WALLET_VERSION_CHECK);
+    fetchLatestVersionIntervalId = setInterval(() => {
+      this.fetchLatestVersion();
+    }, this.$constants.WALLET_VERSION_CHECK);
   },
 
   computed: {
