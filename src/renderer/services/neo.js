@@ -744,6 +744,7 @@ export default {
 
     const config = {
       net: currentNetwork.net,
+      url: currentNetwork.rpc,
       script: {
         scriptHash: assetId,
         operation: 'transfer',
@@ -864,6 +865,7 @@ export default {
 
     const config = {
       net: currentNetwork.net,
+      url: currentNetwork.rpc,
       address: currentWallet.address,
       privateKey: currentWallet.privateKey,
     };
