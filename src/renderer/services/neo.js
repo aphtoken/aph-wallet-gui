@@ -23,7 +23,7 @@ const NETWORK_ERROR_THRESHOLD_SECONDS = 60;
 let lastClaimSent;
 
 function shouldHideNetworkError() {
-  return moment.utc().diff(moment.unix(store.state.lastSuccessfulRequest), 'seconds') < NETWORK_ERROR_THRESHOLD_SECONDS;
+  return moment.utc().diff(moment.unix(store.state.lastReceivedBlock), 'seconds') < NETWORK_ERROR_THRESHOLD_SECONDS;
 }
 
 function showNetworkException(message) {
