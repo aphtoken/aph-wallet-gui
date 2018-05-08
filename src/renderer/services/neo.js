@@ -18,21 +18,8 @@ import { timeouts } from '../constants';
 const toBigNumber = value => new BigNumber(String(value));
 const GAS_ASSET_ID = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 const NEO_ASSET_ID = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
-const NETWORK_ERROR_THRESHOLD_SECONDS = 60;
 
 let lastClaimSent;
-
-function shouldHideNetworkError() {
-  return moment.utc().diff(moment.unix(store.state.lastReceivedBlock), 'seconds') < NETWORK_ERROR_THRESHOLD_SECONDS;
-}
-
-function showNetworkException(message) {
-  if (shouldHideNetworkError()) {
-    return;
-  }
-
-  alerts.exception(message);
-}
 
 export default {
   createWallet(name, passphrase, passphraseConfirm) {
@@ -270,7 +257,7 @@ export default {
                   .catch(e => reject(e));
               })
               .catch((e) => {
-                alerts.exception(e);
+                alerts.networkException(e);
               });
           })
           .catch((e) => {
@@ -281,7 +268,7 @@ export default {
               // happens with a new wallet without any transactions yet
               return;
             }
-            alerts.exception(e);
+            alerts.networkException(e);
           });
       } catch (e) {
         return reject(e);
@@ -428,7 +415,7 @@ export default {
                     h.availableToClaim = toBigNumber(res);
                   })
                   .catch((e) => {
-                    showNetworkException(e);
+                    alerts.networkException(e);
                   }));
               }
               holdings.push(h);
@@ -465,7 +452,7 @@ export default {
                   if (e.message.indexOf('Expected a hexstring but got') > -1) {
                     tokens.remove(nep5.assetId, currentNetwork.net);
                   }
-                  showNetworkException(e);
+                  alerts.networkException(e);
                   reject(e);
                 }));
             });
@@ -493,7 +480,7 @@ export default {
                       }
                     })
                     .catch((e) => {
-                      showNetworkException(e);
+                      alerts.networkException(e);
                     }));
                 });
 
@@ -865,7 +852,7 @@ export default {
       })
       .catch((e) => {
         gasClaim.error = e;
-        alerts.exception(e);
+        alerts.networkException(e);
         lastClaimSent = null;
         store.commit('setGasClaim', gasClaim);
       });
