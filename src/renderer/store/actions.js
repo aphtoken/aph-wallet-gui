@@ -130,7 +130,7 @@ async function fetchHoldings({ commit }) {
     commit('setHoldings', holdings.holdings);
     commit('endRequest', { identifier: 'fetchHoldings' });
   } catch (message) {
-    alerts.exception(message);
+    alerts.networkException(message);
     commit('failRequest', { identifier: 'fetchHoldings', message });
   }
 }
