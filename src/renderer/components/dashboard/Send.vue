@@ -34,6 +34,9 @@
           </div>
         </div>
       </div>
+      <div class="waiting" v-if="$store.state.sendInProgress === true">
+        Waiting for transaction to appear on 3rd party block explorer.
+      </div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
         <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
@@ -186,10 +189,13 @@ export default {
           this.end();
         }
       }, transactionTimeout);
+
+      this.$router.push('/authenticated/dashboard/confirming');
     },
 
     end() {
       this.sending = false;
+      this.$store.commit('setSendInProgress', false);
       this.address = '';
       this.amount = '';
       this.currency = null;
@@ -371,6 +377,13 @@ export default {
         margin-top: $space-lg;
       }
     }
+  }
+
+  .waiting {
+    @extend %small-uppercase-grey-label;
+    
+    text-align: center;
+    margin: $space;
   }
 
   .footer {

@@ -30,6 +30,10 @@ export default {
     },
 
     viewHoldingDetail(holding) {
+      if (this.$store.state.sendInProgress === true) {
+        return;
+      }
+
       this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setStatsToken', holding);
     },
