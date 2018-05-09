@@ -51,6 +51,9 @@ export default {
     },
 
     viewTransaction({ details }) {
+      if (this.$store.state.sendInProgress === true) {
+        return;
+      }
       this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setActiveTransaction', details);
     },
@@ -92,14 +95,10 @@ export default {
 
       .aph-icon {
         svg {
-          height: toRem(60px);
+          height: toRem(52px);
 
           .fill {
             fill: $purple;
-          }
-
-          .stroke {
-            stroke: $purple;
           }
         }
       }

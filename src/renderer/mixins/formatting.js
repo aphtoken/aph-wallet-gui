@@ -14,12 +14,20 @@ export default {
       return formatting.formatMoney.apply(null, args);
     },
 
+    $formatMoneyWithoutCents(...args) {
+      return formatting.formatMoneyWithoutCents.apply(null, args);
+    },
+
     $formatNumber(...args) {
       return formatting.formatNumber.apply(null, args);
     },
 
     $formatTime(...args) {
       return formatting.formatTime.apply(null, args);
+    },
+
+    $formatWeekdayAndTime(...args) {
+      return formatting.formatWeekdayAndTime.apply(null, args);
     },
   },
 };

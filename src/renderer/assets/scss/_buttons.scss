@@ -1,14 +1,17 @@
+$btn-circle-size: toRem(65px);
+
 %btn-circle {
+  @include transition(background-color, border, box-shadow, color);
+
   align-items: center;
   background-color: $purple;
   border-radius: 100%;
   color: white;
   cursor: pointer;
   display: inline-flex;
-  height: toRem(69px);
+  height: $btn-circle-size;
   justify-content: center;
-  transition: $transition;
-  width: toRem(69px);
+  width: $btn-circle-size;
 
   &:hover {
     background-color: $purple-hover;
@@ -16,7 +19,7 @@
 
   .aph-icon {
     .icon {
-      height: toRem(20px);
+      height: toRem(19px);
     }
 
     path {
@@ -26,18 +29,19 @@
 }
 
 %btn {
+  @include transition(background-color, border, box-shadow, color);
+
   background-color: $purple;
   border-radius: $border-radius;
   border: $border-thin;
   color: white;
   cursor: pointer;
   display: inline-block;
-  font-size: toRem(16px);
+  font-size: toRem(14px);
   height: $button-height;
   outline: none;
-  padding: toRem(16px);
+  padding: toRem(16px) 0;
   text-align: center;
-  transition: $transition;
   user-select: none;
   vertical-align: middle;
   white-space: nowrap;
@@ -74,6 +78,8 @@
 }
 
 %btn-square {
+  @include transition(background-color, border, box-shadow, color);
+
   background-color: white;
   border-radius: $border-radius;
   border: none;
@@ -84,7 +90,6 @@
   font-family: GilroyMedium;
   height: toRem(175px);
   outline: none;
-  transition: $transition;
   width: toRem(175px);
 
   .aph-icon {
@@ -94,7 +99,7 @@
     justify-content: center;
 
     svg {
-      height: toRem(42px);
+      height: toRem(52px);
 
       &.create {
         height: toRem(50px);
@@ -103,17 +108,11 @@
 
     .fill {
       fill: $dark;
-      transition: $transition;
-    }
-
-    .stroke {
-      stroke: $purple;
-      transition: $transition;
     }
   }
 
   p {
-    font-size: toRem(16px);
+    font-size: toRem(14px);
     margin: $space 0;
     text-align: center;
   }
@@ -126,10 +125,6 @@
       .fill {
         fill: white;
       }
-
-      .stroke {
-        stroke: white;
-      }
     }
   }
 
@@ -140,18 +135,18 @@
 }
 
 %btn-footer {
+  @include transition(background-color, border, box-shadow, color);
+
   background-color: $purple;
+  border: none;
   color: white;
   cursor: pointer;
   font-family: GilroyMedium;
   font-size: toRem(16px);
   height: $button-height;
-  line-height: $button-height;
   outline: none;
-  padding: 0 $space * 1.2;
+  padding: toRem(16px) 0;
   text-align: center;
-  transition: $transition;
-  border: none;
 
   &:hover {
     background-color: $purple-hover;

@@ -72,7 +72,7 @@ export default {
     });
   },
 
-  getHistorical(symbol, hoursBack, points) {
+  getHistorical(symbol, hoursBack) {
     /* eslint-disable max-len */
     const uri = `https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=${settings.getCurrency()}&limit=${hoursBack}&aggregate=1&e=CCCAGG`;
     /* eslint-enable max-len */
@@ -81,7 +81,6 @@ export default {
       try {
         return axios.get(uri)
           .then((res) => {
-            const mod = Math.round(res.data.Data.length / points);
             let i = 0;
             const returnData = {
               high: 0,
@@ -103,10 +102,8 @@ export default {
               return;
             }
             res.data.Data.forEach((d) => {
-              if (i % mod === 0) {
-                returnData.dates.push(d.time);
-                returnData.prices.push(d.close);
-              }
+              returnData.dates.push(d.time);
+              returnData.prices.push(d.close);
 
               if (d.high > returnData.high) {
                 returnData.high = d.high;

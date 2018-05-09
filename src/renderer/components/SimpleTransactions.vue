@@ -1,11 +1,11 @@
 <template>
   <table class="transactions-table" :class="{'is-clickable': isClickable}">
     <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)" :class="[{active: transaction.active}]">
-      <td width="40%" class="address truncate" v-if="transaction.block_time">{{ transaction.address }}</td>
-      <td width="40%" class="address" v-else>{{ transaction.address }}</td>
-      <td v-if="transaction.block_time">{{ $formatDate(transaction.block_time) }}</td>
+      <td width="50%" class="address truncate" v-if="showBlockTime">{{ transaction.address }}</td>
+      <td width="50%" class="address" v-else>{{ transaction.address }}</td>
+      <td v-if="showBlockTime">{{ $formatDate(transaction.block_time) }}</td>
       <td class="currency">{{ transaction.symbol }}</td>
-      <td width="25%" v-if="transaction.block_time" :class="['amount', {sent: transaction.value < 0, received: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</td>
+      <td v-if="transaction.block_time" :class="['amount', {sent: transaction.value < 0, received: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</td>
       <td width="25%" class="amount" v-else>{{ $formatNumber(transaction.value) }}</td>
     </tr>
   </table>
@@ -32,6 +32,11 @@ export default {
       type: Function,
     },
 
+    showBlockTime: {
+      default: true,
+      type: Boolean,
+    },
+
     transactions: {
       default() {
         return [];
@@ -51,7 +56,7 @@ export default {
   width: 100%;
 
   td {
-    border-top: 1px solid $border-grey;
+    border-top: toRem(1px) solid $border-grey;
     padding: $space $space-sm;
     white-space: nowrap;
 
@@ -93,8 +98,9 @@ export default {
       cursor: pointer;
 
       td {
-        background: transparent;
-        transition: $transition;
+        @include transition(background-color);
+
+        background-color: transparent;
 
         &:first-child {
           padding-left: $space;
@@ -107,7 +113,7 @@ export default {
 
       &:hover , &.active {
         td {
-          background: $background;
+          background-color: $background;
 
           &:not(.amount) {
             color: $purple;

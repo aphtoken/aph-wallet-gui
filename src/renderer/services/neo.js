@@ -16,8 +16,8 @@ import { store } from '../store';
 import { timeouts } from '../constants';
 
 const toBigNumber = value => new BigNumber(String(value));
-const neoAssetId = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
-const gasAssetId = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
+const GAS_ASSET_ID = '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
+const NEO_ASSET_ID = '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 
 let lastClaimSent;
 
@@ -257,7 +257,7 @@ export default {
                   .catch(e => reject(e));
               })
               .catch((e) => {
-                alerts.exception(e);
+                alerts.networkException(e);
               });
           })
           .catch((e) => {
@@ -268,7 +268,7 @@ export default {
               // happens with a new wallet without any transactions yet
               return;
             }
-            alerts.exception(e);
+            alerts.networkException(e);
           });
       } catch (e) {
         return reject(e);
@@ -281,7 +281,10 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        return api.neonDB.getTransactionHistory(currentNetwork.net, address)
+        return api.loadBalance(api.getTransactionHistoryFrom, {
+          address,
+          net: currentNetwork.net,
+        })
           .then((res) => {
             resolve(res);
           })
@@ -321,9 +324,9 @@ export default {
 
                 // set output symbols based on asset ids
                 transaction.vout.forEach((output) => {
-                  if (output.asset === neoAssetId) {
+                  if (output.asset === NEO_ASSET_ID) {
                     output.symbol = 'NEO';
-                  } else if (output.asset === gasAssetId) {
+                  } else if (output.asset === GAS_ASSET_ID) {
                     output.symbol = 'GAS';
                   }
                 });
@@ -335,9 +338,9 @@ export default {
                     .getRawTransaction(input.txid, 1)
                     .then((inputTransaction) => {
                       const inputSource = inputTransaction.vout[input.vout];
-                      if (inputSource.asset === neoAssetId) {
+                      if (inputSource.asset === NEO_ASSET_ID) {
                         input.symbol = 'NEO';
-                      } else if (inputSource.asset === gasAssetId) {
+                      } else if (inputSource.asset === GAS_ASSET_ID) {
                         input.symbol = 'GAS';
                       }
                       input.address = inputSource.address;
@@ -350,7 +353,9 @@ export default {
                   .then(() => resolve(transaction))
                   .catch(e => reject(e));
               })
-              .catch(e => reject(e));
+              .catch((e) => {
+                reject(new Error(`NEO RPC Network Error: ${e.message}`));
+              });
           })
           .catch(() => resolve(null));
       } catch (e) {
@@ -372,19 +377,19 @@ export default {
             const promises = [];
 
             if (!_.find(res.result.balances, (o) => {
-              return o.asset === neoAssetId;
+              return o.asset === NEO_ASSET_ID;
             })) {
               res.result.balances.push({
-                asset: neoAssetId,
+                asset: NEO_ASSET_ID,
                 value: 0,
               });
             }
 
             if (!_.find(res.result.balances, (o) => {
-              return o.asset === gasAssetId;
+              return o.asset === GAS_ASSET_ID;
             })) {
               res.result.balances.push({
-                asset: gasAssetId,
+                asset: GAS_ASSET_ID,
                 value: 0,
               });
             }
@@ -393,24 +398,24 @@ export default {
               const h = {
                 asset: b.asset,
                 balance: b.value,
-                symbol: b.asset === neoAssetId ? 'NEO' : 'GAS',
-                name: b.asset === neoAssetId ? 'NEO' : 'GAS',
+                symbol: b.asset === NEO_ASSET_ID ? 'NEO' : 'GAS',
+                name: b.asset === NEO_ASSET_ID ? 'NEO' : 'GAS',
                 isNep5: false,
               };
               if (restrictToSymbol && h.symbol !== restrictToSymbol) {
                 return;
               }
               if (h.symbol === 'NEO') {
-                promises.push(api.getMaxClaimAmountFrom({
+                promises.push(api.loadBalance(api.getMaxClaimAmountFrom, {
                   net: currentNetwork.net,
                   address: currentWallet.address,
                   privateKey: currentWallet.privateKey,
-                }, api.neonDB)
+                })
                   .then((res) => {
                     h.availableToClaim = toBigNumber(res);
                   })
                   .catch((e) => {
-                    alerts.exception(e);
+                    alerts.networkException(e);
                   }));
               }
               holdings.push(h);
@@ -447,7 +452,7 @@ export default {
                   if (e.message.indexOf('Expected a hexstring but got') > -1) {
                     tokens.remove(nep5.assetId, currentNetwork.net);
                   }
-                  alerts.exception(e);
+                  alerts.networkException(e);
                   reject(e);
                 }));
             });
@@ -475,7 +480,7 @@ export default {
                       }
                     })
                     .catch((e) => {
-                      alerts.exception(e);
+                      alerts.networkException(e);
                     }));
                 });
 
@@ -499,7 +504,9 @@ export default {
               })
               .catch(e => reject(e));
           })
-          .catch(e => reject(e));
+          .catch((e) => {
+            reject(new Error(`NEO RPC Network Error: ${e.message}`));
+          });
       } catch (e) {
         return reject(e);
       }
@@ -551,7 +558,8 @@ export default {
                 }
               });
             })
-            .catch(() => {
+            .catch((e) => {
+              alerts.exception(new Error(`APH API Error: ${e.message}`));
             });
         } catch (e) {
           return reject(e);
@@ -595,7 +603,8 @@ export default {
             store.commit('setLastSuccessfulRequest');
             resolve(res);
           })
-          .catch(() => {
+          .catch((e) => {
+            alerts.exception(new Error(`APH API Error: ${e.message}`));
             resolve({
               data: {
                 transfers: [],
@@ -626,9 +635,9 @@ export default {
         }
 
         if (isNep5 === false) {
-          if (assetId === neoAssetId) {
+          if (assetId === NEO_ASSET_ID) {
             sendPromise = this.sendSystemAsset(toAddress, amount, 0);
-          } else if (assetId === gasAssetId) {
+          } else if (assetId === GAS_ASSET_ID) {
             sendPromise = this.sendSystemAsset(toAddress, 0, amount);
           } else {
             return reject('Invalid system asset id');
@@ -688,19 +697,19 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    return api.getBalanceFrom({
+    return api.loadBalance(api.getBalanceFrom, {
       net: currentNetwork.net,
       address: currentWallet.address,
-    }, api.neonDB)
-    // or api.neoscan? sometimes these apis go down or are unreliable
+    })
     // maybe we should stand up our own version ?
       .then((balance) => {
         if (balance.net !== currentNetwork.net) {
-          alerts.error('Unable to read address balance from neonDB. Please try again later.');
+          alerts.error('Unable to read address balance from neonDB or neoscan api. Please try again later.');
           return null;
         }
         const config = {
           net: currentNetwork.net,
+          url: currentNetwork.rpc,
           address: currentWallet.address,
           privateKey: currentWallet.privateKey,
           balance: balance.balance,
@@ -727,7 +736,7 @@ export default {
     const currentWallet = wallets.getCurrentWallet();
 
     const gasAmount = _.find(store.state.holdings, (o) => {
-      return o.asset === gasAssetId;
+      return o.asset === GAS_ASSET_ID;
     }).balance;
 
     if (gasAmount < 0.00000001) {
@@ -739,6 +748,7 @@ export default {
 
     const config = {
       net: currentNetwork.net,
+      url: currentNetwork.rpc,
       script: {
         scriptHash: assetId,
         operation: 'transfer',
@@ -781,22 +791,16 @@ export default {
       try {
         setTimeout(() => {
           const interval = setInterval(() => {
-            this.fetchTransactionDetails(hash)
-              .then((res) => {
-                if (res && res.confirmed === true) {
-                  alerts.success(`TX: ${hash} CONFIRMED`);
-                  clearInterval(interval);
-                  resolve(res);
-                }
-                return res;
-              })
-              .catch((e) => {
-                if (e.message === 'Unknown transaction') {
-                  return reject('Transaction failed. Please wait several blocks for balance to update and try again.');
-                }
-                return alerts.exception(e);
-              });
-          }, 5000);
+            const tx = _.find(store.state.recentTransactions, (o) => {
+              return o.hash === hash;
+            });
+
+            if (tx) {
+              alerts.success(`TX: ${hash} CONFIRMED`);
+              clearInterval(interval);
+              resolve(tx);
+            }
+          }, 1000);
         }, 15 * 1000); // wait a block for propagation
         return null;
       } catch (e) {
@@ -806,7 +810,6 @@ export default {
   },
 
   claimGas() {
-    const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
     if (new Date() - lastClaimSent < 5 * 60 * 1000) { // 5 minutes ago
@@ -822,20 +825,9 @@ export default {
     store.commit('setGasClaim', gasClaim);
     store.commit('setShowClaimGasModal', true);
 
-    // force neonDB for these, neoscan seems to be unreliable
-    api.setApiSwitch(1);
-    api.setSwitchFreeze(true);
-
     lastClaimSent = new Date();
     return this.fetchHoldings(currentWallet.address, 'NEO')
       .then((h) => {
-        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
-          alerts.error('No NEO to claim from.');
-          api.setSwitchFreeze(false);
-          store.commit('setShowClaimGasModal', false);
-          return;
-        }
-
         const neoAmount = h.holdings[0].balance;
         const callback = () => {
           gasClaim.step = 2;
@@ -843,71 +835,80 @@ export default {
         gasClaim.neoTransferAmount = neoAmount;
         gasClaim.step = 1;
 
-        // send neo to ourself to make all gas available for claim
-        this.sendFunds(currentWallet.address, neoAssetId, neoAmount, false, callback)
-          .then(() => {
-            const config = {
-              net: currentNetwork.net,
-              address: currentWallet.address,
-              privateKey: currentWallet.privateKey,
-            };
 
-            // send the claim gas
-            setTimeout(() => {
-              if (currentWallet.isLedger === true) {
-                config.signingFunction = ledger.signWithLedger;
-              }
+        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
+          this.sendClaimGas(gasClaim);
+        } else {
+          // send neo to ourself to make all gas available for claim
+          this.sendFunds(currentWallet.address, NEO_ASSET_ID, neoAmount, false, callback)
+            .then(() => {
+              setTimeout(() => {
+                // send the claim gas
+                this.sendClaimGas(gasClaim);
+              }, 30 * 1000);
+            })
+            .catch((e) => {
+              gasClaim.error = e;
+              alerts.exception(e);
+              lastClaimSent = null;
+              store.commit('setGasClaim', gasClaim);
+            });
+        }
+      })
+      .catch((e) => {
+        gasClaim.error = e;
+        alerts.networkException(e);
+        lastClaimSent = null;
+        store.commit('setGasClaim', gasClaim);
+      });
+  },
 
-              api.getMaxClaimAmountFrom({
-                net: network.getSelectedNetwork().net,
-                address: wallets.getCurrentWallet().address,
-                privateKey: wallets.getCurrentWallet().privateKey,
-              }, api.neonDB)
-                .then((res) => {
-                  gasClaim.gasClaimAmount = toBigNumber(res);
-                  gasClaim.step = 3;
+  sendClaimGas(gasClaim) {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
 
-                  api.claimGas(config)
-                    .then((res) => {
-                      gasClaim.step = 4;
-                      h.availableToClaim = 0;
-                      api.setSwitchFreeze(false);
-                      this.monitorTransactionConfirmation(res.claims.claims[0].txid)
-                        .then(() => {
-                          store.dispatch('fetchRecentTransactions');
-                          gasClaim.step = 5;
-                        })
-                        .catch((e) => {
-                          gasClaim.error = e;
-                          alerts.error(e);
-                        });
-                    })
-                    .catch((e) => {
-                      gasClaim.error = e;
-                      alerts.exception(e);
-                      api.setSwitchFreeze(false);
-                    });
-                })
-                .catch((e) => {
-                  gasClaim.error = e;
-                  alerts.exception(e);
-                });
-            }, 30 * 1000);
+    const config = {
+      net: currentNetwork.net,
+      url: currentNetwork.rpc,
+      address: currentWallet.address,
+      privateKey: currentWallet.privateKey,
+    };
+
+    if (currentWallet.isLedger === true) {
+      config.signingFunction = ledger.signWithLedger;
+    }
+
+    api.loadBalance(api.getMaxClaimAmountFrom, {
+      net: network.getSelectedNetwork().net,
+      address: wallets.getCurrentWallet().address,
+      privateKey: wallets.getCurrentWallet().privateKey,
+    })
+      .then((res) => {
+        gasClaim.gasClaimAmount = toBigNumber(res);
+        gasClaim.step = 3;
+
+        api.claimGas(config)
+          .then((res) => {
+            gasClaim.step = 4;
+
+            this.monitorTransactionConfirmation(res.claims.claims[0].txid)
+              .then(() => {
+                store.dispatch('fetchRecentTransactions');
+                gasClaim.step = 5;
+              })
+              .catch((e) => {
+                gasClaim.error = e;
+                alerts.error(e);
+              });
           })
           .catch((e) => {
             gasClaim.error = e;
             alerts.exception(e);
-            api.setSwitchFreeze(false);
-            lastClaimSent = null;
-            store.commit('setGasClaim', gasClaim);
           });
       })
       .catch((e) => {
         gasClaim.error = e;
         alerts.exception(e);
-        api.setSwitchFreeze(false);
-        lastClaimSent = null;
-        store.commit('setGasClaim', gasClaim);
       });
   },
 

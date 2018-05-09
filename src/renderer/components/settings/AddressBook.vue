@@ -145,19 +145,18 @@ export default {
     }
 
     .search-field {
-        border-bottom: $border;
-        border-color: $grey;
-        display: flex;
-        flex: none;
-        margin: 0 $space-lg $space-lg;
-        padding: $space 0;
+      border-bottom: $border-thin;
+      display: flex;
+      flex: none;
+      margin: 0 $space-lg $space-lg;
+      padding: $space-sm 0;
 
       .aph-icon {
         flex: none;
         margin: 0 $space;
 
         svg {
-          height: toRem(40px);
+          height: toRem(22px);
 
           .fill {
             fill: $purple;
@@ -169,7 +168,7 @@ export default {
         background: none;
         border: none;
         color: $dark;
-        font-family: GilroySemibold;
+        font-family: GilroyMedium;
         font-size: toRem(15px);
         outline: none;
         padding: 0;
@@ -186,16 +185,17 @@ export default {
       flex: 1;
       margin: 0 $space-lg;
       height: 95%;
-      overflow: auto;
+      overflow-y: auto;
 
       .body {
         height: 90%;
         overflow-y: auto;
 
         .contact {
-          background: transparent;
-          border-top: 1px solid $background;
-          transition: $transition;
+          @include transition(background-color);
+
+          background-color: transparent;
+          border-top: toRem(1px) solid $background;
 
           .summary {
             align-items: center;
@@ -211,7 +211,7 @@ export default {
           }
 
           &:hover, &.active {
-            background: $background;
+            background-color: $background;
           }
 
           .name {
@@ -233,20 +233,19 @@ export default {
               margin-left: $space-sm;
               display: inline-block;
 
-              path {
-                fill: $grey;
-                transition: $transition;
-              }
-
               svg {
-                height: $space;
+                height: toRem(12px);
+
+                .fill {
+                  fill: $grey;
+                }
               }
             }
 
             &:hover {
               color: $purple;
 
-              path {
+              .fill {
                 fill: $purple;
               }
             }
@@ -298,8 +297,9 @@ export default {
                   font-family: GilroySemibold;
 
                   .edit {
+                    @include transition(color);
+
                     display: flex;
-                    transition: $transition;
 
                     .aph-icon {
                       margin-right: $space-sm;
@@ -331,11 +331,6 @@ export default {
               & + .row {
                 margin-top: $space;
               }
-            }
-
-
-            .inputs, .outputs {
-              max-width: 35rem;
             }
           }
 
@@ -370,6 +365,12 @@ export default {
 
       margin-left: 50%;
       transform: translate(-50%, -50%);
+    }
+
+    &:hover {
+      .btn-circle {
+        box-shadow: $box-shadow-sm;
+      }
     }
   }
 }

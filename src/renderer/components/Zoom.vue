@@ -44,40 +44,17 @@ export default {
     cursor: pointer;
     flex: 1;
     padding: $space toRem(20px);
-    transition: $transition;
 
     > .aph-icon {
       svg {
-        height: toRem(16px);
-
-        &.reset {
-          .stroke {
-            stroke-width: 2.6;
-          }
-        }
-      }
-
-      .stroke {
-        stroke: $dark;
-      }
-
-      .plus, .minus {
-        .fill {
-          fill: $dark;
-        }
+        height: toRem(17px);
       }
     }
 
     &:hover {
       > .aph-icon {
-        .stroke {
-          stroke: $purple;
-        }
-
-        .plus, .minus {
-          .fill {
-            fill: $purple;
-          }
+        .fill {
+          fill: $purple;
         }
       }
     }

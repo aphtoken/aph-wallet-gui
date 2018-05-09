@@ -10,6 +10,12 @@
         </span>
         <span class="label">Dashboard</span>
       </router-link>
+      <router-link to="/authenticated/buy-aph">
+        <span class="icon">
+          <aph-icon name="dex"></aph-icon>
+        </span>
+        <span class="label">Buy Aph</span>
+      </router-link>
       <router-link to="/authenticated/assets">
         <span class="icon">
           <aph-icon name="wallet"></aph-icon>
@@ -34,17 +40,15 @@
         </span>
         <span class="label">Settings</span>
       </router-link>
-      <a class="logout" to="" @click.prevent="logout">
-        <span class="icon">
-          <aph-icon name="back"></aph-icon>
-        </span>
-        <span class="label">Log Out</span>
-      </a>
+    </div>
+    <div class="logout-wrapper" @click.prevent="logout">
+      <aph-icon name="logout"></aph-icon>
     </div>
     <div class="footer link-list">
       <div class="network-status">
         <div class="block">
-          <span class="network">{{ currentNetwork.net }} block</span><span class="index">{{ currentNetwork.bestBlock.index }}</span>
+          <span class="network">{{ currentNetwork ? currentNetwork.net : 0 }} block</span>
+          <span class="index">{{ currentNetwork && currentNetwork.bestBlock ? currentNetwork.bestBlock.index : 0}}</span>
         </div>
         <div class="last-update">
           <div v-if="showNetworkError" class="network-error">Unable to Reach Network</div>
@@ -89,6 +93,7 @@ export default {
   methods: {
     logout() {
       this.$services.wallets.clearCurrentWallet();
+      this.$store.commit('handleLogout');
       this.$router.push('/login');
     },
   },
@@ -119,14 +124,15 @@ export default {
     padding: 0;
 
     a {
+      @include transition(border-color);
+
       align-items: center;
-      border-left: 3px solid transparent;
+      border-left: $border-width-thick solid transparent;
       color: white;
       cursor: pointer;
       display: flex;
-      font-size: toRem(16px);
+      font-size: toRem(17px);
       padding: $space-sm 0;
-      transition: $transition;
       height: toRem(70px);
 
       .icon {
@@ -138,8 +144,8 @@ export default {
             height: toRem(42px);
           }
 
-          &.back {
-            height: toRem(20px);
+          &.dex {
+            height: toRem(42px);
           }
 
           &.wallet {
@@ -155,12 +161,8 @@ export default {
           }
 
           &.settings {
-            height: toRem(42px);
+            height: toRem(35px);
           }
-        }
-
-        .fill, .stroke {
-          transition: $transition;
         }
       }
 
@@ -172,9 +174,6 @@ export default {
         border-color: white;
 
         .icon {
-          .stroke {
-            stroke: white;
-          }
           .fill {
             fill: white;
           }
@@ -184,18 +183,41 @@ export default {
       & + a {
         margin-top: $space;
       }
+
+      @include lowRes() {
+        & + a {
+          margin-top: $space-sm;
+        }
+      }
     }
   }
   .menu {
     flex: 1;
   }
 
+  .logout-wrapper {
+    cursor: pointer;
+    display: flex;
+    flex: none;
+    justify-content: center;
+    margin-bottom: $space-lg;
+
+    svg {
+      height: toRem(35px);
+    }
+
+    .fill {
+      fill: white;
+    }
+  }
+
   .footer {
+    background: $purple-hover;
     color: white;
     flex: none;
     font-family: GilroyMedium;
     font-size: toRem(12px);
-    padding-bottom: $space;
+    padding: $space-lg 0;
     text-transform: uppercase;
     text-align: center;
 
@@ -216,7 +238,7 @@ export default {
       }
 
       .last-update {
-        margin: $space-lg 0;
+        margin: $space 0;
       }
     }
 

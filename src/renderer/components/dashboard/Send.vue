@@ -34,6 +34,7 @@
           </div>
         </div>
       </div>
+      <div class="waiting" v-if="$store.state.sendInProgress === true">Waiting for transaction to appear on 3rd party block explorer....</div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
         <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
@@ -173,6 +174,7 @@ export default {
           .catch((e) => {
             this.sending = false;
             this.$services.alerts.error(e);
+            this.$store.commit('setSendInProgress', false);
           });
       }, this.$constants.timeouts.NEO_API_CALL);
 
@@ -186,18 +188,23 @@ export default {
           this.end();
         }
       }, transactionTimeout);
+
+      this.$router.push('/authenticated/dashboard/confirming');
     },
 
     end() {
       this.sending = false;
+      this.$store.commit('setSendInProgress', false);
       this.address = '';
       this.amount = '';
       this.currency = null;
       this.showConfirmation = false;
       this.$router.push('/authenticated/dashboard');
+
       if (this.$services.wallets.getCurrentWallet().isLedger === true) {
         this.$services.ledger.close();
       }
+
       this.$store.dispatch('fetchHoldings');
       clearInterval(sendTimeoutIntervalId);
     },
@@ -241,7 +248,7 @@ export default {
 #dashboard--send {
   @extend %tile-light;
 
-  box-shadow: $box-shadow-small;
+  box-shadow: $box-shadow;
   display: flex;
   flex-direction: column;
 
@@ -265,6 +272,7 @@ export default {
 
     .aph-input {
       border-color: $background;
+      padding-left: toRem(16px);
 
       &.focused {
         border-color: $purple;
@@ -299,24 +307,33 @@ export default {
       }
 
       .max {
+        @include transition(color);
+
         bottom: toRem(16px);
         color: $grey;
         cursor: pointer;
         font-size: toRem(10px);
         position: absolute;
         right: 0;
+        text-transform: uppercase;
         z-index: 0;
+
+        &:hover {
+          color: $purple;
+        }
       }
     }
 
     .estimated-value {
       display: flex;
-      margin-top: $space;
+      margin-top: $space-lg;
+      padding-left: toRem(16px);
 
       .label {
         @extend %small-uppercase-grey-label;
       }
       .value {
+        color: $darker-grey;
         font-family: GilroySemibold;
         font-size: toRem(12px);
         margin-left: $space-sm;
@@ -358,9 +375,16 @@ export default {
       }
 
       & + .row {
-        margin-top: $space;
+        margin-top: $space-lg;
       }
     }
+  }
+
+  .waiting {
+    border-top: toRem(1px) solid $border-grey;
+    font-family: GilroyMedium;
+    padding: $space 0;
+    text-align: center;
   }
 
   .footer {

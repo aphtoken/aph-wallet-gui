@@ -12,7 +12,7 @@
     background: $purple;
     content: "";
     display: block;
-    height: 3px;
+    height: toRem(3px);
     margin-top: $space-sm;
     width: toRem(55px);
   }
@@ -22,6 +22,12 @@
   color: $grey;
   font-family: GilroyMedium;
   font-size: toRem(12px);
-  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+%small-uppercase-grey-label-dark {
+  color: $darker-grey;
+  font-family: GilroyMedium;
+  font-size: toRem(12px);
   text-transform: uppercase;
 }

@@ -13,11 +13,12 @@ const defaultSettings = {
 const formats = {
   DATE: 'DD-MM-YYYY',
   DATE_SHORT: 'DD-MM',
-  MONEY: '$0,0.00',
-  WHOLE_NUMBER: '0,0',
   FRACTIONAL_NUMBER: '[.]0[00000000]',
+  MONEY: '$0,0.00',
+  TIME: 'H:ss',
+  WEEKDAY_AND_TIME: 'dd H:ss',
+  WHOLE_NUMBER: '0,0',
   WHOLE_NUMBER_NO_COMMAS: '0[.]0[00000000]',
-  TIME: 'LTC',
 };
 
 const intervals = {
@@ -41,8 +42,8 @@ const requests = {
 const timeouts = {
   NEO_API_CALL: 500,
   RENDER_CHART: 100,
-  TRANSACTION: 30 * 1000,
-  TRANSACTION_WITH_HARDWARE: 3 * 60 * 1000,
+  TRANSACTION: 5 * 60 * 1000,
+  TRANSACTION_WITH_HARDWARE: 8 * 60 * 1000,
 };
 
 export {

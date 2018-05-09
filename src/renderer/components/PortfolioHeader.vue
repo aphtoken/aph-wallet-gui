@@ -16,10 +16,10 @@
         <aph-icon name="receive"></aph-icon>
         <p>Receive</p>
       </div>
-      <router-link class="send-btn" to="/authenticated/dashboard/send">
+      <div class="send-btn" @click="showSendView">
         <aph-icon name="send"></aph-icon>
         <p>Send</p>
-      </router-link>
+      </div>
     </div>
     <zoom></zoom>
     <address-modal v-if="this.$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></address-modal>
@@ -56,6 +56,14 @@ export default {
 
     showSendAddressModal() {
       this.$store.commit('setShowSendAddressModal', true);
+    },
+
+    showSendView() {
+      if (this.$store.state.sendInProgress === true) {
+        return;
+      }
+
+      this.$router.push('/authenticated/dashboard/send');
     },
   },
 
@@ -112,7 +120,7 @@ h1.underlined {
     .balance {
       .amount {
         font-size: toRem(45px);
-        margin: 0 $space 0 $space-sm;
+        margin: 0 $space 0 0;
       }
 
       .currency {
@@ -126,7 +134,7 @@ h1.underlined {
       margin-top: $space;
 
       .label {
-        @extend %small-uppercase-grey-label;
+        @extend %small-uppercase-grey-label-dark;
       }
 
       .amount {
@@ -154,20 +162,8 @@ h1.underlined {
     height: toRem(160px);
 
     .aph-icon {
-      svg {
-        height: toRem(57px);
-      }
-
       .fill {
         fill: $dark;
-      }
-    }
-  }
-
-  .receive-btn {
-    .aph-icon {
-      .stroke {
-        stroke: $dark !important;
       }
     }
   }
@@ -177,17 +173,11 @@ h1.underlined {
     margin-left: $space-lg;
 
     &:hover {
-      box-shadow: 0px 0px 50px 15px rgba($purple, 0.3);
+      box-shadow: $box-shadow-lg;
     }
 
     p {
       color: white;
-    }
-
-    .aph-icon {
-      .stroke {
-        stroke: $dark !important;
-      }
     }
   }
 }

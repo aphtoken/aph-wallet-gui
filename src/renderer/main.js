@@ -21,6 +21,7 @@ import { store } from './store';
 // Global Vue Components.
 import CopyText from './components/CopyText';
 import DatePicker from './components/DatePicker';
+import Holding from './components/Holding';
 import Icon from './components/Icon';
 import Input from './components/Input';
 import Select from './components/Select';
@@ -53,6 +54,7 @@ _.each(mixins, (mixin) => {
 // Register global components.
 Vue.component('aph-copy-text', CopyText);
 Vue.component('aph-date-picker', DatePicker);
+Vue.component('aph-holding', Holding);
 Vue.component('aph-icon', Icon);
 Vue.component('aph-input', Input);
 Vue.component('aph-select', Select);

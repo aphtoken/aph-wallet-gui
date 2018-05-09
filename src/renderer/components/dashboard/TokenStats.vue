@@ -2,10 +2,6 @@
   <section id="dashboard--token-stats" v-if="$store.state.statsToken">
     <div class="header">
       <h1 class="underlined">Token Stats</h1>
-      <div class="gas" v-if="$store.state.statsToken.availableToClaim">
-        <div class="label">{{ $formatNumber($store.state.statsToken.availableToClaim) }} Gas</div>
-        <button class="claim" @click.prevent="claim" :disabled="$isPending('claimGas')">{{ claimButtonLabel }}</button>
-      </div>
       <div class="current-value">
         <div class="label">Current Value</div>
         <div class="amount">{{ $formatMoney($store.state.statsToken.unitValue) }}</div>
@@ -17,6 +13,12 @@
         <div class="name">{{ $store.state.statsToken.name }}</div>
         <div class="amount">{{ formattedAmount }}<span class="currency">{{ $store.state.statsToken.symbol }}</span></div>
         <div class="value">{{ $formatMoney($store.state.statsToken.totalValue, null, `${$store.state.currencySymbol }0.00`) }}<span class="currency">{{ $store.state.currency }}</span></div>
+        <div class="claim-gas" v-if="$store.state.statsToken.availableToClaim">
+          <span class="label">Gas Available</span>
+          <span class="amount">{{ $formatNumber($store.state.statsToken.availableToClaim) }}</span>
+          <span class="claiming" v-if="$isPending('claimGas')">Claiming...</span>
+          <a class="claim" href="#" @click.prevent="claim" v-else>Claim</a>
+        </div>
       </div>
     </div>
     <div class="footer">
@@ -26,7 +28,7 @@
       </div>
       <div class="market-cap">
         <div class="label">Market Cap</div>
-        <div class="amount">{{ $formatMoney($store.state.statsToken.marketCap) }}</div>
+        <div class="amount">{{ $formatMoneyWithoutCents($store.state.statsToken.marketCap) }}</div>
       </div>
       <div class="change">
         <div class="label">24h Change</div>
@@ -43,10 +45,6 @@ export default {
   computed: {
     balanceClass() {
       return this.formattedAmount.length > AMOUNT_LENGTH_LIMIT ? ['balance', 'small'] : ['balance'];
-    },
-
-    claimButtonLabel() {
-      return this.$isPending('claimGas') ? 'Claiming Gas...' : 'Claim Gas';
     },
 
     formattedAmount() {
@@ -82,28 +80,6 @@ export default {
       white-space: nowrap;
     }
 
-    .gas {
-      flex: 2;
-      text-align: center;
-
-      .claim, .claiming {
-        font-family: GilroyMedium;
-      }
-
-      .claim {
-        @extend %btn;
-
-        border: none;
-        font-size: toRem(10px);
-        height: auto;
-        line-height: initial;
-        padding: toRem(3px) 0;
-        position: relative;
-        top: toRem(-2px);
-        width: 50%;
-      }
-    }
-
     .current-value {
       flex: 1;
       text-align: right;
@@ -111,8 +87,7 @@ export default {
 
       .amount {
         color: $purple;
-
-        font-family: GilroyMedium;
+        font-size: toRem(20px);
       }
     }
   }
@@ -125,17 +100,18 @@ export default {
     position: relative;
 
     .aph-token-icon {
-      $width: toRem(125px);
+      $iconSize: toRem(135px);
 
       padding: 0 $space-lg 0 0;
 
       img, .placeholder {
-        height: $width;
-        width: $width;
+        height: $iconSize;
+        width: $iconSize;
       }
 
-      .placeholder {
+      .placeholder-text {
         font-size: toRem(30px);
+        top: toRem(4px);
       }
     }
 
@@ -162,11 +138,39 @@ export default {
       }
 
       .value {
+        color: $darker-grey;
         font-family: GilroyMedium;
         font-size: toRem(20px);
 
         .currency {
-          margin-left: $space-xsm;
+          margin-left: $space-xs;
+        }
+      }
+
+      .value {
+        font-size: toRem(16px);
+        margin-bottom: $space;
+      }
+
+      .claim-gas {
+        flex: 2;
+        text-align: center;
+
+        .amount {
+          @extend %small-uppercase-grey-label-dark;
+
+          color: $dark;
+          margin: 0 $space-sm;
+        }
+
+        .claim {
+          font-family: GilroyMedium;
+          font-size: toRem(12px);
+          text-transform: uppercase;
+        }
+
+        .claiming {
+          @extend %small-uppercase-grey-label;
         }
       }
 
@@ -179,9 +183,30 @@ export default {
           }
         }
       }
+    }
 
-      .value {
-        font-size: toRem(16px);
+    @include lowRes() {
+      .aph-token-icon {
+        $iconSize: toRem(110px);
+
+        img, .placeholder {
+          height: $iconSize;
+          width: $iconSize;
+        }
+      }
+
+      .balance {
+        .name, .amount, .value {
+          margin-bottom: $space-xs;
+        }
+
+        .amount {
+          font-size: toRem(28px);
+
+          .currency {
+            font-size: toRem(16px);
+          }
+        }
       }
     }
   }
@@ -192,11 +217,7 @@ export default {
     padding: $space-lg;
 
     > div {
-      flex: none;
-
-      & + div {
-        margin-left: $space-lg;
-      }
+      flex: 1;
 
       &.total-supply {
         min-width: toRem(125px);
@@ -204,7 +225,7 @@ export default {
     }
 
     .amount {
-      font-family: GilroySemibold;
+      font-family: GilroyMedium;
       font-size: toRem(18px);
     }
 

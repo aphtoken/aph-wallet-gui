@@ -70,19 +70,19 @@ export default {
 <style lang="scss">
 #aph-import-a-wallet-modal {
   .body {
-    padding: $space-lg;
+    padding: $space-xl $space-lg $space-lg;
     text-align: center;
     display: block;
 
     .aph-icon {
       .wallet {
-        height: $space-xl;
-        margin-bottom: $space-lg;
+        height: toRem(44px);
+        margin-bottom: $space-xl;
       }
     }
 
     .aph-input {
-      border-color: $dark;
+      border-color: $grey;
       height: 50px;
       width: 100%;
 

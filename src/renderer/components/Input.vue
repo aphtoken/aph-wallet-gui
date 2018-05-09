@@ -92,26 +92,26 @@ export default {
   display: flex;
   height: $input-height;
   position: relative;
-  transition: $transition;
 
   input {
     background: none;
     border: none;
     color: white;
     font-size: toRem(14px);
-    letter-spacing: .5px;
+    letter-spacing: toRem(0.5px);
     outline: none;
     padding: $space 0 $space-sm;
     width: 100%;
   }
 
   .placeholder {
+    @include transitionFast(all);
+
     color: white;
-    padding-top: toRem(16px);
+    padding-top: toRem(20px);
     pointer-events: none;
     position: absolute;
     top: 0;
-    transition: $transition-fast;
     z-index: 0;
   }
 
@@ -122,11 +122,7 @@ export default {
 
   .aph-icon {
     svg {
-      height: toRem(16px);
-
-      &.eye-closed {
-        height: toRem(17px);
-      }
+      height: toRem(17px);
     }
 
     .fill {
@@ -140,7 +136,8 @@ export default {
     .placeholder {
       color: $grey;
       font-size: toRem(12px);
-      top: toRem(-18px);
+      padding: 0;
+      top: 0;
     }
   }
 

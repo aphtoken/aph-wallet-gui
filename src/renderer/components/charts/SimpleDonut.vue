@@ -74,14 +74,14 @@ export default {
   }
 
   .label {
-    fill: $grey;
+    fill: $darker-grey;
     font-family: GilroyMedium;
-    font-size: toRem(16px);
+    font-size: toRem(12px);
     text-transform: uppercase;
   }
 
   .percent {
-    font-size: toRem(30px);
+    font-size: toRem(22px);
 
     &.decrease {
       fill: $red;

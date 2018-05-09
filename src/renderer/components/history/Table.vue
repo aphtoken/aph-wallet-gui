@@ -16,13 +16,20 @@
           <div :class="['cell', 'amount', {decrease: transaction.value < 0, increase: transaction.value > 0}]">
             {{ $formatNumber(transaction.value) }}
           </div>
-          <!--<div class="cell total">{{ $formatMoney(transaction.value) }}</div>-->
           <div class="cell status" v-if="transaction.details" @click.stop>
             <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
             <aph-icon name="unconfirmed" v-else></aph-icon>
           </div>
         </div>
         <div class="details" v-if="transaction.details">
+          <div class="section">
+            <div class="row">
+              <div class="column confirmed" v-if="transaction.details.confirmed">
+                <aph-icon name="confirmed"></aph-icon>
+                <div class="label">Confirmed</div>
+              </div>
+            </div>
+          </div>
           <div class="section">
             <div class="row">
               <div class="column">
@@ -76,10 +83,6 @@
               <div class="column">
                 <div class="label">Confirmed in Block</div>
                 <div class="value purple">{{ $formatNumber(transaction.details.block) }}</div>
-              </div>
-              <div class="column confirmed" v-if="transaction.details.confirmed">
-                <aph-icon name="confirmed"></aph-icon>
-                <div class="label">Confirmed</div>
               </div>
             </div>
           </div>
@@ -167,21 +170,21 @@ export default {
     overflow-y: auto;
 
     .transaction {
-      background: transparent;
-      border-top: 1px solid $background;
-      transition: $transition;
+      @include transition(background-color);
+
+      background-color: transparent;
+      border-top: toRem(1px) solid $background;
 
       .summary {
         align-items: center;
         cursor: pointer;
         display: flex;
-        transition: $transition;
         flex-wrap: wrap;
       }
 
       .cell {
         flex: 1;
-        font-family: GilroySemibold;
+        font-family: GilroyMedium;
         padding: $space;
 
         .aph-icon {
@@ -189,17 +192,13 @@ export default {
             height: toRem(30px);
           }
           .confirmed {
-            .stroke {
-              stroke: $green;
-              stroke-width: 1.8;
+            .fill {
+              fill: $green;
             }
           }
           .unconfirmed {
             .fill {
               fill: $red;
-            }
-            .stroke {
-              stroke: $red;
             }
           }
         }
@@ -224,7 +223,7 @@ export default {
       }
 
       &:hover, &.active {
-        background: $background;
+        background-color: $light-grey;
       }
 
       .details {
@@ -250,7 +249,7 @@ export default {
             flex: 1;
 
             .label {
-              @extend %small-uppercase-grey-label;
+              @extend %small-uppercase-grey-label-dark;
 
               margin-bottom: $space-sm;
             }
@@ -279,6 +278,7 @@ export default {
             &.confirmed {
               align-items: center;
               display: flex;
+              padding-bottom: $space;
 
               .label {
                 color: $green;
@@ -287,10 +287,10 @@ export default {
 
               .aph-icon {
                 svg {
-                  height: toRem(30px);
+                  height: toRem(40px);
 
-                  .stroke {
-                    stroke: $green;
+                  .fill {
+                    fill: $green;
                   }
                 }
               }
@@ -307,11 +307,6 @@ export default {
             margin-top: $space;
           }
         }
-
-
-        .inputs, .outputs {
-          max-width: 35rem;
-        }
       }
       &.active {
         .details {
@@ -319,8 +314,23 @@ export default {
           width: 100%;
 
           .transactions-table {
-            .address {
-              width: 60%!important;
+            td {
+              border: none;
+              padding: 0;
+
+              &.amount {
+                text-align: left;
+              }
+
+              &.address {
+                width: 60% !important;
+              }
+            }
+
+            tr + tr {
+              td {
+                padding-top: $space-sm;
+              }
             }
           }
         }

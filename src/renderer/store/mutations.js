@@ -11,6 +11,8 @@ export {
   clearSearchTransactions,
   endRequest,
   failRequest,
+  handleLogout,
+  handleNetworkChange,
   resetRequests,
   setActiveTransaction,
   setContacts,
@@ -62,6 +64,18 @@ function endRequest(state, payload) {
 
 function failRequest(state, payload) {
   updateRequest(state, payload, requests.FAILED);
+}
+
+function handleLogout(state) {
+  state.holdings = [];
+  state.recentTransactions = [];
+  state.searchTransactions = [];
+}
+
+function handleNetworkChange(state) {
+  state.holdings = [];
+  state.recentTransactions = [];
+  state.searchTransactions = [];
 }
 
 function resetRequests(state) {

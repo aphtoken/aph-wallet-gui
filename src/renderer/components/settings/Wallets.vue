@@ -13,6 +13,7 @@
       <div class="right">
         <div class="import-wallet" @click="showImportAWalletModal">
           <div class="import-wallet-btn">
+            <aph-icon name="wallet"></aph-icon>
             <p>Import a wallet</p>
           </div>
           <div class="btn-circle">
@@ -97,7 +98,11 @@ export default {
           width: toRem(250px);
 
           .aph-icon {
-            margin-bottom: $space;
+            margin-bottom: $space-lg;
+
+            svg {
+              height: toRem(44px);
+            }
 
             .fill {
               fill: $dark;
@@ -114,6 +119,12 @@ export default {
               }
             }
           }
+
+          @include lowRes() {
+            .aph-icon {
+              display: none;
+            }
+          }
         }
 
         .btn-circle {
@@ -121,6 +132,12 @@ export default {
 
           margin-left: 50%;
           transform: translate(-50%, -50%);
+        }
+
+        &:hover {
+          .btn-circle {
+            box-shadow: $box-shadow-sm;
+          }
         }
       }
     }
@@ -132,17 +149,18 @@ export default {
       padding-right: $space;
 
       .wallet {
+        @include transition(border-color);
+
         align-items: center;
         background: white;
-        border-left: 3px solid transparent;
+        border-left: $border-width-thick solid transparent;
         border-radius: $border-radius;
         cursor: pointer;
         display: flex;
-        padding: $space $space-lg;
-        transition: $transition;
+        padding: $space-lg;
 
         .name {
-          font-family: GilroySemibold;
+          font-family: GilroyMedium;
           font-size: toRem(18px);
         }
 

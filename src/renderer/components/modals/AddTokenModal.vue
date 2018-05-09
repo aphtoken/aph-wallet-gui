@@ -68,19 +68,19 @@ export default {
   width: 100%;
 
   .body {
-    padding: $space-lg;
+    padding: $space-xl $space-lg $space-lg;
     text-align: center;
 
     .aph-icon {
-      margin-bottom: $space-lg;
+      margin-bottom: $space-xl;
 
       svg {
-        height: $space-xl;
+        height: toRem(52px);
       }
     }
 
     .aph-input {
-      border-color: $dark;
+      border-color: $grey;
 
       &.focused {
         border-color: $purple;

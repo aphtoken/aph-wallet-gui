@@ -35,6 +35,14 @@ export default {
     return accounting.formatMoney(toBigNumber(value), symbol || settings.getCurrencySymbol());
   },
 
+  formatMoneyWithoutCents(value, symbol, defaultValue = 'N/A') {
+    if (nullOrUndefined(value)) {
+      return defaultValue;
+    }
+
+    return accounting.formatMoney(toBigNumber(value), symbol || settings.getCurrencySymbol(), 0);
+  },
+
   formatNumber(value, wholeNumberFormat = formats.WHOLE_NUMBER,
     defaultValue = 'N/A') {
     if (nullOrUndefined(value)) {
@@ -59,5 +67,13 @@ export default {
     }
 
     return moment.unix(timestamp).format(formats.TIME);
+  },
+
+  formatWeekdayAndTime(timestamp, defaultValue = '--') {
+    if (nullOrUndefined(timestamp)) {
+      return defaultValue;
+    }
+
+    return moment.unix(timestamp).format(formats.WEEKDAY_AND_TIME);
   },
 };

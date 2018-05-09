@@ -101,7 +101,20 @@ export default new Router({
                 'top-right': require('@/components/dashboard/Send').default,
               },
             },
+            {
+              path: 'confirming',
+              components: {
+                'bottom-left': require('@/components/dashboard/Holdings').default,
+                'bottom-right': require('@/components/dashboard/RecentTransactions').default,
+                'top-left': require('@/components/dashboard/TokenStats').default,
+                'top-right': require('@/components/dashboard/Send').default,
+              },
+            },
           ],
+        },
+        {
+          path: 'buy-aph',
+          component: require('@/components/BuyAph').default,
         },
         {
           path: 'assets',

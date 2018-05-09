@@ -91,7 +91,7 @@ export default {
             @extend %btn-square;
 
             height: auto;
-            padding: $space-xl 0;
+            padding: 3rem 0;
             width: toRem(250px);
 
             .aph-icon {
@@ -104,11 +104,11 @@ export default {
 
             &:hover {
               background: white;
-              color: $dark;
+              color: $purple;
 
               .aph-icon {
                 .fill {
-                  fill: $purple;
+                  fill: $dark;
                 }
               }
             }
@@ -121,6 +121,12 @@ export default {
             position: absolute;
             top: 100%;
             transform: translate(-50%, -50%);
+          }
+
+          &:hover {
+            .btn-circle {
+              box-shadow: $box-shadow-sm;
+            }
           }
         }
       }

@@ -1,11 +1,12 @@
 <template>
   <div class="aph-token-icon">
+    <img :src="imageUrl" @load="imageLoadOnComplete" class="image-preloader"/>
     <img src="~@/assets/img/token-icons/APH.png" v-if="symbol === 'APH'">
     <img src="~@/assets/img/token-icons/GAS.png" v-else-if="symbol === 'GAS'">
     <img src="~@/assets/img/token-icons/NEO.png" v-else-if="symbol === 'NEO'">
+    <img :src="imageUrl" v-else-if="useImage" />
     <div class="placeholder" v-else>
-      <span>{{ symbol }}</span>
-      <img :src="imageUrl" onerror="this.style.display='none';this.parentNode.classList.add('default');"/>
+      <div class="placeholder-text">{{ symbol }}</div>
     </div>
   </div>
 </template>
@@ -22,45 +23,52 @@ export default {
       return `https://s3.us-east-2.amazonaws.com/aphelion-public-artifacts/TokenLogos/${this.symbol.toLowerCase()}.png`;
     },
   },
+
+  data() {
+    return {
+      useImage: false,
+    };
+  },
+
+  methods: {
+    imageLoadOnComplete() {
+      this.useImage = true;
+    },
+  },
 };
 </script>
 
 
 <style lang="scss">
 .aph-token-icon {
-  $iconWidth: toRem(50px);
+  $iconSize: toRem(50px);
 
   font-size: 0;
 
+  .image-preloader {
+    display: none;
+  }
+
   img, .placeholder {
-      height: $iconWidth;
-      width: $iconWidth;
+    height: $iconSize;
+    width: $iconSize;
+    border-radius: 50%;
   }
 
   .placeholder {
     align-items: center;
+    background: $grey;
     color: white;
     display: flex;
+    font-size: 0;
+    height: $iconSize;
     justify-content: center;
-    font-size: toRem(12px);
-    font-family: GilroyMedium;
-    position: relative;
 
-    span {
-      display: none;
-    }
-    &.default {
-      background: $grey;
-      border-radius: 50%;
-      span {
-        display: block;
-      }
-    }
-    
     > * {
-      position: absolute;
-      max-width: 100%;
-      max-height: 100%;
+      display: block;
+      font-size: toRem(14px);
+      position: relative;
+      top: toRem(1px);
     }
   }
 }

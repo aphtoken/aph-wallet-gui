@@ -4,19 +4,7 @@
       <h1 class="underlined">My holdings</h1>
     </div>
     <div class="body">
-      <div v-for="(holding, index) in holdings" :class="['holding', {active: isActive(holding)}]" :key="index" @click="viewHoldingDetail(holding)">
-        <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
-        <div class="token">
-          <div class="name">{{ holding.name }}</div>
-          <div class="currency">{{ holding.symbol }}</div>
-        </div>
-        <div class="balance">
-          <div class="amount">
-            {{ $formatNumber(holding.balance) }}<span class="currency">{{ holding.symbol }}</span>
-          </div>
-          <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 0}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
-        </div>
-      </div>
+      <aph-holding v-for="(holding, index) in holdings" :holding="holding" :on-click="viewHoldingDetail" :class="[{active: isActive(holding)}]" :key="index"></aph-holding>
     </div>
   </section>
 </template>
@@ -42,6 +30,10 @@ export default {
     },
 
     viewHoldingDetail(holding) {
+      if (this.$store.state.sendInProgress === true) {
+        return;
+      }
+
       this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setStatsToken', holding);
     },
@@ -80,87 +72,6 @@ export default {
   .body {
     overflow: auto;
     padding-right: $space;
-
-    .holding {
-      align-items: center;
-      background: white;
-      border-left: 3px solid transparent;
-      border-radius: $border-radius;
-      cursor: pointer;
-      display: flex;
-      padding: $space;
-      transition: $transition;
-
-      .aph-token-icon {
-        flex: none;
-        padding-right: $space;
-      }
-
-      .token {
-        flex: 1;
-
-        .name {
-          font-family: GilroySemibold;
-          font-size: toRem(19px);
-          margin-bottom: $space-sm;
-        }
-
-        .currency {
-          @extend %small-uppercase-grey-label;
-
-          font-size: toRem(15px);
-        }
-      }
-
-      .balance {
-        flex: 1;
-        font-family: GilroyMedium;
-        text-align: right;
-
-        .amount {
-          margin-bottom: $space-sm;
-          font-size: toRem(19px);
-
-          .currency {
-            margin-left: $space-xsm;
-          }
-        }
-
-        .change {
-          font-size: toRem(15px);
-
-          &.increase {
-            color: $green;
-
-            &:before {
-              content: "+";
-            }
-
-            &:after {
-              content: "%";
-              margin-left: $space-xsm;
-            }
-          }
-
-          &.decrease {
-            color: $red;
-          }
-
-          &:after {
-            content: "%";
-            margin-left: $space-xsm;
-          }
-        }
-      }
-
-      &:hover, &.active {
-        border-color: $purple;
-      }
-
-      & + .holding {
-        margin-top: $space;
-      }
-    }
   }
 }
 </style>

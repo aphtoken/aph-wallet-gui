@@ -5,7 +5,7 @@
     </div>
     <div class="body">
       <div v-if="!$store.state.contacts.length" class="zero-state">
-        <aph-icon name="user"></aph-icon>
+        <aph-icon name="no-contacts"></aph-icon>
         <div class="label">No contacts</div>
       </div>
       <div v-else class="table">
@@ -70,14 +70,10 @@ export default {
 
       .aph-icon {
         svg {
-          height: toRem(60px);
+          height: toRem(52px);
 
           .fill {
             fill: $purple;
-          }
-
-          .stroke {
-            stroke: $purple;
           }
         }
       }
@@ -94,12 +90,14 @@ export default {
       flex-direction: column;
 
       .contact {
+        @include transition(background-color);
+
         align-items: center;
-        background: transparent;
-        border-top: 1px solid $background;
+        background-color: transparent;
+        border-top: toRem(1px) solid $background;
         display: flex;
-        transition: $transition;
         flex-wrap: wrap;
+        font-size: toRem(12px);
 
         .cell {
           flex: 1;
@@ -112,7 +110,7 @@ export default {
         }
 
         &:hover, &.active {
-          background: $background;
+          background-color: $background;
         }
       }
     }
