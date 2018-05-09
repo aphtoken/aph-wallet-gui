@@ -11,7 +11,12 @@
 
 <script>
 let loadHoldingsIntervalId;
+
 export default {
+  beforeDestroy() {
+    clearInterval(loadHoldingsIntervalId);
+  },
+
   computed: {
     holdings() {
       return this.$store.state.holdings.filter(({ name, symbol }) => {
@@ -45,10 +50,6 @@ export default {
     loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldings();
     }, this.$constants.intervals.POLLING);
-  },
-
-  beforeDestroy() {
-    clearInterval(loadHoldingsIntervalId);
   },
 };
 </script>

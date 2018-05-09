@@ -1,10 +1,9 @@
-import { store } from '../store';
 import storage from './storage';
+import { store } from '../store';
 
 const CONTACTS_STORAGE_KEY = 'contacts';
 
 export default {
-
   add(address, data) {
     const contacts = this.getAll();
     storage.set(CONTACTS_STORAGE_KEY, _.set(contacts, this.cleanForKey(address), data));
@@ -12,11 +11,16 @@ export default {
     return this;
   },
 
-  remove(address) {
-    const contacts = this.getAll();
-    storage.set(CONTACTS_STORAGE_KEY, _.omit(contacts, this.cleanForKey(address)));
+  cleanForKey(key) {
+    return key.trim().replace('.', '_').replace('[', '').replace(']', '');
+  },
 
-    return this;
+  contactExists(name) {
+    return !!this.getOne(name.trim());
+  },
+
+  findContactByAddress(address) {
+    return _.find(this.getAllAsArray(), { address });
   },
 
   getAll() {
@@ -33,16 +37,11 @@ export default {
     });
   },
 
-  cleanForKey(key) {
-    return key.trim().replace('.', '_').replace('[', '').replace(']', '');
-  },
+  remove(address) {
+    const contacts = this.getAll();
+    storage.set(CONTACTS_STORAGE_KEY, _.omit(contacts, this.cleanForKey(address)));
 
-  contactExists(name) {
-    return !!this.getOne(name.trim());
-  },
-
-  findContactByAddress(address) {
-    return _.find(this.getAllAsArray(), { address });
+    return this;
   },
 
   sync() {

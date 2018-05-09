@@ -41,10 +41,6 @@ export default {
   },
 
   computed: {
-    loginMessage() {
-      return 'Enter your passphrase to login';
-    },
-
     buttonLabel() {
       return this.$isPending('openSavedWallet') ? 'Logging in...' : 'Login';
     },
@@ -53,14 +49,18 @@ export default {
       return this.$store.state.currentWallet.label !== this.$store.state.currentLoginToWallet.label;
     },
 
-    shouldDisableLoginButton() {
-      return this.$isPending('openSavedWallet') || this.passphrase.length === 0;
+    loginMessage() {
+      return 'Enter your passphrase to login';
     },
 
     shouldDisableDeleteButton() {
       return this.$isPending('deleteWallet')
         || this.confirmWalletName.toLowerCase()
           !== this.$store.state.currentLoginToWallet.label.toLowerCase();
+    },
+
+    shouldDisableLoginButton() {
+      return this.$isPending('openSavedWallet') || this.passphrase.length === 0;
     },
   },
 
@@ -73,6 +73,10 @@ export default {
   },
 
   methods: {
+    cancelRemove() {
+      this.showRemove = false;
+    },
+
     login() {
       if (this.$isPending('openSavedWallet')) {
         return;
@@ -84,28 +88,17 @@ export default {
       }
 
       this.$store.dispatch('openSavedWallet', {
-        name: this.$store.state.currentLoginToWallet.label,
-        passphrase: this.passphrase,
         done: () => {
           this.$store.dispatch('fetchPortfolio');
           this.onCancel();
         },
+        name: this.$store.state.currentLoginToWallet.label,
+        passphrase: this.passphrase,
       });
-    },
-
-    showRemoveConfirmation() {
-      this.$store.commit('endRequest', { identifier: 'openSavedWallet' });
-      this.showRemove = true;
-    },
-
-    cancelRemove() {
-      this.showRemove = false;
     },
 
     remove() {
       this.$store.dispatch('deleteWallet', {
-        name: this.$store.state.currentLoginToWallet.label,
-        passphrase: this.passphrase,
         done: () => {
           this.$services.alerts.success(`Deleted Wallet ${this.$store.state.currentLoginToWallet.label}`);
           if (this.$store.state.currentLoginToWallet.label
@@ -115,7 +108,14 @@ export default {
           }
           this.onCancel();
         },
+        name: this.$store.state.currentLoginToWallet.label,
+        passphrase: this.passphrase,
       });
+    },
+
+    showRemoveConfirmation() {
+      this.$store.commit('endRequest', { identifier: 'openSavedWallet' });
+      this.showRemove = true;
     },
   },
 

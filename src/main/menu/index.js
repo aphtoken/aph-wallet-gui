@@ -3,39 +3,39 @@ export default (app) => {
     label: 'Application',
     submenu: [
       {
-        label: 'Quit',
         accelerator: 'Command+Q',
         click() {
           app.quit();
         },
+        label: 'Quit',
       },
     ],
   }, {
     label: 'Edit',
     submenu: [
       {
-        label: 'Cut',
         accelerator: 'CmdOrCtrl+X',
-        selector: 'cut:',
+        label: 'Cut',
         role: 'cut',
+        selector: 'cut:',
       },
       {
-        label: 'Copy',
         accelerator: 'CmdOrCtrl+C',
-        selector: 'copy:',
+        label: 'Copy',
         role: 'copy',
+        selector: 'copy:',
       },
       {
-        label: 'Paste',
         accelerator: 'CmdOrCtrl+V',
-        selector: 'paste:',
+        label: 'Paste',
         role: 'paste',
+        selector: 'paste:',
       },
       {
-        label: 'Select All',
         accelerator: 'CmdOrCtrl+A',
-        selector: 'selectAll:',
+        label: 'Select All',
         role: 'selectall',
+        selector: 'selectAll:',
       },
     ],
   },

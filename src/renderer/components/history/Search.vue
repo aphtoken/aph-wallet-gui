@@ -20,7 +20,6 @@ import moment from 'moment';
 export default {
   data() {
     return {
-      selectedDateRange: 'all',
       dateRanges: [
         {
           label: 'All',
@@ -44,6 +43,7 @@ export default {
         },
       ],
       fromDate: null,
+      selectedDateRange: 'all',
       toDate: null,
     };
   },

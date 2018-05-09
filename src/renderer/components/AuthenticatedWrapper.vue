@@ -11,23 +11,23 @@
 </template>
 
 <script>
+import AphClaimGasModal from './modals/ClaimGasModal';
+import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
 import PortfolioHeader from './PortfolioHeader';
 import Sidebar from './Sidebar';
-import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
-import AphClaimGasModal from './modals/ClaimGasModal';
 
 export default {
   components: {
+    AphClaimGasModal,
+    AphSendWithLedgerModal,
     PortfolioHeader,
     Sidebar,
-    AphSendWithLedgerModal,
-    AphClaimGasModal,
   },
 
   data() {
     return {
-      outOfDate: false,
       latestWalletVersion: '',
+      outOfDate: false,
     };
   },
 

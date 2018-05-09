@@ -35,6 +35,10 @@ import Zoom from './Zoom';
 let fetchPortfolioIntervalId;
 
 export default {
+  beforeDestroy() {
+    clearInterval(fetchPortfolioIntervalId);
+  },
+
   components: {
     AddressModal,
     SimpleDonut,
@@ -73,10 +77,6 @@ export default {
     fetchPortfolioIntervalId = setInterval(() => {
       this.fetchPortfolio();
     }, this.$constants.intervals.POLLING);
-  },
-
-  beforeDestroy() {
-    clearInterval(fetchPortfolioIntervalId);
   },
 };
 </script>

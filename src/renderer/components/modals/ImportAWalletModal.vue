@@ -34,9 +34,9 @@ export default {
 
   data() {
     return {
+      passphrase: '',
       walletName: '',
       wif: '',
-      passphrase: '',
     };
   },
 
@@ -47,12 +47,12 @@ export default {
       }
 
       this.$store.dispatch('importWallet', {
-        name: this.walletName,
-        wif: this.wif,
-        passphrase: this.passphrase,
         done: () => {
           this.onCancel();
         },
+        name: this.walletName,
+        passphrase: this.passphrase,
+        wif: this.wif,
       });
     },
   },

@@ -1,26 +1,17 @@
-import DomPortal from 'vue-dom-portal';
-import Vue from 'vue';
-import VueFlashMessage from 'vue-flash-message';
-import VueHighCharts from 'vue-highcharts';
-import _ from 'lodash';
-import accounting from 'accounting';
-import axios from 'axios';
-import moment from 'moment';
-
-// Services, etc.
-import { contacts, network, settings, storage, wallets } from './services';
-
-// Initial Vue Libraries.
-import './libraries';
 import './error-handler';
+import './libraries';
 import * as mixins from './mixins';
+import {
+  contacts,
+  network,
+  settings,
+  storage,
+  wallets,
+} from './services';
 import App from './App';
-import router from './router';
-import { store } from './store';
-
-// Global Vue Components.
 import CopyText from './components/CopyText';
 import DatePicker from './components/DatePicker';
+import DomPortal from 'vue-dom-portal';
 import Holding from './components/Holding';
 import Icon from './components/Icon';
 import Input from './components/Input';
@@ -28,6 +19,15 @@ import Select from './components/Select';
 import SimpleTransactions from './components/SimpleTransactions';
 import TimestampFromNow from './components/TimestampFromNow';
 import TokenIcon from './components/TokenIcon';
+import Vue from 'vue';
+import VueFlashMessage from 'vue-flash-message';
+import VueHighCharts from 'vue-highcharts';
+import _ from 'lodash';
+import accounting from 'accounting';
+import axios from 'axios';
+import moment from 'moment';
+import router from './router';
+import { store } from './store';
 
 // Global Libraries.
 window._ = _;

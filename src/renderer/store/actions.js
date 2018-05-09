@@ -1,10 +1,17 @@
 /* eslint-disable no-use-before-define */
-import moment from 'moment';
+import {
+  alerts,
+  db,
+  ledger,
+  neo,
+  network,
+  tokens,
+  wallets,
+} from '../services';
 import { BigNumber } from 'bignumber.js';
-
-import { alerts, db, neo, network, tokens, wallets, ledger } from '../services';
-import { timeouts } from '../constants';
+import moment from 'moment';
 import router from '../router';
+import { timeouts } from '../constants';
 
 export {
   addToken,
@@ -56,10 +63,10 @@ function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
   }
 
   tokens.add({
-    symbol: token.symbol,
     assetId: token.assetId.replace('0x', ''),
     isCustom: true,
     network: network.getSelectedNetwork().net,
+    symbol: token.symbol,
   });
 
   dispatch('fetchHoldings');
@@ -368,7 +375,6 @@ function fetchLatestVersion({ commit }) {
 function normalizeRecentTransactions(transactions) {
   return transactions.map((transaction) => {
     const changes = {
-      value: new BigNumber(transaction.value),
       details: {
         vin: transaction.details.vin.map((i) => {
           return {
@@ -381,6 +387,7 @@ function normalizeRecentTransactions(transactions) {
           };
         }),
       },
+      value: new BigNumber(transaction.value),
     };
 
     return _.merge(transaction, changes);

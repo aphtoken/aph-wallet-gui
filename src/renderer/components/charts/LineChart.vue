@@ -1,7 +1,7 @@
 <script>
 import { Line, mixins } from 'vue-chartjs';
-const { reactiveProp } = mixins;
 
+const { reactiveProp } = mixins;
 const DEFAULT_OPTIONS = {
   animation: false,
 };
@@ -13,16 +13,6 @@ export default {
 
   extends: Line,
 
-  mounted() {
-    this.render();
-
-    this.debouncedRender = _.debounce(() => {
-      this.render();
-    }, this.$constants.charts.DEBOUNCE);
-
-    window.addEventListener('resize', this.debouncedRender);
-  },
-
   methods: {
     render() {
       setTimeout(() => {
@@ -33,8 +23,17 @@ export default {
 
   mixins: [reactiveProp],
 
-  props: ['options'],
+  mounted() {
+    this.render();
 
+    this.debouncedRender = _.debounce(() => {
+      this.render();
+    }, this.$constants.charts.DEBOUNCE);
+
+    window.addEventListener('resize', this.debouncedRender);
+  },
+
+  props: ['options'],
 };
 </script>
 

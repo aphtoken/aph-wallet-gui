@@ -3,7 +3,6 @@ import storage from './storage';
 const TOKENS_STORAGE_KEY = 'tokens';
 
 export default {
-
   add(data) {
     if (this.tokenExists(data.assetId, data.network)) {
       const existing = this.getOne(data.assetId, data.network);
@@ -20,18 +19,6 @@ export default {
     return this;
   },
 
-  remove(assetId, network) {
-    const tokens = this.getAll();
-    const token = this.getOne(assetId, network);
-    if (!token) {
-      return this;
-    }
-    token.isCustom = false;
-    storage.set(TOKENS_STORAGE_KEY, _.set(tokens, `${assetId}_${network}`, token));
-
-    return this;
-  },
-
   getAll() {
     return storage.get(TOKENS_STORAGE_KEY, {});
   },
@@ -44,8 +31,19 @@ export default {
     return _.get(this.getAll(), `${assetId}_${network}`);
   },
 
+  remove(assetId, network) {
+    const tokens = this.getAll();
+    const token = this.getOne(assetId, network);
+    if (!token) {
+      return this;
+    }
+    token.isCustom = false;
+    storage.set(TOKENS_STORAGE_KEY, _.set(tokens, `${assetId}_${network}`, token));
+
+    return this;
+  },
+
   tokenExists(assetId, network) {
     return !!this.getOne(`${assetId}_${network}`);
   },
-
 };

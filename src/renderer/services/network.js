@@ -1,9 +1,8 @@
 import _ from 'lodash';
-import { rpc } from '@cityofzion/neon-js';
-
-import { store } from '../store';
-import storage from './storage';
 import { intervals } from '../constants';
+import { rpc } from '@cityofzion/neon-js';
+import storage from './storage';
+import { store } from '../store';
 
 const NETWORK_STORAGE_KEY = 'network';
 const NETWORKS = [

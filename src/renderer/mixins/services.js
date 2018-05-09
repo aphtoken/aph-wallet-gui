@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import * as services from '../services';
+import _ from 'lodash';
 
 const $services = {};
 

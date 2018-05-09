@@ -1,11 +1,10 @@
+import { BigNumber } from 'bignumber.js';
 import _ from 'lodash';
 import accounting from 'accounting';
+import { formats } from '../constants';
 import moment from 'moment';
 import numeral from 'numeral';
-import { BigNumber } from 'bignumber.js';
-
 import settings from './settings';
-import { formats } from '../constants';
 
 const nullOrUndefined = value => _.isNull(value) || _.isUndefined(value);
 const toBigNumber = value => new BigNumber(String(value));

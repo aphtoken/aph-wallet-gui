@@ -79,6 +79,13 @@
 <script>
 export default {
   computed: {
+    confirmations() {
+      if (!this.$store.state.activeTransaction) {
+        return 0;
+      }
+      return this.$store.state.currentNetwork.bestBlock.index - this.$store.state.activeTransaction.block;
+    },
+
     fromTransactions() {
       if (!this.$store.state.activeTransaction) {
         return [];
@@ -91,13 +98,6 @@ export default {
         return [];
       }
       return this.$store.state.activeTransaction.vout;
-    },
-
-    confirmations() {
-      if (!this.$store.state.activeTransaction) {
-        return 0;
-      }
-      return this.$store.state.currentNetwork.bestBlock.index - this.$store.state.activeTransaction.block;
     },
   },
 };

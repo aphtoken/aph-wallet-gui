@@ -26,25 +26,6 @@ function shouldHideNetworkError() {
 }
 
 export default {
-
-  success(message) {
-    Vue.prototype.$flashStorage.flash(message, 'success', {
-      timeout: calculateTimeout(message),
-    });
-  },
-
-  info(message) {
-    Vue.prototype.$flashStorage.flash(message, 'info', {
-      timeout: calculateTimeout(message),
-    });
-  },
-
-  warning(message) {
-    Vue.prototype.$flashStorage.flash(message, 'warning', {
-      timeout: calculateTimeout(message),
-    });
-  },
-
   error(message) {
     if (errorAlreadyExists(message)) {
       return;
@@ -69,6 +50,12 @@ export default {
     }
   },
 
+  info(message) {
+    Vue.prototype.$flashStorage.flash(message, 'info', {
+      timeout: calculateTimeout(message),
+    });
+  },
+
   networkException(message) {
     if (shouldHideNetworkError()) {
       return;
@@ -77,4 +64,15 @@ export default {
     this.exception(message);
   },
 
+  success(message) {
+    Vue.prototype.$flashStorage.flash(message, 'success', {
+      timeout: calculateTimeout(message),
+    });
+  },
+
+  warning(message) {
+    Vue.prototype.$flashStorage.flash(message, 'warning', {
+      timeout: calculateTimeout(message),
+    });
+  },
 };

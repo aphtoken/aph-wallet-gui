@@ -32,11 +32,11 @@ export default {
   methods: {
     login() {
       this.$store.dispatch('openEncryptedKey', {
-        encryptedKey: this.encryptedKey,
-        passphrase: this.passphrase,
         done: () => {
           this.$router.push('/authenticated/dashboard');
         },
+        encryptedKey: this.encryptedKey,
+        passphrase: this.passphrase,
       });
     },
   },

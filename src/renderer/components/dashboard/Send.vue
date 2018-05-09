@@ -72,7 +72,8 @@ let sendTimeoutIntervalId;
 let storeUnwatch;
 
 export default {
-  components: {
+  beforeDestroy() {
+    storeUnwatch();
   },
 
   computed: {
@@ -84,19 +85,19 @@ export default {
           }
 
           result.push({
-            label: `${name} (${this.$formatNumber(balance)})`,
-            value: {
-              symbol,
-              name,
-              asset,
-              isNep5,
-              label: `${name} (${balance})`,
-              unitValue,
-              balance,
-            },
             asset,
             isNep5,
+            label: `${name} (${this.$formatNumber(balance)})`,
             unitValue,
+            value: {
+              asset,
+              balance,
+              isNep5,
+              label: `${name} (${balance})`,
+              name,
+              symbol,
+              unitValue,
+            },
           });
 
           return result;
@@ -118,25 +119,12 @@ export default {
       amount: '',
       contact: null,
       currency: null,
-      showConfirmation: false,
       sending: false,
+      showConfirmation: false,
     };
   },
 
   methods: {
-    next() {
-      if (!(this.address && this.amount && parseFloat(this.amount) && this.currency)) {
-        return;
-      }
-      this.showConfirmation = true;
-    },
-
-    setAmountToMax() {
-      if (this.currency) {
-        this.amount = this.currency.balance.toString();
-      }
-    },
-
     cleanAmount() {
       if (!this.amount) {
         return;
@@ -160,6 +148,30 @@ export default {
           this.amount = cleanAmount;
         }, 10);
       }
+    },
+
+    end() {
+      this.sending = false;
+      this.$store.commit('setSendInProgress', false);
+      this.address = '';
+      this.amount = '';
+      this.currency = null;
+      this.showConfirmation = false;
+      this.$router.push('/authenticated/dashboard');
+
+      if (this.$services.wallets.getCurrentWallet().isLedger === true) {
+        this.$services.ledger.close();
+      }
+
+      this.$store.dispatch('fetchHoldings');
+      clearInterval(sendTimeoutIntervalId);
+    },
+
+    next() {
+      if (!(this.address && this.amount && parseFloat(this.amount) && this.currency)) {
+        return;
+      }
+      this.showConfirmation = true;
     },
 
     send() {
@@ -192,38 +204,12 @@ export default {
       this.$router.push('/authenticated/dashboard/confirming');
     },
 
-    end() {
-      this.sending = false;
-      this.$store.commit('setSendInProgress', false);
-      this.address = '';
-      this.amount = '';
-      this.currency = null;
-      this.showConfirmation = false;
-      this.$router.push('/authenticated/dashboard');
-
-      if (this.$services.wallets.getCurrentWallet().isLedger === true) {
-        this.$services.ledger.close();
+    setAmountToMax() {
+      if (this.currency) {
+        this.amount = this.currency.balance.toString();
       }
-
-      this.$store.dispatch('fetchHoldings');
-      clearInterval(sendTimeoutIntervalId);
     },
   },
-
-  watch: {
-    address() {
-      this.contact = this.$services.contacts.findContactByAddress(this.address);
-    },
-
-    currency() {
-      this.cleanAmount();
-    },
-
-    amount() {
-      this.cleanAmount();
-    },
-  },
-
 
   mounted() {
     storeUnwatch = this.$store.watch(
@@ -237,8 +223,18 @@ export default {
       });
   },
 
-  beforeDestroy() {
-    storeUnwatch();
+  watch: {
+    address() {
+      this.contact = this.$services.contacts.findContactByAddress(this.address);
+    },
+
+    amount() {
+      this.cleanAmount();
+    },
+
+    currency() {
+      this.cleanAmount();
+    },
   },
 };
 </script>

@@ -1,9 +1,8 @@
 /* eslint-disable no-use-before-define */
+import { alerts, db } from '../services';
 import Vue from 'vue';
 import moment from 'moment';
-
 import { requests } from '../constants';
-import { alerts, db } from '../services';
 
 export {
   clearActiveTransaction,
@@ -290,7 +289,6 @@ function startRequest(state, payload) {
 function normalizeRecentTransactions(transactions) {
   return transactions.map((transaction) => {
     return _.merge(transaction, {
-      value: transaction.value.toString(),
       details: {
         vin: transaction.details.vin.map((i) => {
           return {
@@ -303,10 +301,11 @@ function normalizeRecentTransactions(transactions) {
           };
         }),
       },
+      value: transaction.value.toString(),
     });
   });
 }
 
 function updateRequest(state, { identifier, message }, status) {
-  Vue.set(state.requests, identifier, { status, message });
+  Vue.set(state.requests, identifier, { message, status });
 }

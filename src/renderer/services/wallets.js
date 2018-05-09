@@ -1,7 +1,6 @@
-import { wallet } from '@cityofzion/neon-js';
-
-import { store } from '../store';
 import storage from './storage';
+import { store } from '../store';
+import { wallet } from '@cityofzion/neon-js';
 
 const WALLETS_STORAGE_KEY = 'wallets';
 let currentWallet = null;
@@ -13,17 +12,21 @@ export default {
     return this;
   },
 
-  remove(name) {
-    return new Promise((resolve, reject) => {
-      try {
-        storage.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), this.cleanForKey(name)));
-        return resolve();
-      } catch (e) {
-        console.log(e);
+  cleanBadWalletValues() {
+    const wallets = this.getAll();
+    const keys = Object.keys(wallets);
+    const values = Object.values(wallets);
 
-        return reject('Unable to delete wallet');
+    for (let i = 0; i < keys.length; i += 1) {
+      if (!values[i].label) {
+        console.log(wallets);
+        storage.set(WALLETS_STORAGE_KEY, _.omit(wallets, keys[i]));
       }
-    });
+    }
+  },
+
+  cleanForKey(key) {
+    return key.trim().replace('.', '_').replace('[', '').replace(']', '');
   },
 
   clearCurrentWallet() {
@@ -44,22 +47,6 @@ export default {
     }
   },
 
-  cleanForKey(key) {
-    return key.trim().replace('.', '_').replace('[', '').replace(']', '');
-  },
-
-  cleanBadWalletValues() {
-    const wallets = this.getAll();
-    const keys = Object.keys(wallets);
-    const values = Object.values(wallets);
-    for (let i = 0; i < keys.length; i += 1) {
-      if (!values[i].label) {
-        console.log(wallets);
-        storage.set(WALLETS_STORAGE_KEY, _.omit(wallets, keys[i]));
-      }
-    }
-  },
-
   getCurrentWallet() {
     return currentWallet;
   },
@@ -70,8 +57,78 @@ export default {
     });
   },
 
-  walletExists(name) {
-    return !!this.getOne(name.trim());
+  importWIF(name, wif, passphrase) {
+    return new Promise((resolve, reject) => {
+      try {
+        if (this.walletExists(name) === true) {
+          return reject(`Wallet with name '${name}' already exists.`);
+        }
+        const account = new wallet.Account(wif);
+        const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
+        const currentWallet = {
+          address: account.address,
+          privateKey: account.privateKey,
+          wif,
+        };
+
+        this.setCurrentWallet(currentWallet).sync();
+        this.add(name, {
+          address: account.address,
+          encryptedWIF,
+          label: name,
+          scriptHash: account.scriptHash,
+        })
+          .sync();
+        return resolve(currentWallet);
+      } catch (e) {
+        return reject('Wrong key or passphrase');
+      }
+    });
+  },
+
+  openEncryptedKey(encryptedKey, passphrase) {
+    return new Promise((resolve, reject) => {
+      try {
+        const wif = wallet.decrypt(encryptedKey, passphrase);
+        const account = new wallet.Account(wif);
+        const currentWallet = {
+          address: account.address,
+          encryptedWIF: encryptedKey,
+          passphrase,
+          privateKey: account.privateKey,
+          wif,
+        };
+
+        this.setCurrentWallet(currentWallet).sync();
+
+        return resolve(currentWallet);
+      } catch (e) {
+        console.log(e);
+
+        return reject('Wrong key or passphrase');
+      }
+    });
+  },
+
+  openLedger(publicKey) {
+    return new Promise((resolve, reject) => {
+      try {
+        const scriptHash = wallet.getScriptHashFromPublicKey(publicKey);
+        const address = wallet.getAddressFromScriptHash(scriptHash);
+        const currentWallet = {
+          address,
+          isLedger: true,
+          publicKey,
+          publicKeyEncoded: wallet.getPublicKeyEncoded(publicKey),
+        };
+
+        this.setCurrentWallet(currentWallet).sync();
+        return resolve(currentWallet);
+      } catch (e) {
+        console.log(e);
+        return reject(e.message);
+      }
+    });
   },
 
   openSavedWallet(name, passphrase) {
@@ -100,59 +157,14 @@ export default {
     });
   },
 
-  openLedger(publicKey) {
-    return new Promise((resolve, reject) => {
-      try {
-        const scriptHash = wallet.getScriptHashFromPublicKey(publicKey);
-        const address = wallet.getAddressFromScriptHash(scriptHash);
-        const currentWallet = {
-          isLedger: true,
-          address,
-          publicKey,
-          publicKeyEncoded: wallet.getPublicKeyEncoded(publicKey),
-        };
-
-        this.setCurrentWallet(currentWallet).sync();
-        return resolve(currentWallet);
-      } catch (e) {
-        console.log(e);
-        return reject(e.message);
-      }
-    });
-  },
-
-  openEncryptedKey(encryptedKey, passphrase) {
-    return new Promise((resolve, reject) => {
-      try {
-        const wif = wallet.decrypt(encryptedKey, passphrase);
-        const account = new wallet.Account(wif);
-        const currentWallet = {
-          wif,
-          encryptedWIF: encryptedKey,
-          address: account.address,
-          passphrase,
-          privateKey: account.privateKey,
-        };
-
-        this.setCurrentWallet(currentWallet).sync();
-
-        return resolve(currentWallet);
-      } catch (e) {
-        console.log(e);
-
-        return reject('Wrong key or passphrase');
-      }
-    });
-  },
-
   openWIF(wif) {
     return new Promise((resolve, reject) => {
       try {
         const account = new wallet.Account(wif);
         const currentWallet = {
-          wif,
           address: account.address,
           privateKey: account.privateKey,
+          wif,
         };
 
         this.setCurrentWallet(currentWallet).sync();
@@ -166,32 +178,15 @@ export default {
     });
   },
 
-
-  importWIF(name, wif, passphrase) {
+  remove(name) {
     return new Promise((resolve, reject) => {
       try {
-        if (this.walletExists(name) === true) {
-          return reject(`Wallet with name '${name}' already exists.`);
-        }
-        const account = new wallet.Account(wif);
-        const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
-        const currentWallet = {
-          wif,
-          address: account.address,
-          privateKey: account.privateKey,
-        };
-
-        this.setCurrentWallet(currentWallet).sync();
-        this.add(name, {
-          label: name,
-          encryptedWIF,
-          address: account.address,
-          scriptHash: account.scriptHash,
-        })
-          .sync();
-        return resolve(currentWallet);
+        storage.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), this.cleanForKey(name)));
+        return resolve();
       } catch (e) {
-        return reject('Wrong key or passphrase');
+        console.log(e);
+
+        return reject('Unable to delete wallet');
       }
     });
   },
@@ -205,6 +200,10 @@ export default {
   sync() {
     store.commit('setCurrentWallet', this.getCurrentWallet());
     store.commit('setWallets', this.getAllAsArray());
+  },
+
+  walletExists(name) {
+    return !!this.getOne(name.trim());
   },
 
 };

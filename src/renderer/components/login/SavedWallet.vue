@@ -54,17 +54,18 @@ export default {
   },
 
   methods: {
+    create() {
+      this.$router.push('/login/create-wallet');
+    },
+
     login() {
       this.$store.dispatch('openSavedWallet', {
-        name: this.wallet,
-        passphrase: this.passphrase,
         done: () => {
           this.$router.push('/authenticated/dashboard');
         },
+        name: this.wallet,
+        passphrase: this.passphrase,
       });
-    },
-    create() {
-      this.$router.push('/login/create-wallet');
     },
   },
 };

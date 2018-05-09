@@ -13,11 +13,6 @@
 
 <script>
 export default {
-  props: {
-    symbol: {
-      type: String,
-    },
-  },
   computed: {
     imageUrl() {
       return `https://s3.us-east-2.amazonaws.com/aphelion-public-artifacts/TokenLogos/${this.symbol.toLowerCase()}.png`;
@@ -35,6 +30,12 @@ export default {
       this.useImage = true;
     },
   },
+
+  props: {
+    symbol: {
+      type: String,
+    },
+  },
 };
 </script>
 
@@ -50,9 +51,9 @@ export default {
   }
 
   img, .placeholder {
+    border-radius: 50%;
     height: $iconSize;
     width: $iconSize;
-    border-radius: 50%;
   }
 
   .placeholder {

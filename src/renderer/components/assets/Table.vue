@@ -13,7 +13,12 @@
 
 <script>
 let loadHoldingsIntervalId;
+
 export default {
+  beforeDestroy() {
+    clearInterval(loadHoldingsIntervalId);
+  },
+
   computed: {
     filteredHoldings() {
       const searchBy = this.searchBy.toLowerCase();
@@ -65,10 +70,6 @@ export default {
     loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldings();
     }, this.$constants.intervals.POLLING);
-  },
-
-  beforeDestroy() {
-    clearInterval(loadHoldingsIntervalId);
   },
 };
 </script>

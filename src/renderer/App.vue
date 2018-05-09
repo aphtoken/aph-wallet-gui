@@ -11,8 +11,6 @@
 let fetchLatestVersionIntervalId;
 
 export default {
-  name: 'aphtoken-wallet',
-
   beforeDestroy() {
     clearInterval(fetchLatestVersionIntervalId);
   },
@@ -37,6 +35,7 @@ export default {
       return this.$store.state.latestVersion
         && this.$store.state.latestVersion.version > this.$store.state.version;
     },
+
     newVersionDownloadUrl() {
       if (process.platform === 'darwin') {
         return this.$store.state.latestVersion.downloadUrlMac;

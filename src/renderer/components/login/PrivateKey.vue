@@ -30,10 +30,10 @@ export default {
   methods: {
     login() {
       this.$store.dispatch('openPrivateKey', {
-        wif: this.wif,
         done: () => {
           this.$router.push('/authenticated/dashboard');
         },
+        wif: this.wif,
       });
     },
   },

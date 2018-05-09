@@ -1,6 +1,5 @@
-import Vue from 'vue';
 import Router from 'vue-router';
-
+import Vue from 'vue';
 import { wallets } from '../services';
 
 Vue.use(Router);
@@ -8,69 +7,67 @@ Vue.use(Router);
 export default new Router({
   routes: [
     {
-      path: '/login',
-      component: require('@/components/Login').default,
       children: [
         {
-          path: '',
           components: {
             left: require('@/components/login/Landing').default,
           },
+          path: '',
         },
         {
-          path: 'menu',
           components: {
             left: require('@/components/login/Logo').default,
             right: require('@/components/login/Menu').default,
           },
+          path: 'menu',
         },
         {
-          path: 'create-wallet',
           components: {
             left: require('@/components/login/Logo').default,
             right: require('@/components/login/CreateWallet').default,
           },
+          path: 'create-wallet',
         },
         {
-          path: 'wallet-created',
           components: {
             left: require('@/components/login/Logo').default,
             right: require('@/components/login/WalletCreated').default,
           },
+          path: 'wallet-created',
         },
         {
-          path: 'saved-wallet',
           components: {
             left: require('@/components/login/Logo').default,
             right: require('@/components/login/SavedWallet').default,
           },
+          path: 'saved-wallet',
         },
         {
-          path: 'ledger',
           components: {
             left: require('@/components/login/Logo').default,
             right: require('@/components/login/Ledger').default,
           },
+          path: 'ledger',
         },
         {
-          path: 'encrypted-key',
           components: {
             left: require('@/components/login/Logo').default,
             right: require('@/components/login/EncryptedKey').default,
           },
+          path: 'encrypted-key',
         },
         {
-          path: 'private-key',
           components: {
             left: require('@/components/login/Logo').default,
             right: require('@/components/login/PrivateKey').default,
           },
+          path: 'private-key',
         },
       ],
+      component: require('@/components/Login').default,
+      path: '/login',
     },
     {
-      path: '/authenticated',
-      component: require('@/components/AuthenticatedWrapper').default,
       beforeEnter: (to, from, next) => { // eslint-disable-line
         if (wallets.getCurrentWallet()) {
           return next();
@@ -80,83 +77,85 @@ export default new Router({
       },
       children: [
         {
-          path: 'dashboard',
-          component: require('@/components/Dashboard').default,
           children: [
             {
-              path: '',
               components: {
                 'bottom-left': require('@/components/dashboard/Holdings').default,
                 'bottom-right': require('@/components/dashboard/RecentTransactions').default,
                 'top-left': require('@/components/dashboard/TokenStats').default,
                 'top-right': require('@/components/dashboard/TopRightTile').default,
               },
+              path: '',
             },
             {
-              path: 'send',
               components: {
                 'bottom-left': require('@/components/dashboard/Holdings').default,
                 'bottom-right': require('@/components/dashboard/Contacts').default,
                 'top-left': require('@/components/dashboard/TokenStats').default,
                 'top-right': require('@/components/dashboard/Send').default,
               },
+              path: 'send',
             },
             {
-              path: 'confirming',
               components: {
                 'bottom-left': require('@/components/dashboard/Holdings').default,
                 'bottom-right': require('@/components/dashboard/RecentTransactions').default,
                 'top-left': require('@/components/dashboard/TokenStats').default,
                 'top-right': require('@/components/dashboard/Send').default,
               },
+              path: 'confirming',
             },
           ],
+          component: require('@/components/Dashboard').default,
+          path: 'dashboard',
         },
         {
-          path: 'buy-aph',
           component: require('@/components/BuyAph').default,
+          path: 'buy-aph',
         },
         {
-          path: 'assets',
-          component: require('@/components/Assets').default,
           children: [
             {
-              path: '',
               components: {
                 left: require('@/components/assets/Table').default,
               },
+              path: '',
             },
           ],
+          component: require('@/components/Assets').default,
+          path: 'assets',
         },
         {
-          path: 'history',
-          component: require('@/components/History').default,
           children: [
             {
-              path: '',
               components: {
                 left: require('@/components/history/Table').default,
                 right: require('@/components/history/Search').default,
               },
+              path: '',
             },
           ],
+          component: require('@/components/History').default,
+          path: 'history',
         },
         {
-          path: 'settings',
-          component: require('@/components/Settings').default,
           children: [
             {
-              path: '',
               components: {
                 'bottom-left': require('@/components/settings/AddressBook').default,
                 'bottom-right': require('@/components/settings/Wallets').default,
                 'top-left': require('@/components/settings/WalletActions').default,
                 'top-right': require('@/components/settings/Preferences').default,
               },
+              path: '',
             },
           ],
+          component: require('@/components/Settings').default,
+          path: 'settings',
         },
       ],
+      component: require('@/components/AuthenticatedWrapper').default,
+      path: '/authenticated',
     },
     {
       path: '*',

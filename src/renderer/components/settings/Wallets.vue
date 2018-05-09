@@ -28,32 +28,34 @@
 </template>
 
 <script>
-import AphLoginToWalletModal from '../modals/LoginToWalletModal';
 import AphImportAWalletModal from '../modals/ImportAWalletModal';
+import AphLoginToWalletModal from '../modals/LoginToWalletModal';
 
 export default {
   components: {
-    AphLoginToWalletModal,
     AphImportAWalletModal,
+    AphLoginToWalletModal,
   },
 
   methods: {
-    isActive({ label }) {
-      return _.get(this.$store.state.currentWallet, 'label') === label;
+    hideImportAWalletModal() {
+      this.$store.commit('setShowImportAWalletModal', false);
     },
 
-    showLoginToWalletModal(wallet) {
-      this.$store.commit('setShowLoginToWalletModal', wallet);
-    },
     hideLoginToWalletModal() {
       this.$store.commit('setShowLoginToWalletModal', null);
+    },
+
+    isActive({ label }) {
+      return _.get(this.$store.state.currentWallet, 'label') === label;
     },
 
     showImportAWalletModal() {
       this.$store.commit('setShowImportAWalletModal', true);
     },
-    hideImportAWalletModal() {
-      this.$store.commit('setShowImportAWalletModal', false);
+
+    showLoginToWalletModal(wallet) {
+      this.$store.commit('setShowLoginToWalletModal', wallet);
     },
   },
 };

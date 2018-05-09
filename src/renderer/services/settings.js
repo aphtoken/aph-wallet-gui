@@ -1,52 +1,50 @@
 import _ from 'lodash';
-
 import { defaultSettings } from '../constants';
-import { store } from '../store';
 import storage from './storage';
+import { store } from '../store';
 
 const SETTINGS_STORAGE_KEY = 'settings';
 const CURRENCY_STORAGE_KEY = `${SETTINGS_STORAGE_KEY}.currency`;
 const CURRENCY_SYMBOL_STORAGE_KEY = `${SETTINGS_STORAGE_KEY}.currencySymbol`;
 const CURRENCIES = {
-  USD: {
-    label: 'USD',
+  AUD: {
+    label: 'AUD',
     symbol: '$',
-    value: 'USD',
-  },
-  EUR: {
-    label: 'EUR',
-    symbol: '€',
-    value: 'EUR',
-  },
-  JPY: {
-    label: 'JPY',
-    symbol: '¥',
-    value: 'JPY',
-  },
-  GBP: {
-    label: 'GBP',
-    symbol: '£',
-    value: 'GBP',
-  },
-  CHF: {
-    label: 'CHF',
-    symbol: null,
-    value: 'CHF',
+    value: 'AUD',
   },
   CAD: {
     label: 'CAD',
     symbol: '$',
     value: 'CAD',
   },
-  AUD: {
-    label: 'AUD',
+  CHF: {
+    label: 'CHF',
+    symbol: null,
+    value: 'CHF',
+  },
+  EUR: {
+    label: 'EUR',
+    symbol: '€',
+    value: 'EUR',
+  },
+  GBP: {
+    label: 'GBP',
+    symbol: '£',
+    value: 'GBP',
+  },
+  JPY: {
+    label: 'JPY',
+    symbol: '¥',
+    value: 'JPY',
+  },
+  USD: {
+    label: 'USD',
     symbol: '$',
-    value: 'AUD',
+    value: 'USD',
   },
 };
 
 export default {
-
   getCurrencies() {
     return CURRENCIES;
   },
@@ -81,5 +79,4 @@ export default {
     store.commit('setCurrency', this.getCurrency());
     store.commit('setCurrencySymbol', this.getCurrencySymbol());
   },
-
 };

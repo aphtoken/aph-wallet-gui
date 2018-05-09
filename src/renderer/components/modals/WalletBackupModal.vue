@@ -54,9 +54,8 @@
 </template>
 
 <script>
-import VueQrcode from '@xkeshi/vue-qrcode';
-
 import ModalWrapper from './ModalWrapper';
+import VueQrcode from '@xkeshi/vue-qrcode';
 
 export default {
   components: {

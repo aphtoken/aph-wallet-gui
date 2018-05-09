@@ -67,6 +67,10 @@
 import VueQrcode from '@xkeshi/vue-qrcode';
 
 export default {
+  components: {
+    VueQrcode,
+  },
+
   data() {
     return {
       wallet: null,
@@ -74,7 +78,6 @@ export default {
   },
 
   methods: {
-
     print() {
       window.print();
     },
@@ -82,10 +85,6 @@ export default {
 
   mounted() {
     this.wallet = this.$services.wallets.getCurrentWallet();
-  },
-
-  components: {
-    VueQrcode,
   },
 };
 </script>

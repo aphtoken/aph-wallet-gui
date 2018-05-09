@@ -1,8 +1,11 @@
-import { app, Menu, BrowserWindow } from 'electron';
-import path from 'path';
-
 import './services';
+import {
+  BrowserWindow,
+  Menu,
+  app,
+} from 'electron';
 import menuTemplate from './menu';
+import path from 'path';
 
 /**
  * Set `__static` path to static files in production

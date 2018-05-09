@@ -1,9 +1,8 @@
+import * as mixins from '@/mixins';
 import Vue from 'vue';
 import _ from 'lodash';
-import { shallow } from '@vue/test-utils';
-
-import * as mixins from '@/mixins';
 import router from '@/router';
+import { shallow } from '@vue/test-utils';
 
 _.each(mixins, (mixin) => {
   Vue.mixin(mixin);

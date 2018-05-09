@@ -34,28 +34,19 @@
 </template>
 
 <script>
-import moment from 'moment';
 import LineChart from '../charts/LineChart';
+import moment from 'moment';
+
 let loadPriceDataIntervalId;
 let storeUnwatch;
 
 export default {
-  components: { LineChart },
-
-  data() {
-    return {
-      symbol: '',
-      timeframeOption: 'M',
-      timeframeHours: 24 * 30,
-      date: null,
-      chartData: null,
-      chartOptions: null,
-      high: 0,
-      low: 0,
-      volume: 0,
-      current: 0,
-    };
+  beforeDestroy() {
+    clearInterval(loadPriceDataIntervalId);
+    storeUnwatch();
   },
+
+  components: { LineChart },
 
   computed: {
     reloadInterval() {
@@ -63,37 +54,22 @@ export default {
     },
   },
 
-  mounted() {
-    this.setReloadInterval();
-
-    storeUnwatch = this.$store.watch(
-      () => {
-        return this.$store.state.statsToken;
-      }, () => {
-        if (this.$store.state.statsToken
-          && this.$store.state.statsToken.symbol !== this.symbol) {
-          this.loadPriceData();
-        }
-      });
-  },
-
-  beforeDestroy() {
-    clearInterval(loadPriceDataIntervalId);
-    storeUnwatch();
+  data() {
+    return {
+      chartData: null,
+      chartOptions: null,
+      current: 0,
+      date: null,
+      high: 0,
+      low: 0,
+      symbol: '',
+      timeframeHours: 24 * 30,
+      timeframeOption: 'M',
+      volume: 0,
+    };
   },
 
   methods: {
-    setReloadInterval() {
-      if (loadPriceDataIntervalId) {
-        clearInterval(loadPriceDataIntervalId);
-      }
-
-      this.loadPriceData();
-      loadPriceDataIntervalId = setInterval(() => {
-        this.loadPriceData();
-      }, this.reloadInterval);
-    },
-
     changeTimeframe(timeframe) {
       this.timeframeOption = timeframe;
 
@@ -144,31 +120,6 @@ export default {
             },
             responsive: true,
             scales: {
-              yAxes: [
-                {
-                  gridLines: {
-                    display: false,
-                    drawBorder: false,
-                    tickMarkLength: 40,
-                  },
-                  margins: {
-                    right: 100,
-                    top: 100,
-                  },
-                  ticks: {
-                    callback(label, index) {
-                      return index % 2 === 0 ? _this.$formatMoney(label) : '';
-                    },
-                    autoSkip: true,
-                    fontColor: '#66688D',
-                    fontFamily: 'GilroySemibold',
-                    fontSize: 12,
-                    max: this.high,
-                    maxTicksLimit: 5,
-                    min: this.low,
-                  },
-                },
-              ],
               xAxes: [
                 {
                   gridLines: {
@@ -200,11 +151,35 @@ export default {
                   },
                 },
               ],
+              yAxes: [
+                {
+                  gridLines: {
+                    display: false,
+                    drawBorder: false,
+                    tickMarkLength: 40,
+                  },
+                  margins: {
+                    right: 100,
+                    top: 100,
+                  },
+                  ticks: {
+                    autoSkip: true,
+                    callback(label, index) {
+                      return index % 2 === 0 ? _this.$formatMoney(label) : '';
+                    },
+                    fontColor: '#66688D',
+                    fontFamily: 'GilroySemibold',
+                    fontSize: 12,
+                    max: this.high,
+                    maxTicksLimit: 5,
+                    min: this.low,
+                  },
+                },
+              ],
             },
           };
 
           this.chartData = {
-            labels: priceData.dates,
             datasets: [
               {
                 backgroundColor: 'transparent',
@@ -213,6 +188,7 @@ export default {
                 pointRadius: 0,
               },
             ],
+            labels: priceData.dates,
           };
 
           if (priceData.dates.length > 0 && this.$refs.chart) {
@@ -223,6 +199,31 @@ export default {
           this.$services.alert.exception(e);
         });
     },
+
+    setReloadInterval() {
+      if (loadPriceDataIntervalId) {
+        clearInterval(loadPriceDataIntervalId);
+      }
+
+      this.loadPriceData();
+      loadPriceDataIntervalId = setInterval(() => {
+        this.loadPriceData();
+      }, this.reloadInterval);
+    },
+  },
+
+  mounted() {
+    this.setReloadInterval();
+
+    storeUnwatch = this.$store.watch(
+      () => {
+        return this.$store.state.statsToken;
+      }, () => {
+        if (this.$store.state.statsToken
+          && this.$store.state.statsToken.symbol !== this.symbol) {
+          this.loadPriceData();
+        }
+      });
   },
 };
 </script>

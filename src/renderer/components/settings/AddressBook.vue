@@ -93,6 +93,14 @@ export default {
       this.searchBy = search;
     },
 
+    showAddContactModal() {
+      this.$store.commit('setShowAddContactModal', true);
+    },
+
+    showEditContactModal(contact) {
+      this.$store.commit('setShowEditContactModal', contact);
+    },
+
     toggleContact(contact) {
       if (contact === this.activeContact) {
         contact.active = false;
@@ -103,14 +111,6 @@ export default {
         contact.active = true;
         this.activeContact = contact;
       }
-    },
-
-    showAddContactModal() {
-      this.$store.commit('setShowAddContactModal', true);
-    },
-
-    showEditContactModal(contact) {
-      this.$store.commit('setShowEditContactModal', contact);
     },
   },
 };

@@ -46,25 +46,25 @@ export default {
       }
 
       this.$services.contacts.add(this.address, {
-        name: this.name.trim(),
         address: this.address.trim(),
+        name: this.name.trim(),
       }).sync();
-
-      this.onCancel();
-    },
-
-    save() {
-      this.$services.contacts.remove(this.prevAddress)
-        .add(this.address, {
-          name: this.name.trim(),
-          address: this.address.trim(),
-        }).sync();
 
       this.onCancel();
     },
 
     remove() {
       this.$services.contacts.remove(this.prevAddress).sync();
+      this.onCancel();
+    },
+
+    save() {
+      this.$services.contacts.remove(this.prevAddress)
+        .add(this.address, {
+          address: this.address.trim(),
+          name: this.name.trim(),
+        }).sync();
+
       this.onCancel();
     },
   },

@@ -1,7 +1,6 @@
+import PortfolioHeader from '@/components/PortfolioHeader';
 import Vuex from 'vuex';
 import _ from 'lodash';
-
-import PortfolioHeader from '@/components/PortfolioHeader';
 import utils from './utils';
 
 let actions;
@@ -14,6 +13,7 @@ describe('PortfolioHeader.vue', () => {
     };
 
     store = new Vuex.Store({
+      actions,
       state: {
         portfolio: {
           balance: 200,
@@ -21,7 +21,6 @@ describe('PortfolioHeader.vue', () => {
           changeValue: 100,
         },
       },
-      actions,
     });
   });
 

@@ -34,10 +34,10 @@ export default {
   methods: {
     add() {
       this.$store.dispatch('addToken', {
-        hashOrSymbol: this.hashOrSymbol,
         done: () => {
           this.onCancel();
         },
+        hashOrSymbol: this.hashOrSymbol,
       });
     },
   },

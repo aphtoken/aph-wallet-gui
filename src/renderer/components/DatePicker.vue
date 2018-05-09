@@ -78,10 +78,10 @@ export default {
       return _.chain(days)
         .map((day) => {
           return {
+            disabled: day.notInMonth,
             isSelectedDay: day.isSame(this.selectedDay, 'day'),
             label: day.format('D'),
             moment: day,
-            disabled: day.notInMonth,
           };
         })
         .chunk(7)
@@ -100,9 +100,6 @@ export default {
   methods: {
     close() {
       this.isOpen = false;
-    },
-    setDay(day) {
-      this.selectedDay = day;
     },
 
     getDaysInMonth(year, month) {
@@ -132,6 +129,10 @@ export default {
 
     notInCurrentMonth(date) {
       return this.currentMonth.format('M') !== date.format('M');
+    },
+
+    setDay(day) {
+      this.selectedDay = day;
     },
 
     toggleOpen() {

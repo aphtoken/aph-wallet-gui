@@ -29,6 +29,7 @@
 
 <script>
 import ModalWrapper from './ModalWrapper';
+
 export default {
   components: {
     ModalWrapper,

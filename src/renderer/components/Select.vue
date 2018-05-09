@@ -77,10 +77,6 @@ export default {
   },
 
   props: {
-    value: {
-      default: null,
-    },
-
     allowEmptyValue: {
       default: false,
       type: Boolean,
@@ -107,6 +103,10 @@ export default {
         return 'No Option Selected';
       },
       type: String,
+    },
+
+    value: {
+      default: null,
     },
   },
 };

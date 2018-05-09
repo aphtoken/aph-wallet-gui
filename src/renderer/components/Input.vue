@@ -32,8 +32,8 @@ export default {
   },
 
   methods: {
-    onInput(event) {
-      this.$emit('input', event.target.value);
+    focus() {
+      this.$refs.input.focus();
     },
 
     onBlur() {
@@ -48,12 +48,12 @@ export default {
       this.isFocused = true;
     },
 
-    toggleIsVisible() {
-      this.isVisible = !this.isVisible;
+    onInput(event) {
+      this.$emit('input', event.target.value);
     },
 
-    focus() {
-      this.$refs.input.focus();
+    toggleIsVisible() {
+      this.isVisible = !this.isVisible;
     },
   },
 
@@ -63,12 +63,12 @@ export default {
       type: Boolean,
     },
 
-    placeholder: {
-      type: String,
-    },
-
     hasError: {
       type: Boolean,
+    },
+
+    placeholder: {
+      type: String,
     },
 
     type: {

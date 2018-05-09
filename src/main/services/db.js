@@ -1,10 +1,9 @@
 import PouchDB from 'pouchdb';
 import PouchDBUpsert from 'pouchdb-upsert';
+import { app } from 'electron';
+import { database } from '../../renderer/constants';
 import ipcPromise from 'ipc-promise';
 import path from 'path';
-import { app } from 'electron';
-
-import { database } from '../../renderer/constants';
 
 // PouchDB config
 if (process.env.NODE_ENV === 'development') {

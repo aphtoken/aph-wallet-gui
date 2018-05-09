@@ -1,6 +1,5 @@
-import moment from 'moment';
-
 import alerts from './alerts';
+import moment from 'moment';
 import settings from './settings';
 
 const CMC_BASE_URL = 'https://api.coinmarketcap.com/v1/';
@@ -19,8 +18,8 @@ const defaultValuation = (symbol) => {
     max_supply: 0,
     name: symbol,
     percent_change_1h: 0,
-    percent_change_7d: 0,
     percent_change_24h: 0,
+    percent_change_7d: 0,
     price_btc: 0,
     rank: 0,
     symbol,
@@ -34,6 +33,63 @@ const defaultValuation = (symbol) => {
 };
 
 export default {
+  getHistorical(symbol, hoursBack) {
+    /* eslint-disable max-len */
+    const uri = `https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=${settings.getCurrency()}&limit=${hoursBack}&aggregate=1&e=CCCAGG`;
+    /* eslint-enable max-len */
+
+    return new Promise((resolve, reject) => {
+      try {
+        return axios.get(uri)
+          .then((res) => {
+            let i = 0;
+            const returnData = {
+              dates: [],
+              high: 0,
+              last: 0,
+              low: 999999999,
+              prices: [],
+              volume: 0,
+            };
+            if (res.data.Data.length === 0) {
+              resolve({
+                dates: [],
+                high: null,
+                last: null,
+                low: null,
+                prices: [],
+                volume: null,
+              });
+              return;
+            }
+            res.data.Data.forEach((d) => {
+              returnData.dates.push(d.time);
+              returnData.prices.push(d.close);
+
+              if (d.high > returnData.high) {
+                returnData.high = d.high;
+              }
+              if (d.low < returnData.low) {
+                returnData.low = d.low;
+              }
+              returnData.volume += d.volumeto;
+              if (i === res.data.Data.length - 1) {
+                returnData.last = d.close;
+              }
+              i += 1;
+            });
+            resolve(returnData);
+          })
+          .catch((e) => {
+            alerts.exception(e);
+            resolve([]);
+          });
+      } catch (e) {
+        alerts.exception(e);
+        return reject(e);
+      }
+    });
+  },
 
   getValuation(symbol) {
     return new Promise((resolve, reject) => {
@@ -71,63 +127,4 @@ export default {
       }
     });
   },
-
-  getHistorical(symbol, hoursBack) {
-    /* eslint-disable max-len */
-    const uri = `https://min-api.cryptocompare.com/data/histohour?fsym=${symbol}&tsym=${settings.getCurrency()}&limit=${hoursBack}&aggregate=1&e=CCCAGG`;
-    /* eslint-enable max-len */
-
-    return new Promise((resolve, reject) => {
-      try {
-        return axios.get(uri)
-          .then((res) => {
-            let i = 0;
-            const returnData = {
-              high: 0,
-              low: 999999999,
-              volume: 0,
-              last: 0,
-              dates: [],
-              prices: [],
-            };
-            if (res.data.Data.length === 0) {
-              resolve({
-                high: null,
-                low: null,
-                volume: null,
-                last: null,
-                dates: [],
-                prices: [],
-              });
-              return;
-            }
-            res.data.Data.forEach((d) => {
-              returnData.dates.push(d.time);
-              returnData.prices.push(d.close);
-
-              if (d.high > returnData.high) {
-                returnData.high = d.high;
-              }
-              if (d.low < returnData.low) {
-                returnData.low = d.low;
-              }
-              returnData.volume += d.volumeto;
-              if (i === res.data.Data.length - 1) {
-                returnData.last = d.close;
-              }
-              i += 1;
-            });
-            resolve(returnData);
-          })
-          .catch((e) => {
-            alerts.exception(e);
-            resolve([]);
-          });
-      } catch (e) {
-        alerts.exception(e);
-        return reject(e);
-      }
-    });
-  },
-
 };

@@ -1,5 +1,5 @@
-import ipcPromise from 'ipc-promise';
 import _ from 'lodash';
+import ipcPromise from 'ipc-promise';
 
 function formatResponse(response, defaultValue) {
   return _.get(response, 'data', defaultValue);
@@ -25,7 +25,7 @@ export default {
 
   async upsert(id, data) {
     try {
-      await ipcPromise.send('db.upsert', { id, data });
+      await ipcPromise.send('db.upsert', { data, id });
     } catch (e) {
       console.log(e);
     }

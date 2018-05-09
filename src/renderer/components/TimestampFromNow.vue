@@ -27,14 +27,6 @@ export default {
     },
   },
 
-  data() {
-    return {
-      now: null,
-    };
-  },
-
-  props: ['timestamp'],
-
   created() {
     this.now = moment.utc();
 
@@ -42,5 +34,13 @@ export default {
       this.now = moment.utc();
     }, 1000);
   },
+
+  data() {
+    return {
+      now: null,
+    };
+  },
+
+  props: ['timestamp'],
 };
 </script>

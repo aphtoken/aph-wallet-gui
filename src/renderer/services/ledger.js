@@ -1,57 +1,46 @@
+import {
+  tx,
+  u,
+  wallet,
+} from '@cityofzion/neon-js';
 import LedgerNode from '@ledgerhq/hw-transport-node-hid';
-import { tx, wallet, u } from '@cityofzion/neon-js';
-import wallets from './wallets';
 import { store } from '../store';
+import wallets from './wallets';
 
 const VALID_STATUS = 0x9000;
-let currentLedger = null;
 let currentDevice = null;
+let currentLedger = null;
+
 export default {
-  open() {
-    return new Promise((resolve, reject) => {
-      try {
-        return LedgerNode.isSupported()
-          .then((supported) => {
-            if (!supported) {
-              return reject('Your computer does not support the ledger!');
-            }
+  assembleSignature(response) {
+    const ss = new u.StringStream(response);
+    // The first byte is format. It is usually 0x30 (SEQ) or 0x31 (SET)
+    // The second byte represents the total length of the DER module.
+    ss.read(2);
+    // Now we read each field off
+    // Each field is encoded with a type byte, length byte followed by the data itself
+    ss.read(1); // Read and drop the type
+    const r = ss.readVarBytes();
+    ss.read(1);
+    const s = ss.readVarBytes();
 
-            return LedgerNode.list()
-              .then((paths) => {
-                if (paths.length === 0) {
-                  return reject('No Ledger device found. Please plugin your Ledger in, '
-                    + 'unlock it and open the NEO application.');
-                }
-
-                const path = paths[0];
-                return LedgerNode.open(path)
-                  .then((res) => {
-                    currentDevice = res;
-                    this.getPublicKey()
-                      .then(() => {
-                        currentLedger = this;
-                        resolve(currentDevice);
-                      })
-                      .catch(() => {
-                        return reject('Please plugin your Ledger in, '
-                          + 'unlock it and open the NEO application.');
-                      });
-                  })
-                  .catch(({ message }) => {
-                    return reject(message);
-                  });
-              })
-              .catch(({ message }) => {
-                return reject(message);
-              });
-          })
-          .catch(({ message }) => {
-            return reject(message);
-          });
-      } catch ({ message }) {
-        return reject(message);
+    // We will need to ensure both integers are 32 bytes long
+    const integers = [r, s].map((i) => {
+      if (i.length < 64) {
+        i = i.padStart(64, '0');
       }
+      if (i.length > 64) {
+        i = i.substr(-64);
+      }
+      return i;
     });
+
+    return integers.join('');
+  },
+
+  bip44(acct) {
+    const acctNumber = acct.toString(16);
+    return `8000002C800003788000000000000000${'0'.repeat(8 - acctNumber.length)}${acctNumber}`;
   },
 
   close() {
@@ -134,70 +123,51 @@ export default {
     });
   },
 
-  signWithLedger(unsignedTx) {
+  open() {
     return new Promise((resolve, reject) => {
       try {
-        const currentWallet = wallets.getCurrentWallet();
-        if (currentWallet.isLedger !== true) {
-          reject('Current wallet is not a ledger wallet.');
-          return;
-        }
+        return LedgerNode.isSupported()
+          .then((supported) => {
+            if (!supported) {
+              return reject('Your computer does not support the ledger!');
+            }
 
-        store.commit('setShowSendWithLedgerModal', true);
-        currentLedger.open()
-          .then(() => {
-            const data = tx.serializeTransaction(unsignedTx, false);
-            store.commit('setShowSendRequestLedgerSignature', true);
-            currentLedger.getSignature(data, 0)
-              .then((sig) => {
-                const invocationScript = `40${sig}`;
-                const verificationScript = wallet.getVerificationScriptFromPublicKey(currentWallet.publicKeyEncoded);
-                const txObj = tx.deserializeTransaction(data);
-                txObj.scripts.push({ invocationScript, verificationScript });
-                const serialized = tx.serializeTransaction(txObj);
-                resolve(serialized);
-                currentLedger.close();
+            return LedgerNode.list()
+              .then((paths) => {
+                if (paths.length === 0) {
+                  return reject('No Ledger device found. Please plugin your Ledger in, '
+                    + 'unlock it and open the NEO application.');
+                }
+
+                const path = paths[0];
+                return LedgerNode.open(path)
+                  .then((res) => {
+                    currentDevice = res;
+                    this.getPublicKey()
+                      .then(() => {
+                        currentLedger = this;
+                        resolve(currentDevice);
+                      })
+                      .catch(() => {
+                        return reject('Please plugin your Ledger in, '
+                          + 'unlock it and open the NEO application.');
+                      });
+                  })
+                  .catch(({ message }) => {
+                    return reject(message);
+                  });
               })
-              .catch((e) => {
-                currentLedger.close();
-                reject(e);
+              .catch(({ message }) => {
+                return reject(message);
               });
           })
-          .catch((e) => {
-            currentLedger.close();
-            reject(e);
+          .catch(({ message }) => {
+            return reject(message);
           });
-      } catch (e) {
-        currentLedger.close();
-        reject(e);
+      } catch ({ message }) {
+        return reject(message);
       }
     });
-  },
-
-  assembleSignature(response) {
-    const ss = new u.StringStream(response);
-    // The first byte is format. It is usually 0x30 (SEQ) or 0x31 (SET)
-    // The second byte represents the total length of the DER module.
-    ss.read(2);
-    // Now we read each field off
-    // Each field is encoded with a type byte, length byte followed by the data itself
-    ss.read(1); // Read and drop the type
-    const r = ss.readVarBytes();
-    ss.read(1);
-    const s = ss.readVarBytes();
-
-    // We will need to ensure both integers are 32 bytes long
-    const integers = [r, s].map((i) => {
-      if (i.length < 64) {
-        i = i.padStart(64, '0');
-      }
-      if (i.length > 64) {
-        i = i.substr(-64);
-      }
-      return i;
-    });
-
-    return integers.join('');
   },
 
   send(params, msg, statusList) {
@@ -240,9 +210,43 @@ export default {
     });
   },
 
-  bip44(acct) {
-    const acctNumber = acct.toString(16);
-    return `8000002C800003788000000000000000${'0'.repeat(8 - acctNumber.length)}${acctNumber}`;
-  },
+  signWithLedger(unsignedTx) {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentWallet = wallets.getCurrentWallet();
+        if (currentWallet.isLedger !== true) {
+          reject('Current wallet is not a ledger wallet.');
+          return;
+        }
 
+        store.commit('setShowSendWithLedgerModal', true);
+        currentLedger.open()
+          .then(() => {
+            const data = tx.serializeTransaction(unsignedTx, false);
+            store.commit('setShowSendRequestLedgerSignature', true);
+            currentLedger.getSignature(data, 0)
+              .then((sig) => {
+                const invocationScript = `40${sig}`;
+                const verificationScript = wallet.getVerificationScriptFromPublicKey(currentWallet.publicKeyEncoded);
+                const txObj = tx.deserializeTransaction(data);
+                txObj.scripts.push({ invocationScript, verificationScript });
+                const serialized = tx.serializeTransaction(txObj);
+                resolve(serialized);
+                currentLedger.close();
+              })
+              .catch((e) => {
+                currentLedger.close();
+                reject(e);
+              });
+          })
+          .catch((e) => {
+            currentLedger.close();
+            reject(e);
+          });
+      } catch (e) {
+        currentLedger.close();
+        reject(e);
+      }
+    });
+  },
 };
