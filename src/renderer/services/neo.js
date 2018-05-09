@@ -814,9 +814,7 @@ export default {
               return;
             }
 
-            const txInHistory = _.find(store.state.recentTransactions, (o) => {
-              return o.hash === tx.hash;
-            });
+            const txInHistory = _.find(store.state.recentTransactions, { hash: tx.hash });
 
             if (txInHistory) {
               alerts.success(`TX: ${tx.hash} CONFIRMED`);

@@ -24,8 +24,8 @@ const formats = {
 const intervals = {
   NETWORK_STATUS: 10 * 1000,
   POLLING: 15000,
-  WALLET_VERSION_CHECK: 10 * 60 * 1000,
   REBROADCAST_TRANSACTIONS: 30 * 1000,
+  WALLET_VERSION_CHECK: 10 * 60 * 1000,
 };
 
 const loadStates = {
@@ -41,11 +41,11 @@ const requests = {
 };
 
 const timeouts = {
+  MONITOR_TRANSACTIONS: 10 * 60 * 1000,
   NEO_API_CALL: 500,
   RENDER_CHART: 100,
   TRANSACTION: 5 * 60 * 1000,
   TRANSACTION_WITH_HARDWARE: 8 * 60 * 1000,
-  MONITOR_TRANSACTIONS: 10 * 60 * 1000,
 };
 
 export {
