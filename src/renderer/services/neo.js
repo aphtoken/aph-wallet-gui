@@ -930,9 +930,9 @@ export default {
 
         const scriptHashAddress = wallet.getAddressFromScriptHash(scriptHash);
 
-        if (assetId === neoAssetId) {
+        if (assetId === NEO_ASSET_ID) {
           config.intents = api.makeIntent({ NEO: amount }, scriptHashAddress);
-        } else if (assetId === gasAssetId) {
+        } else if (assetId === GAS_ASSET_ID) {
           config.intents = api.makeIntent({ GAS: amount }, scriptHashAddress);
         } else {
           reject('Invalid asset used to participate in token sale. Must use NEO or GAS.');
