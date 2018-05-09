@@ -10,42 +10,36 @@
     <div class="header">
       <h1 class="underlined">Participate in an Initial Coin Offering (ICO)</h1>
     </div>
-    <div v-if="tokens.length === 0">
-      <div class="none-open">
-        <h2>No Open Token Sales</h2>
-        <p>I'm sorry, doesn't appear that there are any token sale ICOs that are currently open.</p>
-        <p>Please check back again later.</p>
+    <div class="body">
+      <div class="token">
+        <aph-select :options="tokens" placeholder="Select ICO" v-model="token"></aph-select>
+      </div>
+      <div class="custom" v-if="token && token.symbol === 'Custom'">
+        <aph-input placeholder="Enter the ICO Script Hash" v-model="scriptHash"></aph-input>
+      </div>
+      <div class="currency">
+        <aph-select :options="currencies" placeholder="Buy With" v-model="currency"></aph-select>
+      </div>
+      <div class="amount">
+        <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
+        <div class="symbol">{{ currency ? currency.value : '' }}</div>
+        <div class="max" v-if="currency" @click="setAmountToMax">max</div>
+      </div>
+      <div class="estimated-value">
+        <div class="label">Estimated Amount</div>
+        <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
       </div>
     </div>
-    <div v-else>
-      <div class="body">
-        <div class="token">
-          <aph-select :options="tokens" placeholder="Select ICO" v-model="token"></aph-select>
-        </div>
-        <div class="currency">
-          <aph-select :options="currencies" placeholder="Buy With" v-model="currency"></aph-select>
-        </div>
-        <div class="amount">
-          <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
-          <div class="symbol">{{ currency ? currency.value : '' }}</div>
-          <div class="max" v-if="currency" @click="setAmountToMax">max</div>
-        </div>
-        <div class="estimated-value">
-          <div class="label">Estimated Amount</div>
-          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
-        </div>
-      </div>
-      <div class="disclaimer">
-        <h2>Disclaimer - Urgent Instructions</h2>
-        <p>Ensure that you are only sending tokens which are accepted for this ICO.</p>
-        <p>Submitting multiple times could result in loss of funds.</p>
-        <p>Aphelion is not responsible for loss of funds.</p>
-        <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
-        <label for="confirm-disclaimer">I Agree, I am responsible for this transfer of funds.</label>
-      </div>
-      <div class="footer">
-        <button class="send-btn" @click="send()" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
-      </div>
+    <div class="disclaimer">
+      <h2>Disclaimer - Urgent Instructions</h2>
+      <p>Ensure that you are only sending tokens which are accepted for this ICO.</p>
+      <p>Submitting multiple times could result in loss of funds.</p>
+      <p>Aphelion is not responsible for loss of funds.</p>
+      <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
+      <label for="confirm-disclaimer">I Agree, I am responsible for this transfer of funds.</label>
+    </div>
+    <div class="footer">
+      <button class="send-btn" @click="send()" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
     </div>
   </section>
 </template>
@@ -55,12 +49,7 @@ import { BigNumber } from 'bignumber.js';
 
 export default {
   mounted() {
-    try {
-      console.log(this.tokens);
-      this.$store.state.showPortfolioHeader = false;
-    } catch (e) {
-      console.log(e);
-    }
+    this.$store.state.showPortfolioHeader = false;
   },
   beforeDestroy() {
     this.$store.state.showPortfolioHeader = true;
@@ -69,6 +58,7 @@ export default {
   data() {
     return {
       token: null,
+      scriptHash: '',
       amount: '',
       currency: null,
       agreed: false,
@@ -78,7 +68,7 @@ export default {
 
   computed: {
     tokens() {
-      return this.$services.tokens.getAllAsArray().reduce(
+      const list = this.$services.tokens.getAllAsArray().reduce(
         (result, { symbol, assetId, network, sale }) => {
           if (!sale || network !== this.$services.network.getSelectedNetwork().net
               || moment(sale.endDate) < moment().utc) {
@@ -96,6 +86,20 @@ export default {
 
           return result;
         }, []);
+
+      list.push({
+        label: 'Use an ICO Script Hash',
+        value: {
+          symbol: 'Custom',
+          assetId: '',
+          sale: {
+            acceptsNeo: true,
+            acceptsGas: true,
+          },
+        },
+      });
+
+      return list;
     },
 
     currencies() {
@@ -105,7 +109,7 @@ export default {
             return result;
           }
 
-          if (!this.token) {
+          if (this.token) {
             if (symbol === 'NEO' && this.token.sale.acceptsNeo !== true) {
               return result;
             }
@@ -178,13 +182,26 @@ export default {
 
     send() {
       this.sending = true;
-      this.$services.neo.participateInTokenSale(this.token,
+
+      let icoScriptHash = this.scriptHash.replace('0x', '');
+      if (this.token && this.token.symbol !== 'Custom') {
+        icoScriptHash = this.token.assetId;
+      }
+
+      if (icoScriptHash.length !== 40) {
+        this.$services.alerts.error('Please enter a valid ICO script hash');
+        this.sending = false;
+        return;
+      }
+
+      this.$services.neo.participateInTokenSale(icoScriptHash,
         this.currency.asset, this.amount)
         .then((res) => {
-          this.sending = false;
           console.log(res);
+          this.sending = false;
         })
         .catch((e) => {
+          console.log(e);
           this.sending = false;
           this.$services.alerts.error(e);
         });
@@ -254,7 +271,7 @@ export default {
       margin: $space 0;
     }
 
-    .amount {
+    .amount, .custom {
       position: relative;
       margin-top: $space;
 
@@ -282,6 +299,10 @@ export default {
       }
     }
 
+    .custom {
+      margin: 0 0 $space 0;
+    }
+
     .estimated-value {
       display: flex;
       margin-top: $space;
@@ -298,8 +319,8 @@ export default {
       }
     }
 
-    .token, .currency {
-      margin-bottom: $space-lg;
+    .currency {
+      margin-top: $space-lg;
     }
 
   }
