@@ -1,12 +1,12 @@
 <template>
-  <button class="claim-gas-button" @click="claim" :disabled="$isPending('claimGas')">{{ buttonLabel }}</button>
+  <button class="claim-gas-button" @click="claim" :disabled="!$isPending('claimGas')">{{ buttonLabel }}</button>
 </template>
 
 <script>
 export default {
   computed: {
     buttonLabel() {
-      return this.$isPending('claimGas') ? 'Claiming...' : `Claim ${this.formattedAmountToClaim} Gas`;
+      return !this.$isPending('claimGas') ? 'Claiming...' : `Claim ${this.formattedAmountToClaim} Gas`;
     },
 
     formattedAmountToClaim() {
@@ -40,7 +40,8 @@ export default {
   }
 
   &:disabled {
-    background-color: $grey;
+    background-color: $background;
+    color: $grey;
   }
 }
 </style>
