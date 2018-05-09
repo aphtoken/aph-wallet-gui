@@ -40,12 +40,14 @@ export default {
         && (this.$store.state.gasClaim.step >= 5 || this.$store.state.gasClaim.error !== null)) {
         return 'Close';
       }
+
       return 'Cancel';
     },
     error() {
       if (this.$store.state.gasClaim && this.$store.state.gasClaim.error !== null) {
         return this.$store.state.gasClaim.error;
       }
+
       return null;
     },
     step1Label() {
@@ -54,6 +56,7 @@ export default {
       } else if (this.$store.state.gasClaim && this.$store.state.gasClaim.step === 1) {
         return `Transferring ${this.$store.state.gasClaim.neoTransferAmount} NEO to yourself.`;
       }
+
       return 'Transfer all NEO to yourself.';
     },
     step2Label() {
@@ -62,6 +65,7 @@ export default {
       } else if (this.$store.state.gasClaim && this.$store.state.gasClaim.step === 2) {
         return 'Waiting for NEO transfer confirmation.';
       }
+
       return 'Wait for NEO transfer confirmation.';
     },
     step3Label() {
@@ -70,6 +74,7 @@ export default {
       } else if (this.$store.state.gasClaim && this.$store.state.gasClaim.step === 3) {
         return `Sending claim for ~${this.$store.state.gasClaim.gasClaimAmount} GAS.`;
       }
+
       return 'Send GAS claim.';
     },
     step4Label() {
@@ -78,12 +83,14 @@ export default {
       } else if (this.$store.state.gasClaim && this.$store.state.gasClaim.step === 4) {
         return 'Waiting for GAS claim confirmation.';
       }
+
       return 'Wait for GAS claim confirmation.';
     },
     step5Label() {
       if (this.$store.state.gasClaim && this.$store.state.gasClaim.step === 5) {
         return 'Success!';
       }
+
       return 'Wait for GAS claim transaction details.';
     },
   },
@@ -96,9 +103,11 @@ export default {
       if (this.$store.state.gasClaim.step === step) {
         return ['in-progress'];
       }
+
       if (this.$store.state.gasClaim.step > step) {
         return ['complete'];
       }
+
       return [];
     },
     stepIndicator(step) {
@@ -106,6 +115,7 @@ export default {
         && this.$store.state.gasClaim.step < 5) {
         return `${step}.`;
       }
+
       return '✔';
     },
   },

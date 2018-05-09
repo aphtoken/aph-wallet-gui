@@ -9,6 +9,7 @@ export default {
 
   add(name, data) {
     storage.set(WALLETS_STORAGE_KEY, _.set(this.getAll(), this.cleanForKey(name), data));
+
     return this;
   },
 
@@ -43,6 +44,7 @@ export default {
     } catch (e) {
       console.log(e);
       this.cleanBadWalletValues();
+
       return _.sortBy(_.values(this.getAll()), [wallet => wallet.label.toLowerCase()], ['label']);
     }
   },
@@ -79,6 +81,7 @@ export default {
           scriptHash: account.scriptHash,
         })
           .sync();
+
         return resolve(currentWallet);
       } catch (e) {
         return reject('Wrong key or passphrase');
@@ -123,9 +126,11 @@ export default {
         };
 
         this.setCurrentWallet(currentWallet).sync();
+
         return resolve(currentWallet);
       } catch (e) {
         console.log(e);
+
         return reject(e.message);
       }
     });
@@ -182,6 +187,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         storage.set(WALLETS_STORAGE_KEY, _.omit(this.getAll(), this.cleanForKey(name)));
+
         return resolve();
       } catch (e) {
         console.log(e);

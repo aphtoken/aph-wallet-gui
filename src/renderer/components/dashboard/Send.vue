@@ -138,6 +138,7 @@ export default {
         } else if (cleanAmount[cleanAmount.length - 1] !== '.'
           && cleanAmount[cleanAmount.length - 1] !== '0') {
           const n = new BigNumber(cleanAmount);
+
           cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
         }
       }
@@ -191,6 +192,7 @@ export default {
       }, this.$constants.timeouts.NEO_API_CALL);
 
       let transactionTimeout = this.$constants.timeouts.TRANSACTION;
+
       if (this.$services.wallets.getCurrentWallet().isLedger === true) {
         transactionTimeout = this.$constants.timeouts.TRANSACTION_WITH_HARDWARE;
       }

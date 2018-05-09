@@ -6,6 +6,7 @@ export default {
   add(data) {
     if (this.tokenExists(data.assetId, data.network)) {
       const existing = this.getOne(data.assetId, data.network);
+
       if (existing) {
         if (existing.isCustom === data.isCustom
           || (existing.isCustom === true && data.isCustom === false)) {
@@ -15,7 +16,9 @@ export default {
     }
 
     const tokens = this.getAll();
+
     storage.set(TOKENS_STORAGE_KEY, _.set(tokens, `${data.assetId}_${data.network}`, data));
+
     return this;
   },
 
@@ -34,6 +37,7 @@ export default {
   remove(assetId, network) {
     const tokens = this.getAll();
     const token = this.getOne(assetId, network);
+
     if (!token) {
       return this;
     }

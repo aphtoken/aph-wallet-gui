@@ -51,6 +51,7 @@ export default {
               prices: [],
               volume: 0,
             };
+
             if (res.data.Data.length === 0) {
               resolve({
                 dates: [],
@@ -60,6 +61,7 @@ export default {
                 prices: [],
                 volume: null,
               });
+
               return;
             }
             res.data.Data.forEach((d) => {
@@ -69,6 +71,7 @@ export default {
               if (d.high > returnData.high) {
                 returnData.high = d.high;
               }
+
               if (d.low < returnData.low) {
                 returnData.low = d.low;
               }
@@ -86,6 +89,7 @@ export default {
           });
       } catch (e) {
         alerts.exception(e);
+
         return reject(e);
       }
     });
@@ -106,6 +110,7 @@ export default {
               v.total_supply = DEFAULT_APH_TOTAL_SUPPLY;
             }
           }
+
           return resolve(v);
         }
         lastCheckedTicker = moment.utc();

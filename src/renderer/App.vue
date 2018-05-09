@@ -17,6 +17,7 @@ export default {
 
   beforeMount() {
     const shell = require('electron').shell;
+
     document.addEventListener('click', (e) => {
       if (e.target.tagName === 'A' && e.target.target === '_blank' && e.target.href.startsWith('http')) {
         e.preventDefault();
@@ -44,6 +45,7 @@ export default {
       } else if (process.platform === 'win32') {
         return this.$store.state.latestVersion.downloadUrlWin;
       }
+
       return '';
     },
   },

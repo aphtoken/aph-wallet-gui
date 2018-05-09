@@ -46,6 +46,7 @@ export default {
 
     getSelectedOptionLabel() {
       const option = _.find(this.options, { value: this.selectedOption });
+
       return option ? option.label : null;
     },
 

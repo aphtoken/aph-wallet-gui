@@ -160,6 +160,7 @@ async function fetchPortfolio({ commit }) {
 
   try {
     const holdings = await neo.fetchHoldings(currentWallet.address);
+
     commit('setPortfolio', {
       balance: holdings.totalBalance,
       changePercent: holdings.change24hrPercent,

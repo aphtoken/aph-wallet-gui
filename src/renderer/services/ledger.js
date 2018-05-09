@@ -14,6 +14,7 @@ let currentLedger = null;
 export default {
   assembleSignature(response) {
     const ss = new u.StringStream(response);
+
     // The first byte is format. It is usually 0x30 (SEQ) or 0x31 (SET)
     // The second byte represents the total length of the DER module.
     ss.read(2);
@@ -21,6 +22,7 @@ export default {
     // Each field is encoded with a type byte, length byte followed by the data itself
     ss.read(1); // Read and drop the type
     const r = ss.readVarBytes();
+
     ss.read(1);
     const s = ss.readVarBytes();
 
@@ -29,9 +31,11 @@ export default {
       if (i.length < 64) {
         i = i.padStart(64, '0');
       }
+
       if (i.length > 64) {
         i = i.substr(-64);
       }
+
       return i;
     });
 
@@ -40,6 +44,7 @@ export default {
 
   bip44(acct) {
     const acctNumber = acct.toString(16);
+
     return `8000002C800003788000000000000000${'0'.repeat(8 - acctNumber.length)}${acctNumber}`;
   },
 
@@ -51,6 +56,7 @@ export default {
       if (!currentDevice) {
         currentDevice = null;
         resolve();
+
         return;
       }
 
@@ -61,6 +67,7 @@ export default {
         })
         .catch((e) => {
           console.log(e);
+
           return reject(e);
         });
     });
@@ -69,9 +76,11 @@ export default {
   getDeviceInfo() {
     try {
       const deviceInfo = currentDevice.device.getDeviceInfo();
+
       return deviceInfo;
     } catch (e) {
       console.log(e);
+
       return null;
     }
   },
@@ -82,6 +91,7 @@ export default {
         return this.send('80040000', this.bip44(0), [VALID_STATUS])
           .then((res) => {
             const key = res.toString('hex').substring(0, 130);
+
             resolve(key);
           })
           .catch((e) => {
@@ -89,6 +99,7 @@ export default {
           });
       } catch (e) {
         console.log(e);
+
         return reject(e);
       }
     });
@@ -99,8 +110,10 @@ export default {
       try {
         data += this.bip44(acct);
         const chunks = data.match(/.{1,510}/g) || [];
+
         if (!chunks.length) {
           reject(`Invalid data provided: ${data}`);
+
           return;
         }
 
@@ -108,6 +121,7 @@ export default {
           .then((res) => {
             if (res === 0x9000) {
               reject('No more data but Ledger did not return signature!');
+
               return;
             }
 
@@ -140,6 +154,7 @@ export default {
                 }
 
                 const path = paths[0];
+
                 return LedgerNode.open(path)
                   .then((res) => {
                     currentDevice = res;
@@ -176,6 +191,7 @@ export default {
     }
 
     const [cla, ins, p1, p2] = params.match(/.{1,2}/g).map(i => parseInt(i, 16));
+
     return currentDevice.send(cla, ins, p1, p2, Buffer.from(msg, 'hex'), statusList);
   },
 
@@ -185,6 +201,7 @@ export default {
         const p = i === chunks.length - 1 ? '80' : '00';
         const chunk = chunks[i];
         const params = `8002${p}00`;
+
         this.send(params, chunk, [VALID_STATUS])
           .then((res) => {
             i += 1;
@@ -214,8 +231,10 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
+
         if (currentWallet.isLedger !== true) {
           reject('Current wallet is not a ledger wallet.');
+
           return;
         }
 
@@ -223,14 +242,17 @@ export default {
         currentLedger.open()
           .then(() => {
             const data = tx.serializeTransaction(unsignedTx, false);
+
             store.commit('setShowSendRequestLedgerSignature', true);
             currentLedger.getSignature(data, 0)
               .then((sig) => {
                 const invocationScript = `40${sig}`;
                 const verificationScript = wallet.getVerificationScriptFromPublicKey(currentWallet.publicKeyEncoded);
                 const txObj = tx.deserializeTransaction(data);
+
                 txObj.scripts.push({ invocationScript, verificationScript });
                 const serialized = tx.serializeTransaction(txObj);
+
                 resolve(serialized);
                 currentLedger.close();
               })

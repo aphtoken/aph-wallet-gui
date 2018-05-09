@@ -42,6 +42,7 @@ export default {
     add() {
       if (this.$services.contacts.contactExists(this.name.trim())) {
         this.$services.alerts.error(`Contact ${this.name.trim()} already exists.`);
+
         return;
       }
 

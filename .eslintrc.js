@@ -36,9 +36,15 @@ module.exports = {
     'no-param-reassign': 0,
     'no-shadow': 0,
     'no-underscore-dangle': 0,
+    'padding-line-between-statements': [
+      'error',
+      { blankLine: 'always', prev: '*', next: 'return' },
+      { blankLine: 'always', prev: 'block-like', 'next': 'block-like' },
+      { blankLine: 'always', prev: ['const', 'let', 'var'], next: '*'},
+      { blankLine: 'any', prev: ['const', 'let', 'var'], next: ['const', 'let', 'var']},
+    ],
     'sort-imports': ['error'],
-    'sort-keys': ['error', 'asc', {'caseSensitive': true, 'natural': false}],
+    'sort-keys': ['error', 'asc', { 'caseSensitive': true, 'natural': false }],
     'sort-vars': ['error'],
-    'padding-line-between-statements': ['error'],
   }
 }

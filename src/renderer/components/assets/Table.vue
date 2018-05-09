@@ -22,6 +22,7 @@ export default {
   computed: {
     filteredHoldings() {
       const searchBy = this.searchBy.toLowerCase();
+
       return _.filter(this.$store.state.holdings, ({ name, symbol }) => {
         if (!name || !symbol) {
           return false;
@@ -31,6 +32,7 @@ export default {
           || symbol.toLowerCase().indexOf(searchBy) > -1;
       }).map((holding) => {
         const canRemove = holding.isCustom === true && holding.symbol !== 'APH';
+
         return _.merge(holding, {
           canRemove,
         });

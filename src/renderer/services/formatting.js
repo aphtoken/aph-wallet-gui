@@ -49,14 +49,18 @@ export default {
     }
     let bigNumber = toBigNumber(value);
     const isNegative = bigNumber.isNegative();
+
     bigNumber = bigNumber.abs();
     let wholeNumber = bigNumber.integerValue(BigNumber.ROUND_FLOOR);
     const fractionalNumber = bigNumber.minus(wholeNumber);
+
     if (!wholeNumber.isZero()) {
       wholeNumber = isNegative ? wholeNumber.multipliedBy(-1) : wholeNumber;
+
       return `${numeral(wholeNumber).format(wholeNumberFormat)}`
         + `${numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER)}`;
     }
+
     return (isNegative ? '-0' : '0') + numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER);
   },
 

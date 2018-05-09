@@ -84,6 +84,7 @@ export default {
 
       if (this.$store.state.currentLoginToWallet.label === this.$store.state.currentWallet.label) {
         this.$services.alerts.error(`You already have ${this.$store.state.currentLoginToWallet.label} open.`);
+
         return;
       }
 

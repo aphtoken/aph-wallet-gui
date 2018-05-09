@@ -9,6 +9,7 @@ export default {
   async get(id, defaultValue = null) {
     try {
       const response = await ipcPromise.send('db.get', id);
+
       return Promise.resolve(formatResponse(response, defaultValue));
     } catch (e) {
       return Promise.resolve(defaultValue);

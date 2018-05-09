@@ -6,6 +6,7 @@ const CONTACTS_STORAGE_KEY = 'contacts';
 export default {
   add(address, data) {
     const contacts = this.getAll();
+
     storage.set(CONTACTS_STORAGE_KEY, _.set(contacts, this.cleanForKey(address), data));
 
     return this;
@@ -39,6 +40,7 @@ export default {
 
   remove(address) {
     const contacts = this.getAll();
+
     storage.set(CONTACTS_STORAGE_KEY, _.omit(contacts, this.cleanForKey(address)));
 
     return this;

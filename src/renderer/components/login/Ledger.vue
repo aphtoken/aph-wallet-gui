@@ -15,6 +15,7 @@ import LoginFormWrapper from './LoginFormWrapper';
 
 const ledgerPollingInterval = 1000;
 let checkLedgerStatusIntervalId;
+
 export default {
   beforeDestroy() {
     clearInterval(checkLedgerStatusIntervalId);

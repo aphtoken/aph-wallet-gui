@@ -106,6 +106,7 @@ function setCurrentWallet(state, currentWallet) {
 
   state.currentWallet = currentWallet;
 }
+
 function setCurrentNetwork(state, network) {
   if (state.currentNetwork
       && state.currentNetwork.net === network.net) {
@@ -137,6 +138,7 @@ async function setHoldings(state, holdings) {
   }
 
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
+
   db.upsert(holdingsStorageKey, holdings);
 }
 
@@ -158,6 +160,7 @@ function setPortfolio(state, portfolio) {
   }
 
   const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${state.currentNetwork.net}`;
+
   db.upsert(portfolioStorageKey, portfolio);
 }
 
@@ -168,6 +171,7 @@ function setRecentTransactions(state, transactions) {
     const existingTransaction = _.find(state.recentTransactions, (o) => {
       return o.hash === t.hash && o.symbol === t.symbol;
     });
+
     if (existingTransaction) {
       return;
     }
@@ -193,12 +197,15 @@ function clearLocalNetworkState(state, newNetwork) {
   state.recentTransactions = [];
 
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${newNetwork.net}`;
+
   db.remove(holdingsStorageKey);
 
   const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${newNetwork.net}`;
+
   db.remove(portfolioStorageKey);
 
   const transactionsStorageKey = `txs.${state.currentWallet.address}.${newNetwork.net}`;
+
   db.remove(transactionsStorageKey);
 }
 
@@ -238,6 +245,7 @@ function setShowSendAddressModal(state, value) {
 
 function setShowLoginToWalletModal(state, wallet) {
   const show = wallet !== null;
+
   state.showLoginToWalletModal = show;
   state.currentLoginToWallet = wallet;
 }

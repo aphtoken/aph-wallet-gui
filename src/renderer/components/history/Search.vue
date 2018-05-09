@@ -58,14 +58,17 @@ export default {
       if (this.selectedDateRange === 'custom') {
         this.$refs.fromDate.setDay(this.fromDate);
         this.$refs.toDate.setDay(this.toDate);
+
         return;
       } else if (this.selectedDateRange === 'all') {
         this.fromDate = null;
         this.toDate = null;
+
         return;
       }
 
       const daysBack = Number.parseInt(this.selectedDateRange, 10);
+
       this.fromDate = moment().startOf('day').subtract(daysBack, 'days');
       this.toDate = moment().startOf('day');
     },

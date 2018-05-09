@@ -72,6 +72,7 @@ export default {
           address: contact.address,
         });
       });
+
       return list;
     },
   },
@@ -89,6 +90,7 @@ export default {
 
       // this is a hack but not sure how to inform vue to read filteredContacts again
       const search = this.searchBy;
+
       this.searchBy = null;
       this.searchBy = search;
     },

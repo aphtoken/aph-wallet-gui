@@ -34,16 +34,19 @@ export default {
     const gasClaim = {
       step: 0,
     };
+
     store.commit('setGasClaim', gasClaim);
     store.commit('setShowClaimGasModal', true);
 
     lastClaimSent = new Date();
+
     return this.fetchHoldings(currentWallet.address, 'NEO')
       .then((h) => {
         const neoAmount = h.holdings[0].balance;
         const callback = () => {
           gasClaim.step = 2;
         };
+
         gasClaim.neoTransferAmount = neoAmount;
         gasClaim.step = 1;
 
@@ -103,6 +106,7 @@ export default {
           .sync();
 
         wallets.openSavedWallet(name, passphrase);
+
         return resolve(_.merge(account, { encryptedWIF, passphrase }));
       } catch (e) {
         return reject('An error occured while trying to generate a new wallet.');
@@ -148,9 +152,11 @@ export default {
                 name: b.asset === NEO_ASSET_ID ? 'NEO' : 'GAS',
                 symbol: b.asset === NEO_ASSET_ID ? 'NEO' : 'GAS',
               };
+
               if (restrictToSymbol && h.symbol !== restrictToSymbol) {
                 return;
               }
+
               if (h.symbol === 'NEO') {
                 promises.push(api.loadBalance(api.getMaxClaimAmountFrom, {
                   address: currentWallet.address,
@@ -311,6 +317,7 @@ export default {
                   symbol: t.symbol,
                 };
                 let isDefaultToken = false;
+
                 defaultList.forEach((defaultToken) => {
                   if (defaultToken.assetId === token.assetId) {
                     isDefaultToken = true;
@@ -340,6 +347,7 @@ export default {
       try {
         /* eslint-disable max-len */
         const requestUrl = `${currentNetwork.aph}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}&fromBlock=${fromBlock}&toBlock=${toBlock}`;
+
         /* eslint-enable max-len */
         return axios.get(requestUrl)
           .then((res) => {
@@ -356,6 +364,7 @@ export default {
           });
       } catch (e) {
         alerts.exception(e);
+
         return resolve({
           data: {
             transfers: [],
@@ -399,10 +408,12 @@ export default {
                 });
 
                 const promises = [];
+
                 res.forEach((t) => {
                   if (fromBlock && t.blockHeight < fromBlock) {
                     return;
                   }
+
                   if (toBlock && t.blockHeight > toBlock) {
                     return;
                   }
@@ -416,6 +427,7 @@ export default {
                         && transactionDetails.blocktime < fromDate.unix()) {
                         return;
                       }
+
                       if (toDate
                         && transactionDetails.blocktime > toDate.unix()) {
                         return;
@@ -432,6 +444,7 @@ export default {
                             outNEO = outNEO.plus(i.value);
                             movedNEO = true;
                           }
+
                           if (i.address === address && i.symbol === 'GAS') {
                             outGAS = outGAS.plus(i.value);
                             movedGAS = true;
@@ -440,11 +453,13 @@ export default {
 
                         let inNEO = toBigNumber(0);
                         let inGAS = toBigNumber(0);
+
                         transactionDetails.vout.forEach((o) => {
                           if (o.address === address && o.symbol === 'NEO') {
                             inNEO = inNEO.plus(o.value);
                             movedNEO = true;
                           }
+
                           if (o.address === address && o.symbol === 'GAS') {
                             inGAS = inGAS.plus(o.value);
                             movedGAS = true;
@@ -457,6 +472,7 @@ export default {
                         if (transactionDetails.type === 'InvocationTransaction' && neoChange.isZero()) {
                           movedNEO = false;
                         }
+
                         if (transactionDetails.type === 'InvocationTransaction' && gasChange.isZero()) {
                           movedGAS = false;
                         }
@@ -641,11 +657,13 @@ export default {
 
                 // pull information for inputs from their previous outputs
                 const inputPromises = [];
+
                 transaction.vin.forEach((input) => {
                   inputPromises.push(rpcClient
                     .getRawTransaction(input.txid, 1)
                     .then((inputTransaction) => {
                       const inputSource = inputTransaction.vout[input.vout];
+
                       if (inputSource.asset === NEO_ASSET_ID) {
                         input.symbol = 'NEO';
                       } else if (inputSource.asset === GAS_ASSET_ID) {
@@ -688,6 +706,7 @@ export default {
             }
           }, 1000);
         }, 15 * 1000); // wait a block for propagation
+
         return null;
       } catch (e) {
         return reject(e);
@@ -747,6 +766,7 @@ export default {
   sendFunds(toAddress, assetId, amount, isNep5, callback) {
     return new Promise((resolve, reject) => {
       let sendPromise = null;
+
       try {
         toAddress = toAddress.trim();
         if (wallet.isAddress(toAddress) === false) {
@@ -770,6 +790,7 @@ export default {
         }
       } catch (e) {
         console.log(e);
+
         return reject('Unable to send transaction.');
       }
 
@@ -797,6 +818,7 @@ export default {
           .catch((e) => {
             alerts.exception(e);
           });
+
         return sendPromise;
       } catch (e) {
         return reject(e);
@@ -838,6 +860,7 @@ export default {
       config.signingFunction = ledger.signWithLedger;
       config.address = currentWallet.address;
       const intents = api.makeIntent({ GAS: 0.00000001 }, config.address);
+
       config.intents = intents;
 
       return api.doInvoke(config)
@@ -849,6 +872,7 @@ export default {
 
     const account = new wallet.Account(currentWallet.wif);
     const intents = api.makeIntent({ GAS: 0.00000001 }, currentWallet.address);
+
     config.account = account;
     config.intents = intents;
 
@@ -867,6 +891,7 @@ export default {
     if (neoAmount > 0) {
       intentAmounts.NEO = neoAmount;
     }
+
     if (gasAmount > 0) {
       intentAmounts.GAS = gasAmount;
     }
@@ -879,6 +904,7 @@ export default {
       .then((balance) => {
         if (balance.net !== currentNetwork.net) {
           alerts.error('Unable to read address balance from neonDB or neoscan api. Please try again later.');
+
           return null;
         }
         const config = {

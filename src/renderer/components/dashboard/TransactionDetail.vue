@@ -83,6 +83,7 @@ export default {
       if (!this.$store.state.activeTransaction) {
         return 0;
       }
+
       return this.$store.state.currentNetwork.bestBlock.index - this.$store.state.activeTransaction.block;
     },
 
@@ -90,6 +91,7 @@ export default {
       if (!this.$store.state.activeTransaction) {
         return [];
       }
+
       return this.$store.state.activeTransaction.vin;
     },
 
@@ -97,6 +99,7 @@ export default {
       if (!this.$store.state.activeTransaction) {
         return [];
       }
+
       return this.$store.state.activeTransaction.vout;
     },
   },
