@@ -39,5 +39,6 @@ module.exports = {
     'sort-imports': ['error'],
     'sort-keys': ['error', 'asc', {'caseSensitive': true, 'natural': false}],
     'sort-vars': ['error'],
+    'padding-line-between-statements': ['error'],
   }
 }
