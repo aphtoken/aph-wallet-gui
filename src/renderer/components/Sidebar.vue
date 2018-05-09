@@ -132,8 +132,7 @@ export default {
       cursor: pointer;
       display: flex;
       font-size: toRem(17px);
-      padding: $space-sm 0;
-      height: toRem(70px);
+      height: toRem(58px);
 
       .icon {
         flex: 1;
@@ -185,9 +184,7 @@ export default {
       }
 
       @include lowRes() {
-        & + a {
-          margin-top: $space-sm;
-        }
+        height: toRem(50px);
       }
     }
   }
