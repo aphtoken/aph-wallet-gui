@@ -28,6 +28,12 @@
         </span>
         <span class="label">History</span>
       </router-link>
+      <router-link to="/authenticated/token-sale">
+        <span class="icon">
+          <aph-icon name="ico"></aph-icon>
+        </span>
+        <span class="label">Join ICO</span>
+      </router-link>
       <router-link to="/authenticated/settings">
         <span class="icon">
           <aph-icon name="settings"></aph-icon>
@@ -126,8 +132,7 @@ export default {
       cursor: pointer;
       display: flex;
       font-size: toRem(17px);
-      padding: $space-sm 0;
-      height: toRem(70px);
+      height: toRem(58px);
 
       .icon {
         flex: 1;
@@ -144,6 +149,10 @@ export default {
 
           &.wallet {
             height: toRem(35px);
+          }
+
+          &.ico {
+            height: toRem(42px);
           }
 
           &.history {
@@ -175,9 +184,7 @@ export default {
       }
 
       @include lowRes() {
-        & + a {
-          margin-top: $space-sm;
-        }
+        height: toRem(50px);
       }
     }
   }

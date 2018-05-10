@@ -103,14 +103,13 @@ export default {
   }
 
   .body {
-    color: white;
-    line-height: toRem(20px);
     margin: 0 auto;
     max-width: toRem(850px);
     padding: 0 $space-xl 0;
     text-align: center;
 
     p {
+      color: white;
       line-height: 150%;
       margin: 0;
 

@@ -129,6 +129,10 @@ export default new Router({
           ],
         },
         {
+          path: 'token-sale',
+          component: require('@/components/TokenSale').default,
+        },
+        {
           path: 'history',
           component: require('@/components/History').default,
           children: [

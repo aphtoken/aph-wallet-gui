@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Keyshape -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 51 51" text-rendering="geometricPrecision" shape-rendering="geometricPrecision" style="white-space: pre;">
+    <style>
+@keyframes a0_t { 0% { transform: translate(25.5px,25.5px) rotate(180deg) translate(-16.09px,-23.1px); } 50% { transform: translate(25.5px,25.5px) rotate(0deg) translate(-16.09px,-23.1px); } 100% { transform: translate(25.5px,25.5px) rotate(-180deg) translate(-16.09px,-23.1px); } }
+    </style>
+    <ellipse rx="25" ry="25" fill="none" stroke="#4c2a91" stroke-width="0.15" transform="translate(25.5,25.5)"/>
+    <path d="M16.59,47.6C16.7922,47.6,16.9745,47.7218,17.0519,47.9087C17.1293,48.0955,17.0865,48.3105,16.9435,48.4536C16.8005,48.5965,16.5855,48.6393,16.3987,48.5619C16.2118,48.4846,16.09,48.3023,16.09,48.1C16.09,48.0344,16.1029,47.9693,16.1281,47.9087C16.1532,47.848,16.19,47.7929,16.2364,47.7464C16.2829,47.7,16.338,47.6632,16.3987,47.6381C16.4593,47.613,16.5243,47.6,16.59,47.6Z" fill="#4c2a91" fill-rule="evenodd" transform="translate(25.5,25.5) rotate(180) translate(-16.09,-23.1)" style="animation: a0_t 24s linear infinite both;"/>
+</svg>
