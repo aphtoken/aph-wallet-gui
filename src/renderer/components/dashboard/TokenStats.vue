@@ -135,16 +135,15 @@ export default {
       .value {
         color: $darker-grey;
         font-family: GilroyMedium;
-        font-size: toRem(20px);
+        font-size: toRem(16px);
 
         .currency {
           margin-left: $space-xs;
         }
       }
 
-      .value {
-        font-size: toRem(16px);
-        margin-bottom: $space;
+      .claim-gas-button {
+        margin-top: $space;
       }
 
       &.small {
@@ -169,7 +168,7 @@ export default {
       }
 
       .balance {
-        .name, .amount, .value {
+        .name, .amount {
           margin-bottom: $space-xs;
         }
 
@@ -179,6 +178,10 @@ export default {
           .currency {
             font-size: toRem(16px);
           }
+        }
+
+        .claim-gas-button {
+          margin-top: $space-sm;
         }
       }
     }
