@@ -48,11 +48,11 @@ $btn-circle-size: toRem(65px);
   width: 100%;
 
   &:hover {
-    background: $purple-hover;
+    background-color: $purple-hover;
   }
 
   &.disabled, &:disabled {
-    background: rgba($purple-hover, 0.5);
+    background-color: rgba($purple-hover, 0.5);
     color: white;
     cursor: not-allowed;
   }
