@@ -596,7 +596,7 @@ export default {
     return new Promise((resolve) => {
       try {
         /* eslint-disable max-len */
-        const requestUrl = `${currentNetwork.aph}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : null}&toTimestamp=${toDate ? toDate.unix() : null}&fromBlock=${fromBlock}&toBlock=${toBlock}`;
+        const requestUrl = `${currentNetwork.aph}/transfers/${address}?fromTimestamp=${fromDate ? fromDate.unix() : ''}&toTimestamp=${toDate ? toDate.unix() : ''}&fromBlock=${fromBlock ? fromBlock.toString() : ''}&toBlock=${toBlock ? toBlock.toString() : ''}`;
         /* eslint-enable max-len */
         return axios.get(requestUrl)
           .then((res) => {
