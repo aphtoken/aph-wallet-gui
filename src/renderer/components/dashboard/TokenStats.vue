@@ -13,12 +13,7 @@
         <div class="name">{{ $store.state.statsToken.name }}</div>
         <div class="amount">{{ formattedAmount }}<span class="currency">{{ $store.state.statsToken.symbol }}</span></div>
         <div class="value">{{ $formatMoney($store.state.statsToken.totalValue, null, `${$store.state.currencySymbol }0.00`) }}<span class="currency">{{ $store.state.currency }}</span></div>
-        <div class="claim-gas" v-if="$store.state.statsToken.availableToClaim">
-          <span class="label">Gas Available</span>
-          <span class="amount">{{ $formatNumber($store.state.statsToken.availableToClaim) }}</span>
-          <span class="claiming" v-if="$isPending('claimGas')">Claiming...</span>
-          <a class="claim" href="#" @click.prevent="claim" v-else>Claim</a>
-        </div>
+        <claim-gas-button v-if="$store.state.statsToken.availableToClaim"></claim-gas-button>
       </div>
     </div>
     <div class="footer">
@@ -39,9 +34,15 @@
 </template>
 
 <script>
+import ClaimGasButton from './ClaimGasButton';
+
 const AMOUNT_LENGTH_LIMIT = 15;
 
 export default {
+  components: {
+    ClaimGasButton,
+  },
+
   computed: {
     balanceClass() {
       return this.formattedAmount.length > AMOUNT_LENGTH_LIMIT ? ['balance', 'small'] : ['balance'];
@@ -49,12 +50,6 @@ export default {
 
     formattedAmount() {
       return this.$formatNumber(this.$store.state.statsToken.balance);
-    },
-  },
-
-  methods: {
-    claim() {
-      this.$store.dispatch('claimGas');
     },
   },
 };
@@ -140,38 +135,15 @@ export default {
       .value {
         color: $darker-grey;
         font-family: GilroyMedium;
-        font-size: toRem(20px);
+        font-size: toRem(16px);
 
         .currency {
           margin-left: $space-xs;
         }
       }
 
-      .value {
-        font-size: toRem(16px);
-        margin-bottom: $space;
-      }
-
-      .claim-gas {
-        flex: 2;
-        text-align: center;
-
-        .amount {
-          @extend %small-uppercase-grey-label-dark;
-
-          color: $dark;
-          margin: 0 $space-sm;
-        }
-
-        .claim {
-          font-family: GilroyMedium;
-          font-size: toRem(12px);
-          text-transform: uppercase;
-        }
-
-        .claiming {
-          @extend %small-uppercase-grey-label;
-        }
+      .claim-gas-button {
+        margin-top: $space;
       }
 
       &.small {
@@ -196,7 +168,7 @@ export default {
       }
 
       .balance {
-        .name, .amount, .value {
+        .name, .amount {
           margin-bottom: $space-xs;
         }
 
@@ -206,6 +178,10 @@ export default {
           .currency {
             font-size: toRem(16px);
           }
+        }
+
+        .claim-gas-button {
+          margin-top: $space-sm;
         }
       }
     }
