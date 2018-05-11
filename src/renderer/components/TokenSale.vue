@@ -42,10 +42,20 @@
 
 <script>
 import { BigNumber } from 'bignumber.js';
+let loadTransactionsIntervalId;
 
 export default {
   beforeDestroy() {
     this.$store.state.showPortfolioHeader = true;
+    clearInterval(loadTransactionsIntervalId);
+  },
+
+  beforeMount() {
+    this.loadTransactions();
+
+    loadTransactionsIntervalId = setInterval(() => {
+      this.loadTransactions();
+    }, this.$constants.intervals.POLLING);
   },
 
   computed: {
@@ -190,7 +200,8 @@ export default {
       this.$services.neo.participateInTokenSale(icoScriptHash,
         this.currency.asset, this.amount)
         .then((res) => {
-          console.log(res);
+          this.$services.alerts.success(
+            `Token Sale Participation Successful. Your Balance of ${res.symbol} is now ${res.balance}`);
           this.sending = false;
         })
         .catch((e) => {
@@ -198,6 +209,10 @@ export default {
           this.sending = false;
           this.$services.alerts.error(e);
         });
+    },
+
+    loadTransactions() {
+      this.$store.dispatch('fetchRecentTransactions');
     },
   },
 

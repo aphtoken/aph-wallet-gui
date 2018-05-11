@@ -985,12 +985,37 @@ export default {
               setTimeout(() => callback(), timeouts.NEO_API_CALL);
             }
 
-            return this.monitorTransactionConfirmation(res.tx.hash)
-              .then(() => {
-                return resolve(res.tx);
+            return api.nep5.getToken(currentNetwork.rpc, scriptHash, currentWallet.address)
+              .then((token) => {
+                tokens.add({
+                  symbol: token.symbol,
+                  assetId: scriptHash.replace('0x', ''),
+                  isCustom: true,
+                  network: currentNetwork.net,
+                });
+
+                this.monitorTransactionConfirmation(res.tx)
+                  .then(() => {
+                    api.nep5.getToken(currentNetwork.rpc, scriptHash, currentWallet.address)
+                      .then((token) => {
+                        resolve({
+                          name: token.name,
+                          symbol: token.symbol,
+                          decimals: token.decimals,
+                          totalSupply: token.totalSupply,
+                          balance: token.balance,
+                        });
+                      })
+                      .catch((e) => {
+                        reject(e);
+                      });
+                  })
+                  .catch((e) => {
+                    reject(e);
+                  });
               })
-              .catch((e) => {
-                reject(e);
+              .catch(() => {
+                resolve({ balance: 0 });
               });
           })
           .catch((e) => {
