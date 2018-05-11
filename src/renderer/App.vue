@@ -81,39 +81,7 @@ export default {
 </script>
 
 <style lang="scss">
-::-webkit-scrollbar {
-  width: $border-width;
-}
-
-::-webkit-scrollbar-thumb:vertical {
-  background: $purple;
-}
-
-html, body {
-  color: $dark;
-  font-family: Gilroy;
-  font-size: $font-size;
-  height: 100%;
-}
-
-* {
-  box-sizing: border-box;
-  letter-spacing: $letter-spacing;
-  line-height: inherit;
-}
-
-a {
-  color: $purple;
-  text-decoration: none;
-
-  &:hover {
-    color: $purple-hover;
-  }
-
-  &:focus {
-    outline: none;
-  }
-}
+@import 'assets/scss/base';
 
 #app, #app > * {
   height: 100%;
@@ -154,49 +122,6 @@ a {
     &:hover {
       color: white;
     }
-  }
-}
-
-.vue-flash-container {
-  bottom: $space;
-  position: absolute;
-  right: $space;
-  width: toRem(500px);
-  z-index: 10000;
-}
-
-.flash__message {
-  background: rgba($dark, .9) !important;
-  border-radius: $border-radius;
-  border: none;
-  line-height: 150%;
-  margin: 0;
-  padding: $space-lg;
-  word-wrap: break-word;
-
-
-  .flash__close-button {
-    display: none;
-  }
-
-  &.error {
-    color: $red;
-  }
-
-  &.info {
-    color: $purple;
-  }
-
-  &.success {
-    color: $green;
-  }
-
-  &.warning {
-    color: $orange;
-  }
-
-  & + .flash__message {
-    margin-top: $space;
   }
 }
 </style>

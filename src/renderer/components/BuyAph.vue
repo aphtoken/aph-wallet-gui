@@ -110,7 +110,7 @@ export default {
 
     p {
       color: white;
-      line-height: 150%;
+      line-height: $copy-line-height;
       margin: 0;
 
       & + P {

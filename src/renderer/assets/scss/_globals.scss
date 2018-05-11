@@ -1,6 +1,5 @@
 $font-size: 14px;
-
-@import "~normalize.css/normalize";
+$font-size-low-res: 12.5px;
 
 @import 'functions';
 @import 'mixins';
@@ -11,4 +10,3 @@ $font-size: 14px;
 @import 'print';
 @import 'tiles';
 @import 'type';
-@import 'lowres';

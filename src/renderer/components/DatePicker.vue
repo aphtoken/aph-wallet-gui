@@ -294,10 +294,6 @@ export default {
             background-color: $purple;
             color: white;
           }
-
-          @include lowRes() {
-            line-height: initial;
-          }
         }
       }
     }
