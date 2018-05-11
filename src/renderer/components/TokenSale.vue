@@ -193,10 +193,10 @@ export default {
           console.log(res);
           this.sending = false;
         })
-        .catch(({ message }) => {
-          console.log(message);
+        .catch((e) => {
+          console.log(e);
           this.sending = false;
-          this.$services.alerts.error(message);
+          this.$services.alerts.error(e);
         });
     },
   },
