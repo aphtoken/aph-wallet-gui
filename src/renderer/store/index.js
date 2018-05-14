@@ -44,6 +44,8 @@ const state = {
   statsToken: null,
   version: pjson.version,
   wallets: [],
+  transactionDetails: [],
+  nep5Balances: [],
 };
 
 const store = new Vuex.Store({
