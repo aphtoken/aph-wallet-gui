@@ -105,7 +105,7 @@ export default {
 
     loadTransactionsIntervalId = setInterval(() => {
       this.loadTransactions();
-    }, this.$constants.intervals.POLLING);
+    }, this.$constants.intervals.TRANSACTIONS_POLLING);
   },
 
   data() {

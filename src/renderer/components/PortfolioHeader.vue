@@ -72,7 +72,7 @@ export default {
 
     fetchPortfolioIntervalId = setInterval(() => {
       this.fetchPortfolio();
-    }, this.$constants.intervals.POLLING);
+    }, this.$constants.intervals.HOLDINGS_POLLING);
   },
 
   beforeDestroy() {

@@ -64,7 +64,7 @@ export default {
 
     loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldings();
-    }, this.$constants.intervals.POLLING);
+    }, this.$constants.intervals.HOLDINGS_POLLING);
   },
 
   beforeDestroy() {

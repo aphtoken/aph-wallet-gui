@@ -89,6 +89,7 @@ export default {
         done: () => {
           this.$store.dispatch('fetchPortfolio');
           this.onCancel();
+          this.$store.commit('handleLogout');
         },
       });
     },
