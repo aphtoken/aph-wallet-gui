@@ -246,6 +246,15 @@ export default {
                           from: t.from,
                           to: t.to,
                         });
+
+                        const inMemoryHolding = _.find(store.state.nep5Balances, (o) => {
+                          return o.symbol === t.symbol;
+                        });
+                        if (inMemoryHolding) {
+                          // set in memory holding balance to null so it will pick up the new balance
+                          // if it was skipping it before because we didn't hold any
+                          inMemoryHolding.balance = null;
+                        }
                       }
                     }));
                 });
@@ -309,55 +318,62 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        return rpcClient.getBlockCount()
-          .then((blockCount) => {
-            rpcClient.getRawTransaction(hash, 1)
-              .then((transaction) => {
-                transaction.currentBlockHeight = blockCount;
-                if (transaction.confirmations > 0) {
-                  transaction.confirmed = true;
-                  transaction.block = blockCount - transaction.confirmations;
-                } else {
-                  transaction.confirmed = false;
-                }
+        const inMemory = _.find(store.state.transactionDetails, (o) => {
+          return o.txid.indexOf(hash) > -1;
+        });
+        if (inMemory) {
+          inMemory.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
+          inMemory.confirmations = inMemory.currentBlockHeight - inMemory.block;
+          return resolve(inMemory);
+        }
 
+        return rpcClient.getRawTransaction(hash, 1)
+          .then((transaction) => {
+            transaction.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
+            if (transaction.confirmations > 0) {
+              transaction.confirmed = true;
+              transaction.block = transaction.currentBlockHeight - transaction.confirmations;
+            } else {
+              transaction.confirmed = false;
+            }
 
-                // set output symbols based on asset ids
-                transaction.vout.forEach((output) => {
-                  if (output.asset === NEO_ASSET_ID) {
-                    output.symbol = 'NEO';
-                  } else if (output.asset === GAS_ASSET_ID) {
-                    output.symbol = 'GAS';
+            // set output symbols based on asset ids
+            transaction.vout.forEach((output) => {
+              if (output.asset === NEO_ASSET_ID) {
+                output.symbol = 'NEO';
+              } else if (output.asset === GAS_ASSET_ID) {
+                output.symbol = 'GAS';
+              }
+            });
+
+            // pull information for inputs from their previous outputs
+            const inputPromises = [];
+            transaction.vin.forEach((input) => {
+              inputPromises.push(rpcClient
+                .getRawTransaction(input.txid, 1)
+                .then((inputTransaction) => {
+                  const inputSource = inputTransaction.vout[input.vout];
+                  if (inputSource.asset === NEO_ASSET_ID) {
+                    input.symbol = 'NEO';
+                  } else if (inputSource.asset === GAS_ASSET_ID) {
+                    input.symbol = 'GAS';
                   }
-                });
+                  input.address = inputSource.address;
+                  input.value = inputSource.value;
+                })
+                .catch(e => reject(e)));
+            });
 
-                // pull information for inputs from their previous outputs
-                const inputPromises = [];
-                transaction.vin.forEach((input) => {
-                  inputPromises.push(rpcClient
-                    .getRawTransaction(input.txid, 1)
-                    .then((inputTransaction) => {
-                      const inputSource = inputTransaction.vout[input.vout];
-                      if (inputSource.asset === NEO_ASSET_ID) {
-                        input.symbol = 'NEO';
-                      } else if (inputSource.asset === GAS_ASSET_ID) {
-                        input.symbol = 'GAS';
-                      }
-                      input.address = inputSource.address;
-                      input.value = inputSource.value;
-                    })
-                    .catch(e => reject(e)));
-                });
-
-                Promise.all(inputPromises)
-                  .then(() => resolve(transaction))
-                  .catch(e => reject(e));
+            Promise.all(inputPromises)
+              .then(() => {
+                store.state.transactionDetails.push(transaction);
+                resolve(transaction);
               })
-              .catch((e) => {
-                reject(new Error(`NEO RPC Network Error: ${e.message}`));
-              });
+              .catch(e => reject(e));
           })
-          .catch(() => resolve(null));
+          .catch((e) => {
+            reject(new Error(`NEO RPC Network Error: ${e.message}`));
+          });
       } catch (e) {
         return reject(e);
       }
@@ -425,22 +441,37 @@ export default {
               if (nep5.network !== currentNetwork.net) {
                 return;
               }
+              const inMemory = _.find(store.state.nep5Balances, (o) => {
+                return o.asset === nep5.assetId;
+              });
+              if (inMemory && inMemory.balance === 0) {
+                if (inMemory.balance > 0 || nep5.isCustom === true) {
+                  if (restrictToSymbol && inMemory.symbol !== restrictToSymbol) {
+                    return;
+                  }
+
+                  holdings.push(inMemory);
+                }
+                return;
+              }
+
               promises.push(this.fetchNEP5Balance(address, nep5.assetId)
                 .then((val) => {
                   if (!val.symbol) {
                     return; // token not found on this network
                   }
 
-                  if (val.balance > 0 || nep5.isCustom === true) {
-                    const h = {
-                      asset: nep5.assetId,
-                      balance: val.balance,
-                      symbol: val.symbol,
-                      name: val.name,
-                      isNep5: true,
-                      isCustom: nep5.isCustom,
-                    };
+                  const h = {
+                    asset: nep5.assetId,
+                    balance: val.balance,
+                    symbol: val.symbol,
+                    name: val.name,
+                    isNep5: true,
+                    isCustom: nep5.isCustom,
+                  };
+                  store.state.nep5Balances.push(h);
 
+                  if (val.balance > 0 || nep5.isCustom === true) {
                     if (restrictToSymbol && h.symbol !== restrictToSymbol) {
                       return;
                     }
@@ -659,12 +690,12 @@ export default {
         sendPromise
           .then((res) => {
             if (!res || !res.tx || !res.response) {
-              this.$store.commit('setSendInProgress', false);
+              store.commit('setSendInProgress', false);
               return reject('Failed to create transaction.');
             }
 
             if (res.response.result !== true) {
-              this.$store.commit('setSendInProgress', false);
+              store.commit('setSendInProgress', false);
               return reject('Transaction rejected by NEO network.');
             }
 
@@ -684,12 +715,12 @@ export default {
               });
           })
           .catch((e) => {
-            this.$store.commit('setSendInProgress', false);
+            store.commit('setSendInProgress', false);
             alerts.exception(e);
           });
         return sendPromise;
       } catch (e) {
-        this.$store.commit('setSendInProgress', false);
+        store.commit('setSendInProgress', false);
         return reject(e);
       }
     });
@@ -985,12 +1016,37 @@ export default {
               setTimeout(() => callback(), timeouts.NEO_API_CALL);
             }
 
-            return this.monitorTransactionConfirmation(res.tx.hash)
-              .then(() => {
-                return resolve(res.tx);
+            return api.nep5.getToken(currentNetwork.rpc, scriptHash, currentWallet.address)
+              .then((token) => {
+                tokens.add({
+                  symbol: token.symbol,
+                  assetId: scriptHash.replace('0x', ''),
+                  isCustom: true,
+                  network: currentNetwork.net,
+                });
+
+                this.monitorTransactionConfirmation(res.tx)
+                  .then(() => {
+                    api.nep5.getToken(currentNetwork.rpc, scriptHash, currentWallet.address)
+                      .then((token) => {
+                        resolve({
+                          name: token.name,
+                          symbol: token.symbol,
+                          decimals: token.decimals,
+                          totalSupply: token.totalSupply,
+                          balance: token.balance,
+                        });
+                      })
+                      .catch((e) => {
+                        reject(e);
+                      });
+                  })
+                  .catch((e) => {
+                    reject(e);
+                  });
               })
-              .catch((e) => {
-                reject(e);
+              .catch(() => {
+                resolve({ balance: 0 });
               });
           })
           .catch((e) => {

@@ -70,12 +70,18 @@ function handleLogout(state) {
   state.holdings = [];
   state.recentTransactions = [];
   state.searchTransactions = [];
+  state.transactionDetails = [];
+  state.nep5Balances = [];
+  state.sendInProgress = false;
 }
 
 function handleNetworkChange(state) {
   state.holdings = [];
   state.recentTransactions = [];
   state.searchTransactions = [];
+  state.transactionDetails = [];
+  state.nep5Balances = [];
+  state.sendInProgress = false;
 }
 
 function resetRequests(state) {
