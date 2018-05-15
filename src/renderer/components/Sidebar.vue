@@ -117,6 +117,10 @@ export default {
         fill: white;
       }
     }
+
+    @include lowRes() {
+      padding-bottom: $space-lg;
+    }
   }
 
   .link-list {

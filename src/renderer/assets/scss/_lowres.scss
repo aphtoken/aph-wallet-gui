@@ -1,9 +1,0 @@
-@include lowRes() {
-  html, body {
-    font-size: 12.5px !important;
-  }
-
-  #authenticated-wrapper > #sidebar {
-    width: toRem(240px);
-  }
-}

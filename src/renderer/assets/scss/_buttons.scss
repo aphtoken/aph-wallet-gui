@@ -1,5 +1,9 @@
 $btn-circle-size: toRem(65px);
 
+button, input, optgroup, select, textarea {
+  line-height: normal;
+}
+
 %btn-circle {
   @include transition(background-color, border, box-shadow, color);
 

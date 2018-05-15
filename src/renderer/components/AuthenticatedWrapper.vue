@@ -46,6 +46,10 @@ export default {
   > #sidebar {
     flex: none;
     width: $left-sidebar-width;
+
+    @include lowRes() {
+      width: toRem(240px);
+    }
   }
 
   > .content {
