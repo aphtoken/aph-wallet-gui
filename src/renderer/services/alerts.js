@@ -21,6 +21,10 @@ function errorAlreadyExists(content) {
   });
 }
 
+function isNetworkError(message) {
+  return message.indedOf('Network Error') > -1;
+}
+
 function shouldHideNetworkError() {
   return moment.utc().diff(moment.unix(store.state.lastReceivedBlock), 'seconds') < NETWORK_ERROR_THRESHOLD_SECONDS;
 }
@@ -55,18 +59,12 @@ export default {
     });
   },
 
-  exception(e) {
-    console.log(e);
-    if (!e.message) {
-      this.error(e);
-    } else {
-      if (e.message === 'Network Error') {
-        // absorb these errors, so we don't constantly alert the user if they are not online
-        // maybe some other kind of offline indicator?
-        return;
-      }
-      this.error(e.message);
+  exception(message) {
+    if (errorAlreadyExists(message) || isNetworkError(message)) {
+      return;
     }
+
+    this.error(message);
   },
 
   networkException(message) {

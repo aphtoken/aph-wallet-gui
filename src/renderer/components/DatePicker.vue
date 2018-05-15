@@ -39,8 +39,8 @@ export default {
   },
 
   beforeMount() {
-    document.addEventListener('click', (e) => {
-      if (!this.$el || !this.$el.contains(e.target)) {
+    document.addEventListener('click', (event) => {
+      if (!this.$el || !this.$el.contains(event.target)) {
         this.close();
       }
     });

@@ -40,7 +40,8 @@ export default {
   watch: {
     selectedCurrency(currency) {
       this.$services.settings.setCurrency(currency);
-      this.$store.dispatch('fetchPortfolio');
+      this.$store.commit('HandleCurrencyChange');
+      this.$store.dispatch('fetchAll');
     },
 
     selectedNetwork(network) {
@@ -50,7 +51,7 @@ export default {
 
       this.$services.network.setSelectedNetwork(network);
       this.$store.commit('handleNetworkChange');
-      this.$store.dispatch('fetchPortfolio');
+      this.$store.dispatch('fetchAll');
     },
   },
 };

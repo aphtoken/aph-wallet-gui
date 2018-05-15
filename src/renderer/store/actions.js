@@ -11,6 +11,7 @@ export {
   claimGas,
   createWallet,
   deleteWallet,
+  fetchAll,
   fetchHoldings,
   fetchLatestVersion,
   fetchPortfolio,
@@ -101,6 +102,12 @@ function createWallet({ commit }, { name, passphrase, passphraseConfirm }) {
         commit('failRequest', { identifier: 'createWallet', message });
       });
   }, timeouts.NEO_API_CALL);
+}
+
+function fetchAll({ dispatch }) {
+  dispatch('fetchHoldings');
+  dispatch('fetchPortfolio');
+  dispatch('fetchRecentTransactions');
 }
 
 async function fetchCachedData(id, defaultValue) {
@@ -225,8 +232,8 @@ function openEncryptedKey({ commit }, { encryptedKey, passphrase, done }) {
         done();
         commit('endRequest', { identifier: 'openEncryptedKey' });
       })
-      .catch((e) => {
-        commit('failRequest', { identifier: 'openEncryptedKey', message: e });
+      .catch((message) => {
+        commit('failRequest', { identifier: 'openEncryptedKey', message });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -239,9 +246,9 @@ function verifyLedgerConnection({ commit }, { done, failed }) {
       done();
       commit('endRequest', { identifier: 'verifyLedgerConnection' });
     })
-    .catch((e) => {
-      failed(e);
-      commit('failRequest', { identifier: 'verifyLedgerConnection', message: e });
+    .catch((message) => {
+      failed(message);
+      commit('failRequest', { identifier: 'verifyLedgerConnection', message });
     });
 }
 
@@ -264,24 +271,24 @@ function openLedger({ commit }, { done, failed }) {
 
                   commit('endRequest', { identifier: 'openLedger' });
                 })
-                .catch((e) => {
-                  failed(e);
-                  commit('failRequest', { identifier: 'openLedger', message: e });
+                .catch((message) => {
+                  failed(message);
+                  commit('failRequest', { identifier: 'openLedger', message });
                 });
             })
-            .catch((e) => {
-              failed(e);
-              commit('failRequest', { identifier: 'openLedger', message: e });
+            .catch((message) => {
+              failed(message);
+              commit('failRequest', { identifier: 'openLedger', message });
             });
         })
-        .catch((e) => {
-          failed(e);
-          commit('failRequest', { identifier: 'openLedger', message: e });
+        .catch((message) => {
+          failed(message);
+          commit('failRequest', { identifier: 'openLedger', message });
         });
     })
-    .catch((e) => {
-      failed(e);
-      commit('failRequest', { identifier: 'openLedger', message: e });
+    .catch((message) => {
+      failed(message);
+      commit('failRequest', { identifier: 'openLedger', message });
     });
 }
 
@@ -294,8 +301,8 @@ function openPrivateKey({ commit }, { wif, done }) {
         done();
         commit('endRequest', { identifier: 'openPrivateKey' });
       })
-      .catch((e) => {
-        commit('failRequest', { identifier: 'openPrivateKey', message: e });
+      .catch((message) => {
+        commit('failRequest', { identifier: 'openPrivateKey', message });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -310,8 +317,8 @@ function openSavedWallet({ commit }, { name, passphrase, done }) {
         commit('clearActiveTransaction');
         commit('endRequest', { identifier: 'openSavedWallet' });
       })
-      .catch((e) => {
-        commit('failRequest', { identifier: 'openSavedWallet', message: e });
+      .catch((message) => {
+        commit('failRequest', { identifier: 'openSavedWallet', message });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -326,8 +333,8 @@ function importWallet({ commit }, { name, wif, passphrase, done }) {
         done();
         commit('endRequest', { identifier: 'importWallet' });
       })
-      .catch((e) => {
-        commit('failRequest', { identifier: 'importWallet', message: e });
+      .catch((message) => {
+        commit('failRequest', { identifier: 'importWallet', message });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -342,9 +349,9 @@ function deleteWallet({ commit }, { name, done }) {
         done();
         commit('endRequest', { identifier: 'deleteWallet' });
       })
-      .catch((e) => {
-        alerts.exception(e);
-        commit('failRequest', { identifier: 'deleteWallet', message: e });
+      .catch((message) => {
+        alerts.exception(message);
+        commit('failRequest', { identifier: 'deleteWallet', message });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -352,14 +359,14 @@ function deleteWallet({ commit }, { name, done }) {
 function fetchLatestVersion({ commit }) {
   commit('startRequest', { identifier: 'fetchLatestVersion' });
 
-  return axios.get(`${network.getSelectedNetwork().aph}/LatestWalletInfo`)
+  return axios.get(`${network.getSelectedNetwork().aph}/LatestWalletInfo-asdfadsf-`)
     .then(({ data }) => {
       commit('setLatestVersion', data);
       commit('endRequest', { identifier: 'fetchLatestVersion' });
     })
-    .catch((e) => {
-      console.log(e);
-      commit('failRequest', { identifier: 'fetchLatestVersion', message: e });
+    .catch(({ message }) => {
+      console.log(message);
+      commit('failRequest', { identifier: 'fetchLatestVersion', message });
     });
 }
 

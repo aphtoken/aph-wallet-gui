@@ -34,7 +34,7 @@
           </div>
         </div>
       </div>
-      <div class="waiting" v-if="$store.state.sendInProgress === true">Waiting for transaction to appear on 3rd party block explorer....</div>
+      <div class="waiting" v-if="$store.state.sendInProgress">Waiting for transaction to appear on 3rd party block explorer....</div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
         <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
@@ -68,13 +68,11 @@
 
 <script>
 import { BigNumber } from 'bignumber.js';
+
 let sendTimeoutIntervalId;
 let storeUnwatch;
 
 export default {
-  components: {
-  },
-
   computed: {
     currencies() {
       return this.$store.state.holdings.reduce(
@@ -171,15 +169,15 @@ export default {
           .then(() => {
             this.end();
           })
-          .catch((e) => {
+          .catch((message) => {
             this.sending = false;
-            this.$services.alerts.error(e);
+            this.$services.alerts.error(message);
             this.$store.commit('setSendInProgress', false);
           });
       }, this.$constants.timeouts.NEO_API_CALL);
 
       let transactionTimeout = this.$constants.timeouts.TRANSACTION;
-      if (this.$services.wallets.getCurrentWallet().isLedger === true) {
+      if (this.$services.wallets.getCurrentWallet().isLedger) {
         transactionTimeout = this.$constants.timeouts.TRANSACTION_WITH_HARDWARE;
       }
 
@@ -201,11 +199,11 @@ export default {
       this.showConfirmation = false;
       this.$router.push('/authenticated/dashboard');
 
-      if (this.$services.wallets.getCurrentWallet().isLedger === true) {
+      if (this.$services.wallets.getCurrentWallet().isLedger) {
         this.$services.ledger.close();
       }
 
-      this.$store.dispatch('fetchHoldings');
+      this.$store.dispatch('fetchAll');
       clearInterval(sendTimeoutIntervalId);
     },
   },
@@ -229,12 +227,13 @@ export default {
     storeUnwatch = this.$store.watch(
       () => {
         return this.$store.state.sendInProgress;
-      }, () => {
-        if (this.$store.state.sendInProgress === false
-          && this.sending === true) {
+      },
+      () => {
+        if (!this.$store.state.sendInProgress && this.sending) {
           this.end();
         }
-      });
+      },
+    );
   },
 
   beforeDestroy() {

@@ -16,7 +16,13 @@ import Sidebar from './Sidebar';
 import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
 import AphClaimGasModal from './modals/ClaimGasModal';
 
+let fetchAllIntervalId;
+
 export default {
+  beforeUnmount() {
+    clearInterval(fetchAllIntervalId);
+  },
+
   components: {
     PortfolioHeader,
     Sidebar,
@@ -33,6 +39,11 @@ export default {
 
   mounted() {
     this.$services.neo.fetchNEP5Tokens();
+
+    this.$store.dispatch('fetchAll');
+    fetchAllIntervalId = setInterval(() => {
+      this.$store.dispatch('fetchAll');
+    }, this.$constants.intervals.POLLING);
   },
 };
 </script>

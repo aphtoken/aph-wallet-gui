@@ -14,21 +14,7 @@
 </template>
 
 <script>
-let loadTransactionsIntervalId;
-
 export default {
-  beforeDestroy() {
-    clearInterval(loadTransactionsIntervalId);
-  },
-
-  beforeMount() {
-    this.loadTransactions();
-
-    loadTransactionsIntervalId = setInterval(() => {
-      this.loadTransactions();
-    }, this.$constants.intervals.POLLING);
-  },
-
   computed: {
     transactions() {
       return this.$store.state.recentTransactions
@@ -44,10 +30,6 @@ export default {
   methods: {
     isActive({ details }) {
       return _.get(this.$store.state.activeTransaction, 'txid') === details.txid;
-    },
-
-    loadTransactions() {
-      this.$store.dispatch('fetchRecentTransactions');
     },
 
     viewTransaction({ details }) {

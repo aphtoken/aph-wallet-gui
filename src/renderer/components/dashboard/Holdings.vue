@@ -10,7 +10,6 @@
 </template>
 
 <script>
-let loadHoldingsIntervalId;
 export default {
   computed: {
     holdings() {
@@ -25,10 +24,6 @@ export default {
       return _.get(this.$store.state.statsToken, 'symbol') === symbol;
     },
 
-    loadHoldings() {
-      this.$store.dispatch('fetchHoldings');
-    },
-
     viewHoldingDetail(holding) {
       if (this.$store.state.sendInProgress === true) {
         return;
@@ -37,18 +32,6 @@ export default {
       this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setStatsToken', holding);
     },
-  },
-
-  mounted() {
-    this.loadHoldings();
-
-    loadHoldingsIntervalId = setInterval(() => {
-      this.loadHoldings();
-    }, this.$constants.intervals.POLLING);
-  },
-
-  beforeDestroy() {
-    clearInterval(loadHoldingsIntervalId);
   },
 };
 </script>

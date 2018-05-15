@@ -4,6 +4,7 @@
     <router-view></router-view>
     <flash-message class="vue-flash-container"></flash-message>
     <div id="out-of-date" v-if="isOutOfDate">A new version is available. <a :href="newVersionDownloadUrl" :title="newVersionDownloadUrl" target="_blank">Click here</a> to download v{{this.$store.state.latestVersion.version}}.</div>
+    <div id="offline" v-else-if="!online">No network connection detected</div>
   </div>
 </template>
 
@@ -19,10 +20,10 @@ export default {
 
   beforeMount() {
     const shell = require('electron').shell;
-    document.addEventListener('click', (e) => {
-      if (e.target.tagName === 'A' && e.target.target === '_blank' && e.target.href.startsWith('http')) {
-        e.preventDefault();
-        shell.openExternal(e.target.href);
+    document.addEventListener('click', (event) => {
+      if (event.target.tagName === 'A' && event.target.target === '_blank' && event.target.href.startsWith('http')) {
+        event.preventDefault();
+        shell.openExternal(event.target.href);
       }
     });
 
@@ -133,6 +134,7 @@ a {
   width: 100%;
 }
 
+#offline,
 #out-of-date {
   background: rgba(black, 0.8);
   color: $red;
@@ -155,6 +157,10 @@ a {
       color: white;
     }
   }
+}
+
+#offline {
+  color: $orange;
 }
 
 .vue-flash-container {

@@ -66,8 +66,8 @@ export default {
               return o.symbol === symbol;
             }));
           });
-      } catch (e) {
-        return reject(e);
+      } catch ({ message }) {
+        return reject(message);
       }
     });
   },
@@ -119,13 +119,13 @@ export default {
             });
             resolve(returnData);
           })
-          .catch((e) => {
-            alerts.exception(e);
+          .catch(({ message }) => {
+            alerts.exception(message);
             resolve([]);
           });
-      } catch (e) {
-        alerts.exception(e);
-        return reject(e);
+      } catch ({ message }) {
+        alerts.exception(message);
+        return reject({ message });
       }
     });
   },

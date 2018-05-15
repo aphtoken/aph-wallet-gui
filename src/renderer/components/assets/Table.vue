@@ -12,7 +12,6 @@
 </template>
 
 <script>
-let loadHoldingsIntervalId;
 export default {
   computed: {
     filteredHoldings() {
@@ -44,31 +43,14 @@ export default {
   },
 
   methods: {
-    loadHoldings() {
-      this.$store.dispatch('fetchHoldings');
-    },
-
     remove(holding) {
       this.$services.tokens.remove(holding.asset, this.$store.state.currentNetwork.net);
       this.$services.alerts.success(`Removed ${holding.symbol}`);
-      this.loadHoldings();
     },
 
     showAddTokenModal() {
       this.$store.commit('setShowAddTokenModal', true);
     },
-  },
-
-  mounted() {
-    this.loadHoldings();
-
-    loadHoldingsIntervalId = setInterval(() => {
-      this.loadHoldings();
-    }, this.$constants.intervals.POLLING);
-  },
-
-  beforeDestroy() {
-    clearInterval(loadHoldingsIntervalId);
   },
 };
 </script>

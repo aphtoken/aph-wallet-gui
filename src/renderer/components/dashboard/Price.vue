@@ -204,23 +204,21 @@ export default {
           };
 
           this.chartData = {
-            labels: priceData.dates,
+            labels: _.get(priceData, 'dates', []),
             datasets: [
               {
                 backgroundColor: 'transparent',
                 borderColor: '#742BF0',
-                data: priceData.prices,
+                data: _.get(priceData, 'prices', []),
                 pointRadius: 0,
               },
             ],
           };
 
-          if (priceData.dates.length > 0 && this.$refs.chart) {
-            this.$refs.chart.render();
-          }
+          this.$refs.chart.render();
         })
-        .catch((e) => {
-          this.$services.alert.exception(e);
+        .catch(({ message }) => {
+          this.$services.alerts.exception(message);
         });
     },
   },

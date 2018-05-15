@@ -25,8 +25,8 @@ export default {
   },
 
   methods: {
-    copy(e) {
-      this.position(e);
+    copy(event) {
+      this.position(event);
       clipboard.writeText(this.text);
 
       setTimeout(() => {

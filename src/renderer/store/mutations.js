@@ -12,6 +12,7 @@ export {
   endRequest,
   failRequest,
   handleLogout,
+  HandleCurrencyChange,
   handleNetworkChange,
   resetRequests,
   setActiveTransaction,
@@ -67,6 +68,12 @@ function failRequest(state, payload) {
 }
 
 function handleLogout(state) {
+  state.holdings = [];
+  state.recentTransactions = [];
+  state.searchTransactions = [];
+}
+
+function HandleCurrencyChange(state) {
   state.holdings = [];
   state.recentTransactions = [];
   state.searchTransactions = [];
