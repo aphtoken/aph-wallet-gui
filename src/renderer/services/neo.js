@@ -776,17 +776,6 @@ export default {
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
-    const gasAmount = _.find(store.state.holdings, (o) => {
-      return o.asset === GAS_ASSET_ID;
-    }).balance;
-
-    if (gasAmount < 0.00000001) {
-      return new Promise((reject) => {
-        alerts.error('At least one drop of GAS is required to send NEP5 transfers.');
-        reject('At least one drop of GAS is required to send NEP5 transfers.');
-      });
-    }
-
     const config = {
       net: currentNetwork.net,
       url: currentNetwork.rpc,
@@ -805,8 +794,6 @@ export default {
     if (currentWallet.isLedger === true) {
       config.signingFunction = ledger.signWithLedger;
       config.address = currentWallet.address;
-      const intents = api.makeIntent({ GAS: 0.00000001 }, config.address);
-      config.intents = intents;
 
       return api.doInvoke(config)
         .then(res => res)
@@ -816,9 +803,7 @@ export default {
     }
 
     const account = new wallet.Account(currentWallet.wif);
-    const intents = api.makeIntent({ GAS: 0.00000001 }, currentWallet.address);
     config.account = account;
-    config.intents = intents;
 
     return api.doInvoke(config)
       .then(res => res)
