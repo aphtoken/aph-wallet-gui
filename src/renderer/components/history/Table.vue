@@ -8,11 +8,11 @@
       <div class="cell status">Status</div>
     </div>
     <div class="body">
-      <div v-if="!transactions().length" class="zero-state">
+      <div v-if="!transactions.length" class="zero-state">
         <aph-icon name="no-transactions"></aph-icon>
         <div class="label">No transactions</div>
       </div>
-      <div v-for="(transaction, index) in transactions()" :key="index"
+      <div v-for="(transaction, index) in transactions" :key="index"
            :class="['transaction', {active: transaction.active, increase: transaction.amount > 0}]">
         <div class="summary" @click="toggleTransaction(transaction)">
           <div class="cell date">{{ $formatDate(transaction.block_time) }}</div>
@@ -118,6 +118,37 @@ export default {
     };
   },
 
+  computed: {
+    transactions() {
+      try {
+        return _.filter(this.$store.state.searchTransactions, (t) => {
+          const fromDate = this.$store.state.searchTransactionFromDate;
+          const toDate = this.$store.state.searchTransactionToDate
+            ? moment(this.$store.state.searchTransactionToDate).add(1, 'days') : null;
+
+          if (fromDate
+            && t.block_time < fromDate.unix()) {
+            return false;
+          }
+          if (toDate
+            && t.block_time > toDate.unix()) {
+            return false;
+          }
+
+          return true;
+        }).map((transaction) => {
+          return _.merge(transaction, {
+            active: this.isActive(transaction),
+            address: transaction.hash,
+          });
+        });
+      } catch (e) {
+        console.log(e);
+        return [];
+      }
+    },
+  },
+
   methods: {
     isActive({ details }) {
       return this.activeTxid === details.txid;
@@ -129,15 +160,6 @@ export default {
 
     toggleTransaction({ details }) {
       this.activeTxid = this.activeTxid === details.txid ? null : details.txid;
-    },
-
-    transactions() {
-      return this.$store.state.searchTransactions.map((transaction) => {
-        return _.merge(transaction, {
-          active: this.isActive(transaction),
-          address: transaction.hash,
-        });
-      });
     },
   },
 };

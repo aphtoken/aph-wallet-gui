@@ -43,13 +43,9 @@ export default {
           value: 'custom',
         },
       ],
-      fromDate: null,
+      fromDate: moment().startOf('day').subtract(7, 'days'),
       toDate: null,
     };
-  },
-
-  beforeMount() {
-    this.fromDate = moment().startOf('day').subtract(7, 'days');
   },
 
   watch: {
