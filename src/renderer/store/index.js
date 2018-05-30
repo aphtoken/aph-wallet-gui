@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import moment from 'moment';
 
 import * as actions from './actions';
 import * as getters from './getters';
@@ -26,7 +27,7 @@ const state = {
   portfolio: null,
   recentTransactions: [],
   requests: {},
-  searchTransactionFromDate: null,
+  searchTransactionFromDate: moment().startOf('day').subtract(7, 'days'),
   searchTransactionToDate: null,
   searchTransactions: [],
   sendInProgress: false,
