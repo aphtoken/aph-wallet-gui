@@ -202,10 +202,28 @@ function findTransactions({ state, commit }) {
 
   commit('startRequest', { identifier: 'findTransactions' });
 
+  const fromDate = state.searchTransactionFromDate;
+  const toDate = state.searchTransactionToDate ? moment(state.searchTransactionToDate).add(1, 'days') : null;
+  const immediateFilter = [];
+
+  state.searchTransactions.forEach((t) => {
+    if (fromDate
+      && t.block_time < fromDate.unix()) {
+      return;
+    }
+    if (toDate
+      && t.block_time > toDate.unix()) {
+      return;
+    }
+
+    immediateFilter.push(t);
+  });
+  // if the filter is removing transactions, do it in memory first without waiting for network responses
+  commit('setSearchTransactions', immediateFilter);
+
   neo
     .fetchRecentTransactions(currentWallet.address, true,
-      state.searchTransactionFromDate,
-      state.searchTransactionToDate ? moment(state.searchTransactionToDate).add(1, 'days') : null)
+      fromDate, toDate)
     .then((data) => {
       commit('setSearchTransactions', data);
       commit('endRequest', { identifier: 'findTransactions' });

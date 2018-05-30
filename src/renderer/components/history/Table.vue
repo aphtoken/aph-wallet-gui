@@ -8,6 +8,10 @@
       <div class="cell status">Status</div>
     </div>
     <div class="body">
+      <div v-if="!transactions().length" class="zero-state">
+        <aph-icon name="no-transactions"></aph-icon>
+        <div class="label">No transactions</div>
+      </div>
       <div v-for="(transaction, index) in transactions()" :key="index"
            :class="['transaction', {active: transaction.active, increase: transaction.amount > 0}]">
         <div class="summary" @click="toggleTransaction(transaction)">
@@ -168,6 +172,30 @@ export default {
   .body {
     height: 90%;
     overflow-y: auto;
+
+    > .zero-state {
+      align-items: center;
+      display: flex;
+      height: 100%;
+      justify-content: center;
+      flex-direction: column;
+
+      .aph-icon {
+        svg {
+          height: toRem(52px);
+
+          .fill {
+            fill: $purple;
+          }
+        }
+      }
+
+      .label {
+        color: $purple;
+        font-weight: GilroyMedium;
+        margin-top: $space-lg;
+      }
+    }
 
     .transaction {
       @include transition(background-color);
