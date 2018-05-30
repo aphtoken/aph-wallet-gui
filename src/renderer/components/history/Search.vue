@@ -20,7 +20,7 @@ import moment from 'moment';
 export default {
   data() {
     return {
-      selectedDateRange: 'all',
+      selectedDateRange: '7',
       dateRanges: [
         {
           label: 'All',
@@ -46,6 +46,10 @@ export default {
       fromDate: null,
       toDate: null,
     };
+  },
+
+  beforeMount() {
+    this.fromDate = moment().startOf('day').subtract(7, 'days');
   },
 
   watch: {
