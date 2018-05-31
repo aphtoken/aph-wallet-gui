@@ -553,11 +553,13 @@ export default {
           symbol: 'APH',
           assetId: '591eedcd379a8981edeefe04ef26207e1391904a',
           isCustom: true, // always show even if 0 balance
+          name: 'Aphelion',
           network: 'TestNet',
         }, {
           symbol: 'APH',
           assetId: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
-          isCustom: true, // always show even if 0 balance
+          isCustom: true, // always show even if 0 balance,
+          name: 'Aphelion',
           network: 'MainNet',
         },
         ];
@@ -573,6 +575,7 @@ export default {
                   symbol: t.symbol,
                   assetId: t.scriptHash.replace('0x', ''),
                   isCustom: false,
+                  name: t.name,
                   network: currentNetwork.net,
                 };
                 let isDefaultToken = false;

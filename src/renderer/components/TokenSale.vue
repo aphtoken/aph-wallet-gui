@@ -61,14 +61,14 @@ export default {
   computed: {
     tokens() {
       const list = this.$services.tokens.getAllAsArray().reduce(
-        (result, { symbol, assetId, network, sale }) => {
+        (result, { symbol, name, assetId, network, sale }) => {
           if (!sale || network !== this.$services.network.getSelectedNetwork().net
               || moment(sale.endDate) < moment().utc) {
             return result;
           }
 
           result.push({
-            label: symbol,
+            label: `${symbol} - ${name}`,
             value: {
               symbol,
               assetId,
