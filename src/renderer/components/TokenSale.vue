@@ -68,13 +68,8 @@ export default {
             return result;
           }
 
-          let label = `${symbol} - ${name}`;
-          if (!name) {
-            label = symbol;
-          }
-
           result.push({
-            label,
+            label: name ? `${symbol} - ${name}` : symbol;,
             value: {
               symbol,
               assetId,
