@@ -1006,12 +1006,15 @@ export default {
 
             return api.nep5.getToken(currentNetwork.rpc, scriptHash, currentWallet.address)
               .then((token) => {
-                tokens.add({
-                  symbol: token.symbol,
-                  assetId: scriptHash.replace('0x', ''),
-                  isCustom: true,
-                  network: currentNetwork.net,
-                });
+                if (tokens.tokenExists(scriptHash.replace('0x', ''), currentNetwork.net) !== true) {
+                  tokens.add({
+                    symbol: token.symbol,
+                    assetId: scriptHash.replace('0x', ''),
+                    isCustom: true,
+                    name: token.name,
+                    network: currentNetwork.net,
+                  });
+                }
 
                 this.monitorTransactionConfirmation(res.tx)
                   .then(() => {
