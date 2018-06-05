@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import moment from 'moment';
 import { BigNumber } from 'bignumber.js';
 let loadTransactionsIntervalId;
 
@@ -68,7 +69,7 @@ export default {
           }
 
           result.push({
-            label: `${symbol} - ${name}`,
+            label: name ? `${symbol} - ${name}` : symbol;,
             value: {
               symbol,
               assetId,
@@ -102,10 +103,10 @@ export default {
           }
 
           if (this.token) {
-            if (symbol === 'NEO' && this.token.sale.acceptsNeo !== true) {
+            if (symbol === 'NEO' && this.token.sale && this.token.sale.acceptsNeo !== true) {
               return result;
             }
-            if (symbol === 'GAS' && this.token.sale.acceptsGas !== true) {
+            if (symbol === 'GAS' && this.token.sale && this.token.sale.acceptsGas !== true) {
               return result;
             }
           }

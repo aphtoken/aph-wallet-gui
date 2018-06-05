@@ -3,7 +3,7 @@ import Vue from 'vue';
 import moment from 'moment';
 
 import { requests } from '../constants';
-import { alerts, db } from '../services';
+import { alerts, db, neo } from '../services';
 
 export {
   clearActiveTransaction,
@@ -73,6 +73,7 @@ function handleLogout(state) {
   state.transactionDetails = [];
   state.nep5Balances = [];
   state.sendInProgress = false;
+  neo.fetchNEP5Tokens();
 }
 
 function handleNetworkChange(state) {
@@ -82,6 +83,7 @@ function handleNetworkChange(state) {
   state.transactionDetails = [];
   state.nep5Balances = [];
   state.sendInProgress = false;
+  neo.fetchNEP5Tokens();
 }
 
 function resetRequests(state) {

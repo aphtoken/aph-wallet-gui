@@ -16,7 +16,21 @@ import Sidebar from './Sidebar';
 import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
 import AphClaimGasModal from './modals/ClaimGasModal';
 
+let loadTokensIntervalId;
+
 export default {
+  beforeDestroy() {
+    clearInterval(loadTokensIntervalId);
+  },
+
+  mounted() {
+    this.$services.neo.fetchNEP5Tokens();
+
+    loadTokensIntervalId = setInterval(() => {
+      this.$services.neo.fetchNEP5Tokens();
+    }, this.$constants.intervals.TRANSACTIONS_POLLING);
+  },
+
   components: {
     PortfolioHeader,
     Sidebar,
@@ -29,10 +43,6 @@ export default {
       outOfDate: false,
       latestWalletVersion: '',
     };
-  },
-
-  mounted() {
-    this.$services.neo.fetchNEP5Tokens();
   },
 };
 </script>
