@@ -45,7 +45,7 @@ export default {
   },
 
   tokenExists(assetId, network) {
-    return !!this.getOne(`${assetId}_${network}`);
+    return !!this.getOne(assetId, network);
   },
 
 };
