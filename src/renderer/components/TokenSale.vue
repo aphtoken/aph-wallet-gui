@@ -69,7 +69,7 @@ export default {
           }
 
           result.push({
-            label: name ? `${symbol} - ${name}` : symbol;,
+            label: name ? `${symbol} - ${name}` : symbol,
             value: {
               symbol,
               assetId,

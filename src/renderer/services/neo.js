@@ -293,6 +293,7 @@ export default {
         return api.loadBalance(api.getTransactionHistoryFrom, {
           address,
           net: currentNetwork.net,
+          url: currentNetwork.rpc,
         })
           .then((res) => {
             resolve(res);
@@ -424,6 +425,7 @@ export default {
               if (h.symbol === 'NEO') {
                 promises.push(api.loadBalance(api.getMaxClaimAmountFrom, {
                   net: currentNetwork.net,
+                  url: currentNetwork.rpc,
                   address: currentWallet.address,
                   privateKey: currentWallet.privateKey,
                 })
@@ -743,6 +745,7 @@ export default {
 
     return api.loadBalance(api.getBalanceFrom, {
       net: currentNetwork.net,
+      url: currentNetwork.rpc,
       address: currentWallet.address,
     })
     // maybe we should stand up our own version ?
@@ -925,6 +928,7 @@ export default {
 
     api.loadBalance(api.getMaxClaimAmountFrom, {
       net: network.getSelectedNetwork().net,
+      url: currentNetwork.rpc,
       address: wallets.getCurrentWallet().address,
       privateKey: wallets.getCurrentWallet().privateKey,
     })
@@ -966,6 +970,7 @@ export default {
 
         const config = {
           net: currentNetwork.net,
+          url: currentNetwork.rpc,
           script: {
             scriptHash,
             operation: 'mintTokens',
