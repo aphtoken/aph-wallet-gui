@@ -8,16 +8,29 @@ export default {
     if (this.tokenExists(data.assetId, data.network)) {
       const existing = this.getOne(data.assetId, data.network);
       if (existing) {
+        let skipUpdate = false;
         if (existing.isCustom === data.isCustom
           || (existing.isCustom === true && data.isCustom === false)) {
-          return this;
+          // skip updating if already in local db and isCustom is the same
+          //   or isCustom is already true and this would set it back to false
+          skipUpdate = true;
+        }
+
+        if (data.sale || existing.sale) {
+          // if the existing token or the new token data has token sale info, update
+          // (important for keeping sale information up to date with server)
+          skipUpdate = false;
+          data.isCustom = existing.isCustom;
+        }
+
+        if (skipUpdate === true) {
+          return;
         }
       }
     }
 
     const tokens = this.getAll();
     storage.set(TOKENS_STORAGE_KEY, _.set(tokens, `${data.assetId}_${data.network}`, data));
-    return this;
   },
 
   remove(assetId, network) {
