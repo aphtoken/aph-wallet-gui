@@ -52,6 +52,7 @@ export default {
   },
 
   beforeMount() {
+    this.$store.dispatch('fetchHoldings');
     this.loadTransactions();
 
     loadTransactionsIntervalId = setInterval(() => {
@@ -198,11 +199,18 @@ export default {
         return;
       }
 
+      if (this.amount > this.currency.balance) {
+        this.$services.alerts.error(`Amount entered greater than your current ${this.currency.symbol} balance.`);
+        this.sending = false;
+        return;
+      }
+
       this.$services.neo.participateInTokenSale(icoScriptHash,
         this.currency.asset, this.amount)
         .then((res) => {
           this.$services.alerts.success(
             `Token Sale Participation Successful. Your Balance of ${res.symbol} is now ${res.balance}`);
+          this.$store.dispatch('fetchHoldings');
           this.sending = false;
         })
         .catch((e) => {
