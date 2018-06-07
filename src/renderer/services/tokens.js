@@ -20,6 +20,7 @@ export default {
           // if the existing token or the new token data has token sale info, update
           // (important for keeping sale information up to date with server)
           skipUpdate = false;
+          data.isCustom = existing.isCustom;
         }
 
         if (skipUpdate === true) {

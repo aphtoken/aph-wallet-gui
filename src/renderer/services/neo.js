@@ -478,6 +478,13 @@ export default {
                       return;
                     }
 
+                    if (nep5.isCustom !== true && val.balance > 0) {
+                      // saw a balance > 0 on this token but we haven't explicitly added to our tokens we hold,
+                      // mark isCustom = true so it will stay there until explicitly removed
+                      nep5.isCustom = true;
+                      tokens.add(nep5);
+                    }
+
                     holdings.push(h);
                   }
                 })
