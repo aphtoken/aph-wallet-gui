@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { rpc } from '@cityofzion/neon-js';
+import { rpc, settings, api } from '@cityofzion/neon-js';
 
 import { store } from '../store';
 import storage from './storage';
@@ -41,6 +41,11 @@ export default {
   },
 
   init() {
+    api.setApiSwitch(0);
+    api.setSwitchFreeze(true);
+    settings.networks.TestNet.extra.neonDB = null;
+    settings.networks.TestNet.extra.neoscan = 'http://18.220.142.224:4000/api/test_net';
+    console.log(settings);
     this.setSelectedNetwork(this.getSelectedNetwork());
   },
 
@@ -80,7 +85,6 @@ export default {
     if (loadNetworkStatusIntervalId) {
       clearInterval(loadNetworkStatusIntervalId);
     }
-
     this.loadStatus();
     loadNetworkStatusIntervalId = setInterval(() => {
       this.loadStatus();
