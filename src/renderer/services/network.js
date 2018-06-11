@@ -41,11 +41,15 @@ export default {
   },
 
   init() {
+    // freeze to using only the APH instance of neoscan
     api.setApiSwitch(0);
     api.setSwitchFreeze(true);
+
+    settings.networks.MainNet.extra.neonDB = null;
+    settings.networks.MainNet.extra.neoscan = 'https://neoscan.aphelion-neo.com:4443/api/main_net';
     settings.networks.TestNet.extra.neonDB = null;
-    settings.networks.TestNet.extra.neoscan = 'http://18.220.142.224:4000/api/test_net';
-    console.log(settings);
+    settings.networks.TestNet.extra.neoscan = 'https://neoscan-test.aphelion-neo.com:4443/api/test_net';
+
     this.setSelectedNetwork(this.getSelectedNetwork());
   },
 

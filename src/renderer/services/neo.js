@@ -833,7 +833,7 @@ export default {
           const interval = setInterval(() => {
             if (moment().utc().diff(startedMonitoring, 'milliseconds') > timeouts.MONITOR_TRANSACTIONS) {
               clearInterval(interval);
-              reject('Timed out waiting for transaction to be returned from third party block explorer');
+              reject('Timed out waiting for transaction to be returned from block explorer');
               return;
             }
 
