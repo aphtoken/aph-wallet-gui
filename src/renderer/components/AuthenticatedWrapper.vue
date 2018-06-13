@@ -28,7 +28,7 @@ export default {
 
     loadTokensIntervalId = setInterval(() => {
       this.$services.neo.fetchNEP5Tokens();
-    }, this.$constants.intervals.TRANSACTIONS_POLLING);
+    }, this.$constants.intervals.TOKENS_POLLING);
   },
 
   components: {
