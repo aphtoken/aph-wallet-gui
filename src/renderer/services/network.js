@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { rpc, settings, api } from '@cityofzion/neon-js';
+import { rpc, settings } from '@cityofzion/neon-js';
 
 import { store } from '../store';
 import storage from './storage';
@@ -41,13 +41,7 @@ export default {
   },
 
   init() {
-    // freeze to using only the APH instance of neoscan
-    api.setApiSwitch(0);
-    api.setSwitchFreeze(true);
-
-    settings.networks.MainNet.extra.neonDB = null;
     settings.networks.MainNet.extra.neoscan = 'https://explorer.aphelion-neo.com:4443/api/main_net';
-    settings.networks.TestNet.extra.neonDB = null;
     settings.networks.TestNet.extra.neoscan = 'https://test-explorer.aphelion-neo.com:4443/api/test_net';
 
     this.setSelectedNetwork(this.getSelectedNetwork());
