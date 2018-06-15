@@ -9,7 +9,7 @@
         <div class="label">No contacts</div>
       </div>
       <div v-else class="table">
-        <div v-for="(contact, index) in $store.state.contacts" :key="index" @click="useContact(contact)" class="contact">
+        <div v-for="(contact, index) in filteredContacts" :key="index" @click="useContact(contact)" class="contact">
           <div class="cell name">{{ contact.name }}</div>
           <div class="cell copy">
             <aph-copy-text :text="contact.address"></aph-copy-text>
@@ -22,6 +22,20 @@
 
 <script>
 export default {
+  computed: {
+    filteredContacts() {
+      const searchBy = this.searchBy.toLowerCase();
+
+      if (!searchBy.length) {
+        return this.$store.state.contacts;
+      }
+
+      return _.filter(this.$store.state.contacts, ({ name }) => {
+        return name.toLowerCase().indexOf(searchBy) > -1;
+      });
+    },
+  },
+
   data() {
     return {
       searchBy: '',
