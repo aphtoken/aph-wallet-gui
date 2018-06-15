@@ -41,10 +41,17 @@ export default {
   },
 
   init() {
-    settings.networks.MainNet.extra.neoscan = 'https://explorer.aphelion-neo.com:4443/api/main_net';
-    settings.networks.TestNet.extra.neoscan = 'https://test-explorer.aphelion-neo.com:4443/api/test_net';
-
     this.setSelectedNetwork(this.getSelectedNetwork());
+  },
+
+  setExplorer(useAphExplorer) {
+    if (useAphExplorer === true) {
+      settings.networks.MainNet.extra.neoscan = 'https://explorer.aphelion-neo.com:4443/api/main_net';
+      settings.networks.TestNet.extra.neoscan = 'https://test-explorer.aphelion-neo.com:4443/api/test_net';
+    } else {
+      settings.networks.MainNet.extra.neoscan = 'https://api.neoscan.io/api/main_net';
+      settings.networks.TestNet.extra.neoscan = 'https://neoscan-testnet.io/api/test_net';
+    }
   },
 
   loadStatus() {
