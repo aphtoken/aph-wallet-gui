@@ -290,11 +290,11 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        return api.loadBalance(api.getTransactionHistoryFrom, {
+        return api.getTransactionHistoryFrom({
           address,
           net: currentNetwork.net,
           url: currentNetwork.rpc,
-        })
+        }, api.neoscan)
           .then((res) => {
             resolve(res);
           })
@@ -423,12 +423,12 @@ export default {
                 return;
               }
               if (h.symbol === 'NEO') {
-                promises.push(api.loadBalance(api.getMaxClaimAmountFrom, {
+                promises.push(api.getMaxClaimAmountFrom({
                   net: currentNetwork.net,
                   url: currentNetwork.rpc,
                   address: currentWallet.address,
                   privateKey: currentWallet.privateKey,
-                })
+                }, api.neoscan)
                   .then((res) => {
                     h.availableToClaim = toBigNumber(res);
                   })
@@ -750,11 +750,11 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    return api.loadBalance(api.getBalanceFrom, {
+    return api.getBalanceFrom({
       net: currentNetwork.net,
       url: currentNetwork.rpc,
       address: currentWallet.address,
-    })
+    }, api.neoscan)
     // maybe we should stand up our own version ?
       .then((balance) => {
         if (balance.net !== currentNetwork.net) {
@@ -833,7 +833,7 @@ export default {
           const interval = setInterval(() => {
             if (moment().utc().diff(startedMonitoring, 'milliseconds') > timeouts.MONITOR_TRANSACTIONS) {
               clearInterval(interval);
-              reject('Timed out waiting for transaction to be returned from third party block explorer');
+              reject('Timed out waiting for transaction to be returned from block explorer');
               return;
             }
 
@@ -933,12 +933,12 @@ export default {
       config.signingFunction = ledger.signWithLedger;
     }
 
-    api.loadBalance(api.getMaxClaimAmountFrom, {
+    api.getMaxClaimAmountFrom({
       net: network.getSelectedNetwork().net,
       url: currentNetwork.rpc,
       address: wallets.getCurrentWallet().address,
       privateKey: wallets.getCurrentWallet().privateKey,
-    })
+    }, api.neoscan)
       .then((res) => {
         gasClaim.gasClaimAmount = toBigNumber(res);
         gasClaim.step = 3;

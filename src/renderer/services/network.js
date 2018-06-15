@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { rpc } from '@cityofzion/neon-js';
+import { rpc, settings, api } from '@cityofzion/neon-js';
 
 import { store } from '../store';
 import storage from './storage';
@@ -44,6 +44,20 @@ export default {
     this.setSelectedNetwork(this.getSelectedNetwork());
   },
 
+  setExplorer(useAphExplorer) {
+    // freeze to neoscan for any calls that neon-js uses to switch.loadBalance
+    api.setApiSwitch(0);
+    api.setSwitchFreeze(true);
+
+    if (useAphExplorer === true) {
+      settings.networks.MainNet.extra.neoscan = 'https://explorer.aphelion-neo.com:4443/api/main_net';
+      settings.networks.TestNet.extra.neoscan = 'https://test-explorer.aphelion-neo.com:4443/api/test_net';
+    } else {
+      settings.networks.MainNet.extra.neoscan = 'https://api.neoscan.io/api/main_net';
+      settings.networks.TestNet.extra.neoscan = 'https://neoscan-testnet.io/api/test_net';
+    }
+  },
+
   loadStatus() {
     const network = this.getSelectedNetwork();
     const rpcClient = this.getRpcClient();
@@ -80,7 +94,6 @@ export default {
     if (loadNetworkStatusIntervalId) {
       clearInterval(loadNetworkStatusIntervalId);
     }
-
     this.loadStatus();
     loadNetworkStatusIntervalId = setInterval(() => {
       this.loadStatus();
