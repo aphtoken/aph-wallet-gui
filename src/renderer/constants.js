@@ -15,7 +15,7 @@ const formats = {
   DATE_SHORT: 'DD-MM',
   FRACTIONAL_NUMBER: '[.]0[00000000]',
   MONEY: '$0,0.00',
-  TIME: 'H:ss',
+  TIME: 'H:mm',
   WEEKDAY_AND_TIME: 'dd H:ss',
   WHOLE_NUMBER: '0,0',
   WHOLE_NUMBER_NO_COMMAS: '0[.]0[00000000]',
