@@ -5,6 +5,7 @@
       <aph-input placeholder="Name" v-model="walletName"></aph-input>
       <aph-input placeholder="Private key" v-model="wif"></aph-input>
       <aph-input placeholder="Passphrase" v-model="passphrase" type="password"></aph-input>
+      <aph-input placeholder="Confirm passphrase" v-model="passphraseConfirm" type="password"></aph-input>
     </div>
     <div class="footer">
       <div class="cancel-btn" @click="onCancel">Cancel</div>
@@ -26,17 +27,23 @@ export default {
       return this.$isPending('importWallet') ? 'Saving...' : 'Import';
     },
 
+    passphrasesMatch() {
+      return this.passphrase === this.passphraseConfirm;
+    },
+
     shouldDisableSaveButton() {
       return this.$isPending('importWallet') || this.wif.length === 0
-        || this.walletName.length === 0 || this.passphrase.length === 0;
+        || this.walletName.length === 0 || this.passphrase.length === 0
+        || !this.passphrasesMatch;
     },
   },
 
   data() {
     return {
+      passphrase: '',
+      passphraseConfirm: '',
       walletName: '',
       wif: '',
-      passphrase: '',
     };
   },
 
