@@ -26,7 +26,7 @@ export default {
     },
 
     loadHoldings() {
-      this.$store.dispatch('fetchHoldings');
+      this.$store.dispatch('fetchHoldings', { done: null });
     },
 
     viewHoldingDetail(holding) {

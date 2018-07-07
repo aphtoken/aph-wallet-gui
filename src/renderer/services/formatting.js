@@ -8,7 +8,20 @@ import settings from './settings';
 import { formats } from '../constants';
 
 const nullOrUndefined = value => _.isNull(value) || _.isUndefined(value);
-const toBigNumber = value => new BigNumber(String(value));
+
+const toBigNumber = (value) => {
+  let bigNumber = value;
+  if (!bigNumber.isNegative) {
+    if (bigNumber.c && bigNumber.e && bigNumber.s) {
+      bigNumber = new BigNumber(0);
+      bigNumber.c = value.c;
+      bigNumber.e = value.e;
+      bigNumber.s = value.s;
+    }
+  }
+
+  return new BigNumber(String(bigNumber));
+};
 
 export default {
   formatDate(timestamp, defaultValue = '--') {
@@ -48,6 +61,7 @@ export default {
     if (nullOrUndefined(value)) {
       return defaultValue;
     }
+
     let bigNumber = toBigNumber(value);
     const isNegative = bigNumber.isNegative();
     bigNumber = bigNumber.abs();

@@ -18,6 +18,12 @@
   }
 }
 
+%underlined-header-sm {
+  @extend %underlined-header;
+
+  font-size: toRem(16px);
+}
+
 %small-uppercase-grey-label {
   color: $grey;
   font-family: GilroyMedium;

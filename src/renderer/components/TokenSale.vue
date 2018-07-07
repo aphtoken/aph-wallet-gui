@@ -52,7 +52,7 @@ export default {
   },
 
   beforeMount() {
-    this.$store.dispatch('fetchHoldings');
+    this.$store.dispatch('fetchHoldings', { done: null });
     this.loadTransactions();
 
     loadTransactionsIntervalId = setInterval(() => {
@@ -210,7 +210,7 @@ export default {
         .then((res) => {
           this.$services.alerts.success(
             `Token Sale Participation Successful. Your Balance of ${res.symbol} is now ${res.balance}`);
-          this.$store.dispatch('fetchHoldings');
+          this.$store.dispatch('fetchHoldings', { done: null });
           this.sending = false;
         })
         .catch((e) => {

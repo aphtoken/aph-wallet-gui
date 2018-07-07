@@ -64,13 +64,16 @@ button, input, optgroup, select, textarea {
 
 %btn-outline {
   @extend %btn;
-
   background-color: transparent;
   color: white;
 
   &:hover {
     background-color: $purple;
     color: white;
+
+    .fill {
+      color: white;
+    }
   }
 
   &.disabled, &:disabled {

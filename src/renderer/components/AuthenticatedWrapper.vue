@@ -1,5 +1,5 @@
 <template>
-  <section id="authenticated-wrapper">
+  <section id="authenticated-wrapper" :class="[$store.state.styleMode]">
     <sidebar></sidebar>
     <div class="content">
       <portfolio-header v-if="$store.state.showPortfolioHeader"></portfolio-header>

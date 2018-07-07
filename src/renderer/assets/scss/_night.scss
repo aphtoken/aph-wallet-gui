@@ -1,0 +1,112 @@
+#authenticated-wrapper {
+  &.Night {
+    #dex {
+      color: #aeaeb8;
+      background-color: #1f1d33;
+
+      .aph-input input {
+        color: #ffffff;
+      }
+
+      .aph-select.is-light {
+        .aph-select--label {
+          background: #1f1d33;
+          color: #ffffff;
+        }
+
+        .aph-select--dropdown {
+          background: #1f1d33;
+          color: #ffffff;
+
+          > li {
+            &.selected, &:hover {
+              background-color: #1f1d33;
+              color: #aeaeb8;
+            }
+          }
+        }
+
+        .fill {
+          fill: #ffffff;
+        }
+      }
+
+      .aph-icon {
+        .fill {
+          fill: #ffffff;
+        }
+      }
+
+      .asks {
+        .size-bar {
+          background-color: #441e35 !important;
+          border-color: #5b2f40 !important;
+
+          span {
+            border-color: #5b2f40 !important;
+
+            &:after {
+              color: #5b2f40 !important;
+            }
+          }
+        }
+      }
+
+      .bids {
+        .size-bar {
+          background-color: #233c40 !important;
+          border-color: #3b5459 !important;
+
+          span {
+            border-color: #3b5459 !important;
+
+            &:after {
+              color: #3b5459 !important;
+            }
+          }
+        }
+      }
+
+      #dex--orderform .body .side .buy-btn, #dex--orderform .body .footer .order-btn.buy-btn {
+        border-color: #3b5459;
+      }
+
+      #dex--orderform .body .side .buy-btn.selected, #dex--orderform .body .footer .order-btn.buy-btn:hover {
+        background-color: #233c40;
+      }
+
+      #dex--orderform .body .side .sell-btn, #dex--orderform .body .footer .order-btn.sell-btn {
+        border-color: #5b2f40;
+      }
+
+      #dex--orderform .body .side .sell-btn.selected, #dex--orderform .body .footer .order-btn.sell-btn:hover {
+        background-color: #441e35;
+      }
+      
+      .aph-modal-wrapper {
+        background: rgba(206, 205, 509, 0.35);
+
+        & > .content {
+          background-color: #1d1c31;
+        }
+      }
+
+      %disabled-text {
+        color: #404156;
+      }
+
+      %selected-text {
+        color: #ffffff;
+      }
+
+      %light-background {
+        background: #18162b;
+        border-color: #18162b;
+      }
+
+      %tile-light {
+        background: #18162b;
+      }
+    }
+  }
+}

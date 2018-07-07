@@ -3,7 +3,7 @@ import Vue from 'vue';
 import moment from 'moment';
 
 import { requests } from '../constants';
-import { alerts, db, neo } from '../services';
+import { alerts, db, neo, settings, dex } from '../services';
 
 export {
   clearActiveTransaction,
@@ -13,18 +13,30 @@ export {
   failRequest,
   handleLogout,
   handleNetworkChange,
+  orderBookSnapshotReceived,
+  orderBookUpdateReceived,
+  putAllNep5Balances,
+  putTransactionDetail,
   resetRequests,
+  setAcceptDexDemoVersion,
   setActiveTransaction,
   setContacts,
   setCurrency,
   setCurrencySymbol,
+  setCurrentMarket,
   setCurrentNetwork,
   setCurrentWallet,
+  setDepositWithdrawModalModel,
   setGasClaim,
   setHoldings,
   setLastReceivedBlock,
   setLastSuccessfulRequest,
   setLatestVersion,
+  setMarkets,
+  setOrderHistory,
+  setOrderPrice,
+  setOrderQuantity,
+  setOrderToConfirm,
   setPortfolio,
   setRecentTransactions,
   setSearchTransactionFromDate,
@@ -42,8 +54,14 @@ export {
   setShowSendWithLedgerModal,
   setShowWalletBackupModal,
   setStatsToken,
+  setStyleMode,
+  setTradeHistory,
   setWallets,
   startRequest,
+  SOCKET_ONOPEN,
+  SOCKET_ONCLOSE,
+  SOCKET_ONMESSAGE,
+  SOCKET_RECONNECT_ERROR,
 };
 
 function clearActiveTransaction(state) {
@@ -70,9 +88,9 @@ function handleLogout(state) {
   state.holdings = [];
   state.recentTransactions = [];
   state.searchTransactions = [];
-  state.transactionDetails = [];
-  state.nep5Balances = [];
+  state.nep5Balances = {};
   state.sendInProgress = false;
+  state.currentMarket = null;
   neo.fetchNEP5Tokens();
 }
 
@@ -80,14 +98,30 @@ function handleNetworkChange(state) {
   state.holdings = [];
   state.recentTransactions = [];
   state.searchTransactions = [];
-  state.transactionDetails = [];
-  state.nep5Balances = [];
+  state.nep5Balances = {};
   state.sendInProgress = false;
+  state.currentMarket = null;
   neo.fetchNEP5Tokens();
+}
+
+function putAllNep5Balances(state, nep5balances) {
+  const balances = state.nep5Balances;
+  nep5balances.forEach((nep5balance) => {
+    _.set(balances, nep5balance.assetId, nep5balance);
+  });
+}
+
+function putTransactionDetail(state, transactionDetail) {
+  const details = state.transactionDetails;
+  _.set(details, transactionDetail.txid, transactionDetail);
 }
 
 function resetRequests(state) {
   state.requests = {};
+}
+
+function setAcceptDexDemoVersion(state, value) {
+  state.acceptDexDemoVersion = value;
 }
 
 function setActiveTransaction(state, transaction) {
@@ -115,13 +149,9 @@ function setCurrentWallet(state, currentWallet) {
 
   state.currentWallet = currentWallet;
 }
-function setCurrentNetwork(state, network) {
-  if (state.currentNetwork
-      && state.currentNetwork.net === network.net) {
-    return;
-  }
 
-  if (state.currentNetwork) {
+function setCurrentNetwork(state, network) {
+  if (state.currentNetwork && state.currentNetwork.net !== network.net) {
     clearLocalNetworkState(state, network);
   }
 
@@ -293,6 +323,109 @@ function startRequest(state, payload) {
   updateRequest(state, payload, requests.PENDING);
 }
 
+function updateRequest(state, { identifier, message }, status) {
+  Vue.set(state.requests, identifier, { status, message });
+}
+
+function setStyleMode(state, style) {
+  state.styleMode = style;
+  settings.setStyleMode(style);
+}
+function setMarkets(state, markets) {
+  state.markets = markets;
+}
+function setCurrentMarket(state, market) {
+  if (state.currentMarket) {
+    if (!market || state.currentMarket.marketName !== market.marketName) {
+      this.dispatch('unsubscribeFromMarket', {
+        market: state.currentMarket,
+      });
+    }
+  }
+  state.currentMarket = market;
+  if (state.currentMarket) {
+    this.dispatch('subscribeToMarket', {
+      market: state.currentMarket,
+    });
+  }
+}
+function setOrderPrice(state, price) {
+  state.orderPrice = price;
+}
+function setOrderQuantity(state, quantity) {
+  state.orderQuantity = quantity;
+}
+function orderBookSnapshotReceived(state, res) {
+  const orderBook = dex.formOrderBook(res.asks, res.bids);
+  orderBook.pair = res.pair;
+
+  Vue.set(state, 'orderBook', orderBook);
+}
+function orderBookUpdateReceived(state, res) {
+  if (!state.orderBook || state.orderBook.pair !== res.pair) {
+    return;
+  }
+
+  const orderBook = dex.updateOrderBook(state.orderBook, res.side, res.changes);
+  const side = res.side === 'ask' ? orderBook.asks : orderBook.bids;
+  Vue.set(state.orderBook, res.side, side);
+}
+function setTradeHistory(state, trades) {
+  state.tradeHistory = trades;
+}
+function setOrderHistory(state, orders) {
+  state.orderHistory = orders;
+}
+function setOrderToConfirm(state, order) {
+  state.orderToConfirm = order;
+  state.showOrderConfirmationModal = !!order;
+}
+function setDepositWithdrawModalModel(state, model) {
+  state.depositWithdrawModalModel = model;
+}
+function SOCKET_ONOPEN(state, event) {
+  state.socket.client = event.target;
+  state.socket.isConnected = true;
+  state.socket.connectionClosed = null;
+  if (state.socket.opened) {
+    state.socket.opened();
+  }
+}
+function SOCKET_ONCLOSE(state) {
+  state.socket.client = null;
+  state.socket.isConnected = false;
+  if (!state.socket.connectionClosed) {
+    state.socket.connectionClosed = moment().utc();
+  }
+}
+function SOCKET_ONMESSAGE(state, message) {
+  state.lastMessage = message;
+
+  if (message.subscribe && message.subscribe.indexOf('orderBook') > -1) {
+    state.socket.subscribedMarket = message.subscribe.substring(message.subscribe.indexOf(':') + 1);
+  } else if (message.unsubscribe && message.unsubscribe.indexOf('orderBook') > -1) {
+    state.socket.subscribedMarket = null;
+  } else if (message.type === 'bookSnapshot') {
+    orderBookSnapshotReceived(state, message);
+  } else if (message.type === 'bookUpdate') {
+    orderBookUpdateReceived(state, message);
+  } else if (message.type === 'orderCreated') {
+    if (state.socket.orderCreated) {
+      state.socket.orderCreated(message);
+    }
+  } else if (message.type === 'orderMatched') {
+    if (state.socket.orderMatched) {
+      state.socket.orderMatched(message);
+    }
+  } else if (message.type) {
+    // unknown message type
+    console.log(message);
+  }
+}
+
+function SOCKET_RECONNECT_ERROR(state) {
+  state.socket.reconnectError = true;
+}
 
 // Local functions
 function normalizeRecentTransactions(transactions) {
@@ -315,6 +448,3 @@ function normalizeRecentTransactions(transactions) {
   });
 }
 
-function updateRequest(state, { identifier, message }, status) {
-  Vue.set(state.requests, identifier, { status, message });
-}

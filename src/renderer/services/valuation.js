@@ -38,36 +38,26 @@ export default {
   getValuation(symbol) {
     return new Promise((resolve, reject) => {
       try {
-        if (lastCheckedTicker !== null
-          && moment.utc().diff(lastCheckedTicker, 'seconds') < 60) {
-          let v = _.find(coinTickerList, (o) => {
-            return o.symbol === symbol;
-          });
+        if (lastCheckedTicker && moment.utc().diff(lastCheckedTicker, 'seconds') < 60) {
+          let valuation = _.find(coinTickerList, { symbol });
 
-          if (!v) {
-            v = defaultValuation(symbol);
+          if (!valuation) {
+            valuation = defaultValuation(symbol);
             if (symbol === 'APH') {
-              v.total_supply = DEFAULT_APH_TOTAL_SUPPLY;
+              valuation.total_supply = DEFAULT_APH_TOTAL_SUPPLY;
             }
           }
-          return resolve(v);
+          resolve(valuation);
         }
-        lastCheckedTicker = moment.utc();
 
-        return axios.get(`${CMC_BASE_URL}ticker/?limit=1000&convert=${settings.getCurrency()}`)
+        axios.get(`${CMC_BASE_URL}ticker/?limit=1000&convert=${settings.getCurrency()}`)
           .then((res) => {
+            lastCheckedTicker = moment.utc();
             coinTickerList = res.data;
-            resolve(_.find(coinTickerList, (o) => {
-              return o.symbol === symbol;
-            }));
-          })
-          .catch(() => {
-            resolve(_.find(coinTickerList, (o) => {
-              return o.symbol === symbol;
-            }));
+            resolve(_.find(coinTickerList, { symbol }));
           });
       } catch (e) {
-        return reject(e);
+        reject(e);
       }
     });
   },

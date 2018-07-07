@@ -10,7 +10,13 @@
         </span>
         <span class="label">Dashboard</span>
       </router-link>
-      <router-link to="/authenticated/buy-aph">
+      <router-link v-if="currentNetwork.net !== 'MainNet'" to="/authenticated/dex">
+        <span class="icon">
+          <aph-icon name="dex"></aph-icon>
+        </span>
+        <span class="label">Trade DEX</span>
+      </router-link>
+      <router-link v-else to="/authenticated/buy-aph">
         <span class="icon">
           <aph-icon name="dex"></aph-icon>
         </span>
@@ -97,7 +103,6 @@ export default {
       this.$router.push('/login');
     },
   },
-
 };
 </script>
 

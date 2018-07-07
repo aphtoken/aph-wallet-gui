@@ -44,6 +44,7 @@ const CURRENCIES = {
     value: 'AUD',
   },
 };
+const STYLE_MODE_STORAGE_KEY = `${SETTINGS_STORAGE_KEY}.style`;
 
 export default {
 
@@ -52,7 +53,7 @@ export default {
   },
 
   getCurrenciesAsArray() {
-    return _.values(CURRENCIES);
+    return _.sortBy(_.values(CURRENCIES), 'label');
   },
 
   getCurrency() {
@@ -80,6 +81,17 @@ export default {
   sync() {
     store.commit('setCurrency', this.getCurrency());
     store.commit('setCurrencySymbol', this.getCurrencySymbol());
+  },
+
+  getStyleMode() {
+    return storage.get(STYLE_MODE_STORAGE_KEY, defaultSettings.STYLE);
+  },
+
+  setStyleMode(style) {
+    storage.set(STYLE_MODE_STORAGE_KEY, style);
+    this.sync();
+
+    return this;
   },
 
 };
