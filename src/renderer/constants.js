@@ -1,5 +1,5 @@
 const assets = {
-  DEX_SCRIPT_HASH: '14dba19a34de19c5377572be7f9ccfeaa27da744',
+  DEX_SCRIPT_HASH: 'f38fb0024a3909b6358f1ca6f01bb0d9d504873e',
   GAS: '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7',
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
   // TODO: these different per network
