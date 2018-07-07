@@ -3,7 +3,10 @@
     <div class="drag-area"></div>
     <router-view></router-view>
     <flash-message class="vue-flash-container"></flash-message>
-    <div id="out-of-date" v-if="isOutOfDate">A new version is available. <a :href="newVersionDownloadUrl" :title="newVersionDownloadUrl" target="_blank">Click here</a> to download v{{this.$store.state.latestVersion.version}}.</div>
+    <div id="fixed-notifications">
+      <div id="out-of-date" v-if="isOutOfDate">A new version is available. <a :href="newVersionDownloadUrl" :title="newVersionDownloadUrl" target="_blank">Click here</a> to download v{{this.$store.state.latestVersion.version}}.</div>
+      <div id="demo-dex" v-if="shouldShowDexDemoWarning">You are viewing a Test Aphelion DEX Version. Mainnet coming soon.</div>
+    </div>
   </div>
 </template>
 
@@ -37,6 +40,7 @@ export default {
       return this.$store.state.latestVersion
         && this.$store.state.latestVersion.version > this.$store.state.version;
     },
+
     newVersionDownloadUrl() {
       if (process.platform === 'darwin') {
         return this.$store.state.latestVersion.downloadUrlMac;
@@ -46,6 +50,10 @@ export default {
         return this.$store.state.latestVersion.downloadUrlWin;
       }
       return '';
+    },
+
+    shouldShowDexDemoWarning() {
+      return this.$route.path === '/authenticated/dex';
     },
   },
 
@@ -101,19 +109,22 @@ export default {
   width: 100%;
 }
 
-#out-of-date {
+#fixed-notifications {
   background: rgba(black, 0.8);
   color: $red;
   font-family: GilroyMedium;
   font-size: toRem(14px);
   height: auto;
   left: 0;
-  padding: $space-sm;
   position: fixed;
   right: 0;
   text-align: center;
   top: 0;
   z-index: 10000;
+
+  > * {
+    padding: $space-sm;
+  }
 
   a {
     color: white;

@@ -205,7 +205,7 @@ export default {
         this.$services.ledger.close();
       }
 
-      this.$store.dispatch('fetchHoldings');
+      this.$store.dispatch('fetchHoldings', { done: null });
       clearInterval(sendTimeoutIntervalId);
     },
   },

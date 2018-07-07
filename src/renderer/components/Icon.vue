@@ -69,6 +69,14 @@
         />
       </g>
     </svg>
+    
+    <!-- cancel -->
+    <svg class="icon cancel" v-if="name === 'cancel'" viewBox="0 0 22 24" xmlns="http://www.w3.org/2000/svg">
+      <g class="fill">
+        <path class="x" d="m10.5 7.6v3.9h-3.9a.5.5 0 0 0 0 1h3.9v3.9a.5.5 0 0 0 1 0v-3.9h3.9a.5.5 0 0 0 0-1h-3.9v-3.9a.5.5 0 0 0 -1 0z" />
+        <path d="m21.73 5.56-10.5-5.5a.47.47 0 0 0 -.46 0l-10.5 5.5a.48.48 0 0 0 -.27.44v12a.48.48 0 0 0 .27.44l10.5 5.5a.47.47 0 0 0 .46 0l10.5-5.5a.48.48 0 0 0 .27-.44v-12a.48.48 0 0 0 -.27-.44zm-.73 12.14-10 5.24-10-5.24v-11.4l10-5.24 10 5.24z" />
+      </g>
+    </svg>
 
     <!-- wallet -->
     <svg class="icon wallet" v-if="name === 'wallet'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20">
@@ -114,8 +122,10 @@
 
     <!-- remove -->
     <svg class="icon remove" v-if="name === 'remove'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7 7">
-      <path class="fill remove--path" d="M25,28.5a.5.5,0,0,1-.5-.5V22a.5.5,0,0,1,1,0v6A.5.5,0,0,1,25,28.5Z" />
-      <path class="fill remove--path" d="M28,25.5H22a.5.5,0,0,1,0-1h6a.5.5,0,0,1,0,1Z" />
+      <path class="fill" d="M-41.66,367.1l-10.5-5.5a.89.89,0,0,0-.81,0l-10.5,5.5a.87.87,0,0,0-.47.78v12a.87.87,0,0,0,.47.77l10.5,5.5a.83.83,0,0,0,.41.1.79.79,0,0,0,.4-.1l10.51-5.5a.88.88,0,0,0,.46-.77v-12A.87.87,0,0,0-41.66,367.1Zm-1.28,1.3v11l-9.62,5-9.63-5v-11l9.63-5Z" 
+            transform="translate(63.94 -361.5)"/>
+      <path class="fill" d="M-52.56,372.64l-.62-.62h0l-1.77-1.77a.88.88,0,0,0-1.24,0,.88.88,0,0,0,0,1.24l1.77,1.77.62.61-2.39,2.39a.88.88,0,0,0,0,1.24h0a.88.88,0,0,0,.62.25.86.86,0,0,0,.62-.25l1.77-1.77.62-.62.62.62,1.76,1.77a.88.88,0,0,0,.62.25.86.86,0,0,0,.62-.25.88.88,0,0,0,0-1.24l-2.38-2.39.61-.61,1.77-1.77a.88.88,0,0,0,0-1.24.88.88,0,0,0-1.24,0L-51.94,372h0Z" 
+            transform="translate(63.94 -361.5)"/>
     </svg>
 
     <!-- copy -->
@@ -365,6 +375,19 @@
         transform="translate(-0.56 -0.11)" />
     </svg>
 
+
+    <!-- moon -->
+    <svg class="icon moon" v-if="name === 'moon'" xxmlns="http://www.w3.org/2000/svg" viewBox="0 0 13.25 24.5">
+      <path class="fill" d="M-23.81,24.75a1,1,0,0,1-.71-.29L-35.77,13.21a1,1,0,0,1,0-1.42L-24.52.54A1,1,0,0,1-23.43.33a1,1,0,0,1,.62.92v22.5a1,1,0,0,1-.62.92A.84.84,0,0,1-23.81,24.75ZM-33.65,12.5l8.84,8.84V3.66Z" 
+            transform="translate(36.06 -0.25)"/>
+    </svg>
+
+    <!-- sun -->
+    <svg class="icon sun" v-if="name === 'sun'" xxmlns="http://www.w3.org/2000/svg" viewBox="0 0 24.5 24.5">
+      <path class="fill" d="M-23.81,24.75a1,1,0,0,1-.71-.29L-35.77,13.21a1,1,0,0,1,0-1.42L-24.52.54a1,1,0,0,1,1.41,0l11.25,11.25a1,1,0,0,1,0,1.42L-23.11,24.46A1,1,0,0,1-23.81,24.75ZM-33.65,12.5l9.84,9.84L-14,12.5l-9.83-9.84Z" 
+            transform="translate(36.06 -0.25)"/>
+    </svg>
+    
   </div>
 </template>
 
@@ -419,12 +442,14 @@ export default {
     }
   }
 
-  .remove {
+  .cancel {
     path {
-      transform: rotate(45deg) translate(-20px, -25px);
+      &.x {
+        transform-origin: center;
+        transform: rotate(-45deg);
+      }
     }
   }
-
 
   .logout {
     transform: rotate(90deg);

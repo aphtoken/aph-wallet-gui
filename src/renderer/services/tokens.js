@@ -4,33 +4,30 @@ const TOKENS_STORAGE_KEY = 'tokens';
 
 export default {
 
-  add(data) {
-    if (this.tokenExists(data.assetId, data.network)) {
-      const existing = this.getOne(data.assetId, data.network);
-      if (existing) {
-        let skipUpdate = false;
-        if (existing.isCustom === data.isCustom
-          || (existing.isCustom === true && data.isCustom === false)) {
-          // skip updating if already in local db and isCustom is the same
-          //   or isCustom is already true and this would set it back to false
-          skipUpdate = true;
-        }
-
-        if (data.sale || existing.sale) {
-          // if the existing token or the new token data has token sale info, update
-          // (important for keeping sale information up to date with server)
-          skipUpdate = false;
-          data.isCustom = existing.isCustom;
-        }
-
-        if (skipUpdate === true) {
-          return;
-        }
+  putInternal(existingTokens, token) {
+    if (!token.isCustom) {
+      const existingToken = _.get(existingTokens, `${token.assetId}_${token.network}`);
+      if (existingToken && existingToken.isCustom === true) {
+        token.isCustom = true;
       }
     }
+    _.set(existingTokens, `${token.assetId}_${token.network}`, token);
+  },
 
-    const tokens = this.getAll();
-    storage.set(TOKENS_STORAGE_KEY, _.set(tokens, `${data.assetId}_${data.network}`, data));
+  add(token) {
+    const existingTokens = this.getAll();
+
+    this.putInternal(existingTokens, token);
+    storage.set(TOKENS_STORAGE_KEY, existingTokens);
+  },
+
+  putAll(tokens) {
+    const existingTokens = this.getAll();
+
+    tokens.forEach((token) => {
+      this.putInternal(existingTokens, token);
+    });
+    storage.set(TOKENS_STORAGE_KEY, existingTokens);
   },
 
   remove(assetId, network) {

@@ -49,6 +49,7 @@ export default {
     background: white;
     border-radius: $border-radius;
     flex: none;
+    overflow: hidden;
     width: toRem(400px);
   }
 

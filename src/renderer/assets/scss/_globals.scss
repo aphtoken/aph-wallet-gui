@@ -9,4 +9,18 @@ $font-size-low-res: 12.5px;
 @import 'fonts';
 @import 'print';
 @import 'tiles';
+@import 'tables';
 @import 'type';
+
+@import 'night';
+
+%light-background {
+  background: white;
+  border-color: white;
+}
+%disabled-text {
+  color: $grey;
+}
+%selected-text {
+  color: #000000;
+}

@@ -2,6 +2,7 @@ import DomPortal from 'vue-dom-portal';
 import Vue from 'vue';
 import VueFlashMessage from 'vue-flash-message';
 import VueHighCharts from 'vue-highcharts';
+import VueNativeSock from 'vue-native-websocket';
 import _ from 'lodash';
 import accounting from 'accounting';
 import axios from 'axios';
@@ -45,6 +46,14 @@ Vue.use(VueHighCharts);
 Vue.use(VueFlashMessage);
 Vue.use(DomPortal);
 require('vue-flash-message/dist/vue-flash-message.min.css');
+
+// Vue.use(VueNativeSock, 'ws://localhost:62433/ws', {
+Vue.use(VueNativeSock, 'wss://testnet.aphelion-neo.com:62443/ws', {
+  format: 'json',
+  store,
+  reconnection: true, // (Boolean) whether to reconnect automatically (false)
+  reconnectionDelay: 3000, // (Number) how long to initially wait before attempting a new (1000)
+});
 
 // Register global mixins.
 _.each(mixins, (mixin) => {

@@ -2,7 +2,7 @@
 import moment from 'moment';
 import { BigNumber } from 'bignumber.js';
 
-import { alerts, db, neo, network, tokens, wallets, ledger } from '../services';
+import { alerts, db, neo, network, tokens, wallets, ledger, dex } from '../services';
 import { timeouts } from '../constants';
 import router from '../router';
 
@@ -22,6 +22,14 @@ export {
   openPrivateKey,
   openSavedWallet,
   verifyLedgerConnection,
+  fetchMarkets,
+  fetchTradeHistory,
+  fetchOrderHistory,
+  formOrder,
+  placeOrder,
+  pingSocket,
+  subscribeToMarket,
+  unsubscribeFromMarket,
 };
 
 function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
@@ -109,7 +117,7 @@ async function fetchCachedData(id, defaultValue) {
   return result;
 }
 
-async function fetchHoldings({ commit }) {
+async function fetchHoldings({ commit }, { done }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let holdings;
@@ -120,6 +128,9 @@ async function fetchHoldings({ commit }) {
 
   try {
     holdings = await fetchCachedData(holdingsStorageKey);
+    if (done) {
+      done();
+    }
     commit('setHoldings', holdings);
   } catch (holdings) {
     commit('setHoldings', holdings);
@@ -212,7 +223,6 @@ function findTransactions({ state, commit }) {
       commit('endRequest', { identifier: 'findTransactions' });
     })
     .catch((message) => {
-      console.log(message);
       commit('failRequest', { identifier: 'findTransactions', message });
     });
 }
@@ -360,11 +370,141 @@ function fetchLatestVersion({ commit }) {
       commit('endRequest', { identifier: 'fetchLatestVersion' });
     })
     .catch((e) => {
-      console.log(e);
       commit('failRequest', { identifier: 'fetchLatestVersion', message: e });
     });
 }
 
+async function fetchMarkets({ commit }, { done }) {
+  let markets;
+  commit('startRequest', { identifier: 'fetchMarkets' });
+
+  try {
+    markets = await dex.fetchMarkets();
+    commit('setMarkets', markets);
+    done();
+    commit('endRequest', { identifier: 'fetchMarkets' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'fetchMarkets', message });
+  }
+}
+
+async function fetchTradeHistory({ commit }, { marketName }) {
+  let trades;
+  commit('startRequest', { identifier: 'fetchTradeHistory' });
+
+  try {
+    trades = await dex.fetchTradeHistory(marketName);
+    commit('setTradeHistory', trades);
+    commit('endRequest', { identifier: 'fetchTradeHistory' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'fetchTradeHistory', message });
+  }
+}
+
+async function fetchOrderHistory({ commit }) {
+  let orders;
+  commit('startRequest', { identifier: 'fetchOrderHistory' });
+
+  try {
+    orders = await dex.fetchOrderHistory();
+    commit('setOrderHistory', orders);
+    commit('endRequest', { identifier: 'fetchOrderHistory' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'fetchOrderHistory', message });
+  }
+}
+
+async function formOrder({ commit }, { order }) {
+  commit('startRequest', { identifier: 'placeOrder' });
+
+  try {
+    const res = await dex.formOrder(order);
+    commit('setOrderToConfirm', res);
+    commit('endRequest', { identifier: 'placeOrder' });
+  } catch (message) {
+    alerts.exception(message);
+    commit('failRequest', { identifier: 'placeOrder', message });
+  }
+}
+
+async function placeOrder({ commit }, { order, done }) {
+  commit('startRequest', { identifier: 'placeOrder' });
+
+  try {
+    await dex.placeOrder(order);
+    done();
+    commit('setOrderToConfirm', null);
+    commit('endRequest', { identifier: 'placeOrder' });
+  } catch (message) {
+    alerts.exception(message);
+    commit('failRequest', { identifier: 'placeOrder', message });
+  }
+}
+
+
+async function pingSocket({ state, commit }) {
+  commit('startRequest', { identifier: 'pingSocket' });
+
+  try {
+    if (!state.socket || state.socket.isConnected !== true) {
+      return;
+    }
+
+    state.socket.client.sendObj({ op: 'ping' });
+    commit('endRequest', { identifier: 'pingSocket' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'pingSocket', message });
+  }
+}
+
+async function subscribeToMarket({ state, commit }, { market }) {
+  if (!market) {
+    return;
+  }
+
+  commit('startRequest', { identifier: 'subscribeToMarket' });
+
+  try {
+    state.socket.client.sendObj({ op: 'subscribe', args: `orderBook:${market.marketName}` });
+
+    const currentWallet = wallets.getCurrentWallet();
+    state.socket.client.sendObj({
+      op: 'subscribe',
+      args: `orderUpdates:${market.marketName}:${currentWallet.address}`,
+    });
+
+    commit('endRequest', { identifier: 'subscribeToMarket' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'subscribeToMarket', message });
+  }
+}
+async function unsubscribeFromMarket({ state, commit }, { market }) {
+  if (!market) {
+    return;
+  }
+
+  commit('startRequest', { identifier: 'unsubscribeFromMarket' });
+
+  try {
+    state.socket.client.sendObj({ op: 'unsubscribe', args: `orderBook:${market.marketName}` });
+
+    const currentWallet = wallets.getCurrentWallet();
+    state.socket.client.sendObj({
+      op: 'unsubscribe',
+      args: `orderUpdates:${market.marketName}:${currentWallet.address}`,
+    });
+
+    commit('endRequest', { identifier: 'unsubscribeFromMarket' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'unsubscribeFromMarket', message });
+  }
+}
 
 // Local functions
 function normalizeRecentTransactions(transactions) {

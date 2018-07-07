@@ -117,6 +117,23 @@ export default new Router({
           component: require('@/components/BuyAph').default,
         },
         {
+          path: 'dex',
+          component: require('@/components/Dex').default,
+          children: [
+            {
+              path: '',
+              components: {
+                'top-left': require('@/components/dex/MarketSelection').default,
+                'bottom-left': require('@/components/dex/OrderForm').default,
+                'top-middle': require('@/components/dex/Chart').default,
+                'bottom-middle': require('@/components/dex/OrderHistory').default,
+                'top-right': require('@/components/dex/OrderBook').default,
+                'bottom-right': require('@/components/dex/TradeHistory').default,
+              },
+            },
+          ],
+        },
+        {
           path: 'assets',
           component: require('@/components/Assets').default,
           children: [

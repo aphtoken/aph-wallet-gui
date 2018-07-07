@@ -3,7 +3,7 @@
     <div class="left">
       <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
       <div class="token">
-        <div class="name">{{ holding.name }}</div>
+        <div class="name" :title="holding.asset">{{ holding.name }}</div>
         <div class="currency">{{ holding.symbol }}</div>
       </div>
     </div>

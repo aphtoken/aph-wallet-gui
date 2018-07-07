@@ -10,6 +10,7 @@ import storage from './storage';
 import tokens from './tokens';
 import valuation from './valuation';
 import wallets from './wallets';
+import dex from './dex';
 
 export {
   alerts,
@@ -24,4 +25,5 @@ export {
   tokens,
   valuation,
   wallets,
+  dex,
 };
