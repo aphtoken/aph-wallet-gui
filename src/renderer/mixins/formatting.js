@@ -29,5 +29,9 @@ export default {
     $formatWeekdayAndTime(...args) {
       return formatting.formatWeekdayAndTime.apply(null, args);
     },
+
+    $formatTokenAmount(...args) {
+      return formatting.formatTokenAmount.apply(null, args);
+    },
   },
 };

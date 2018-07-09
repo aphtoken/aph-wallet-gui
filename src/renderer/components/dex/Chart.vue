@@ -62,6 +62,7 @@
 import { BigNumber } from 'bignumber.js';
 
 let storeUnwatch;
+let storeMarketUnwatch;
 let tradingView;
 let barsSubscription;
 
@@ -89,10 +90,18 @@ export default {
         }
         this.styleMode = this.$store.state.styleMode;
       });
+
+    storeMarketUnwatch = this.$store.watch(
+      () => {
+        return this.$store.state.currentMarket;
+      }, () => {
+        this.loadChart();
+      });
   },
 
   beforeDestroy() {
     storeUnwatch();
+    storeMarketUnwatch();
     clearInterval(barsSubscription);
   },
 
@@ -245,6 +254,7 @@ export default {
             "header_compare","symbol_info","display_market_status","display_market_status",
           ],
           enabled_features: [],
+          autosize: true,
 		    };
 
         const container = document.getElementById('chart-container');

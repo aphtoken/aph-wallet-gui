@@ -45,7 +45,7 @@
 
         <div class="estimate">
           <div class="label">ESTIMATE ({{ $store.state.currentMarket.baseCurrency }})</div>
-          <div class="value">{{ $formatMoneyWithoutCents(estimate) }}</div>
+          <div class="value">{{ $formatTokenAmount(estimate) }}</div>
         </div>
 
 
@@ -344,9 +344,9 @@ export default {
       this.$store.commit('setOrderToConfirm', null);
     },
     setMarket() {
-      this.$services.dex.setMarket(this.$constants.assets.ATI,
+      this.$services.dex.setMarket(this.$constants.assets.APH,
         this.$constants.assets.GAS,
-        10, 0.00001, 0.0001, 0.0002)
+        10, 0.00001, 0.0000, 0.0001)
         .then(() => {
           this.$services.alerts.success('setMarket Invocation Relayed');
         })
@@ -354,10 +354,11 @@ export default {
           this.$services.alerts.exception(e);
         });
     },
+
     testDepositAPH() {
       this.$services.dex.depositAsset(this.$constants.assets.APH, 50)
         .then(() => {
-          this.$services.alerts.success('500 APH Deposit Relayed');
+          this.$services.alerts.success('50 APH Deposit Relayed');
         })
         .catch((e) => {
           this.$services.alerts.exception(e);
@@ -368,12 +369,19 @@ export default {
 </script>
 
 <style lang="scss">
+$depositWithdrawMenuHeight: toRem(114px);
+#dex .grid--cell > div:first-child {
+  height:100%;
+}
 #dex--orderform {
-  @extend %tile-light;
-
+  @extend %tile-light;  
+  position: relative;
+  height: 100%;
+  min-width: toRem(280px);
   .body {
-    padding: $space;
-
+    padding: $space $space 0;
+    overflow: auto;
+    height: calc(100% - #{$depositWithdrawMenuHeight});
     .balance, .estimate {
       display: flex;
       flex-direction: row;
@@ -461,7 +469,7 @@ export default {
     .options {
       color: $grey;
       text-align: center;
-      margin: $space 0 $space-lg;
+      margin: $space 0 $space;
     }
 
     .aph-input {
@@ -514,19 +522,22 @@ export default {
 
   .test-buttons {
     padding: $space;
-
+    height: $depositWithdrawMenuHeight;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
     .row {
       display: flex;
       flex-direction: row;
 
       & + .row {
-        margin-top: $space;
+        margin-top: $space-xs;
       }
     }
 
     .test-btn {
-      height: auto;
-      padding: $space-sm 0;
+      height: toRem(26px);
+      padding: $space-xs 0;
       font-size: toRem(12px);
       border-width: $border-width-thin;
 
