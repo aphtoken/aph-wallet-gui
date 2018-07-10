@@ -58,16 +58,18 @@
       </div>
       <div class="test-buttons">
         <div class="row">
-          <button @click="setMarket" class="test-btn">Setup Market</button>
           <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">Deposit {{ baseHolding.symbol }}</button>
-        </div>
-        <div class="row">
-          <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">Deposit APH</button>
-          <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">Deposit {{ quoteHolding.symbol }}</button>
-        </div>
-        <div class="row">
           <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">Withdraw {{ baseHolding.symbol }}</button>
+        </div>
+        <div class="row">
+          <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">Deposit {{ quoteHolding.symbol }}</button>
           <button @click="showDepositWithdrawModal(false, quoteHolding)" class="test-btn">Withdraw {{ quoteHolding.symbol }}</button>
+        </div>
+        <div class="row" v-if="quoteHolding.symbol !== 'APH'">
+          <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">Deposit APH</button>
+          <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">Withdraw APH</button>
+          <!-- Only the contract owner or manager can do this.
+          <button @click="setMarket" class="test-btn">Setup Market</button> -->
         </div>
       </div>
     </section>
@@ -349,16 +351,6 @@ export default {
         10, 0.00001, 0.0000, 0.0001)
         .then(() => {
           this.$services.alerts.success('setMarket Invocation Relayed');
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
-    },
-
-    testDepositAPH() {
-      this.$services.dex.depositAsset(this.$constants.assets.APH, 50)
-        .then(() => {
-          this.$services.alerts.success('50 APH Deposit Relayed');
         })
         .catch((e) => {
           this.$services.alerts.exception(e);
