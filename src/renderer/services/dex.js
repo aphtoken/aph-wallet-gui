@@ -24,6 +24,7 @@ const TX_ATTR_USAGE_WITHDRAW_STEP = 0xF1;
 const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xF2;
 const TX_ATTR_USAGE_WITHDRAW_ASSET_ID = 0xF3;
 const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xF4;
+const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xF5;
 const WITHDRAW_STEP_MARK = '91';
 const WITHDRAW_STEP_WITHDRAW = '92';
 
@@ -426,7 +427,7 @@ export default {
     });
   },
 
-  placeOrder(order) {
+  placeOrder(order, waitForDeposits) {
     return new Promise((resolve, reject) => {
       try {
         if (order.postOnly && order.offersToTake.length > 0) {
@@ -437,12 +438,20 @@ export default {
         this.formDepositsForOrder(order);
 
         if (order.deposits.length > 0) {
+          if (waitForDeposits) {
+            // we have deposits pending, wait for our balance to reflect
+            setTimeout(() => {
+              this.placeOrder(order, true);
+            }, 5000);
+            return;
+          }
+
           this.makeOrderDeposits(order)
             .then((o) => {
-              this.placeOrder(o);
+              this.placeOrder(o, true);
             })
-            .catch((e) => {
-              reject(e);
+            .catch(() => {
+              reject('Failed to make automatic deposits');
             });
 
           Vue.set(order, 'status', 'Depositing');
@@ -807,18 +816,7 @@ export default {
           this.markWithdraw(assetId, quantity)
             .then((res) => {
               if (res.success !== true) {
-                // is this utxo reserved by us already? skip to withdraw step, todo: need to query storage first to verify it's ours
-                this.withdrawSystemAsset(assetId, quantity, res.tx.inputs[0].prevHash, res.tx.inputs[0].prevIndex)
-                  .then((res) => {
-                    if (res.success) {
-                      resolve(res.tx);
-                    } else {
-                      reject('Withdraw Mark Step rejected');
-                    }
-                  })
-                  .catch((e) => {
-                    reject(e);
-                  });
+                reject('Withdraw Mark Step rejected');
                 return;
               }
 
@@ -892,6 +890,8 @@ export default {
           config.intents = api.makeIntent({ GAS: quantity }, assets.DEX_SCRIPT_HASH);
         }
 
+        quantity = toBigNumber(quantity);
+
         if (currentWallet.isLedger === true) {
           config.signingFunction = ledger.signWithLedger;
           config.address = currentWallet.address;
@@ -901,6 +901,7 @@ export default {
 
         let utxoIndex = -1;
 
+        alerts.success('Processing withdraw request...');
         api.fillKeys(config)
           .then((c) => {
             return new Promise((resolveBalance) => {
@@ -918,15 +919,28 @@ export default {
             return api.createTx(c, 'invocation');
           })
           .then((c) => {
-            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_MARK);
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
+            return new Promise((resolveTx) => {
+              this.calculateWithdrawInputsAndOutputs(c, assetId, quantity)
+                .then(() => {
+                  const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_MARK);
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()));
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0));
 
-            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+                  c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+                  c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+                  resolveTx(c);
+                })
+                .catch(() => {
+                  reject('Failed to calculate withdraw inputs and outputs');
+                });
+            });
+          })
+          .then((c) => {
             return api.signTx(c);
           })
           .then((c) => {
@@ -946,7 +960,7 @@ export default {
             let i = 0;
 
             c.tx.outputs.forEach((o) => {
-              if (utxoIndex === -1 && toBigNumber(quantity).isEqualTo(o.value)) {
+              if (utxoIndex === -1 && quantity.isEqualTo(o.value)) {
                 utxoIndex = i;
               }
               i += 1;
@@ -978,10 +992,89 @@ export default {
               tx: config.tx,
             };
             console.log(dump);
+            reject(`Failed to Mark Withdraw. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to Mark Withdraw. ${e.message}`);
+      }
+    });
+  },
+
+  calculateWithdrawInputsAndOutputs(config, assetId, quantity) {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentWallet = wallets.getCurrentWallet();
+        const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
+
+        const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+        api.neoscan.getBalance(config.net, dexAddress)
+          .then((balance) => {
+            config.balance = balance;
+            const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
+
+            config.tx.inputs = [];
+            config.tx.outputs = [];
+
+            const promises = [];
+            unspents.forEach((u) => {
+              promises.push(this.fetchSystemAssetUTXOReserved(u));
+            });
+
+            Promise.all(promises)
+              .then(() => {
+                let inputTotal = new BigNumber(0);
+                _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).reverse().forEach((u) => {
+                  if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
+                    return;
+                  }
+                  if (u.reservedFor === currentWalletScriptHash) {
+                    this.completeSystemAssetWithdrawals();
+                    reject('Already have a UTXO reserved for your address. Completing open withdraw.');
+                    return;
+                  }
+                  if (u.reservedFor && u.reservedFor.length > 0) {
+                    // reserved for someone else
+                    return;
+                  }
+
+                  inputTotal = inputTotal.plus(u.value);
+                  config.tx.inputs.push({
+                    prevHash: u.txid,
+                    prevIndex: u.index,
+                  });
+                });
+
+                if (inputTotal.isLessThan(quantity)) {
+                  reject('Contract does not have enough balance for withdraw.');
+                  return;
+                }
+
+                config.tx.outputs.push({
+                  assetId,
+                  scriptHash: assets.DEX_SCRIPT_HASH,
+                  value: quantity,
+                });
+
+                if (inputTotal.isGreaterThan(quantity)) {
+                  // change output
+                  config.tx.outputs.push({
+                    assetId,
+                    scriptHash: assets.DEX_SCRIPT_HASH,
+                    value: inputTotal.minus(quantity),
+                  });
+                }
+
+                resolve(config);
+              })
+              .catch((e) => {
+                reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
+              });
+          })
+          .catch((e) => {
             reject(e);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
       }
     });
   },
@@ -1032,6 +1125,8 @@ export default {
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0));
 
             c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
@@ -1137,14 +1232,45 @@ export default {
             return api.createTx(c, 'invocation');
           })
           .then((c) => {
-            c.utxoTxHash = utxoTxHash;
-            c.utxoIndex = utxoIndex;
+            return new Promise((resolveInputs) => {
+              api.neoscan.getBalance(c.net, dexAddress)
+                .then((balance) => {
+                  const unspents = assetId === assets.GAS ? balance.assets.GAS.unspent : balance.assets.NEO.unspent;
+                  const input = _.find(unspents, (o) => {
+                    return o.txid === utxoTxHash && o.index === utxoIndex;
+                  });
 
+                  if (!input) {
+                    reject('Unable to find marked input.');
+                    return;
+                  }
+
+                  c.tx.inputs = [{
+                    prevHash: input.txid,
+                    prevIndex: input.index,
+                  }];
+
+                  c.tx.outputs = [{
+                    assetId,
+                    scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),
+                    value: input.value,
+                  }];
+
+                  resolveInputs(c);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            });
+          })
+          .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_WITHDRAW);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0));
 
             c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
@@ -1236,9 +1362,9 @@ export default {
           .then((balance) => {
             if (balance.assets.GAS) {
               balance.assets.GAS.unspent.forEach((u) => {
-                this.fetchSystemAssetUTXOReserved(u.txid, u.index)
-                  .then((res) => {
-                    if (res.success === true && res.result === currentWalletScriptHash) {
+                this.fetchSystemAssetUTXOReserved(u)
+                  .then(() => {
+                    if (u.reservedFor === currentWalletScriptHash) {
                       this.withdrawSystemAsset(assets.GAS, u.value.toNumber(), u.txid, u.index);
                     }
                   })
@@ -1249,9 +1375,9 @@ export default {
             }
             if (balance.assets.NEO) {
               balance.assets.NEO.unspent.forEach((u) => {
-                this.fetchSystemAssetUTXOReserved(u.txid, u.index)
-                  .then((res) => {
-                    if (res.success === true && res.result === currentWalletScriptHash) {
+                this.fetchSystemAssetUTXOReserved(u)
+                  .then(() => {
+                    if (u.reservedFor === currentWalletScriptHash) {
                       this.withdrawSystemAsset(assets.NEO, u.value.toNumber(), u.txid, u.index);
                     }
                   })
@@ -1270,10 +1396,13 @@ export default {
     });
   },
 
-  fetchSystemAssetUTXOReserved(prevTxHash, prevTxIndex) {
+  fetchSystemAssetUTXOReserved(input) {
     return new Promise((resolve, reject) => {
       try {
-        let utxoParam = prevTxHash;
+        const prevTxHash = input.prevHash ? input.prevHash : input.txid;
+        const prevTxIndex = input.prevIndex ? input.prevIndex : input.index;
+
+        let utxoParam = u.reverseHex(prevTxHash);
         if (prevTxIndex > 0) {
           utxoParam = `${utxoParam}${u.num2hexstring(prevTxIndex)}`; // todo: support > 8bit indexes
         }
@@ -1284,16 +1413,16 @@ export default {
           params: [assets.DEX_SCRIPT_HASH, utxoParam],
         })
           .then((res) => {
-            resolve({
-              success: !!res.result,
-              result: res.result && res.result.length > 0 ? u.reverseHex(res.result) : '',
-            });
+            if (!!res.result && res.result.length > 0) {
+              input.reservedFor = u.reverseHex(res.result);
+            }
+            resolve(input);
           })
           .catch((e) => {
-            reject(e);
+            reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e.message}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e.message}`);
       }
     });
   },

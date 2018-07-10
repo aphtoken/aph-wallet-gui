@@ -923,10 +923,15 @@ export default {
               && moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK) {
               this.fetchTransactionDetails(tx.hash)
                 .then((transactionDetails) => {
-                  if (transactionDetails) {
+                  if (transactionDetails && transactionDetails.confirmed) {
                     alerts.success(`TX: ${transactionDetails.txid} CONFIRMED`);
                     clearInterval(interval);
                     resolve(transactionDetails);
+                  }
+                })
+                .catch(() => {
+                  if (moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK * 2) {
+                    reject('Transaction confirmation failed.');
                   }
                 });
             }

@@ -168,7 +168,6 @@ export default {
           ? this.$formatNumber(this.quoteHolding.contractBalance) : '0';
         return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
       } catch (e) {
-        console.log(e);
         return '';
       }
     },
@@ -180,7 +179,6 @@ export default {
           ? this.$formatNumber(this.baseHolding.contractBalance) : '0';
         return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
       } catch (e) {
-        console.log(e);
         return '';
       }
     },
@@ -192,7 +190,6 @@ export default {
           ? this.$formatNumber(this.aphHolding.contractBalance) : '0';
         return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
       } catch (e) {
-        console.log(e);
         return '';
       }
     },
