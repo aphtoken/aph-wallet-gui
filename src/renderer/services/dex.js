@@ -807,18 +807,7 @@ export default {
           this.markWithdraw(assetId, quantity)
             .then((res) => {
               if (res.success !== true) {
-                // is this utxo reserved by us already? skip to withdraw step, todo: need to query storage first to verify it's ours
-                this.withdrawSystemAsset(assetId, quantity, res.tx.inputs[0].prevHash, res.tx.inputs[0].prevIndex)
-                  .then((res) => {
-                    if (res.success) {
-                      resolve(res.tx);
-                    } else {
-                      reject('Withdraw Mark Step rejected');
-                    }
-                  })
-                  .catch((e) => {
-                    reject(e);
-                  });
+                reject('Withdraw Mark Step rejected');
                 return;
               }
 
@@ -892,6 +881,8 @@ export default {
           config.intents = api.makeIntent({ GAS: quantity }, assets.DEX_SCRIPT_HASH);
         }
 
+        quantity = toBigNumber(quantity);
+
         if (currentWallet.isLedger === true) {
           config.signingFunction = ledger.signWithLedger;
           config.address = currentWallet.address;
@@ -901,6 +892,7 @@ export default {
 
         let utxoIndex = -1;
 
+        alerts.success('Processing withdraw request...');
         api.fillKeys(config)
           .then((c) => {
             return new Promise((resolveBalance) => {
@@ -918,15 +910,26 @@ export default {
             return api.createTx(c, 'invocation');
           })
           .then((c) => {
-            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_MARK);
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
+            return new Promise((resolveTx) => {
+              this.calculateWithdrawInputsAndOutputs(c, assetId, quantity)
+                .then(() => {
+                  const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_MARK);
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()));
 
-            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+                  c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+                  c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+                  resolveTx(c);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            });
+          })
+          .then((c) => {
             return api.signTx(c);
           })
           .then((c) => {
@@ -946,7 +949,7 @@ export default {
             let i = 0;
 
             c.tx.outputs.forEach((o) => {
-              if (utxoIndex === -1 && toBigNumber(quantity).isEqualTo(o.value)) {
+              if (utxoIndex === -1 && quantity.isEqualTo(o.value)) {
                 utxoIndex = i;
               }
               i += 1;
@@ -978,6 +981,77 @@ export default {
               tx: config.tx,
             };
             console.log(dump);
+            reject(e);
+          });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  },
+
+  calculateWithdrawInputsAndOutputs(c, assetId, quantity) {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentWallet = wallets.getCurrentWallet();
+        const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
+
+        c.tx.inputs = [];
+        c.tx.outputs = [];
+
+        const unspents = assetId === assets.GAS ? c.balance.assets.GAS.unspent : c.balance.assets.NEO.unspent;
+
+        const promises = [];
+        unspents.forEach((u) => {
+          promises.push(this.fetchSystemAssetUTXOReserved(u));
+        });
+
+        Promise.all(promises)
+          .then(() => {
+            let inputTotal = new BigNumber(0);
+            _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).reverse().forEach((u) => {
+              if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
+                return;
+              }
+              if (u.reservedFor === currentWalletScriptHash) {
+                this.completeSystemAssetWithdrawals();
+                reject('Already have a UTXO reserved for your address. Completing open withdraw.');
+                return;
+              }
+              if (u.reservedFor && u.reservedFor.length > 0) {
+                // reserved for someone else
+                return;
+              }
+
+              inputTotal = inputTotal.plus(u.value);
+              c.tx.inputs.push({
+                prevHash: u.txid,
+                prevIndex: u.index,
+              });
+            });
+
+            if (inputTotal.isLessThan(quantity)) {
+              reject('Contract does not have enough balance for withdrawl.');
+              return;
+            }
+
+            c.tx.outputs.push({
+              assetId,
+              scriptHash: assets.DEX_SCRIPT_HASH,
+              value: quantity,
+            });
+
+            if (inputTotal.isGreaterThan(quantity)) {
+              // change output
+              c.tx.outputs.push({
+                assetId,
+                scriptHash: assets.DEX_SCRIPT_HASH,
+                value: inputTotal.minus(quantity),
+              });
+            }
+
+            resolve(c);
+          })
+          .catch((e) => {
             reject(e);
           });
       } catch (e) {
@@ -1236,9 +1310,9 @@ export default {
           .then((balance) => {
             if (balance.assets.GAS) {
               balance.assets.GAS.unspent.forEach((u) => {
-                this.fetchSystemAssetUTXOReserved(u.txid, u.index)
-                  .then((res) => {
-                    if (res.success === true && res.result === currentWalletScriptHash) {
+                this.fetchSystemAssetUTXOReserved(u)
+                  .then(() => {
+                    if (u.reservedFor === currentWalletScriptHash) {
                       this.withdrawSystemAsset(assets.GAS, u.value.toNumber(), u.txid, u.index);
                     }
                   })
@@ -1249,9 +1323,9 @@ export default {
             }
             if (balance.assets.NEO) {
               balance.assets.NEO.unspent.forEach((u) => {
-                this.fetchSystemAssetUTXOReserved(u.txid, u.index)
-                  .then((res) => {
-                    if (res.success === true && res.result === currentWalletScriptHash) {
+                this.fetchSystemAssetUTXOReserved(u)
+                  .then(() => {
+                    if (u.reservedFor === currentWalletScriptHash) {
                       this.withdrawSystemAsset(assets.NEO, u.value.toNumber(), u.txid, u.index);
                     }
                   })
@@ -1270,10 +1344,13 @@ export default {
     });
   },
 
-  fetchSystemAssetUTXOReserved(prevTxHash, prevTxIndex) {
+  fetchSystemAssetUTXOReserved(input) {
     return new Promise((resolve, reject) => {
       try {
-        let utxoParam = prevTxHash;
+        const prevTxHash = input.prevHash ? input.prevHash : input.txid;
+        const prevTxIndex = input.prevIndex ? input.prevIndex : input.index;
+
+        let utxoParam = u.reverseHex(prevTxHash);
         if (prevTxIndex > 0) {
           utxoParam = `${utxoParam}${u.num2hexstring(prevTxIndex)}`; // todo: support > 8bit indexes
         }
@@ -1284,10 +1361,10 @@ export default {
           params: [assets.DEX_SCRIPT_HASH, utxoParam],
         })
           .then((res) => {
-            resolve({
-              success: !!res.result,
-              result: res.result && res.result.length > 0 ? u.reverseHex(res.result) : '',
-            });
+            if (!!res.result && res.result.length > 0) {
+              input.reservedFor = u.reverseHex(res.result);
+            }
+            resolve(input);
           })
           .catch((e) => {
             reject(e);
