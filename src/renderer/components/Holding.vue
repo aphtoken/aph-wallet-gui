@@ -40,7 +40,6 @@ export default {
           ? this.$formatNumber(this.holding.contractBalance) : '0';
         return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
       } catch (e) {
-        console.log(e);
         return '';
       }
     },
