@@ -923,7 +923,7 @@ export default {
               && moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK) {
               this.fetchTransactionDetails(tx.hash)
                 .then((transactionDetails) => {
-                  if (transactionDetails && transactionDetails.confirmed === true) {
+                  if (transactionDetails && transactionDetails.confirmed) {
                     alerts.success(`TX: ${transactionDetails.txid} CONFIRMED`);
                     clearInterval(interval);
                     resolve(transactionDetails);

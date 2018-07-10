@@ -437,7 +437,7 @@ export default {
         this.formDepositsForOrder(order);
 
         if (order.deposits.length > 0) {
-          if (waitForDeposits === true) {
+          if (waitForDeposits) {
             // we have deposits pending, wait for our balance to reflect
             setTimeout(() => {
               this.placeOrder(order, true);
@@ -450,7 +450,7 @@ export default {
               this.placeOrder(o, true);
             })
             .catch((e) => {
-              reject(e);
+              reject('Failed to make automatic deposits');
             });
 
           Vue.set(order, 'status', 'Depositing');
@@ -933,7 +933,7 @@ export default {
                   resolveTx(c);
                 })
                 .catch((e) => {
-                  reject(e);
+                  reject('Failed to calculate withdraw inputs and outputs');
                 });
             });
           })
@@ -989,24 +989,24 @@ export default {
               tx: config.tx,
             };
             console.log(dump);
-            reject(e);
+            reject(`Failed to Mark Withdraw. ${e.message}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to Mark Withdraw. ${e.message}`);
       }
     });
   },
 
-  calculateWithdrawInputsAndOutputs(c, assetId, quantity) {
+  calculateWithdrawInputsAndOutputs(config, assetId, quantity) {
     return new Promise((resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
-        c.tx.inputs = [];
-        c.tx.outputs = [];
+        config.tx.inputs = [];
+        config.tx.outputs = [];
 
-        const unspents = assetId === assets.GAS ? c.balance.assets.GAS.unspent : c.balance.assets.NEO.unspent;
+        const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
 
         const promises = [];
         unspents.forEach((u) => {
@@ -1031,7 +1031,7 @@ export default {
               }
 
               inputTotal = inputTotal.plus(u.value);
-              c.tx.inputs.push({
+              config.tx.inputs.push({
                 prevHash: u.txid,
                 prevIndex: u.index,
               });
@@ -1042,7 +1042,7 @@ export default {
               return;
             }
 
-            c.tx.outputs.push({
+            config.tx.outputs.push({
               assetId,
               scriptHash: assets.DEX_SCRIPT_HASH,
               value: quantity,
@@ -1050,7 +1050,7 @@ export default {
 
             if (inputTotal.isGreaterThan(quantity)) {
               // change output
-              c.tx.outputs.push({
+              config.tx.outputs.push({
                 assetId,
                 scriptHash: assets.DEX_SCRIPT_HASH,
                 value: inputTotal.minus(quantity),
@@ -1060,10 +1060,10 @@ export default {
             resolve(c);
           })
           .catch((e) => {
-            reject(e);
+            reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
       }
     });
   },
