@@ -23,6 +23,20 @@ const toBigNumber = (value) => {
   return new BigNumber(String(bigNumber));
 };
 
+const formatNumberBase = (value, wholeNumberFormat) => {
+  let bigNumber = toBigNumber(value);
+  const isNegative = bigNumber.isNegative();
+  bigNumber = bigNumber.abs();
+  let wholeNumber = bigNumber.integerValue(BigNumber.ROUND_FLOOR);
+  const fractionalNumber = bigNumber.minus(wholeNumber);
+  if (!wholeNumber.isZero()) {
+    wholeNumber = isNegative ? wholeNumber.multipliedBy(-1) : wholeNumber;
+    return `${numeral(wholeNumber).format(wholeNumberFormat)}`
+      + `${numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER)}`;
+  }
+  return (isNegative ? '-0' : '0') + numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER);
+};
+
 export default {
   formatDate(timestamp, defaultValue = '--') {
     if (nullOrUndefined(timestamp)) {
@@ -62,17 +76,7 @@ export default {
       return defaultValue;
     }
 
-    let bigNumber = toBigNumber(value);
-    const isNegative = bigNumber.isNegative();
-    bigNumber = bigNumber.abs();
-    let wholeNumber = bigNumber.integerValue(BigNumber.ROUND_FLOOR);
-    const fractionalNumber = bigNumber.minus(wholeNumber);
-    if (!wholeNumber.isZero()) {
-      wholeNumber = isNegative ? wholeNumber.multipliedBy(-1) : wholeNumber;
-      return `${numeral(wholeNumber).format(wholeNumberFormat)}`
-        + `${numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER)}`;
-    }
-    return (isNegative ? '-0' : '0') + numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER);
+    return formatNumberBase(value, wholeNumberFormat);
   },
 
   formatTime(timestamp, defaultValue = '--') {
@@ -89,5 +93,14 @@ export default {
     }
 
     return moment.unix(timestamp).format(formats.WEEKDAY_AND_TIME);
+  },
+
+  formatTokenAmount(value, threshold = 1000, defaultValue = 'N/A') {
+    if (nullOrUndefined(value)) {
+      return defaultValue;
+    }
+
+    return value > threshold ?
+      accounting.formatMoney(toBigNumber(value), ' ', 0) : formatNumberBase(value);
   },
 };

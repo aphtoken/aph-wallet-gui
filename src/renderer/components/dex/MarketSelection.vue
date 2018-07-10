@@ -17,19 +17,19 @@
       <div class="day-values">
         <div class="row">
           <div class="label">VOL</div>
-          <div class="value">{{ $formatMoneyWithoutCents($store.state.tradeHistory.volume24Hour) }}</div>
+          <div class="value">{{ $formatNumber($store.state.tradeHistory.volume24Hour) }}</div>
         </div>
         <div class="row">
           <div class="label">OPEN</div>
-          <div class="value">{{ $formatMoneyWithoutCents($store.state.tradeHistory.open24Hour) }}</div>
+          <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.open24Hour) }}</div>
         </div>
         <div class="row">
           <div class="label">HIGH</div>
-          <div class="value">{{ $formatMoneyWithoutCents($store.state.tradeHistory.high24Hour) }}</div>
+          <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.high24Hour) }}</div>
         </div>
         <div class="row">
           <div class="label">LOW</div>
-          <div class="value">{{ $formatMoneyWithoutCents($store.state.tradeHistory.low24Hour) }}</div>
+          <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.low24Hour) }}</div>
         </div>
       </div>
 
@@ -39,7 +39,7 @@
         <div class="price">
           <span class="label">PRICE</span>
           <div class="base-price">
-            {{ $formatMoneyWithoutCents($store.state.tradeHistory.close24Hour) }}
+            {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
           </div>
           <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">{{ $formatNumber($store.state.tradeHistory.change24Hour) }}</div>
         </div>

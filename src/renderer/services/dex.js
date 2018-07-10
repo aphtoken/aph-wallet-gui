@@ -200,7 +200,7 @@ export default {
       open: 0,
       close: trades.length > 0 ? trades[0].price : 0,
       high: 0,
-      low: 0,
+      low: trades.length > 0 ? 99999999 : 0,
       volume: 0,
       time: (to * 1000) - resolution,
     };
@@ -215,7 +215,7 @@ export default {
             open: 0,
             close: t.price,
             high: 0,
-            low: 0,
+            low: 99999999,
             volume: 0,
             time: currentBar.time - resolution,
           };
@@ -232,7 +232,7 @@ export default {
             open: 0,
             close: t.price,
             high: 0,
-            low: 0,
+            low: 99999999,
             volume: 0,
             time: currentBar.time - resolution,
           };
@@ -258,7 +258,7 @@ export default {
             open: 0,
             close: t.price,
             high: 0,
-            low: 0,
+            low: 99999999,
             volume: 0,
             time: currentBar.time - resolution,
           };

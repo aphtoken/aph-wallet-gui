@@ -12,7 +12,8 @@
               <th>order</th>
               <th>type</th>
               <th>pair</th>
-              <th>amount</th>
+              <th>filled</th>
+              <th>units total</th>
               <th>price</th>
               <th>created</th>
               <th class="status" width="1">status</th>
@@ -23,7 +24,8 @@
               <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
               <td class="type">{{ order.type }}</td>
               <td class="market">{{ order.marketName }}</td>
-              <td class="quantity">{{ $formatNumber(order.quantityRemaining) }}</td>
+              <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
+              <td class="units-total">{{ $formatNumber(order.quantity) }}</td>
               <td class="price">{{ $formatNumber(order.price) }}</td>
               <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
               <td class="status">
@@ -145,7 +147,7 @@ export default {
 
 
   .body {
-    height: 150px;
+    height: calc(100% - 42px);
     overflow-y: auto;
     padding: $space;
 

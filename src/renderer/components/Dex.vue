@@ -125,6 +125,7 @@ export default {
   justify-content: center;
   padding-top: toRem(30px);
   width: 100%;
+  flex: 1;
 
   .grid {
     display: flex;
