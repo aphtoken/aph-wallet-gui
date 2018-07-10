@@ -449,7 +449,7 @@ export default {
             .then((o) => {
               this.placeOrder(o, true);
             })
-            .catch((e) => {
+            .catch(() => {
               reject('Failed to make automatic deposits');
             });
 
@@ -932,7 +932,7 @@ export default {
                     u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
                   resolveTx(c);
                 })
-                .catch((e) => {
+                .catch(() => {
                   reject('Failed to calculate withdraw inputs and outputs');
                 });
             });
@@ -1057,7 +1057,7 @@ export default {
               });
             }
 
-            resolve(c);
+            resolve(config);
           })
           .catch((e) => {
             reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
