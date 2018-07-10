@@ -24,6 +24,7 @@ const TX_ATTR_USAGE_WITHDRAW_STEP = 0xF1;
 const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xF2;
 const TX_ATTR_USAGE_WITHDRAW_ASSET_ID = 0xF3;
 const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xF4;
+const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xF5;
 const WITHDRAW_STEP_MARK = '91';
 const WITHDRAW_STEP_WITHDRAW = '92';
 
@@ -926,6 +927,8 @@ export default {
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()));
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0));
 
                   c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
                   c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
@@ -1003,64 +1006,72 @@ export default {
         const currentWallet = wallets.getCurrentWallet();
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
-        config.tx.inputs = [];
-        config.tx.outputs = [];
+        const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+        api.neoscan.getBalance(config.net, dexAddress)
+          .then((balance) => {
+            config.balance = balance;
+            const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
 
-        const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
+            config.tx.inputs = [];
+            config.tx.outputs = [];
 
-        const promises = [];
-        unspents.forEach((u) => {
-          promises.push(this.fetchSystemAssetUTXOReserved(u));
-        });
-
-        Promise.all(promises)
-          .then(() => {
-            let inputTotal = new BigNumber(0);
-            _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).reverse().forEach((u) => {
-              if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
-                return;
-              }
-              if (u.reservedFor === currentWalletScriptHash) {
-                this.completeSystemAssetWithdrawals();
-                reject('Already have a UTXO reserved for your address. Completing open withdraw.');
-                return;
-              }
-              if (u.reservedFor && u.reservedFor.length > 0) {
-                // reserved for someone else
-                return;
-              }
-
-              inputTotal = inputTotal.plus(u.value);
-              config.tx.inputs.push({
-                prevHash: u.txid,
-                prevIndex: u.index,
-              });
+            const promises = [];
+            unspents.forEach((u) => {
+              promises.push(this.fetchSystemAssetUTXOReserved(u));
             });
 
-            if (inputTotal.isLessThan(quantity)) {
-              reject('Contract does not have enough balance for withdrawl.');
-              return;
-            }
+            Promise.all(promises)
+              .then(() => {
+                let inputTotal = new BigNumber(0);
+                _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).reverse().forEach((u) => {
+                  if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
+                    return;
+                  }
+                  if (u.reservedFor === currentWalletScriptHash) {
+                    this.completeSystemAssetWithdrawals();
+                    reject('Already have a UTXO reserved for your address. Completing open withdraw.');
+                    return;
+                  }
+                  if (u.reservedFor && u.reservedFor.length > 0) {
+                    // reserved for someone else
+                    return;
+                  }
 
-            config.tx.outputs.push({
-              assetId,
-              scriptHash: assets.DEX_SCRIPT_HASH,
-              value: quantity,
-            });
+                  inputTotal = inputTotal.plus(u.value);
+                  config.tx.inputs.push({
+                    prevHash: u.txid,
+                    prevIndex: u.index,
+                  });
+                });
 
-            if (inputTotal.isGreaterThan(quantity)) {
-              // change output
-              config.tx.outputs.push({
-                assetId,
-                scriptHash: assets.DEX_SCRIPT_HASH,
-                value: inputTotal.minus(quantity),
+                if (inputTotal.isLessThan(quantity)) {
+                  reject('Contract does not have enough balance for withdraw.');
+                  return;
+                }
+
+                config.tx.outputs.push({
+                  assetId,
+                  scriptHash: assets.DEX_SCRIPT_HASH,
+                  value: quantity,
+                });
+
+                if (inputTotal.isGreaterThan(quantity)) {
+                  // change output
+                  config.tx.outputs.push({
+                    assetId,
+                    scriptHash: assets.DEX_SCRIPT_HASH,
+                    value: inputTotal.minus(quantity),
+                  });
+                }
+
+                resolve(config);
+              })
+              .catch((e) => {
+                reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
               });
-            }
-
-            resolve(config);
           })
           .catch((e) => {
-            reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
+            reject(e);
           });
       } catch (e) {
         reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
@@ -1114,6 +1125,8 @@ export default {
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0));
 
             c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
@@ -1219,38 +1232,45 @@ export default {
             return api.createTx(c, 'invocation');
           })
           .then((c) => {
-            let unspents = assetId === assets.GAS ? c.balance.assets.unspent.GAS : c.balance.assets.unspent.NEO;
-            let input = _.find(unspents, (o) => {
-              return o.txid === utxoTxHash && o.index === utxoIndex;
+            return new Promise((resolveInputs) => {
+              api.neoscan.getBalance(c.net, dexAddress)
+                .then((balance) => {
+                  const unspents = assetId === assets.GAS ? balance.assets.GAS.unspent : balance.assets.NEO.unspent;
+                  const input = _.find(unspents, (o) => {
+                    return o.txid === utxoTxHash && o.index === utxoIndex;
+                  });
+
+                  if (!input) {
+                    reject('Unable to find marked input.');
+                    return;
+                  }
+
+                  c.tx.inputs = [{
+                    prevHash: input.txid,
+                    prevIndex: input.index,
+                  }];
+
+                  c.tx.outputs = [{
+                    assetId,
+                    scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),
+                    value: input.value,
+                  }];
+
+                  resolveInputs(c);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
             });
-            if (!input) {
-              unspents = assetId === assets.GAS ? c.balance.assets.unconfirmed.GAS : c.balance.assets.unconfirmed.NEO;
-              input = _.find(unspents, (o) => {
-                return o.txid === utxoTxHash && o.index === utxoIndex;
-              });
-            }
-
-            if (!input) {
-              reject('Unable to find marked input.');
-              return null;
-            }
-
-            c.tx.inputs = [{
-              prevHash: input.txid,
-              prevIndex: input.index,
-            }];
-
-            c.tx.outputs = [{
-              assetId,
-              scriptHash: currentWallet.scriptHash,
-              value: input.value,
-            }];
-
+          })
+          .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_WITHDRAW);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0));
 
             c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);

@@ -928,6 +928,11 @@ export default {
                     clearInterval(interval);
                     resolve(transactionDetails);
                   }
+                })
+                .catch(() => {
+                  if (moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK * 2) {
+                    reject('Transaction confirmation failed.');
+                  }
                 });
             }
 
