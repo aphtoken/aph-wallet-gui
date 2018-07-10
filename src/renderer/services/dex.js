@@ -1211,8 +1211,32 @@ export default {
             return api.createTx(c, 'invocation');
           })
           .then((c) => {
-            c.utxoTxHash = utxoTxHash;
-            c.utxoIndex = utxoIndex;
+            let unspents = assetId === assets.GAS ? c.balance.assets.unspent.GAS : c.balance.assets.unspent.NEO;
+            let input = _.find(unspents, (o) => {
+              return o.txid === utxoTxHash && o.index === utxoIndex;
+            });
+            if (!input) {
+              unspents = assetId === assets.GAS ? c.balance.assets.unconfirmed.GAS : c.balance.assets.unconfirmed.NEO;
+              input = _.find(unspents, (o) => {
+                return o.txid === utxoTxHash && o.index === utxoIndex;
+              });
+            }
+
+            if (!input) {
+              reject('Unable to find marked input.');
+              return null;
+            }
+
+            c.tx.inputs = [{
+              prevHash: input.txid,
+              prevIndex: input.index,
+            }];
+
+            c.tx.outputs = [{
+              assetId,
+              scriptHash: currentWallet.scriptHash,
+              value: input.value,
+            }];
 
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_WITHDRAW);

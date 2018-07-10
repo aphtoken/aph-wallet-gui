@@ -1,11 +1,16 @@
 const assets = {
-  DEX_SCRIPT_HASH: 'f38fb0024a3909b6358f1ca6f01bb0d9d504873e',
   GAS: '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7',
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
+
   // TODO: these different per network
+  DEX_SCRIPT_HASH: 'f38fb0024a3909b6358f1ca6f01bb0d9d504873e',
   APH: '591eedcd379a8981edeefe04ef26207e1391904a',
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
-};
+
+  // privnet
+  /* DEX_SCRIPT_HASH: '8da505f3025bede243323ea3e3ccf0785b129e83',
+  APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac',
+  ATI: 'a9ffe1c85f55d0545898a9e749cde53c05151760', */};
 
 const charts = {
   DEBOUNCE: 500,
