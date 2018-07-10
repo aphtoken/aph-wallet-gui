@@ -70,9 +70,7 @@ function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
     network: network.getSelectedNetwork().net,
   });
 
-  dispatch('fetchHoldings');
-
-  done();
+  dispatch('fetchHoldings', { done });
 
   return commit('endRequest', { identifier: 'addToken' });
 }

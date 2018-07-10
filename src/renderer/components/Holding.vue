@@ -12,8 +12,8 @@
     </div>
     <div class="right">
       <div class="balance">
-        <div class="amount">
-          {{ $formatNumber(holding.balance) }}<span class="currency">{{ holding.symbol }}</span>
+        <div class="amount" :title="balanceToolTip">
+          {{ $formatNumber(holding.totalBalance) }}<span class="currency">{{ holding.symbol }}</span>
         </div>
         <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 0}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
       </div>
@@ -30,6 +30,19 @@ export default {
 
     isClickable() {
       return _.isFunction(this.onClick);
+    },
+
+    balanceToolTip() {
+      try {
+        const walletBalance = this.holding.balance
+          ? this.$formatNumber(this.holding.balance) : '0';
+        const contractBalance = this.holding.contractBalance
+          ? this.$formatNumber(this.holding.contractBalance) : '0';
+        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
+      } catch (e) {
+        console.log(e);
+        return '';
+      }
     },
   },
 

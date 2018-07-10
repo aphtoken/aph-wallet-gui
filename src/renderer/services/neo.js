@@ -509,7 +509,7 @@ export default {
                   nep5balance.totalBalance = toBigNumber(nep5balance.balance).plus(nep5balance.contractBalance);
 
                   if (val.balance > 0 || nep5.isCustom === true) {
-                    if (nep5.isCustom !== true && val.balance > 0) {
+                    if (nep5.isCustom !== true && nep5balance.totalBalance.isGreaterThan(0)) {
                       // saw a balance > 0 on this token but we haven't explicitly added to our tokens we hold,
                       // mark isCustom = true so it will stay there until explicitly removed
                       nep5.isCustom = true;
@@ -785,6 +785,11 @@ export default {
 
             if (callback) {
               setTimeout(() => callback(), timeouts.NEO_API_CALL);
+            }
+
+            if (isNep5) {
+              // don't wait for confirmation to be able to send again
+              store.commit('setSendInProgress', false);
             }
 
             res.tx.lastBroadcasted = moment().utc();
