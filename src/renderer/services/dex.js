@@ -426,7 +426,7 @@ export default {
     });
   },
 
-  placeOrder(order) {
+  placeOrder(order, waitForDeposits) {
     return new Promise((resolve, reject) => {
       try {
         if (order.postOnly && order.offersToTake.length > 0) {
@@ -437,9 +437,17 @@ export default {
         this.formDepositsForOrder(order);
 
         if (order.deposits.length > 0) {
+          if (waitForDeposits === true) {
+            // we have deposits pending, wait for our balance to reflect
+            setTimeout(() => {
+              this.placeOrder(order, true);
+            }, 5000);
+            return;
+          }
+
           this.makeOrderDeposits(order)
             .then((o) => {
-              this.placeOrder(o);
+              this.placeOrder(o, true);
             })
             .catch((e) => {
               reject(e);
