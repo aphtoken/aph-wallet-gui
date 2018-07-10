@@ -1399,10 +1399,10 @@ export default {
             resolve(input);
           })
           .catch((e) => {
-            reject(e);
+            reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e.message}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e.message}`);
       }
     });
   },
