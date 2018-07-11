@@ -35,26 +35,22 @@
           <div @click="setPercent(.75)" :class="['percent-btn', {selected: selectedPercent === .75}]">75%</div>
           <div @click="setPercent(1)" :class="['percent-btn', {selected: selectedPercent === 1}]">100%</div>
         </div>
-
         <div class="options">
           <div class="option">
             <input type="checkbox" id="post-only" v-model="postOnly" />
             <label for="post-only">Post Only</label>
           </div>
         </div>
-
+      </div>
+      <div class="footer">
         <div class="estimate">
           <div class="label">ESTIMATE ({{ $store.state.currentMarket.baseCurrency }})</div>
           <div class="value">{{ $formatTokenAmount(estimate) }}</div>
         </div>
-
-
-        <div class="footer">
-          <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
-               :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
-            {{ orderButtonLabel }}
-          </button>
-        </div>
+        <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
+              :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
+          {{ orderButtonLabel }}
+        </button>
       </div>
       <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="test-buttons">
         <div class="row">
@@ -358,42 +354,21 @@ export default {
 </script>
 
 <style lang="scss">
-$depositWithdrawMenuHeight: toRem(114px);
 #dex .grid--cell > div:first-child {
   height:100%;
 }
 #dex--orderform {
   @extend %tile-light;  
   position: relative;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
   min-width: toRem(280px);
+  height: 100%;
+  justify-content: space-between;
+
   .body {
-    padding: $space $space 0;
     overflow: auto;
-    height: calc(100% - #{$depositWithdrawMenuHeight});
-    .balance, .estimate {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-
-      .label {
-        @extend %small-uppercase-grey-label-dark;
-
-        flex: none
-      }
-
-      .value {
-        flex: 1;
-        font-family: GilroySemibold;
-        font-size: toRem(12px);
-        text-align: right;
-      }
-
-      & + .balance {
-        margin-top: $space;
-      }
-    }
-
+    
     .side {
       display: flex;
       margin-top: $space;
@@ -455,12 +430,6 @@ $depositWithdrawMenuHeight: toRem(114px);
       }
     }
 
-    .options {
-      color: $grey;
-      text-align: center;
-      margin: $space 0 $space;
-    }
-
     .aph-input {
       border-color: $background;
       padding-left: toRem(16px);
@@ -479,8 +448,41 @@ $depositWithdrawMenuHeight: toRem(114px);
         font-family: GilroyMedium;
       }
     }
+  }
 
-    .footer {
+  .body, .estimate, .footer {
+    padding: $space;
+  }
+
+  .footer {
+    margin-top: $space;
+  }
+
+  .options {
+      color: $grey;
+      text-align: center;
+      margin: $space 0 $space;
+  }
+
+  .balance, .estimate {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .label {
+      @extend %small-uppercase-grey-label-dark;
+
+      flex: none
+    }
+
+    .value {
+      flex: 1;
+      font-family: GilroySemibold;
+      font-size: toRem(12px);
+      text-align: right;
+    }
+
+    & + .balance {
       margin-top: $space;
     }
   }
@@ -511,10 +513,8 @@ $depositWithdrawMenuHeight: toRem(114px);
 
   .test-buttons {
     padding: $space;
-    height: $depositWithdrawMenuHeight;
-    position: absolute;
+    height: auto;
     width: 100%;
-    bottom: 0;
     .row {
       display: flex;
       flex-direction: row;
