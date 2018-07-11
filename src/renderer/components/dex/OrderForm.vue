@@ -331,7 +331,7 @@ export default {
       this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.asset, Number(amount))
         .then(() => {
           this.$services.alerts.success(
-            `${amount} ${holding.symbol} ${isDeposit ? 'Deposit' : 'Withdraw'} Complete`);
+            `${amount} ${holding.symbol} ${isDeposit ? 'Deposit' : 'Withdraw'} Relayed to Network.`);
         })
         .catch((e) => {
           this.$services.alerts.exception(e);
