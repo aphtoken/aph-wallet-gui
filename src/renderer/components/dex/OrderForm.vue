@@ -28,7 +28,6 @@
         <div class="quantity">
           <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
         </div>
-
         <div class="percentages">
           <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
           <div @click="setPercent(.50)" :class="['percent-btn', {selected: selectedPercent === .50}]">50%</div>
@@ -40,7 +39,7 @@
             <input type="checkbox" id="post-only" v-model="postOnly" />
             <label for="post-only">Post Only</label>
           </div>
-        </div>
+        </div>       
       </div>
       <div class="footer">
         <div class="estimate">
@@ -51,21 +50,21 @@
               :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
           {{ orderButtonLabel }}
         </button>
-      </div>
-      <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="test-buttons">
-        <div class="row">
-          <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">Deposit {{ baseHolding.symbol }}</button>
-          <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">Withdraw {{ baseHolding.symbol }}</button>
-        </div>
-        <div class="row">
-          <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">Deposit {{ quoteHolding.symbol }}</button>
-          <button @click="showDepositWithdrawModal(false, quoteHolding)" class="test-btn">Withdraw {{ quoteHolding.symbol }}</button>
-        </div>
-        <div class="row" v-if="quoteHolding.symbol !== 'APH'">
-          <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">Deposit APH</button>
-          <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">Withdraw APH</button>
-          <!-- Only the contract owner or manager can do this.
-          <button @click="setMarket" class="test-btn">Setup Market</button> -->
+        <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="test-buttons">
+          <div class="row">
+            <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">Deposit {{ baseHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">Withdraw {{ baseHolding.symbol }}</button>
+          </div>
+          <div class="row">
+            <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">Deposit {{ quoteHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(false, quoteHolding)" class="test-btn">Withdraw {{ quoteHolding.symbol }}</button>
+          </div>
+          <div class="row" v-if="quoteHolding.symbol !== 'APH'">
+            <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">Deposit APH</button>
+            <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">Withdraw APH</button>
+            <!-- Only the contract owner or manager can do this.
+            <button @click="setMarket" class="test-btn">Setup Market</button> -->
+          </div>
         </div>
       </div>
     </section>
@@ -358,7 +357,7 @@ export default {
   height:100%;
 }
 #dex--orderform {
-  @extend %tile-light;  
+  @extend %tile-light; 
   position: relative;
   display: flex;
   flex-direction: column;
@@ -450,12 +449,16 @@ export default {
     }
   }
 
-  .body, .estimate, .footer {
+  .body, .footer {
     padding: $space;
   }
 
   .footer {
     margin-top: $space;
+
+    .order-btn {
+      margin: $space 0;
+    }
   }
 
   .options {
@@ -512,7 +515,6 @@ export default {
   }
 
   .test-buttons {
-    padding: $space;
     height: auto;
     width: 100%;
     .row {
