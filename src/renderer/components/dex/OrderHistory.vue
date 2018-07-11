@@ -29,9 +29,15 @@
               <td class="price">{{ $formatNumber(order.price) }}</td>
               <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
               <td class="status">
-                <div class="btn-cancel" @click="cancelOrder(order)">
+                <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="btn-cancel" @click="cancelOrder(order)">
                   <aph-icon name="cancel"></aph-icon>
                   <p>CANCEL</p>
+                </div>
+                <div v-else-if="order.status === 'Filled'">
+                  <p>FILLED</p>
+                </div>
+                <div v-else-if="order.status === 'Cancelled'">
+                  <p>CANCELLED</p>
                 </div>
               </td>
             </tr>
