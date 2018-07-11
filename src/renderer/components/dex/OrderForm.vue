@@ -303,7 +303,7 @@ export default {
 
     marketPriceForQuantity(side, quantity) {
       let quantityRemaining = new BigNumber(quantity);
-      let totalMultiple = 0;
+      let totalMultiple = new BigNumber(0);
       let book = this.$store.state.orderBook.asks;
 
       if (side === 'Sell') {
@@ -313,7 +313,7 @@ export default {
       book.forEach((l) => {
         const takeQuantity = l.quantity.isGreaterThan(quantityRemaining) ? quantityRemaining : l.quantity;
         quantityRemaining -= takeQuantity;
-        totalMultiple += (takeQuantity * l.price);
+        totalMultiple = totalMultiple.plus(takeQuantity * l.price);
       });
 
       return (totalMultiple / quantity).toString();
