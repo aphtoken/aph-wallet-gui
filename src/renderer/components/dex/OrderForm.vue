@@ -286,7 +286,7 @@ export default {
         newQuantity = this.quoteHolding.totalBalance * value;
       }
 
-      newQuantity = Math.round(newQuantity * 100000000) / 100000000.0;
+      newQuantity = Math.floor(newQuantity * 100000000) / 100000000.0;
       return newQuantity.toString();
     },
 
