@@ -144,7 +144,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
-        axios.get(`${currentNetwork.aph}/trades/${marketName}`)
+        axios.get(`${currentNetwork.aph}/trades/${marketName}?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
           .then((res) => {
             if (!res || !res.data || !res.data.trades) {
               resolve({
@@ -274,7 +274,7 @@ export default {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
-        axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}`)
+        axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
           .then((res) => {
             resolve(res.data.orders);
           })

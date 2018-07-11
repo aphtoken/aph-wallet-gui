@@ -30,12 +30,14 @@
           <aph-icon name="no-transactions"></aph-icon>
           <div class="label">Unable to reach trading server.</div>
     </div>
-    <dex-demo-confirmation v-if="!$store.state.acceptDexDemoVersion"></dex-demo-confirmation>
+    <dex-demo-confirmation v-if="!$store.state.acceptDexDemoVersion && !isOutOfDate"></dex-demo-confirmation>
+    <dex-out-of-date v-if="isOutOfDate && !this.$store.state.acceptDexOutOfDate"></dex-out-of-date>
   </section>
 </template>
 
 <script>
 import DexDemoConfirmation from './modals/DexDemoConfirmation';
+import DexOutOfDate from './modals/DexOutOfDate';
 
 export default {
   beforeDestroy() {
@@ -45,6 +47,7 @@ export default {
 
   components: {
     DexDemoConfirmation,
+    DexOutOfDate,
   },
 
   created() {
@@ -58,6 +61,14 @@ export default {
     return {
       connected: false,
     };
+  },
+
+  computed: {
+    isOutOfDate() {
+      return this.$store.state.latestVersion
+        && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
+          !== this.$constants.assets.DEX_SCRIPT_HASH;
+    },
   },
 
   methods: {

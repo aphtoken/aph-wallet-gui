@@ -19,6 +19,7 @@ export {
   putTransactionDetail,
   resetRequests,
   setAcceptDexDemoVersion,
+  setAcceptDexOutOfDate,
   setActiveTransaction,
   setContacts,
   setCurrency,
@@ -122,6 +123,10 @@ function resetRequests(state) {
 
 function setAcceptDexDemoVersion(state, value) {
   state.acceptDexDemoVersion = value;
+}
+
+function setAcceptDexOutOfDate(state, value) {
+  state.acceptDexOutOfDate = value;
 }
 
 function setActiveTransaction(state, transaction) {

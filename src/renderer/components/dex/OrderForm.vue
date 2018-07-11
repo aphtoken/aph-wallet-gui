@@ -101,6 +101,12 @@ export default {
   },
 
   computed: {
+    isOutOfDate() {
+      return this.$store.state.latestVersion
+        && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
+          !== this.$constants.assets.DEX_SCRIPT_HASH;
+    },
+
     quoteHolding() {
       if (this.$store.state.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
@@ -216,6 +222,9 @@ export default {
       return this.$isPending('placeOrder') === false ? `Place ${this.side} Order` : 'Placing Order...';
     },
     shouldDisableOrderButton() {
+      if (this.isOutOfDate) {
+        return true;
+      }
       if (this.orderType === 'Market') {
         return !this.$store.state.orderQuantity || this.$isPending('placeOrder');
       }
