@@ -28,48 +28,43 @@
         <div class="quantity">
           <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
         </div>
-
         <div class="percentages">
           <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
           <div @click="setPercent(.50)" :class="['percent-btn', {selected: selectedPercent === .50}]">50%</div>
           <div @click="setPercent(.75)" :class="['percent-btn', {selected: selectedPercent === .75}]">75%</div>
           <div @click="setPercent(1)" :class="['percent-btn', {selected: selectedPercent === 1}]">100%</div>
         </div>
-
         <div class="options">
           <div class="option" v-if="orderType === 'Limit'">
             <input type="checkbox" id="post-only" v-model="postOnly" />
             <label for="post-only">Post Only</label>
           </div>
-        </div>
-
+        </div>       
+      </div>
+      <div class="footer">
         <div class="estimate">
           <div class="label">ESTIMATE ({{ $store.state.currentMarket.baseCurrency }})</div>
           <div class="value">{{ $formatTokenAmount(estimate) }}</div>
         </div>
-
-
-        <div class="footer">
-          <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
-               :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
-            {{ orderButtonLabel }}
-          </button>
-        </div>
-      </div>
-      <div class="test-buttons">
-        <div class="row">
-          <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">Deposit {{ baseHolding.symbol }}</button>
-          <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">Withdraw {{ baseHolding.symbol }}</button>
-        </div>
-        <div class="row">
-          <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">Deposit {{ quoteHolding.symbol }}</button>
-          <button @click="showDepositWithdrawModal(false, quoteHolding)" class="test-btn">Withdraw {{ quoteHolding.symbol }}</button>
-        </div>
-        <div class="row" v-if="quoteHolding.symbol !== 'APH'">
-          <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">Deposit APH</button>
-          <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">Withdraw APH</button>
-          <!-- Only the contract owner or manager can do this.
-          <button @click="setMarket" class="test-btn">Setup Market</button> -->
+        <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
+              :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
+          {{ orderButtonLabel }}
+        </button>
+        <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="test-buttons">
+          <div class="row">
+            <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">Deposit {{ baseHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">Withdraw {{ baseHolding.symbol }}</button>
+          </div>
+          <div class="row">
+            <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">Deposit {{ quoteHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(false, quoteHolding)" class="test-btn">Withdraw {{ quoteHolding.symbol }}</button>
+          </div>
+          <div class="row" v-if="quoteHolding.symbol !== 'APH'">
+            <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">Deposit APH</button>
+            <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">Withdraw APH</button>
+            <!-- Only the contract owner or manager can do this.
+            <button @click="setMarket" class="test-btn">Setup Market</button> -->
+          </div>
         </div>
       </div>
     </section>
@@ -387,42 +382,21 @@ export default {
 </script>
 
 <style lang="scss">
-$depositWithdrawMenuHeight: toRem(114px);
 #dex .grid--cell > div:first-child {
   height:100%;
 }
 #dex--orderform {
-  @extend %tile-light;  
+  @extend %tile-light; 
   position: relative;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
   min-width: toRem(280px);
+  height: 100%;
+  justify-content: space-between;
+
   .body {
-    padding: $space $space 0;
     overflow: auto;
-    height: calc(100% - #{$depositWithdrawMenuHeight});
-    .balance, .estimate {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-
-      .label {
-        @extend %small-uppercase-grey-label-dark;
-
-        flex: none
-      }
-
-      .value {
-        flex: 1;
-        font-family: GilroySemibold;
-        font-size: toRem(12px);
-        text-align: right;
-      }
-
-      & + .balance {
-        margin-top: $space;
-      }
-    }
-
+    
     .side {
       display: flex;
       margin-top: $space;
@@ -484,12 +458,6 @@ $depositWithdrawMenuHeight: toRem(114px);
       }
     }
 
-    .options {
-      color: $grey;
-      text-align: center;
-      margin: $space 0 $space;
-    }
-
     .aph-input {
       border-color: $background;
       padding-left: toRem(16px);
@@ -509,59 +477,93 @@ $depositWithdrawMenuHeight: toRem(114px);
       }
     }
 
-    .footer {
-      margin-top: $space;
-    }
-  }
-
-  .order-btn, .test-btn {
-    @extend %btn-outline;
-    @extend %selected-text;
-    font-family: GilroySemibold;
-
-    &:disabled {
+    .options {
       color: $grey;
+      text-align: center;
+      margin: $space 0 $space;
     }
-    &.buy-btn {
-      border-color: $green;
+  }
 
-      &:hover, &.selected {
-        background-color: $green;
+  .body, .footer {
+    padding: $space;
+  }
+
+  .footer {
+    margin-top: $space;
+
+    .order-btn {
+      margin: $space 0;
+    }
+
+    .order-btn, .test-btn {
+      @extend %btn-outline;
+      @extend %selected-text;
+      font-family: GilroySemibold;
+
+      &:disabled {
+        color: $grey;
+      }
+      &.buy-btn {
+        border-color: $green;
+
+        &:hover, &.selected {
+          background-color: $green;
+        }
+      }
+      &.sell-btn {
+        border-color: $red;
+
+        &:hover, &.selected {
+          background-color: $red;
+        }
       }
     }
-    &.sell-btn {
-      border-color: $red;
 
-      &:hover, &.selected {
-        background-color: $red;
+    .test-buttons {
+      height: auto;
+      width: 100%;
+      .row {
+        display: flex;
+        flex-direction: row;
+
+        & + .row {
+          margin-top: $space-xs;
+        }
+      }
+
+      .test-btn {
+        height: toRem(26px);
+        padding: $space-xs 0;
+        font-size: toRem(12px);
+        border-width: $border-width-thin;
+
+        & + .test-btn {
+          margin-left: $space;
+        }
       }
     }
   }
 
-  .test-buttons {
-    padding: $space;
-    height: $depositWithdrawMenuHeight;
-    position: absolute;
-    width: 100%;
-    bottom: 0;
-    .row {
-      display: flex;
-      flex-direction: row;
+  .balance, .estimate {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 
-      & + .row {
-        margin-top: $space-xs;
-      }
+    .label {
+      @extend %small-uppercase-grey-label-dark;
+
+      flex: none
     }
 
-    .test-btn {
-      height: toRem(26px);
-      padding: $space-xs 0;
+    .value {
+      flex: 1;
+      font-family: GilroySemibold;
       font-size: toRem(12px);
-      border-width: $border-width-thin;
+      text-align: right;
+    }
 
-      & + .test-btn {
-        margin-left: $space;
-      }
+    & + .balance {
+      margin-top: $space;
     }
   }
 }
