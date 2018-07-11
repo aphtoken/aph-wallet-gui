@@ -37,7 +37,7 @@
         </div>
 
         <div class="options">
-          <div class="option">
+          <div class="option" v-if="orderType === 'Limit'">
             <input type="checkbox" id="post-only" v-model="postOnly" />
             <label for="post-only">Post Only</label>
           </div>
@@ -201,11 +201,17 @@ export default {
     },
     estimate() {
       try {
-        if (!this.$store.state.orderPrice || !this.$store.state.orderQuantity) {
+        if (!this.$store.state.orderQuantity) {
           return 0;
         }
 
-        return new BigNumber(this.$store.state.orderPrice).multipliedBy(new BigNumber(this.$store.state.orderQuantity));
+        let price = this.$store.state.orderPrice;
+        if (!price) {
+          // market order
+          price = this.marketPriceForQuantity(this.side, this.$store.state.orderQuantity);
+        }
+
+        return new BigNumber(price).multipliedBy(new BigNumber(this.$store.state.orderQuantity));
       } catch (e) {
         console.log(e);
         return 0;
@@ -241,6 +247,11 @@ export default {
   },
 
   watch: {
+    orderType() {
+      if (this.orderType === 'Market') {
+        this.$store.commit('setOrderPrice', '');
+      }
+    },
     quantity() {
       if (this.selectedPercent && this.percent(this.selectedPercent) !== this.$store.state.orderQuantity) {
         this.selectedPercent = null;
@@ -288,6 +299,24 @@ export default {
 
       newQuantity = Math.floor(newQuantity * 100000000) / 100000000.0;
       return newQuantity.toString();
+    },
+
+    marketPriceForQuantity(side, quantity) {
+      let quantityRemaining = new BigNumber(quantity);
+      let totalMultiple = 0;
+      let book = this.$store.state.orderBook.asks;
+
+      if (side === 'Sell') {
+        book = this.$store.state.orderBook.bids;
+      }
+
+      book.forEach((l) => {
+        const takeQuantity = l.quantity.isGreaterThan(quantityRemaining) ? quantityRemaining : l.quantity;
+        quantityRemaining -= takeQuantity;
+        totalMultiple += (takeQuantity * l.price);
+      });
+
+      return (totalMultiple / quantity).toString();
     },
 
     confirmOrder() {
