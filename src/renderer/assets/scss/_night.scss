@@ -8,24 +8,25 @@
         color: #ffffff;
       }
 
+      .aph-select  {
+        .aph-select--dropdown {
+          background: #1f1d33;
+          color: #aeaeb8;
+
+          > li {
+            &.selected, &:hover {
+              background-color: $purple;
+              color: #ffffff;
+            }
+          }
+        }
+      }
+
       .aph-select.is-light {
         .aph-select--label {
           background: #1f1d33;
           color: #ffffff;
         }
-
-        .aph-select--dropdown {
-          background: #1f1d33;
-          color: #ffffff;
-
-          > li {
-            &.selected, &:hover {
-              background-color: #1f1d33;
-              color: #aeaeb8;
-            }
-          }
-        }
-
         .fill {
           fill: #ffffff;
         }

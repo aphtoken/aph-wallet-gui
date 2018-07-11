@@ -172,18 +172,21 @@ export default {
   }
 
   .aph-select--dropdown {
-    background: white;
+    background: #f4f4fc;
+    color: $purple;
     border-radius: $border-radius;
     left: 0;
     list-style-type: none;
     margin: $space 0 0;
-    max-height: toRem(300px);
+    max-height: toRem(600px);
     overflow-x: auto;
     padding: 0;
     position: absolute;
     top: 100%;
     width: 100%;
     z-index: 100;
+    box-shadow: $box-shadow;
+    border: 1px solid #99999e;
 
     > li {
       cursor: pointer;
@@ -192,11 +195,12 @@ export default {
       line-height: $button-height;
       padding: 0 $space;
       transition: all .1s linear;
+      border-bottom: 1px solid #dbdbe2;
 
       &:hover,
       &.selected {
-        background: #f4f4fc;
-        color: $purple;
+        background: $purple;
+        color: #FFF;
       }
 
       &:first-child {
@@ -207,6 +211,7 @@ export default {
       &:last-child {
         border-bottom-left-radius: $border-radius;
         border-bottom-right-radius: $border-radius;
+        border-bottom:0;
       }
     }
   }
@@ -222,18 +227,6 @@ export default {
 
     .aph-icon .fill {
       fill: $dark;
-    }
-
-    .aph-select--dropdown {
-      box-shadow: $box-shadow;
-
-      > li {
-        &:hover,
-        &.selected {
-          background: $background;
-          color: $dark;
-        }
-      }
     }
   }
 }

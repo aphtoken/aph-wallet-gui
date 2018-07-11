@@ -56,7 +56,7 @@
           </button>
         </div>
       </div>
-      <div class="test-buttons">
+      <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="test-buttons">
         <div class="row">
           <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">Deposit {{ baseHolding.symbol }}</button>
           <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">Withdraw {{ baseHolding.symbol }}</button>
