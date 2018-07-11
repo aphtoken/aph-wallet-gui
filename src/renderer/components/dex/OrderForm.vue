@@ -447,6 +447,12 @@ export default {
         font-family: GilroyMedium;
       }
     }
+
+    .options {
+      color: $grey;
+      text-align: center;
+      margin: $space 0 $space;
+    }
   }
 
   .body, .footer {
@@ -459,12 +465,54 @@ export default {
     .order-btn {
       margin: $space 0;
     }
-  }
 
-  .options {
-      color: $grey;
-      text-align: center;
-      margin: $space 0 $space;
+    .order-btn, .test-btn {
+      @extend %btn-outline;
+      @extend %selected-text;
+      font-family: GilroySemibold;
+
+      &:disabled {
+        color: $grey;
+      }
+      &.buy-btn {
+        border-color: $green;
+
+        &:hover, &.selected {
+          background-color: $green;
+        }
+      }
+      &.sell-btn {
+        border-color: $red;
+
+        &:hover, &.selected {
+          background-color: $red;
+        }
+      }
+    }
+
+    .test-buttons {
+      height: auto;
+      width: 100%;
+      .row {
+        display: flex;
+        flex-direction: row;
+
+        & + .row {
+          margin-top: $space-xs;
+        }
+      }
+
+      .test-btn {
+        height: toRem(26px);
+        padding: $space-xs 0;
+        font-size: toRem(12px);
+        border-width: $border-width-thin;
+
+        & + .test-btn {
+          margin-left: $space;
+        }
+      }
+    }
   }
 
   .balance, .estimate {
@@ -487,54 +535,6 @@ export default {
 
     & + .balance {
       margin-top: $space;
-    }
-  }
-
-  .order-btn, .test-btn {
-    @extend %btn-outline;
-    @extend %selected-text;
-    font-family: GilroySemibold;
-
-    &:disabled {
-      color: $grey;
-    }
-    &.buy-btn {
-      border-color: $green;
-
-      &:hover, &.selected {
-        background-color: $green;
-      }
-    }
-    &.sell-btn {
-      border-color: $red;
-
-      &:hover, &.selected {
-        background-color: $red;
-      }
-    }
-  }
-
-  .test-buttons {
-    height: auto;
-    width: 100%;
-    .row {
-      display: flex;
-      flex-direction: row;
-
-      & + .row {
-        margin-top: $space-xs;
-      }
-    }
-
-    .test-btn {
-      height: toRem(26px);
-      padding: $space-xs 0;
-      font-size: toRem(12px);
-      border-width: $border-width-thin;
-
-      & + .test-btn {
-        margin-left: $space;
-      }
     }
   }
 }
