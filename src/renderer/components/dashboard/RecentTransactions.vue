@@ -1,12 +1,12 @@
 <template>
   <section id="dashboard--recent-transactions">
     <div class="header">
-      <h1 class="underlined">Recent transactions</h1>
+      <h1 class="underlined">{{$t('recentTransactions')}}</h1>
     </div>
     <div class="body">
       <div v-if="!transactions.length" class="zero-state">
         <aph-icon name="no-transactions"></aph-icon>
-        <div class="label">No transactions</div>
+        <div class="label">{{$t('noTransactions')}}</div>
       </div>
       <aph-simple-transactions v-else :transactions="transactions" :onClick="viewTransaction"></aph-simple-transactions>
     </div>

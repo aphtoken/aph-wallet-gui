@@ -40,7 +40,7 @@ export default {
 
   props: {
     label: {
-      default: '24 Hour',
+      default: this.$t('twentyFourHour'),
       type: String,
     },
     percent: {

@@ -1,42 +1,42 @@
 <template>
   <section id="dashboard--send">
     <div class="header">
-      <h1 class="underlined">Send</h1>
+      <h1 class="underlined">{{$t('send')}}</h1>
     </div>
     <template v-if="showConfirmation">
       <div class="body">
         <div class="row">
           <div class="column">
-            <div class="label">Amount</div>
+            <div class="label">{{$t('amount')}}</div>
             <div class="value">{{ $formatNumber(amount) }}</div>
           </div>
           <div class="column">
-            <div class="label">Value</div>
+            <div class="label">{{$t('value')}}</div>
             <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
           </div>
         </div>
         <div class="row">
           <div class="column">
-            <div class="label">Token</div>
+            <div class="label">{{$t('token')}}</div>
             <div class="value">{{ currency.label }}</div>
           </div>
         </div>
         <div class="row" v-if="this.contact">
           <div class="column">
-            <div class="label">Recipient</div>
+            <div class="label">{{$t('recipient')}}</div>
             <div class="value purple">{{ this.contact.name }}</div>
           </div>
         </div>
         <div class="row">
           <div class="column">
-            <div class="label">Address</div>
+            <div class="label">{{$t('address')}}</div>
             <div class="value">{{ address }}</div>
           </div>
         </div>
       </div>
-      <div class="waiting" v-if="$store.state.sendInProgress === true">Waiting for transaction to appear on block explorer....</div>
+      <div class="waiting" v-if="$store.state.sendInProgress === true">{{$t('waitingForTransaction')}}</div>
       <div class="footer">
-        <button class="back-btn" @click="showConfirmation = false" :disabled="sending">Back</button>
+        <button class="back-btn" @click="showConfirmation = false" :disabled="sending">{{$t('back')}}</button>
         <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
       </div>
     </template>
@@ -46,21 +46,21 @@
           <aph-select :options="currencies" :light="true" placeholder="Select a currency" v-model="currency"></aph-select>
         </div>
         <div class="address">
-          <aph-input placeholder="Enter Send to Address" v-model="address"></aph-input>
+          <aph-input :placeholder="$t('enterSendToAddress')" v-model="address"></aph-input>
         </div>
         <div class="amount">
-          <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
+          <aph-input :placeholder="$t('enterAmount')" v-model="amount"></aph-input>
           <div class="symbol">{{ currency ? currency.value : '' }}</div>
-          <div class="max" v-if="currency" @click="setAmountToMax">max</div>
+          <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
         </div>
         <div class="estimated-value">
-          <div class="label">Estimated</div>
+          <div class="label">{{$t('estimated')}}</div>
           <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
         </div>
       </div>
       <div class="footer">
-        <router-link class="cancel-btn" to="/dashboard">Cancel</router-link>
-        <button class="next-btn" @click="next" :disabled="shouldDisableNextButton">Next</button>
+        <router-link class="cancel-btn" to="/dashboard">{{$t('cancel')}}</router-link>
+        <button class="next-btn" @click="next" :disabled="shouldDisableNextButton">{{$t('next')}}</button>
       </div>
     </template>
   </section>
@@ -104,7 +104,7 @@ export default {
     },
 
     sendButtonLabel() {
-      return this.sending ? 'Waiting for confirmation...' : 'Send';
+      return this.sending ? this.$t('waitingForConfirmation') : this.$t('send');
     },
 
     shouldDisableNextButton() {

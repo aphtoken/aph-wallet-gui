@@ -1,7 +1,7 @@
 <template>
-  <span class="aph-copy-text" @click.stop="copy" title="Copy to Clipboard">
+  <span class="aph-copy-text" @click.stop="copy" :title="$t('copyToClipboard')">
     <aph-icon name="copy" ref="icon"></aph-icon>
-    <span :class="['aph-copy-text--confirmation-text', {show: showConfirmationText}]" ref="confirmationText" v-dom-portal>Copied</span>
+    <span :class="['aph-copy-text--confirmation-text', {show: showConfirmationText}]" ref="confirmationText" v-dom-portal>{{$t('copied')}}</span>
   </span>
 </template>
 

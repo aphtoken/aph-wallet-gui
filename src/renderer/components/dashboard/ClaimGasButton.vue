@@ -6,7 +6,7 @@
 export default {
   computed: {
     buttonLabel() {
-      return this.$isPending('claimGas') ? 'Claiming...' : `Claim ${this.formattedAmountToClaim} Gas`;
+      return this.$isPending('claimGas') ? this.$t('claiming') : this.$t('claimGas', { gas: this.formattedAmountToClaim});
     },
 
     formattedAmountToClaim() {
