@@ -307,13 +307,13 @@ export default {
       try {
         const groups = [];
         const size = this.groupSize;
-        let currentLower = this.middle.minus(size);
+        let currentUpper = this.middle;
 
         while (groups.length < 5) {
           let currentGroup = {
-            priceUpper: currentLower.plus(size),
-            priceLower: currentLower,
-            priceLabel: this.$formatNumber(currentLower),
+            priceUpper: currentUpper,
+            priceLower: currentUpper.minus(size),
+            priceLabel: this.$formatNumber(currentUpper),
             quantity: new BigNumber(0),
           };
 
@@ -323,7 +323,7 @@ export default {
             }
           });
           groups.push(currentGroup);
-          currentLower = this.roundToDepthPrecision(currentLower.minus(size));
+          currentUpper = this.roundToDepthPrecision(currentUpper.minus(size));
         };
 
         let totalQuantity = new BigNumber(0);
@@ -346,13 +346,13 @@ export default {
       try {
         const groups = [];
         const size = this.groupSize;
-        let currentUpper = this.middle.plus(size);
+        let currentLower = this.middle;
 
         while (groups.length < 5) {
           let currentGroup = {
-            priceUpper: currentUpper,
-            priceLower: currentUpper.minus(size),
-            priceLabel: this.$formatNumber(currentUpper),
+            priceUpper: currentLower.plus(size),
+            priceLower: currentLower,
+            priceLabel: this.$formatNumber(currentLower),
             quantity: new BigNumber(0),
           };
 
@@ -363,7 +363,7 @@ export default {
           });
 
           groups.push(currentGroup);
-          currentUpper = this.roundToDepthPrecision(currentUpper.plus(size));
+          currentLower = this.roundToDepthPrecision(currentLower.plus(size));
         };
 
         let totalQuantity = new BigNumber(0);
@@ -400,26 +400,25 @@ export default {
 
       let bidRange = 0;
       if (bids.length > 1 && asks.length > 0) {
-        bidRange = this.middle - bids[bids.length - 1].price;
+        bidRange = asks[0].price - bids[bids.length - 1].price;
       }
 
       let askRange = 0;
       if (asks.length > 1 && bids.length > 0) {
-        askRange = asks[asks.length - 1].price - this.middle;
+        askRange = asks[asks.length - 1].price - bids[0].price;
       }
 
-      let groupSize = bidRange;
-      if (askRange < bidRange) {
-        groupSize = askRange;
+      let groupSize = bidRange / 4;
+      if (askRange > bidRange) {
+        groupSize = askRange / 4;
       }
 
       this.depthPrecision = 4;
       while (groupSize * Math.pow(10, this.depthPrecision) < 1) {
         this.depthPrecision += 1;
       }
-      
-      groupSize = this.roundToDepthPrecision(groupSize).dividedBy(5);
-      return groupSize;
+
+      return this.roundToDepthPrecision(groupSize);
     }
   },
 
