@@ -10,7 +10,7 @@
       </router-link>
       <router-link class="create-wallet-btn" to="/login/create-wallet">
         <aph-icon name="create"></aph-icon>
-        <p>{{ $t('createWallet') }}t</p>
+        <p>{{ $t('createWallet') }}</p>
       </router-link>
     </div>
     <!-- <router-link class="settings-btn" to="login">Settings</router-link> -->
