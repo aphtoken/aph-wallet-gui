@@ -53,6 +53,10 @@ export {
   setShowSendRequestLedgerSignature,
   setShowSendWithLedgerModal,
   setShowWalletBackupModal,
+  setSocketOrderCreated,
+  setSocketOrderMatched,
+  setSocketOrderCreationFailed,
+  setSocketOrderMatchFailed,
   setStatsToken,
   setStyleMode,
   setTradeHistory,
@@ -299,6 +303,22 @@ function setSendInProgress(state, value) {
 
 function setShowWalletBackupModal(state, value) {
   state.showWalletBackupModal = value;
+}
+
+function setSocketOrderCreated(state, value) {
+  state.socket.orderCreated = value;
+}
+
+function setSocketOrderMatched(state, value) {
+  state.socket.orderMatched = value;
+}
+
+function setSocketOrderCreationFailed(state, value) {
+  state.socket.orderCreationFailed = value;
+}
+
+function setSocketOrderMatchFailed(state, value) {
+  state.socket.orderMatchFailed = value;
 }
 
 function setStatsToken(state, token) {
