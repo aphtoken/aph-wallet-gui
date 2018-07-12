@@ -22,7 +22,7 @@
 
 <style lang="scss">
   .locale-changer {
-    margin: 1rem 0;
+    margin: $space 0;
   }
 </style>
 
