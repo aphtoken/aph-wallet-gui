@@ -1,5 +1,6 @@
 import DomPortal from 'vue-dom-portal';
 import Vue from 'vue';
+import VueI18n from 'vue-i18n';
 import VueFlashMessage from 'vue-flash-message';
 import VueHighCharts from 'vue-highcharts';
 import VueNativeSock from 'vue-native-websocket';
@@ -30,6 +31,10 @@ import SimpleTransactions from './components/SimpleTransactions';
 import TimestampFromNow from './components/TimestampFromNow';
 import TokenIcon from './components/TokenIcon';
 
+
+import en from './l10n/en';
+import de from './l10n/de';
+
 // Global Libraries.
 window._ = _;
 window.accounting = accounting;
@@ -55,6 +60,8 @@ Vue.use(VueNativeSock, 'wss://testnet.aphelion-neo.com:62443/ws', {
   reconnectionDelay: 3000, // (Number) how long to initially wait before attempting a new (1000)
 });
 
+Vue.use(VueI18n);
+
 // Register global mixins.
 _.each(mixins, (mixin) => {
   Vue.mixin(mixin);
@@ -78,9 +85,25 @@ network.init();
 settings.sync();
 wallets.sync();
 
+
+// i18n
+const messages = {
+  en,
+  de,
+};
+
+const lang = (window.navigator.userLanguage || window.navigator.language).split('-')[0];
+// Create VueI18n instance with options
+const i18n = new VueI18n({
+  locale: lang,
+  fallbackLocale: 'en',
+  messages,
+});
+
 /* eslint-disable no-new */
 new Vue({
   router,
   store,
+  i18n,
   ...App,
 }).$mount('#app');
