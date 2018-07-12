@@ -27,8 +27,8 @@
       </div>
     </div>
     <div v-else class="zero-state">
-          <aph-icon name="no-transactions"></aph-icon>
-          <div class="label">Unable to reach trading server.</div>
+      <aph-icon name="no-transactions"></aph-icon>
+      <div class="label">Unable to reach trading server.</div>
     </div>
     <dex-demo-confirmation v-if="!$store.state.acceptDexDemoVersion && !isOutOfDate"></dex-demo-confirmation>
     <dex-out-of-date v-if="isOutOfDate && !this.$store.state.acceptDexOutOfDate"></dex-out-of-date>
@@ -65,7 +65,7 @@ export default {
 
   computed: {
     isOutOfDate() {
-      return this.$store.state.latestVersion
+      return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
           !== this.$constants.assets.DEX_SCRIPT_HASH;
     },
