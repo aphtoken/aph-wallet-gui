@@ -12,6 +12,9 @@ import moment from 'moment';
 // Services, etc.
 import { contacts, network, settings, storage, wallets } from './services';
 
+// constants
+import { messages } from './constants';
+
 // Initial Vue Libraries.
 import './libraries';
 import './error-handler';
@@ -30,10 +33,6 @@ import Select from './components/Select';
 import SimpleTransactions from './components/SimpleTransactions';
 import TimestampFromNow from './components/TimestampFromNow';
 import TokenIcon from './components/TokenIcon';
-
-
-import en from './l10n/en';
-import de from './l10n/de';
 
 // Global Libraries.
 window._ = _;
@@ -85,13 +84,7 @@ network.init();
 settings.sync();
 wallets.sync();
 
-
-// i18n
-const messages = {
-  en,
-  de,
-};
-
+// get user's locale settings
 const lang = (window.navigator.userLanguage || window.navigator.language).split('-')[0];
 // Create VueI18n instance with options
 const i18n = new VueI18n({

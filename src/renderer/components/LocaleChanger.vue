@@ -7,14 +7,12 @@
 </template>
 
 <script>
+  import { langs } from '../constants';
   export default {
     name: 'locale-changer',
     data() {
       return {
-        langs: [
-          'en',
-          'de',
-        ],
+        langs,
       };
     },
   };
