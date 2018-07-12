@@ -112,6 +112,14 @@ export default {
       /* eslint-disable max-len */
       this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Filled. x${message.data.quantity} @${message.data.price}`);
     };
+
+    this.$store.state.socket.orderCreationFailed = (message) => {
+      this.$services.alerts.error(`Failed to Create Order ${(message.side === 'bid' ? 'Buy' : 'Sell')}. {message.errorMessage}`);
+    };
+
+    this.$store.state.socket.orderMatchFailed = (message) => {
+      this.$services.alerts.error(`Failed to Match ${(message.side === 'bid' ? 'Buy' : 'Sell')} x${message.data.quantity}. {message.data.errorMessage}`);
+    };
   },
 };
 </script>

@@ -417,6 +417,14 @@ function SOCKET_ONMESSAGE(state, message) {
     if (state.socket.orderMatched) {
       state.socket.orderMatched(message);
     }
+  } else if (message.type === 'orderCreationFailed') {
+    if (state.socket.orderCreationFailed) {
+      state.socket.orderCreationFailed(message);
+    }
+  } else if (message.type === 'orderMatchFailed') {
+    if (state.socket.orderMatchFailed) {
+      state.socket.orderMatchFailed(message);
+    }
   } else if (message.type) {
     // unknown message type
     console.log(message);
