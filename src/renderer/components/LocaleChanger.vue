@@ -7,13 +7,15 @@
 </template>
 
 <script>
-  import { langs } from '../constants';
   export default {
     name: 'locale-changer',
     data() {
       return {
-        langs,
+        langs: [],
       };
+    },
+    mounted() {
+      this.langs = this.$constants.langs;
     },
   };
 </script>
