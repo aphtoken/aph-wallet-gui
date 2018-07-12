@@ -510,8 +510,10 @@ export default {
                       reject(e);
                     });
                   return;
+                } else if (res.data.result.error) {
+                  reject(`Order failed. Error: ${res.data.result.error}`);
                 } else {
-                  reject('Order failed');
+                  reject('Order failed.');
                 }
 
                 // set in memory holding balance to null so it will pick up the new balance
