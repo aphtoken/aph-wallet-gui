@@ -12,6 +12,7 @@ const pjson = require('../../../package.json');
 
 const state = {
   acceptDexDemoVersion: false,
+  acceptDexOutOfDate: false,
   activeTransaction: null,
   contacts: [],
   currency: null,

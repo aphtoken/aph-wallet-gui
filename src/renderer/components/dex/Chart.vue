@@ -1,10 +1,19 @@
 <template>
   <section id="dex--chart">
-    <div class="header">
+    <div class="header" v-if="isOutOfDate">
+      <h1>Aphelion DEX Out of Date</h1>
+    </div>
+    <div class="header tab" v-else>
       <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">Candlesticks</h1>
       <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">Depth</h1>
     </div>
-    <div class="body">
+    <div class="body" v-if="isOutOfDate">
+      <p>
+        The DEX contract has been updated. A corresponding wallet upgrade is required to continue to use the DEX.
+        Please use the controls below to cancel your orders and withdraw your funds from the contract back to your wallet and then download the latest version.
+      </p>
+    </div>
+    <div class="body" v-else>
       <div id="chart-container" :class="[{visible: tab === 'Chart'}]">
       </div>
       <div id="depth-container" :class="[{visible: tab === 'Depth'}]">
@@ -117,7 +126,7 @@ export default {
 
     removeChart() {
       const container = document.getElementById('chart-container');
-      while (container.hasChildNodes()) {
+      while (container && container.hasChildNodes()) {
         container.removeChild(container.lastChild);
       }
       clearInterval(barsSubscription);
@@ -126,6 +135,11 @@ export default {
     loadChart() {
       /* eslint-disable */
       try {
+        const container = document.getElementById('chart-container');
+        if (!container) {
+          return;
+        }
+
         if (!this.$store.state.currentMarket) {
           return;
         }
@@ -257,7 +271,6 @@ export default {
           autosize: true,
 		    };
 
-        const container = document.getElementById('chart-container');
         if (this.$store.state.styleMode === 'Night') {
           settings.overrides = {
 					  "paneProperties.background": "#222222",
@@ -303,6 +316,12 @@ export default {
   },
 
   computed: {
+    isOutOfDate() {
+      return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
+        && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
+          !== this.$constants.assets.DEX_SCRIPT_HASH;
+    },
+
     bidGroups() {
       try {
         const groups = [];
@@ -431,24 +450,31 @@ export default {
 
   .header {
     padding: $space $space 0;
-    display: flex;
-    justify-content: flex-end;
-
+    
     h1 {
       @extend %underlined-header-sm;
+    }
+    
+    &.tab {
+      display: flex;
+      justify-content: flex-end;
 
-      cursor: pointer;
-      margin-bottom: 0;
+      h1 {
+        @extend %underlined-header-sm;
 
-      & + h1 {
-        margin-left: $space-lg;
-      }
+        cursor: pointer;
+        margin-bottom: 0;
 
-      &:not(.selected) {
-        color: $grey;
+        & + h1 {
+          margin-left: $space-lg;
+        }
 
-        &:after {
-          background: transparent;
+        &:not(.selected) {
+          color: $grey;
+
+          &:after {
+            background: transparent;
+          }
         }
       }
     }

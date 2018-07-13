@@ -24,7 +24,8 @@ const assets = {
   // privnet
   /* DEX_SCRIPT_HASH: '8da505f3025bede243323ea3e3ccf0785b129e83',
   APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac',
-  ATI: 'a9ffe1c85f55d0545898a9e749cde53c05151760', */};
+  ATI: 'a9ffe1c85f55d0545898a9e749cde53c05151760', */
+};
 
 const charts = {
   DEBOUNCE: 500,

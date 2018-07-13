@@ -1,4 +1,5 @@
 export const acceptDexDemoVersion = state => state.acceptDexDemoVersion;
+export const acceptDexOutOfDate = state => state.acceptDexOutOfDate;
 export const activeTransaction = state => state.activeTransaction;
 export const contacts = state => state.contacts;
 export const currency = state => state.currency;
