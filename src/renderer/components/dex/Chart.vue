@@ -79,7 +79,7 @@ export default {
   data() {
     return {
       tab: 'Chart',
-      styleMode: 'Day',
+      styleMode: 'Night',
       depthPrecision: 4,
     };
   },
@@ -287,7 +287,7 @@ export default {
                 break;
               }
             }
-          }, 250);
+          }, 1000);
         }
 
         setTimeout(() => {
@@ -301,7 +301,7 @@ export default {
               break;
             }
           }
-        }, 100);
+        }, 1000);
 
         tradingView = new TradingView.widget(settings);
       } catch (e) {
