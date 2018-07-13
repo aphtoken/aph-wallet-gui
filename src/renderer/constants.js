@@ -17,7 +17,7 @@ const assets = {
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
 
   // TODO: these different per network
-  DEX_SCRIPT_HASH: 'f38fb0024a3909b6358f1ca6f01bb0d9d504873e',
+  DEX_SCRIPT_HASH: '927e87a5a86581cf1345ce40edde64ed40e4994f',
   APH: '591eedcd379a8981edeefe04ef26207e1391904a',
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
 
