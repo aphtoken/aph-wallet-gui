@@ -163,22 +163,28 @@ export default {
     },
     quoteBalanceToolTip() {
       try {
+      /* eslint-disable max-len */
         const walletBalance = this.quoteHolding.balance
           ? this.$formatNumber(this.quoteHolding.balance) : '0';
         const contractBalance = this.quoteHolding.contractBalance
           ? this.$formatNumber(this.quoteHolding.contractBalance) : '0';
-        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
+        const openOrdersBalance = this.quoteHolding.openOrdersBalance
+          ? this.$formatNumber(this.quoteHolding.openOrdersBalance) : '0';
+        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}\nBalance in Open Orders: ${openOrdersBalance}`;
       } catch (e) {
         return '';
       }
     },
     baseBalanceToolTip() {
       try {
+      /* eslint-disable max-len */
         const walletBalance = this.baseHolding.balance
           ? this.$formatNumber(this.baseHolding.balance) : '0';
         const contractBalance = this.baseHolding.contractBalance
           ? this.$formatNumber(this.baseHolding.contractBalance) : '0';
-        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
+        const openOrdersBalance = this.baseHolding.openOrdersBalance
+          ? this.$formatNumber(this.baseHolding.openOrdersBalance) : '0';
+        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}\nBalance in Open Orders: ${openOrdersBalance}`;
       } catch (e) {
         return '';
       }
@@ -189,7 +195,9 @@ export default {
           ? this.$formatNumber(this.aphHolding.balance) : '0';
         const contractBalance = this.aphHolding.contractBalance
           ? this.$formatNumber(this.aphHolding.contractBalance) : '0';
-        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
+        const openOrdersBalance = this.aphHolding.openOrdersBalance
+          ? this.$formatNumber(this.aphHolding.openOrdersBalance) : '0';
+        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}\nBalance in Open Orders: ${openOrdersBalance}`;
       } catch (e) {
         return '';
       }
