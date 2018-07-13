@@ -16,6 +16,7 @@
               <div class="cell price red" @click="setPrice(ask.price)">{{ $formatNumber(ask.price) }}</div>
               <div class="cell quantity" @click="setQuantity(ask.quantity)">{{ $formatNumber(ask.quantity) }}</div>
               <div class="cell graph">
+                <span class="size-bar size-total red" :style="{ width: (ask.quantityTotalRatio * 100) + '%' }"></span>
                 <span class="size-bar red" :style="{ width: (ask.quantityRatio * 100) + '%' }"></span>
               </div>
             </div>
@@ -32,7 +33,8 @@
               <div class="cell price green" @click="setPrice(bid.price)">{{ $formatNumber(bid.price) }}</div>
               <div class="cell quantity" @click="setQuantity(bid.quantity)">{{ $formatNumber(bid.quantity) }}</div>
               <div class="cell graph" >
-                <span class="size-bar green" :style="{ width: (bid.quantityRatio * 100) + '%' }"></span>
+                <span class="size-bar size-total green" :style="{ width: (bid.quantityTotalRatio * 100) + '%' }"></span>
+                <span class="size-bar green" :style="{ width: (bid.quantityRatio * 100) + '%', 'border-right-width': (bid.quantityTotalRatio * 100) + '%' }"></span>
               </div>
             </div>
           </div>
@@ -175,19 +177,30 @@ export default {
           &.graph {
             font-size: 0;
             text-align: right;
+            position: relative;
 
             .size-bar {
               height: toRem(12px);
               display: inline-block;
+              position: absolute;
+              right: 0px;
 
               &.green {
-                background-color: $light-green;
-                border-left: $border-width-thin solid $green;
+                background-color: $green;
               }
 
               &.red {
-                background-color: $light-red;
-                border-left: $border-width-thin solid $red;
+                background-color: $red;
+              }
+              
+              &.size-total {
+                &.green {
+                  background-color: $light-green;
+                }
+
+                &.red {
+                  background-color: $light-red;
+                }
               }
             }
           }

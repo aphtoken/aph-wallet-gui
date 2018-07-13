@@ -2,14 +2,15 @@
   <section id="login--landing">
     <aph-icon name="logo"></aph-icon>
     <div class="version-number">v{{$store.state.version}}</div>
+    <!--<locale-changer></locale-changer>-->
     <div class="btn-group">
       <router-link class="login-btn" to="/login/menu">
         <aph-icon name="wallet"></aph-icon>
-        <p>Login</p>
+        <p>{{ $t('login') }}</p>
       </router-link>
       <router-link class="create-wallet-btn" to="/login/create-wallet">
         <aph-icon name="create"></aph-icon>
-        <p>Create Wallet</p>
+        <p>{{ $t('createWallet') }}</p>
       </router-link>
     </div>
     <!-- <router-link class="settings-btn" to="login">Settings</router-link> -->
@@ -17,7 +18,12 @@
 </template>
 
 <script>
+import LocaleChanger from '../LocaleChanger';
+
 export default {
+  components: {
+    LocaleChanger,
+  },
 };
 </script>
 
