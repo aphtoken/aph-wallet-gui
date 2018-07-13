@@ -1,5 +1,6 @@
 import DomPortal from 'vue-dom-portal';
 import Vue from 'vue';
+import VueI18n from 'vue-i18n';
 import VueFlashMessage from 'vue-flash-message';
 import VueHighCharts from 'vue-highcharts';
 import VueNativeSock from 'vue-native-websocket';
@@ -10,6 +11,9 @@ import moment from 'moment';
 
 // Services, etc.
 import { contacts, network, settings, storage, wallets } from './services';
+
+// constants
+import { messages } from './constants';
 
 // Initial Vue Libraries.
 import './libraries';
@@ -55,6 +59,8 @@ Vue.use(VueNativeSock, 'wss://testnet.aphelion-neo.com:62443/ws', {
   reconnectionDelay: 3000, // (Number) how long to initially wait before attempting a new (1000)
 });
 
+Vue.use(VueI18n);
+
 // Register global mixins.
 _.each(mixins, (mixin) => {
   Vue.mixin(mixin);
@@ -78,9 +84,19 @@ network.init();
 settings.sync();
 wallets.sync();
 
+// get user's locale settings
+const lang = (window.navigator.userLanguage || window.navigator.language).split('-')[0];
+// Create VueI18n instance with options
+const i18n = new VueI18n({
+  locale: lang,
+  fallbackLocale: 'en',
+  messages,
+});
+
 /* eslint-disable no-new */
 new Vue({
   router,
   store,
+  i18n,
   ...App,
 }).$mount('#app');
