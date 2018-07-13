@@ -3,11 +3,11 @@
     <div class="color-mode-btn" @click="toggleNightMode">
       <template v-if="$store.state.styleMode === 'Night'">
         <aph-icon name="sun"></aph-icon>
-        Day Mode
+        {{$t('dayMode')}}
       </template>
       <template v-else>
         <aph-icon name="moon"></aph-icon>
-        Night Mode
+        {{$t('nightMode')}}
       </template>
     </div>
     <div class="selection">
@@ -16,19 +16,19 @@
     <div class="market">
       <div class="day-values">
         <div class="row">
-          <div class="label">VOL</div>
+          <div class="label">{{$t('vol')}}</div>
           <div class="value">{{ $formatNumber($store.state.tradeHistory.volume24Hour) }}</div>
         </div>
         <div class="row">
-          <div class="label">OPEN</div>
+          <div class="label">{{$t('open')}}</div>
           <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.open24Hour) }}</div>
         </div>
         <div class="row">
-          <div class="label">HIGH</div>
+          <div class="label">{{$t('high')}}</div>
           <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.high24Hour) }}</div>
         </div>
         <div class="row">
-          <div class="label">LOW</div>
+          <div class="label">{{$t('low')}}</div>
           <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.low24Hour) }}</div>
         </div>
       </div>
@@ -37,7 +37,7 @@
         <aph-token-icon :symbol="$store.state.currentMarket.quoteCurrency"></aph-token-icon>
         <div class="market-name">{{ $store.state.currentMarket.marketName }}</div>
         <div class="price">
-          <span class="label">PRICE</span>
+          <span class="label">{{$t('price')}}</span>
           <div class="base-price">
             {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
           </div>

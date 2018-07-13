@@ -1,37 +1,37 @@
 <template>
   <section id="dashboard--transaction-detail">
     <div class="header">
-      <h1 class="underlined">Transaction</h1>
+      <h1 class="underlined">{{$t('transaction')}}</h1>
     </div>
     <div class="body" v-if="$store.state.activeTransaction">
       <div class="section">
         <div class="row">
           <div class="column confirmed" v-if="this.$store.state.activeTransaction.confirmed">
             <aph-icon name="confirmed-big"></aph-icon>
-            <div class="label">Confirmed</div>
+            <div class="label">{{$t('confirmed')}}</div>
           </div>
           <div class="column unconfirmed" v-else>
             <aph-icon name="unconfirmed-big"></aph-icon>
-            <div class="label">Unconfirmed</div>
+            <div class="label">{{$t('unconfirmed')}}</div>
           </div>
         </div>
         <div class="row">
           <div class="column">
-            <div class="label">Hash</div>
+            <div class="label">{{$t('hash')}}</div>
             <div class="value truncate">{{ $store.state.activeTransaction.txid }}</div>
           </div>
         </div>
         <div class="row">
           <div class="column">
-            <div class="label">Date</div>
+            <div class="label">{{$t('date')}}</div>
             <div class="value">{{ $formatDate($store.state.activeTransaction.blocktime) }}</div>
           </div>
           <div class="column">
-            <div class="label">Time</div>
+            <div class="label">{{$t('time')}}</div>
             <div class="value">{{ $formatTime($store.state.activeTransaction.blocktime) }}</div>
           </div>
           <div class="column">
-            <div class="label">Block</div>
+            <div class="label">{{$t('block')}}</div>
             <div class="value purple">{{ $formatNumber($store.state.activeTransaction.block) }}</div>
           </div>
         </div>
@@ -39,13 +39,13 @@
       <div class="section">
         <div class="row">
           <div class="column">
-            <div class="label">From</div>
+            <div class="label">{{$t('from')}}</div>
             <aph-simple-transactions :transactions="fromTransactions" :show-block-time="false"></aph-simple-transactions>
           </div>
         </div>
         <div class="row">
           <div class="column">
-            <div class="label">To</div>
+            <div class="label">{{$t('to')}}</div>
             <aph-simple-transactions :transactions="toTransactions" :show-block-time="false"></aph-simple-transactions>
           </div>
         </div>
@@ -53,21 +53,21 @@
       <div class="section">
         <div class="row">
           <div class="column">
-            <div class="label">Network Fee</div>
+            <div class="label">{{$t('networkFee')}}</div>
             <div class="value">{{ $formatNumber($store.state.activeTransaction.net_fee) }} GAS</div>
           </div>
           <div class="column">
-            <div class="label">System Fee</div>
+            <div class="label">{{$t('systemFee')}}</div>
             <div class="value">{{ $formatNumber($store.state.activeTransaction.sys_fee) }} GAS</div>
           </div>
           <div class="column">
-            <div class="label">Size</div>
+            <div class="label">{{$t('size')}}</div>
             <div class="value">{{ $formatNumber($store.state.activeTransaction.size) }} Bytes</div>
           </div>
         </div>
         <div class="row">
           <div class="column" v-if="this.$store.state.activeTransaction.confirmed">
-            <div class="label">Confirmations</div>
+            <div class="label">{{$t('confirmations')}}</div>
             <div class="value">{{ $formatNumber(confirmations) }}</div>
           </div>
         </div>
