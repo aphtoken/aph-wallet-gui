@@ -2,13 +2,13 @@
   <section id="login--saved-wallet">
     <login-form-wrapper identifier="openSavedWallet">
       <div v-if="wallets.length > 0">
-        <aph-select v-model="wallet" :options="wallets" placeholder="Select a wallet"></aph-select>
-        <aph-input :hasError="$isFailed('openSavedWallet')" v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
+        <aph-select v-model="wallet" :options="wallets" :placeholder="$t('selectAWallet"></aph-select>
+        <aph-input :hasError="$isFailed('openSavedWallet')" v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password"></aph-input>
         <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
       </div>
       <div v-else>
-        <p class="help-text">You do not have any saved wallets. Create one?</p>
-        <button class="login" @click="create">Create a Wallet</button>
+        <p class="help-text">{{$t('noSavedWallets')}}</p>
+        <button class="login" @click="create">{{$t('createAWallet')}}</button>
       </div>
     </login-form-wrapper>
   </section>
@@ -24,7 +24,7 @@ export default {
 
   computed: {
     buttonLabel() {
-      return this.$isPending('openSavedWallet') ? 'Logging in...' : 'Login';
+      return this.$isPending('openSavedWallet') ? this.$t('loggingIn') : this.$t('login');
     },
 
     shouldDisableLoginButton() {

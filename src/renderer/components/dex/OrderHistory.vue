@@ -1,22 +1,22 @@
 <template>
   <section id="dex--order-history">
     <div class="header">
-      <h1 :class="[{selected: tab === 'Open'}]" @click="selectTab('Open')">Open Orders ({{ openOrders.length }})</h1>
-      <h1 :class="[{selected: tab === 'Completed'}]" @click="selectTab('Completed')">Completed Orders ({{ completedOrders.length }})</h1>
+      <h1 :class="[{selected: tab === 'Open'}]" @click="selectTab('Open')">{{$t('openOrders')}} ({{ openOrders.length }})</h1>
+      <h1 :class="[{selected: tab === 'Completed'}]" @click="selectTab('Completed')">{{$t('completedOrders')}} ({{ completedOrders.length }})</h1>
     </div>
     <div class="body" v-if="$store.state.orderHistory">
       <div class="history">
         <table class="order-history-table">
           <thead>
             <tr>
-              <th>order</th>
-              <th>type</th>
-              <th>pair</th>
-              <th>filled</th>
-              <th>units total</th>
-              <th>price</th>
-              <th>created</th>
-              <th class="status" width="1">status</th>
+              <th>{{$t('order')}}</th>
+              <th>{{$t('type')}}</th>
+              <th>{{$t('pairLc')}}</th>
+              <th>{{$t('filled')}}</th>
+              <th>{{$t('unitsTotal')}}</th>
+              <th>{{$t('priceLc')}}</th>
+              <th>{{$t('created')}}</th>
+              <th class="status" width="1">{{$t('status')}}</th>
             </tr>
           </thead>
           <tbody>
@@ -31,13 +31,13 @@
               <td class="status">
                 <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="btn-cancel" @click="cancelOrder(order)">
                   <aph-icon name="cancel"></aph-icon>
-                  <p>CANCEL</p>
+                  <p>{{$t('cancelUc')}}</p>
                 </div>
                 <div v-else-if="order.status === 'Filled'">
-                  <p>FILLED</p>
+                  <p>{{$t('filledUc')}}</p>
                 </div>
                 <div v-else-if="order.status === 'Cancelled'">
-                  <p>CANCELLED</p>
+                  <p>{{$t('cancelled')}}</p>
                 </div>
               </td>
             </tr>

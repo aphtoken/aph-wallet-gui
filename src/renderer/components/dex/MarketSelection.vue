@@ -37,7 +37,7 @@
         <aph-token-icon :symbol="$store.state.currentMarket.quoteCurrency"></aph-token-icon>
         <div class="market-name">{{ $store.state.currentMarket.marketName }}</div>
         <div class="price">
-          <span class="label">{{$t('price')}}</span>
+          <span class="label">{{$t('priceUc')}}</span>
           <div class="base-price">
             {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
           </div>

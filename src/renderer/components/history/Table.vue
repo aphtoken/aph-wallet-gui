@@ -1,16 +1,16 @@
 <template>
   <section id="history--table">
     <div class="header">
-      <div class="cell">Date</div>
-      <div class="cell">Token</div>
-      <div class="cell">Amount</div>
+      <div class="cell">{{$t('date')}}</div>
+      <div class="cell">{{$t('token')}}</div>
+      <div class="cell">{{$t('amount')}}</div>
       <!--This would require getting the fiat value at that point in time, put this off till a later release <div class="cell">Total</div>-->
-      <div class="cell status">Status</div>
+      <div class="cell status">{{$t('Status')}}</div>
     </div>
     <div class="body">
       <div v-if="!transactions.length" class="zero-state">
         <aph-icon name="no-transactions"></aph-icon>
-        <div class="label">No transactions</div>
+        <div class="label">{{$t('noTransactions')}}</div>
       </div>
       <div v-for="(transaction, index) in transactions" :key="index"
            :class="['transaction', {active: transaction.active, increase: transaction.amount > 0}]">
@@ -30,14 +30,14 @@
             <div class="row">
               <div class="column confirmed" v-if="transaction.details.confirmed">
                 <aph-icon name="confirmed"></aph-icon>
-                <div class="label">Confirmed</div>
+                <div class="label">{{$t('confirmed')}}</div>
               </div>
             </div>
           </div>
           <div class="section">
             <div class="row">
               <div class="column">
-                <div class="label">Time</div>
+                <div class="label">{{$t('time')}}</div>
                 <div class="value">{{ $formatTime(transaction.details.blocktime) }}</div>
               </div>
             </div>
@@ -45,7 +45,7 @@
           <div class="section">
             <div class="row">
               <div class="column">
-                <div class="label">Hash</div>
+                <div class="label">{{$t('hash')}}</div>
                 <div class="value">{{ transaction.details.txid }}</div>
               </div>
             </div>
@@ -53,13 +53,13 @@
           <div class="section">
             <div class="row">
               <div class="column inputs">
-                <div class="label">From</div>
+                <div class="label">{{$t('from')}}</div>
                 <aph-simple-transactions :transactions="transaction.details.vin"></aph-simple-transactions>
               </div>
             </div>
             <div class="row">
               <div class="column outputs">
-                <div class="label">To</div>
+                <div class="label">{{$t('to')}}</div>
                 <aph-simple-transactions :transactions="transaction.details.vout"></aph-simple-transactions>
               </div>
             </div>
@@ -67,25 +67,25 @@
           <div class="section">
             <div class="row">
               <div class="column">
-                <div class="label">Network Fee</div>
-                <div class="value">{{ $formatNumber(transaction.details.net_fee) }} GAS</div>
+                <div class="label">{{$t('networkFee')}}</div>
+                <div class="value">{{$t('gas', { gas: $formatNumber(transaction.details.net_fee)})}}</div>
               </div>
               <div class="column">
-                <div class="label">System Fee</div>
-                <div class="value">{{ $formatNumber(transaction.details.sys_fee) }} GAS</div>
+                <div class="label">{{$t('systemFee')}}</div>
+                <div class="value">{{$t('gas', { gas: $formatNumber(transaction.details.sys_fee)})}}</div>
               </div>
               <div class="column">
-                <div class="label">Size</div>
-                <div class="value">{{ $formatNumber(transaction.details.size) }} Bytes</div>
+                <div class="label">{{$t('size')}}</div>
+                <div class="value">{{$t('bytes', { bytes: $formatNumber(transaction.details.size)})}}</div>
               </div>
             </div>
             <div class="row has-equal-columns">
               <div class="column" v-if="transaction.details.confirmed">
-                <div class="label">Confirmations</div>
+                <div class="label">{{$t('confirmations')}}</div>
                 <div class="value">{{ $formatNumber(transaction.details.confirmations) }}</div>
               </div>
               <div class="column">
-                <div class="label">Confirmed in Block</div>
+                <div class="label">{{$t('confirmedInBlock')}}</div>
                 <div class="value purple">{{ $formatNumber(transaction.details.block) }}</div>
               </div>
             </div>

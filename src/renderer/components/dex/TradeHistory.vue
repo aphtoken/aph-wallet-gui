@@ -1,14 +1,14 @@
 <template>
   <section id="dex--trade-history">
     <div class="header">
-      <h1 class="underlined">Trade history</h1>
+      <h1 class="underlined">{{$t('tradeHistory')}}</h1>
     </div>
     <div class="body">
       <div class="trade-history-table">
         <div class="header">
-          <div class="cell">PRICE ({{ $store.state.currentMarket.baseCurrency }})</div>
-          <div class="cell">VOLUME</div>
-          <div class="cell time">TIME</div>
+          <div class="cell">{{$t('PRICE')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
+          <div class="cell">{{$t('VOLUME')}}</div>
+          <div class="cell time">{{$t('TIME')}}</div>
         </div>
         <div class="body">
           <div class="row" v-for="(trade, index) in $store.state.tradeHistory.trades" :key="index">
