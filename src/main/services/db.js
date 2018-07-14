@@ -15,7 +15,17 @@ if (process.env.NODE_ENV === 'development') {
 PouchDB.plugin(PouchDBUpsert);
 
 // Create database
-const db = new PouchDB(path.join(app.getPath('userData'), database.NAME), { adapter: 'leveldb' });
+const db = new PouchDB(path.join(app.getPath('userData'), database.NAME), {
+  adapter: 'leveldb',
+  auto_compaction: true,
+  revs_limit: 1,
+});
+
+if (process.env.NODE_ENV === 'development') {
+  db.info((err, info) => {
+    console.log(err || info);
+  });
+}
 
 const service = {
   get(id) {
