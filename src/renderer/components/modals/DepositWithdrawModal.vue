@@ -1,25 +1,25 @@
 <template>
   <modal-wrapper id="aph-deposit-withdraw-modal">
     <div class="header">
-      {{isDeposit ? 'Deposit': 'Withdraw'}} <span>{{holding.symbol}}</span>
+      {{isDeposit ? $t('deposit'): $t('withdraw')}} <span>{{holding.symbol}}</span>
     </div>
     <div class="body">
       <div class="balance-container">
         <div class="balance"> 
-          <span class="label">Contract Balance</span>
+          <span class="label">{{$t('contractBalance')}}</span>
           <span class="value">{{ $formatNumber(holding.contractBalance) }}</span> 
         </div>
         <div class="balance"> 
-          <span class="label">Wallet Balance</span>
+          <span class="label">{{$t('walletBalance')}}</span>
           <span class="value">{{ $formatNumber(holding.totalBalance) }}</span> 
         </div>
       </div>
       <aph-input type="number" placeholder="Amount" :light="true" v-model="amount"></aph-input>
     </div>
     <div class="footer">
-      <button class="cancel-btn" @click="onCancel">Cancel</button>
+      <button class="cancel-btn" @click="onCancel">{{$t('cancel')}}</button>
       <button class="deposit-withdraw-btn" @click="onConfirmed(isDeposit, holding, amount)" 
-        :disabled="shouldDisableDepositWithdrawButton">{{isDeposit ? 'Deposit' : 'Withdraw'}}</button>
+        :disabled="shouldDisableDepositWithdrawButton">{{isDeposit ? $t('deposit') : $t('withdraw')}}</button>
     </div>
   </modal-wrapper>
 </template>

@@ -1,11 +1,11 @@
 <template>
   <modal-wrapper id="dex-demo-confirmation-modal">
     <div class="body">
-      <h1>Aphelion DEX Test Version</h1>
-      <p>This is a preliminary demo and testing verion of the Aphelion DEX. It operates on Neo Testnet, which may exhibit degraded performance. Mainnet coming soon.</p>
+      <h1>{{$t('aphelionDexTest')}}</h1>
+      <p>{{$t('thisIsAPreliminaryDemo')}}</p>
     </div>
     <div class="footer">
-      <div class="accept-btn" @click="accept">Accept</div>
+      <div class="accept-btn" @click="accept">{{$t('accept')}}</div>
     </div>
   </modal-wrapper>
 </template>

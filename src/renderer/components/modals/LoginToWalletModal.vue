@@ -4,18 +4,18 @@
       <div class="body">
         <aph-icon name="wallet"></aph-icon>
         <div class="wallet-name">{{ $store.state.currentLoginToWallet.label }}</div>
-        <p>Are you sure you'd like to remove <span>{{$store.state.currentLoginToWallet.label}}</span>?</p>
-        <p><span class="warning">Loss of funds is possible</span>, if you have not properly backed up this wallet's keys.</p>
-        <aph-input placeholder="Enter the name of your wallet to delete" :light="true" v-model="confirmWalletName"></aph-input>
+        <p>{{$t('confirmRemove')}} <span>{{$store.state.currentLoginToWallet.label}}</span>?</p>
+        <p><span class="warning">{{$t('lossOfFunds')}}</span>{{$t('properlyBackedUpWallet')}}</p>
+        <aph-input :placeholder="$t('enterNameOfWalletToDelete')" :light="true" v-model="confirmWalletName"></aph-input>
       </div>
       <div class="footer">
-        <div class="cancel-btn" @click="cancelRemove">Cancel</div>
-        <button class="login-btn" @click="remove" :disabled="shouldDisableDeleteButton">Yes, Delete Wallet</button>
+        <div class="cancel-btn" @click="cancelRemove">{{$t('cancel')}}</div>
+        <button class="login-btn" @click="remove" :disabled="shouldDisableDeleteButton">{{$t('deleteWallet')}}</button>
       </div>
     </template>
     <template v-else>
       <div class="header">
-        <div class="remove" @click="showRemoveConfirmation">Remove</div>
+        <div class="remove" @click="showRemoveConfirmation">{{$t('remove')}}</div>
       </div>
       <div class="body">
         <aph-icon name="wallet"></aph-icon>
@@ -23,7 +23,7 @@
         <aph-input v-if="isNotCurrentWallet" :placeholder="loginMessage" :light="true" v-model="passphrase" type="password"></aph-input>
       </div>
       <div class="footer">
-        <div class="cancel-btn" @click="onCancel">Cancel</div>
+        <div class="cancel-btn" @click="onCancel">{{$t('cancel')}}</div>
         <button v-if="isNotCurrentWallet" class="login-btn" @click="login" :disabled="shouldDisableLoginButton">
           {{ buttonLabel }}
         </button>
@@ -42,11 +42,11 @@ export default {
 
   computed: {
     loginMessage() {
-      return 'Enter your passphrase to login';
+      return this.$t('enterPassphraseToLogin');
     },
 
     buttonLabel() {
-      return this.$isPending('openSavedWallet') ? 'Logging in...' : 'Login';
+      return this.$isPending('openSavedWallet') ? this.$t('loggingIn') : this.$t('login');
     },
 
     isNotCurrentWallet() {
@@ -79,7 +79,8 @@ export default {
       }
 
       if (this.$store.state.currentLoginToWallet.label === this.$store.state.currentWallet.label) {
-        this.$services.alerts.error(`You already have ${this.$store.state.currentLoginToWallet.label} open.`);
+        const message = this.$t('youAlreadyHaveWalletOpen', { name: this.$store.state.currentLoginToWallet.label});
+        this.$services.alerts.error(message);
         return;
       }
 
@@ -108,7 +109,8 @@ export default {
         name: this.$store.state.currentLoginToWallet.label,
         passphrase: this.passphrase,
         done: () => {
-          this.$services.alerts.success(`Deleted Wallet ${this.$store.state.currentLoginToWallet.label}`);
+          const message = this.$t('deletedWallet', { name: this.$store.state.currentLoginToWallet.label});
+          this.$services.alerts.success(message);
           if (this.$store.state.currentLoginToWallet.label
             === this.$store.state.currentWallet.label) {
             this.$services.wallets.clearCurrentWallet();
