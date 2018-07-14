@@ -129,4 +129,12 @@ export default {
   selectAWallet: 'Select a wallet',
   noSavedWallets: 'You do not have any saved wallets. Create one?',
   createAWallet: 'Create a Wallet',
+  yourKeysAreNowEncryptedAs: 'Your keys are now encrypted and saved in your local application storage as \'{label}\'',
+  youMustSaveAndBackupTheKeys: 'You must save and backup the keys below.',
+  ifYouLoseThem: 'If you lose them, you lose access to your assets.',
+  publicAddress: 'Public Address',
+  encryptedPrivateKey: 'Encrypted Private Key',
+  passphrase: 'Passphrase',
+  print: 'Print',
+  goToMyWallet: 'Go To My Wallet',
 };
