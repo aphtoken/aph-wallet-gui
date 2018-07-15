@@ -5,6 +5,15 @@
     </div>
     <div class="body">
       <div class="row">
+        <div class="label">{{$t('language')}}</div>
+        <aph-select :light="true"
+                    :options="languages"
+                    :initialValue="selectedLanguage"
+                    v-model="selectedLanguage"
+                    :allow-empty-value="false"></aph-select>
+      </div>
+
+      <div class="row">
         <div class="label">{{$t('currency')}}</div>
         <aph-select :light="true" :options="currencies" :initialValue="selectedCurrency" v-model="selectedCurrency" :allow-empty-value="false"></aph-select>
       </div>
@@ -22,6 +31,8 @@ export default {
   beforeMount() {
     this.currencies = this.$services.settings.getCurrenciesAsArray();
     this.networks = this.$services.network.getNetworks();
+    this.languages = this.$constants.languages;
+    this.selectedLanguage = localStorage.getItem('language') || 'en';
     this.selectedCurrency = this.$services.settings.getCurrency();
     this.selectedNetwork = _.find(this.networks, (o) => {
       return o.value.net === this.$services.network.getSelectedNetwork().net;
@@ -32,6 +43,8 @@ export default {
     return {
       currencies: [],
       networks: [],
+      languages: [],
+      selectedLanguage: null,
       selectedCurrency: null,
       selectedNetwork: null,
     };
@@ -51,6 +64,11 @@ export default {
       this.$services.network.setSelectedNetwork(network);
       this.$store.commit('handleNetworkChange');
       this.$store.dispatch('fetchPortfolio');
+    },
+
+    selectedLanguage(language) {
+      this.$i18n.locale = language;
+      localStorage.setItem('language', language);
     },
   },
 };
