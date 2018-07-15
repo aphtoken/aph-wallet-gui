@@ -173,6 +173,7 @@ export default {
   purchaseNow: 'Purchase Now',
   receivedNEO: 'Received NEO transfer confirmation.',
   recentTransactions: 'Recent transactions',
+  receive: 'Receive',
   recipient: 'Recipient',
   regressionTrend: 'Regression Trend',
   relayedToNetwork: '{amount} {symbol} {action} Relayed to Network.',

@@ -7,18 +7,18 @@
         <span class="amount">{{ $formatMoney($store.state.portfolio.balance) }}</span><span class="currency">{{ $store.state.currency }}</span>
       </div>
       <div class="change">
-        <div class="label">24h change</div>
+        <div class="label">{{$t('twentyFourHourChange')}}</div>
         <div :class="['amount', {increase: $store.state.portfolio.changeValue > 0, decrease: $store.state.portfolio.changeValue < 0}]">{{ $formatMoney($store.state.portfolio.changeValue) }}</div>
       </div>
     </div>
     <div class="btn-group">
       <div class="receive-btn" @click="showSendAddressModal">
         <aph-icon name="receive"></aph-icon>
-        <p>Receive</p>
+        <p>{{$t('receive')}}</p>
       </div>
       <div class="send-btn" @click="showSendView">
         <aph-icon name="send"></aph-icon>
-        <p>Send</p>
+        <p>{{$t('send')}}</p>
       </div>
     </div>
     <zoom></zoom>
