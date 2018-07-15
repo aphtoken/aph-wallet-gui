@@ -28,7 +28,7 @@
     </div>
     <div v-else class="zero-state">
       <aph-icon name="no-transactions"></aph-icon>
-      <div class="label">Unable to reach trading server.</div>
+      <div class="label">{{$t('unableToReachTradingServer')}}</div>
     </div>
     <dex-demo-confirmation v-if="!$store.state.acceptDexDemoVersion && !isOutOfDate"></dex-demo-confirmation>
     <dex-out-of-date v-if="isOutOfDate && !this.$store.state.acceptDexOutOfDate"></dex-out-of-date>
@@ -116,20 +116,23 @@ export default {
 
     this.$store.commit('setSocketOrderCreated', (message) => {
       /* eslint-disable max-len */
-      this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Created. x${message.data.quantity} @${message.data.price}`);
+      let text = (message.side === 'bid' ? this.$t('buy') : this.$t('sell'));
+
+      text += this.$t('orderCreated', { quantity: message.data.quantity, price: message.data.price});
+      this.$services.alerts.success(text);
     });
 
     this.$store.commit('setSocketOrderMatched', (message) => {
       /* eslint-disable max-len */
-      this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Filled. x${message.data.quantity} @${message.data.price}`);
+      this.$services.alerts.success(`${(message.side === 'bid' ? this.$t('buy') : this.$t('sell'))} ${this.$t('orderFilled')}. x${message.data.quantity} @${message.data.price}`);
     });
 
     this.$store.commit('setSocketOrderCreationFailed', (message) => {
-      this.$services.alerts.error(`Failed to Create Order ${(message.side === 'bid' ? 'Buy' : 'Sell')}. {message.errorMessage}`);
+      this.$services.alerts.error(`${this.$t('failedToCreateOrder')} ${(message.side === 'bid' ? this.$t('buy') : this.$t('sell'))}. ${message.errorMessage}`);
     });
 
     this.$store.commit('setSocketOrderMatchFailed', (message) => {
-      this.$services.alerts.error(`Failed to Match ${(message.side === 'bid' ? 'Buy' : 'Sell')} x${message.data.quantity}. {message.data.errorMessage}`);
+      this.$services.alerts.error(`${this.$t('failedToMatch')} ${(message.side === 'bid' ? this.$t('buy') : this.$t('sell'))} x${message.data.quantity}. ${message.data.errorMessage}`);
     });
   },
 };

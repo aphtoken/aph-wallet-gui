@@ -208,8 +208,18 @@ export default {
   backupWallet: 'Backup Wallet',
   wallets: 'Wallets',
   importWallet: 'Import a wallet',
-
-
-
+  history: 'History',
+  unableToReachTradingServer: 'Unable to reach trading server.',
+  orderCreated: ' Order Created. x{quantity} @{price}',
+  orderFilled: 'Order Filled',
+  failedToCreateOrder: 'Failed to Create Order',
+  failedToMatch: 'Failed to Match',
+  nowListedOnKucoin: 'APH Tokens Now Listed On Kucoin!',
+  comingSoon: 'Coming Soon: Aphelion DEX is a fully integrated, wallet based peer-to-peer decentralized trading\\nsolution that will be updated directly into this wallet in a future release.',
+  tradesWillBePoweredBy: 'Trades will be powered by APH tokens to be redistributed to all APH token holders via the Aphelion\\nDecentralized Exchange Asset Ledger (D.E.A.L) smart contract.',
+  getYourAPHTokens: 'Get Your APH Tokens Here',
+  buyNow: 'Buy Now',
+  openKucoinInBrowser: 'Open Kucoin in your browser',
+  assets: 'Assets',
 };
 
