@@ -1,16 +1,16 @@
 <template>
   <section id="settings--preferences">
     <div class="header">
-      <h1 class="underlined">Preferences</h1>
+      <h1 class="underlined">{{$t('preferences')}}</h1>
     </div>
     <div class="body">
       <div class="row">
-        <div class="label">Currency</div>
+        <div class="label">{{$t('currency')}}</div>
         <aph-select :light="true" :options="currencies" :initialValue="selectedCurrency" v-model="selectedCurrency" :allow-empty-value="false"></aph-select>
       </div>
 
       <div class="row">
-        <div class="label">Network</div>
+        <div class="label">{{$t('network')}}</div>
         <aph-select :light="true" :options="networks" :initialValue="selectedNetwork" v-model="selectedNetwork" :allow-empty-value="false"></aph-select>
       </div>
     </div>
