@@ -18,9 +18,9 @@ export default {
 
       switch (true) {
         case seconds <= 1:
-          return 'a second ago';
+          return this.$t('aSecondAgo');
         case seconds < 60:
-          return `${seconds} seconds ago`;
+          return this.$t('secondsAgo', { seconds });
         default:
           return moment.unix(this.timestamp).fromNow();
       }
