@@ -85,7 +85,7 @@ settings.sync();
 wallets.sync();
 
 // get user's locale settings
-const lang = (window.navigator.userLanguage || window.navigator.language).split('-')[0];
+const lang = localStorage.getItem('lang') || (window.navigator.userLanguage || window.navigator.language).split('-')[0];
 // Create VueI18n instance with options
 const i18n = new VueI18n({
   locale: lang,

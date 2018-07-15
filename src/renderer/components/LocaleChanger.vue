@@ -1,6 +1,6 @@
 <template>
   <div class="locale-changer">
-    <select v-model="$i18n.locale">
+    <select v-model="locale">
       <option v-for="(lang, i) in langs" :key="`Lang${i}`" :value="lang">{{ lang }}</option>
     </select>
   </div>
@@ -12,10 +12,17 @@
     data() {
       return {
         langs: [],
+        locale: this.$i18n.locale,
       };
     },
     mounted() {
       this.langs = this.$constants.langs;
+    },
+    watch: {
+      locale(lang) {
+        this.$i18n.locale = lang;
+        localStorage.setItem('lang', lang);
+      },
     },
   };
 </script>

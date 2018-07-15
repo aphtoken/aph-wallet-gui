@@ -2,7 +2,7 @@
   <modal-wrapper id="aph-import-a-wallet-modal" identifier="importWallet">
     <div class="body">
       <aph-icon name="wallet"></aph-icon>
-      <aph-input :placeholder="$t('name'}" v-model="walletName"></aph-input>
+      <aph-input :placeholder="$t('name')" v-model="walletName"></aph-input>
       <aph-input :placeholder="$t('privateKey')" v-model="wif"></aph-input>
       <aph-input :placeholder="$t('passphrase')" v-model="passphrase" type="password"></aph-input>
       <aph-input :placeholder="$t('confirmPassphrase')" v-model="passphraseConfirm" type="password"></aph-input>
