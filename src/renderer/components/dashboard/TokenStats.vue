@@ -26,7 +26,7 @@
         <div class="amount">{{ $formatMoneyWithoutCents($store.state.statsToken.marketCap) }}</div>
       </div>
       <div class="change">
-        <div class="label">{{$t('twnetyFourHourChange')}}</div>
+        <div class="label">{{$t('twentyFourHourChange')}}</div>
         <div :class="['amount', {increase: $store.state.statsToken.change24hrPercent > 0, decrease: $store.state.statsToken.change24hrPercent < 0}]">{{ $formatNumber($store.state.statsToken.change24hrPercent) }}</div>
       </div>
     </div>

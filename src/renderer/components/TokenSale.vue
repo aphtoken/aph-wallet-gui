@@ -27,7 +27,7 @@
     <div class="disclaimer">
       <h2>{{$t('disclaimerUrgent')}}</h2>
       <p>{{$t('ensureThatYouAreOnlySendingTokens')}}</p>
-      <p>{{$t('submittingMultpleTimesWarning')}}</p>
+      <p>{{$t('submittingMultipleTimesWarning')}}</p>
       <p>{{$t('aphelionIsNotResponsible')}}</p>
       <div class="disclaimer-accept">
         <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
