@@ -118,7 +118,7 @@ export default {
       /* eslint-disable max-len */
       let text = (message.side === 'bid' ? this.$t('buy') : this.$t('sell'));
 
-      text += this.$t('orderCreated', { quantity: message.data.quantity, price: message.data.price});
+      text += this.$t('orderCreated', { quantity: message.data.quantity, price: message.data.price });
       this.$services.alerts.success(text);
     });
 

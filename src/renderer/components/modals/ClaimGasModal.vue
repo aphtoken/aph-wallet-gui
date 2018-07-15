@@ -67,7 +67,7 @@ export default {
       if (this.$store.state.gasClaim && this.$store.state.gasClaim.step > 3) {
         return this.$t('sentClaim', { amount: this.$store.state.gasClaim.gasClaimAmount});
       } else if (this.$store.state.gasClaim && this.$store.state.gasClaim.step === 3) {
-        return this.$t('sendingClaim', { amount this.$store.state.gasClaim.gasClaimAmount });
+        return this.$t('sendingClaim', { amount: this.$store.state.gasClaim.gasClaimAmount });
       }
       return this.$t('sendGasClaim');
     },

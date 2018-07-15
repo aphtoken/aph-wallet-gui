@@ -79,7 +79,7 @@ export default {
       }
 
       if (this.$store.state.currentLoginToWallet.label === this.$store.state.currentWallet.label) {
-        const message = this.$t('youAlreadyHaveWalletOpen', { name: this.$store.state.currentLoginToWallet.label});
+        const message = this.$t('youAlreadyHaveWalletOpen', { name: this.$store.state.currentLoginToWallet.label });
         this.$services.alerts.error(message);
         return;
       }
@@ -109,7 +109,7 @@ export default {
         name: this.$store.state.currentLoginToWallet.label,
         passphrase: this.passphrase,
         done: () => {
-          const message = this.$t('deletedWallet', { name: this.$store.state.currentLoginToWallet.label});
+          const message = this.$t('deletedWallet', { name: this.$store.state.currentLoginToWallet.label });
           this.$services.alerts.success(message);
           if (this.$store.state.currentLoginToWallet.label
             === this.$store.state.currentWallet.label) {

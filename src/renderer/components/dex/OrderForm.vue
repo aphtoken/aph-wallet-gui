@@ -227,7 +227,9 @@ export default {
       }
     },
     orderButtonLabel() {
-      return this.$isPending('placeOrder') === false ? this.$t('placeSideOrder', { side: this.side }) : this.$t('placingOrder');
+      return this.$isPending('placeOrder') === false ?
+        this.$t('placeSideOrder', { side: this.side }) :
+        this.$t('placingOrder');
     },
     shouldDisableOrderButton() {
       if (this.isOutOfDate) {
@@ -374,7 +376,7 @@ export default {
           const message = this.$t('relayedToNetwork', {
             amount,
             symbol: holding.symbol,
-            action: (isDeposit ? this.t('deposit') : this.$t('withdraw'))
+            action: (isDeposit ? this.t('deposit') : this.$t('withdraw')),
           });
           this.$services.alerts.success(message);
         })
