@@ -56,9 +56,9 @@ export default {
   dayMode: 'Day Mode',
   nightMode: 'Night Mode',
   vol: 'VOL',
-  open: 'OPEN',
-  high: 'HIGH',
-  low: 'LOW',
+  OPEN: 'OPEN',
+  HIGH: 'HIGH',
+  LOW: 'LOW',
   priceUc: 'PRICE',
   orderBook: 'Order book',
   size: 'size',
@@ -142,7 +142,7 @@ export default {
   add: 'Add',
   contactExists: 'Contact {name} already exists.',
   done: 'Done',
-  claimGas: `Claiming GAS which has accumulated from your NEO holdings takes
+  claimingGas: `Claiming GAS which has accumulated from your NEO holdings takes
    several steps. We've automated the process for you but it may take up to
     5 minutes.`,
   pleaseWaitForGas: 'Please wait for the GAS claim to complete.',

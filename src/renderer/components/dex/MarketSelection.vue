@@ -20,15 +20,15 @@
           <div class="value">{{ $formatNumber($store.state.tradeHistory.volume24Hour) }}</div>
         </div>
         <div class="row">
-          <div class="label">{{$t('open')}}</div>
+          <div class="label">{{$t('OPEN')}}</div>
           <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.open24Hour) }}</div>
         </div>
         <div class="row">
-          <div class="label">{{$t('high')}}</div>
+          <div class="label">{{$t('HIGH')}}</div>
           <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.high24Hour) }}</div>
         </div>
         <div class="row">
-          <div class="label">{{$t('low')}}</div>
+          <div class="label">{{$t('LOW')}}</div>
           <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.low24Hour) }}</div>
         </div>
       </div>

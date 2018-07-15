@@ -2,7 +2,7 @@
   <modal-wrapper id="aph-claim-gas-modal" identifier="claimGas">
     <template>
       <div class="body" v-if="$store.state.gasClaim">
-        <p>{{$t('claimGas')}}}}</p>
+        <p>{{$t('claimingGas')}}}}</p>
         <p>{{$t('pleaseWaitForGas')}}</p>
         <p>{{$t('closingYourWallet')}}.</p>
         <div class="checklist">
@@ -51,7 +51,7 @@ export default {
       if (this.$store.state.gasClaim && this.$store.state.gasClaim.step > 1) {
         return this.$t('transferredNEO', { amount: this.$store.state.gasClaim.neoTransferAmount });
       } else if (this.$store.state.gasClaim && this.$store.state.gasClaim.step === 1) {
-        return this.$t('transferringNEO', { amount: this.$store.state.gasClaim.neoTransferAmount});
+        return this.$t('transferringNEO', { amount: this.$store.state.gasClaim.neoTransferAmount });
       }
       return this.$t('transferAllNEO');
     },
@@ -65,7 +65,7 @@ export default {
     },
     step3Label() {
       if (this.$store.state.gasClaim && this.$store.state.gasClaim.step > 3) {
-        return this.$t('sentClaim', { amount: this.$store.state.gasClaim.gasClaimAmount});
+        return this.$t('sentClaim', { amount: this.$store.state.gasClaim.gasClaimAmount });
       } else if (this.$store.state.gasClaim && this.$store.state.gasClaim.step === 3) {
         return this.$t('sendingClaim', { amount: this.$store.state.gasClaim.gasClaimAmount });
       }
