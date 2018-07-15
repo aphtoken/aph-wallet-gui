@@ -75,7 +75,7 @@
                 <div class="value">{{$t('gas', { gas: $formatNumber(transaction.details.sys_fee)})}}</div>
               </div>
               <div class="column">
-                <div class="label">{{$t('size')}}</div>
+                <div class="label">{{$t('Size')}}</div>
                 <div class="value">{{$t('bytes', { bytes: $formatNumber(transaction.details.size)})}}</div>
               </div>
             </div>

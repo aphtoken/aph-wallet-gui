@@ -61,7 +61,7 @@
             <div class="value">{{ $formatNumber($store.state.activeTransaction.sys_fee) }} GAS</div>
           </div>
           <div class="column">
-            <div class="label">{{$t('size')}}</div>
+            <div class="label">{{$t('Size')}}</div>
             <div class="value">{{ $formatNumber($store.state.activeTransaction.size) }} Bytes</div>
           </div>
         </div>

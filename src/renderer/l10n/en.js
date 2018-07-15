@@ -48,7 +48,7 @@ export default {
   to: 'To',
   networkFee: 'Network Fee',
   systemFee: 'System Fee',
-  size: 'Size',
+  Size: 'Size',
   confirmations: 'Confirmations',
   candlesticks: 'Candlesticks',
   depth: 'Depth',
@@ -142,9 +142,12 @@ export default {
   add: 'Add',
   contactExists: 'Contact {name} already exists.',
   done: 'Done',
-  claimGas: 'Claiming GAS which has accumulated from your NEO holdings takes several steps. We\'ve automated the process for you but it may take up to 5 minutes.',
+  claimGas: `Claiming GAS which has accumulated from your NEO holdings takes
+   several steps. We've automated the process for you but it may take up to
+    5 minutes.`,
   pleaseWaitForGas: 'Please wait for the GAS claim to complete.',
-  closingYourWallet: 'Closing your wallet during this process may result in the GAS claim failing and require you to run it again',
+  closingYourWallet: `Closing your wallet during this process may result in
+   the GAS claim failing and require you to run it again`,
   steps: 'Steps:',
   transferredNEO: 'Transferred {amount} NEO to yourself.',
   transferringNEO: 'Transferring {amount} NEO to yourself.',
@@ -163,10 +166,16 @@ export default {
   contractBalance: 'Contract Balance',
   walletBalance: 'Wallet Balance',
   aphelionDexTest: 'Aphelion DEX Test Version',
-  thisIsAPreliminaryDemo: 'This is a preliminary demo and testing verion of the Aphelion DEX. It operates on Neo Testnet, which may exhibit degraded performance. Mainnet coming soon.',
+  thisIsAPreliminaryDemo: `This is a preliminary demo and testing verion of the
+   Aphelion DEX. It operates on Neo Testnet, which may exhibit degraded 
+   performance. Mainnet coming soon.`,
   accept: 'Accept',
   aphelionDexOutOfDate: 'Aphelion DEX Out of Date',
-  theDexContractHasBeenUpdated: 'The DEX contract has been updated. A corresponding wallet upgrade is required to continue to use the DEX.\\nPlease use the controls below to cancel your orders and withdraw your funds from the contract back to your wallet and then download the latest version.',
+  theDexContractHasBeenUpdated: `The DEX contract has been updated. A
+   corresponding wallet upgrade is required to continue to use the DEX.
+
+   Please use the controls below to cancel your orders and withdraw your funds
+    from the contract back to your wallet and then download the latest version.`,
   name: 'Name',
   confirmPassphrase: 'Confirm passphrase',
   saving: 'Saving...',
@@ -181,24 +190,34 @@ export default {
   deletedWallet: 'Deleted Wallet {name}',
   confirmYourOrder: 'Confirm Your Order:',
   areYouSureYouWouldLikeToPlace: 'Are you sure that you would like to place a',
-  postOnly: 'Post Only',
   atAUnitPriceOf: 'at a unit price of',
   forATotalOf: 'for a total of',
-  thisWillBeAMakerOrder: 'This will be a maker order that will be left on the book until someone takes it. You will not be charged a fee for this trade.',
+  thisWillBeAMakerOrder: `This will be a maker order that will be left on the
+   book until someone takes it. You will not be charged a fee for this trade.`,
   thisOrderWouldTakeTheFollowing: 'This order would take the following offers:',
   thisMeansThatItIsIneligible: 'This means that it is ineligible as a Post Only order.',
-  youWillBeImmediatelyTaking: 'You will be immediately taking these {count} offers:',
-  weveAlsoMatchedBackupOrders: 'We\'ve also matched {count} backup orders that may be matched in the event that any of these orders are taken already.',
-  theFeeForCompletingYourTradeWillDepend: 'The fee for completing your trade will depend on the final number of offers matched but will be between {min} APH and {max} APH',
+  youWillBeImmediatelyTaking: `You will be immediately taking these {count}
+   offers:`,
+  weveAlsoMatchedBackupOrders: `We've also matched {count} backup orders that
+   may be matched in the event that any of these orders are taken already.`,
+  theFeeForCompletingYourTradeWillDepend: `The fee for completing your trade
+   will depend on the final number of offers matched but will be between {min}
+    APH and {max} APH`,
   theFeeForCompletingYourTradeWillBe: 'The fee for completing your trade will be {amount} APH',
-  thisOrderRequires: 'This order requires {quantity} {symbol} to be completed.\\nYour current contract balance is only {balance} {symbol}.\\nSubmitting this order will first submit {deposit} {symbol} in order to process successfully.',
-  youWillBeCreatingTheFollowingMakerOrder: 'You will also be creating the following maker order that will be left on the book until someone takes it. You will not be charged a fee for this trade:',
-  thisWillBeAMakerOrderLeftOnTheBook: 'This will be a maker order that will be left on the book until someone takes it. You will not be charged a fee for this trade.',
+  thisOrderRequires: `This order requires {quantity} {symbol} to be completed.
+  Your current contract balance is only {balance} {symbol}.
+  Submitting this order will first submit {deposit} {symbol} in order to
+   process successfully.`,
+  youWillBeCreatingTheFollowingMakerOrder: `You will also be creating the
+   following maker order that will be left on the book until
+    someone takes it. You will not be charged a fee for this trade:`,
+  thisWillBeAMakerOrderLeftOnTheBook: `This will be a maker order that will
+   be left on the book until someone takes it.
+    You will not be charged a fee for this trade.`,
   submit: 'Submit',
   pleaseConfirmTheTransactionOnYourLedgerDevice: 'Please confirm the transaction on your Ledger device.',
   pleaseConnectYourLedgerDevice: 'Please connect your Ledger device, unlock it and open the NEO application.',
   saveAndBackupTheKeys: 'Save and backup the keys below.',
-  ifYouLoseThem: 'If you lose them, you lose access to your assets.',
   addressBook: 'Address Book',
   edit: 'Edit',
   addContact: 'Add contact',
@@ -215,8 +234,13 @@ export default {
   failedToCreateOrder: 'Failed to Create Order',
   failedToMatch: 'Failed to Match',
   nowListedOnKucoin: 'APH Tokens Now Listed On Kucoin!',
-  comingSoon: 'Coming Soon: Aphelion DEX is a fully integrated, wallet based peer-to-peer decentralized trading\\nsolution that will be updated directly into this wallet in a future release.',
-  tradesWillBePoweredBy: 'Trades will be powered by APH tokens to be redistributed to all APH token holders via the Aphelion\\nDecentralized Exchange Asset Ledger (D.E.A.L) smart contract.',
+  comingSoon: `Coming Soon: Aphelion DEX is a fully integrated, wallet
+   based peer-to-peer decentralized trading
+   solution that will be updated directly into this wallet in a future
+    release.`,
+  tradesWillBePoweredBy: `Trades will be powered by APH tokens to be
+   redistributed to all APH token holders via the Aphelion
+   Decentralized Exchange Asset Ledger (D.E.A.L) smart contract.`,
   getYourAPHTokens: 'Get Your APH Tokens Here',
   buyNow: 'Buy Now',
   openKucoinInBrowser: 'Open Kucoin in your browser',
@@ -226,7 +250,6 @@ export default {
   buyAph: 'buy Aph',
   joinIco: 'Join ICO',
   settings: 'Settings',
-  block: 'block',
   unableToReachNetwork: 'Unable to Reach Network',
   aSecondAgo: 'a second ago',
   secondsAgo: '{seconds} seconds ago',
