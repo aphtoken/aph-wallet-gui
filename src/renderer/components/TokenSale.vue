@@ -200,7 +200,7 @@ export default {
       }
 
       if (this.amount > this.currency.balance) {
-        this.$services.alerts.error(this.$t('amountEnteredGreaterThanBalance', { symbol: this.currency.symbol}));
+        this.$services.alerts.error(this.$t('amountEnteredGreaterThanBalance', { symbol: this.currency.symbol }));
         this.sending = false;
         return;
       }
@@ -209,7 +209,7 @@ export default {
         this.currency.asset, this.amount)
         .then((res) => {
           this.$services.alerts.success(
-            this.$t('tokenSaleSuccessful', { symbol: res.symbol, balance: res.balance })
+            this.$t('tokenSaleSuccessful', { symbol: res.symbol, balance: res.balance }),
           );
           this.$store.dispatch('fetchHoldings', { done: null });
           this.sending = false;
