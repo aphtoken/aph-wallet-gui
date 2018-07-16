@@ -278,7 +278,25 @@ export default {
         const currentWallet = wallets.getCurrentWallet();
         axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
           .then((res) => {
-            resolve(res.data.orders);
+            const orders = res.data.orders;
+            orders.forEach((order) => {
+              const marketForOrder = _.filter(store.state.markets, (market) => {
+                return market.marketName === order.marketName;
+              });
+
+              if (!marketForOrder || marketForOrder.length === 0) {
+                return;
+              }
+
+              if (order.side === 'Buy') {
+                order.assetIdToGive = marketForOrder[0].baseAssetId;
+                order.quantityToGive = order.price * order.quantity;
+              } else {
+                order.assetIdToGive = marketForOrder[0].quoteAssetId;
+                order.quantityToGive = order.quantity;
+              }
+            });
+            resolve(orders);
           })
           .catch((e) => {
             alerts.exception(new Error(`APH API Error: ${e.message}`));
@@ -313,6 +331,20 @@ export default {
           });
       } catch (e) {
         reject(e);
+      }
+    });
+  },
+
+  fetchOpenOrderBalance(assetId) {
+    return new Promise((resolve, reject) => {
+      try {
+        const openOrdersForAsset = _.filter(store.state.orderHistory, (order) => {
+          return order.assetIdToGive === assetId && (order.status === 'Open' || order.status === 'PartiallyFilled');
+        });
+
+        resolve(_.sumBy(openOrdersForAsset, 'quantityToGive'));
+      } catch (e) {
+        reject(`Error fetching open order balance for ${assetId}. Error: ${e.message}`);
       }
     });
   },
