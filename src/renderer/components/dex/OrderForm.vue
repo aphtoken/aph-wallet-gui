@@ -324,8 +324,11 @@ export default {
 
       book.forEach((l) => {
         const takeQuantity = l.quantity.isGreaterThan(quantityRemaining) ? quantityRemaining : l.quantity;
-        quantityRemaining -= takeQuantity;
-        totalMultiple = totalMultiple.plus(takeQuantity * l.price);
+        if (quantityRemaining.isLessThanOrEqualTo(0)) {
+          return;
+        }
+        quantityRemaining = quantityRemaining.minus(takeQuantity);
+        totalMultiple = totalMultiple.plus(takeQuantity.multipliedBy(l.price));
       });
 
       return (totalMultiple / quantity).toString();
