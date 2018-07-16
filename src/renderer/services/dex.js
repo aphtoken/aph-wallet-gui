@@ -72,8 +72,8 @@ export default {
   setOrderBookMeta(book) {
     let totalAsk = new BigNumber(0);
 
-    book.asks = _.sortBy(book.asks, 'price');
-    book.bids = _.sortBy(book.bids, 'price').reverse();
+    book.asks = _.sortBy(book.asks, [level => level.price.toNumber()]);
+    book.bids = _.sortBy(book.bids, [level => level.price.toNumber()]).reverse();
 
     book.asks.forEach((l) => {
       totalAsk = totalAsk.plus(l.quantity);
