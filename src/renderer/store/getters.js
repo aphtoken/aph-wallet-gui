@@ -18,6 +18,7 @@ export const nep5Balances = state => state.nep5Balances;
 export const orderBook = state => state.orderBook;
 export const orderHistory = state => state.orderHistory;
 export const orderToConfirm = state => state.orderToConfirm;
+export const ordersToShow = state => state.ordersToShow;
 export const portfolio = state => state.portfolio;
 export const recentTransactions = state => state.recentTransactions;
 export const requests = state => state.requests;

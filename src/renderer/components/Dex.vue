@@ -45,6 +45,45 @@ export default {
     clearInterval(this.interval);
   },
 
+  beforeMount() {
+    this.$store.state.showPortfolioHeader = false;
+    this.$store.dispatch('fetchMarkets', {
+      done: () => {
+        if (!this.$store.state.currentMarket) {
+          this.$store.commit('setCurrentMarket', this.$store.state.markets[0]);
+        }
+      },
+    });
+
+    this.$services.dex.completeSystemAssetWithdrawals();
+
+    this.$store.state.socket.opened = () => {
+      if (this.$store.state.currentMarket) {
+        this.$store.dispatch('subscribeToMarket', {
+          market: this.$store.state.currentMarket,
+        });
+      }
+    };
+
+    this.$store.commit('setSocketOrderCreated', (message) => {
+      /* eslint-disable max-len */
+      this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Created. x${message.data.quantity} @${message.data.price}`);
+    });
+
+    this.$store.commit('setSocketOrderMatched', (message) => {
+      /* eslint-disable max-len */
+      this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Filled. x${message.data.quantity} @${message.data.price}`);
+    });
+
+    this.$store.commit('setSocketOrderCreationFailed', (message) => {
+      this.$services.alerts.error(`Failed to Create Order ${(message.side === 'bid' ? 'Buy' : 'Sell')}. {message.errorMessage}`);
+    });
+
+    this.$store.commit('setSocketOrderMatchFailed', (message) => {
+      this.$services.alerts.error(`Failed to Match ${(message.side === 'bid' ? 'Buy' : 'Sell')} x${message.data.quantity}. {message.data.errorMessage}`);
+    });
+  },
+
   components: {
     DexDemoConfirmation,
     DexOutOfDate,
@@ -93,45 +132,6 @@ export default {
       this.connected = true;
     },
   },
-
-  mounted() {
-    this.$store.state.showPortfolioHeader = false;
-    this.$store.dispatch('fetchMarkets', {
-      done: () => {
-        if (!this.$store.state.currentMarket) {
-          this.$store.commit('setCurrentMarket', this.$store.state.markets[0]);
-        }
-      },
-    });
-
-    this.$services.dex.completeSystemAssetWithdrawals();
-
-    this.$store.state.socket.opened = () => {
-      if (this.$store.state.currentMarket) {
-        this.$store.dispatch('subscribeToMarket', {
-          market: this.$store.state.currentMarket,
-        });
-      }
-    };
-
-    this.$store.commit('setSocketOrderCreated', (message) => {
-      /* eslint-disable max-len */
-      this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Created. x${message.data.quantity} @${message.data.price}`);
-    });
-
-    this.$store.commit('setSocketOrderMatched', (message) => {
-      /* eslint-disable max-len */
-      this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Filled. x${message.data.quantity} @${message.data.price}`);
-    });
-
-    this.$store.commit('setSocketOrderCreationFailed', (message) => {
-      this.$services.alerts.error(`Failed to Create Order ${(message.side === 'bid' ? 'Buy' : 'Sell')}. {message.errorMessage}`);
-    });
-
-    this.$store.commit('setSocketOrderMatchFailed', (message) => {
-      this.$services.alerts.error(`Failed to Match ${(message.side === 'bid' ? 'Buy' : 'Sell')} x${message.data.quantity}. {message.data.errorMessage}`);
-    });
-  },
 };
 </script>
 
@@ -141,10 +141,10 @@ export default {
   display: flex;
   flex-direction: column;
   flex-direction: column;
+  flex: 1;
   justify-content: center;
   padding-top: toRem(30px);
   width: 100%;
-  flex: 1;
 
   .grid {
     display: flex;
@@ -223,6 +223,7 @@ export default {
       flex-direction: column;
       height: 100%;
       justify-content: center;
+      width: 100%;
 
       .aph-icon {
         svg {

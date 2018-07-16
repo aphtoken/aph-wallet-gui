@@ -11,7 +11,7 @@
       </template>
     </div>
     <div class="selection">
-      <aph-select :options="markets" v-model="$store.state.currentMarket"></aph-select>
+      <aph-select :options="markets" v-model="currentMarket"></aph-select>
     </div>
     <div class="market">
       <div class="day-values">
@@ -62,11 +62,38 @@ export default {
           return result;
         }, []);
     },
+
+    storeStateCurrentMarket() {
+      return this.$store.state.currentMarket;
+    },
   },
+
+  data() {
+    return {
+      currentMarket: {},
+    };
+  },
+
 
   methods: {
     toggleNightMode() {
       this.$store.commit('setStyleMode', this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
+    },
+  },
+
+  mounted() {
+    this.currentMarket = this.$store.state.currentMarket;
+  },
+
+  watch: {
+    currentMarket(newVal) {
+      this.$store.commit('setCurrentMarket', newVal);
+    },
+
+    storeStateCurrentMarket(newVal) {
+      if (!this.currentMarket) {
+        this.currentMarket = newVal;
+      }
     },
   },
 };
