@@ -164,30 +164,24 @@ export default {
               getBars: this.getTradeHistoryBars,
             };
 
-            // Convert prices to base asset unit value
             const baseAsset = neo.getHolding(store.state.currentMarket.baseAssetId);
-
-            if (baseAsset && !isNaN(baseAsset.unitValue)) {
-              _.each(history.trades, (trade) => {
-                trade.price *= baseAsset.unitValue;
-              });
-            }
-
             const todayCutoff = moment().startOf('day').unix();
             const todayTrades = _.filter(history.trades, (trade) => {
               return trade.tradeTime >= todayCutoff;
             });
             if (todayTrades.length > 0) {
-              history.close24Hour = todayTrades[0].price;
+              history.close24Hour = todayTrades[0].price *
+                (baseAsset && !isNaN(baseAsset.unitValue) ? baseAsset.unitValue : 1);
               history.open24Hour = todayTrades[todayTrades.length - 1].price;
               history.low24Hour = _.minBy(todayTrades, (t) => { return t.price; }).price;
               history.high24Hour = _.maxBy(todayTrades, (t) => { return t.price; }).price;
               history.volume24Hour = _.sumBy(todayTrades, (t) => { return t.quantity; });
-              history.change24Hour = Math.round(((history.close24Hour - history.open24Hour)
+              history.change24Hour = Math.round(((todayTrades[0].price - history.open24Hour)
                 / history.open24Hour) * 10000) / 100;
             } else {
               if (history.trades.length > 0) {
-                history.close24Hour = history.trades[0].price;
+                history.close24Hour = history.trades[0].price *
+                  (baseAsset && !isNaN(baseAsset.unitValue) ? baseAsset.unitValue : 1);
                 history.open24Hour = history.trades[0].price;
                 history.low24Hour = history.trades[0].price;
                 history.high24Hour = history.trades[0].price;
