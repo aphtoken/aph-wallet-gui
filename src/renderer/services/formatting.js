@@ -72,7 +72,7 @@ export default {
 
   formatNumber(value, wholeNumberFormat = formats.WHOLE_NUMBER,
     defaultValue = 'N/A') {
-    if (nullOrUndefined(value)) {
+    if (nullOrUndefined(value) || isNaN(value)) {
       return defaultValue;
     }
 
@@ -95,12 +95,11 @@ export default {
     return moment.unix(timestamp).format(formats.WEEKDAY_AND_TIME);
   },
 
-  formatTokenAmount(value, threshold = 1000, defaultValue = 'N/A') {
-    if (nullOrUndefined(value)) {
+  formatTokenAmount(value, threshold = 0.1, defaultValue = 'N/A') {
+    if (nullOrUndefined(value) || isNaN(value)) {
       return defaultValue;
     }
-
-    return value > threshold ?
-      accounting.formatMoney(toBigNumber(value), ' ', 0) : formatNumberBase(value);
+    return value > threshold || value === 0 ? accounting.formatMoney(toBigNumber(value)) :
+      `${formatNumberBase(value * 100)}${settings.getCurrencySymbol(true)}`;
   },
 };

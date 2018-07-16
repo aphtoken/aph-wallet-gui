@@ -603,16 +603,16 @@ export default {
     });
 
     if (holding) {
-      if (holding.balance && !isBigNumber(holding.balance)) {
+      if (holding.balance && !isBigNumber(holding.balance) && !isNaN(holding.balance)) {
         holding.balance = toBigNumber(holding.balance);
       }
-      if (holding.contractBalance && !isBigNumber(holding.contractBalance)) {
+      if (holding.contractBalance && !isBigNumber(holding.contractBalance) && !isNaN(holding.contractBalance)) {
         holding.contractBalance = toBigNumber(holding.contractBalance);
       }
       if (!holding.totalBalance) {
         holding.totalBalance = holding.balance.plus(holding.contractBalance);
       }
-      if (holding.totalBalance && !isBigNumber(holding.totalBalance)) {
+      if (holding.totalBalance && !isBigNumber(holding.totalBalance) && !isNaN(holding.totalBalance)) {
         holding.totalBalance = toBigNumber(holding.totalBalance);
       }
     }

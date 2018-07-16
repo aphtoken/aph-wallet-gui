@@ -163,6 +163,16 @@ export default {
               trades: res.data.trades,
               getBars: this.getTradeHistoryBars,
             };
+
+            // Convert prices to base asset unit value
+            const baseAsset = neo.getHolding(store.state.currentMarket.baseAssetId);
+
+            if (baseAsset && !isNaN(baseAsset.unitValue)) {
+              _.each(history.trades, (trade) => {
+                trade.price *= baseAsset.unitValue;
+              });
+            }
+
             const todayCutoff = moment().startOf('day').unix();
             const todayTrades = _.filter(history.trades, (trade) => {
               return trade.tradeTime >= todayCutoff;
@@ -278,6 +288,7 @@ export default {
         const currentWallet = wallets.getCurrentWallet();
         axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
           .then((res) => {
+            // Convert here
             resolve(res.data.orders);
           })
           .catch((e) => {

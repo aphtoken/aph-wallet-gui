@@ -11,36 +11,43 @@ const CURRENCIES = {
   USD: {
     label: 'USD',
     symbol: '$',
+    centSymbol: '￠',
     value: 'USD',
   },
   EUR: {
     label: 'EUR',
     symbol: '€',
+    centSymbol: 'c',
     value: 'EUR',
   },
   JPY: {
     label: 'JPY',
     symbol: '¥',
+    centSymbol: 'sen',
     value: 'JPY',
   },
   GBP: {
     label: 'GBP',
     symbol: '£',
+    centSymbol: 'p',
     value: 'GBP',
   },
   CHF: {
     label: 'CHF',
     symbol: null,
+    centSymbol: null,
     value: 'CHF',
   },
   CAD: {
     label: 'CAD',
     symbol: '$',
+    centSymbol: '￠',
     value: 'CAD',
   },
   AUD: {
     label: 'AUD',
     symbol: '$',
+    centSymbol: 'c',
     value: 'AUD',
   },
 };
@@ -60,8 +67,8 @@ export default {
     return storage.get(CURRENCY_STORAGE_KEY, defaultSettings.CURRENCY);
   },
 
-  getCurrencySymbol() {
-    return CURRENCIES[this.getCurrency()].symbol;
+  getCurrencySymbol(isCent = false) {
+    return CURRENCIES[this.getCurrency()][isCent ? 'centSymbol' : 'symbol'];
   },
 
   setCurrency(currency) {

@@ -160,6 +160,7 @@ export default {
         flex: 4;
         font-family: GilroySemibold;
         font-size: toRem(12px);
+        white-space: nowrap;
       }
 
       &.row {
