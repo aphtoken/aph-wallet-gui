@@ -49,6 +49,9 @@ export default {
     },
 
     formattedAmount() {
+      if (!this.$store.state.statsToken) {
+        return '0';
+      }
       return this.$formatNumber(this.$store.state.statsToken.balance);
     },
   },

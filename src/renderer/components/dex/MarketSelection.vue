@@ -66,7 +66,7 @@ export default {
 
   methods: {
     toggleNightMode() {
-      this.$store.commit('setStyleMode', this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
+      this.$services.settings.setStyleMode(this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
     },
   },
 };
