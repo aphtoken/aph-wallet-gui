@@ -8,7 +8,7 @@
       <div class="address">{{ address }}</div>
     </div>
     <div class="footer">
-      <div class="done-btn" @click="onDone">Done</div>
+      <div class="done-btn" @click="onDone">{{$t('done')}}</div>
     </div>
   </modal-wrapper>
 </template>

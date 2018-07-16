@@ -1,16 +1,16 @@
 <template>
   <section id="login--menu">
     <router-link class="saved-wallet-btn" to="/login/saved-wallet">
-      Saved wallet
+      {{$t('savedWallet')}}
     </router-link>
     <router-link class="private-key-btn" to="/login/ledger">
-      Ledger
+      {{$t('ledger')}}
     </router-link>
     <router-link class="encrypted-key-btn" to="/login/encrypted-key">
-      Encrypted key
+      {{$t('encryptedKey')}}
     </router-link>
     <router-link class="private-key-btn" to="/login/private-key">
-      Private key
+      {{$t('privateKey')}}
     </router-link>
   </section>
 </template>

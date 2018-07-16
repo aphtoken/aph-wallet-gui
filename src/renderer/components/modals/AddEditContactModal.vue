@@ -1,7 +1,7 @@
 <template>
   <modal-wrapper id="aph-add-edit-contact-modal">
     <div class="header" v-if="prevAddress">
-      <div class="remove" @click="remove">Remove</div>
+      <div class="remove" @click="remove">{{$t('remove')}}</div>
     </div>
     <div class="body">
       <aph-icon name="user"></aph-icon>
@@ -9,9 +9,9 @@
       <aph-input placeholder="Address" v-model="address"></aph-input>
     </div>
     <div class="footer">
-      <button class="cancel-btn" @click="onCancel">Cancel</button>
-      <button class="add-btn" @click="save" v-if="prevAddress" :disabled="shouldDisableSaveAddButton">Save</button>
-      <button class="add-btn" @click="add" v-else :disabled="shouldDisableSaveAddButton">Add</button>
+      <button class="cancel-btn" @click="onCancel">{{$t('cancel')}}</button>
+      <button class="add-btn" @click="save" v-if="prevAddress" :disabled="shouldDisableSaveAddButton">{{$t('save')}}</button>
+      <button class="add-btn" @click="add" v-else :disabled="shouldDisableSaveAddButton">{{$t('add')}}</button>
     </div>
   </modal-wrapper>
 </template>
@@ -41,7 +41,7 @@ export default {
   methods: {
     add() {
       if (this.$services.contacts.contactExists(this.name.trim())) {
-        this.$services.alerts.error(`Contact ${this.name.trim()} already exists.`);
+        this.$services.alerts.error(this.$t('contactExists', { name: this.name.trim() }));
         return;
       }
 

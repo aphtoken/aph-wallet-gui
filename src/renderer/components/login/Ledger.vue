@@ -5,7 +5,7 @@
     </login-form-wrapper>
     <div class="aph-request-status-message" v-if="connected === null">
       <aph-icon name="unconfirmed-big"></aph-icon>
-      <div class="right">No Ledger device found. Please plugin your Ledger in, unlock it and open the NEO application.</div>
+      <div class="right">{{$t('noLedgerDeviceFound')}}</div>
     </div>
   </section>
 </template>
@@ -32,7 +32,7 @@ export default {
 
   computed: {
     buttonLabel() {
-      return this.$isPending('openLedger') ? 'Logging in...' : 'Login with Ledger';
+      return this.$isPending('openLedger') ? this.$t('loggingIn') : this.$t('loginWithLedger');
     },
 
     shouldDisableLoginButton() {

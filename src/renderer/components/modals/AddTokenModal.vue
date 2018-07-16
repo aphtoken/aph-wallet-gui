@@ -6,7 +6,7 @@
     </div>
     <div class="footer">
       <button class="cancel-btn" @click="onCancel">Cancel</button>
-      <button class="add-btn" @click="add" :disabled="shouldDisableAddButton">Add</button>
+      <button class="add-btn" @click="add" :disabled="shouldDisableAddButton">{{$t('add')}}</button>
     </div>
   </modal-wrapper>
 </template>

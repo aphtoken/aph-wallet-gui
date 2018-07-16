@@ -1,7 +1,7 @@
 <template>
   <section id="history">
     <div class="header">
-      <h1 class="underlined">History</h1>
+      <h1 class="underlined">{{$t('history')}}</h1>
     </div>
     <div class="grid">
       <div class="grid--column left">

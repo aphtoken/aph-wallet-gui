@@ -2,7 +2,6 @@
   <section id="login--landing">
     <aph-icon name="logo"></aph-icon>
     <div class="version-number">v{{$store.state.version}}</div>
-    <!--<locale-changer></locale-changer>-->
     <div class="btn-group">
       <router-link class="login-btn" to="/login/menu">
         <aph-icon name="wallet"></aph-icon>
@@ -18,12 +17,8 @@
 </template>
 
 <script>
-import LocaleChanger from '../LocaleChanger';
-
 export default {
-  components: {
-    LocaleChanger,
-  },
+  components: {},
 };
 </script>
 

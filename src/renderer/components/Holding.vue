@@ -8,7 +8,7 @@
       </div>
     </div>
     <div class="center">
-      <div class="remove" v-if="canBeRemoved" @click="handleOnRemove">Remove</div>
+      <div class="remove" v-if="canBeRemoved" @click="handleOnRemove">{{$t('remove')}}</div>
     </div>
     <div class="right">
       <div class="balance">
@@ -38,7 +38,7 @@ export default {
           ? this.$formatNumber(this.holding.balance) : '0';
         const contractBalance = this.holding.contractBalance
           ? this.$formatNumber(this.holding.contractBalance) : '0';
-        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
+        return this.$t('walletBalanceContractBalance', { walletBalance, contractBalance });
       } catch (e) {
         return '';
       }

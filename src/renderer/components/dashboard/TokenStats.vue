@@ -1,9 +1,9 @@
 <template>
   <section id="dashboard--token-stats" v-if="$store.state.statsToken">
     <div class="header">
-      <h1 class="underlined">Token Stats</h1>
+      <h1 class="underlined">{{$t('tokenStats')}}</h1>
       <div class="current-value">
-        <div class="label">Current Value</div>
+        <div class="label">{{$t('currentValue')}}</div>
         <div class="amount">{{ $formatMoney($store.state.statsToken.unitValue) }}</div>
       </div>
     </div>
@@ -18,15 +18,15 @@
     </div>
     <div class="footer">
       <div class="total-supply">
-        <div class="label">Total Supply</div>
+        <div class="label">{{$t('totalSupply')}}</div>
         <div class="amount">{{ $formatNumber($store.state.statsToken.totalSupply) }}</div>
       </div>
       <div class="market-cap">
-        <div class="label">Market Cap</div>
+        <div class="label">{{$t('marketCap')}}</div>
         <div class="amount">{{ $formatMoneyWithoutCents($store.state.statsToken.marketCap) }}</div>
       </div>
       <div class="change">
-        <div class="label">24h Change</div>
+        <div class="label">{{$t('twentyFourHourChange')}}</div>
         <div :class="['amount', {increase: $store.state.statsToken.change24hrPercent > 0, decrease: $store.state.statsToken.change24hrPercent < 0}]">{{ $formatNumber($store.state.statsToken.change24hrPercent) }}</div>
       </div>
     </div>
