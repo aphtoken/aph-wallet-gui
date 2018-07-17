@@ -57,18 +57,6 @@ export default {
   },
 
   computed: {
-    markets() {
-      return this.$store.state.markets.reduce(
-        (result, market) => {
-          result.push({
-            label: market.marketName,
-            value: market,
-          });
-
-          return result;
-        }, []);
-    },
-
     storeStateCurrentMarket() {
       return this.$store.state.currentMarket;
     },
