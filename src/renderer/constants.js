@@ -98,7 +98,6 @@ export {
   defaultSettings,
   formats,
   intervals,
-  langs,
   languages,
   loadStates,
   messages,
