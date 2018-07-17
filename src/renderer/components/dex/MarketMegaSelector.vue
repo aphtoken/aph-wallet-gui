@@ -5,17 +5,33 @@
       <aph-icon :name="iconName"></aph-icon>
     </div>
     <div class="menu">
-      <div class="base-currencies">
-        <div @click="baseCurrency = currency" :class="['currency', {active: baseCurrency === currency}]"
-             v-for="currency in baseCurrencies" :key="currency">{{ currency }}</div>
+      <div class="search-field">
+        <aph-icon name="search"></aph-icon>
+        <input placeholder="Search" v-model="searchBy">
       </div>
-      <div class="table">
-        <div class="body">
-          <div @click="selectMarket(market)" :class="['row', {selected: market.marketName === $store.state.currentMarket.marketName}]"
-               v-for="market in filteredMarkets" :key="market.marketName">
-            <div class="cell">{{ market.marketName }}</div>
-          </div>
-        </div>
+      <div class="base-currencies">
+        <div @click="selectBaseCurrency(currency)" :class="['currency', {active: baseCurrency === currency}]"
+             v-for="currency in baseCurrencies" :key="currency">{{ currency }}</div>
+        <div @click="selectBaseCurrency('favorites')" :class="['currency', {active: baseCurrency === 'favorites'}]">favorites</div>
+      </div>
+      <div class="body">
+        <aph-fixed-table>
+          <template slot="headers">
+            <th>Asset</th>
+            <th>Price</th>
+            <th>Volume (24h)</th>
+            <th>Change</th>
+            <th>&nbsp;</th>
+          </template>
+          <tr @click="selectMarket(market)" :class="[{selected: market.marketName === $store.state.currentMarket.marketName}]"
+                v-for="market in filteredMarkets" :key="market.marketName">
+            <td>{{ market.quoteCurrency }}</td>
+            <td>price</td>
+            <td>volume</td>
+            <td>change</td>
+            <td>action...</td>
+          </tr>
+        </aph-fixed-table>
       </div>
     </div>
   </div>
@@ -41,8 +57,18 @@ export default {
     },
 
     filteredMarkets() {
+      const searchBy = this.searchBy.toLowerCase();
+
       return this.$store.state.markets.filter((market) => {
-        return market.baseCurrency === this.baseCurrency;
+        const baseCurrencyMatch = market.baseCurrency === this.baseCurrency;
+
+        if (!searchBy) {
+          return baseCurrencyMatch;
+        }
+
+        const searchByMatch = market.quoteCurrency.toLowerCase().indexOf(searchBy) > -1;
+
+        return baseCurrencyMatch && searchByMatch;
       });
     },
 
@@ -55,12 +81,18 @@ export default {
     return {
       baseCurrency: '',
       isOpen: false,
+      searchBy: '',
     };
   },
 
   methods: {
     close() {
       this.isOpen = false;
+    },
+
+    selectBaseCurrency(currency) {
+      this.baseCurrency = currency;
+      this.searchBy = '';
     },
 
     selectMarket(market) {
@@ -123,29 +155,74 @@ export default {
     border-radius: $border-radius;
     box-shadow: $box-shadow;
     display: none;
-    margin-top: $space;
+    margin-top: -($border-radius);
     position: absolute;
-    width: 100%;
+    width: toRem(600px);
+
+    .search-field {
+      border-bottom: $border-thin;
+      display: flex;
+      flex: none;
+      margin: $space 0 $space $space;
+      padding: $space-sm 0;
+      width: 60%;
+
+      .aph-icon {
+        flex: none;
+        margin: 0 $space;
+
+        svg {
+          height: toRem(22px);
+
+          .fill {
+            fill: $purple;
+          }
+        }
+      }
+
+      input {
+        background: none;
+        border: none;
+        color: $dark;
+        font-family: GilroyMedium;
+        font-size: toRem(15px);
+        outline: none;
+        padding: 0;
+        width: 100%;
+
+        &::placeholder {
+          color: $grey;
+        }
+      }
+    }
 
     .base-currencies {
       display: flex;
       flex-direction: row;
+      justify-content: space-between;
+      margin: $space-lg 0 0 $space;
+      width: 60%;
 
       .currency {
-        @include transition(all);
+        @extend %underlined-header-sm;
 
-        border-bottom: $border;
-        border-color: transparent;
-        color: $purple;
         cursor: pointer;
-        flex: 1;
-        font-family: GilroyMedium;
-        font-size: toRem(14px);
-        padding: $space-sm 0;
-        text-align: center;
+        flex: none;
+
+        &:first-child {
+          margin-left: $space;
+        }
+
+        &:after {
+          @include transition(all);
+
+          background: transparent;
+        }
 
         &:hover, &.active {
-          border-color: $purple;
+          &:after {
+            background: $purple;
+          }
         }
 
         & + .currency {
@@ -154,38 +231,39 @@ export default {
       }
     }
 
-    .table{
-      @extend %dex-table-flex;
+    .body {
+      padding: 0 $space $space;
 
-      .body {
-        font-size: 0;
+      .aph-fixed-table {
         max-height: toRem(200px);
         overflow: auto;
 
-        .row {
-          @include transition(all);
+        thead, tbody {
+          tr {
+            th, td {
+              padding: $space 0;
 
-          cursor: pointer;
-          font-size: 0;
-          height: $button-height;
-          line-height: $button-height;
-          padding: 0 $space;
+              &:first-child {
+                padding-left: $space;
+              }
 
-          .cell {
-            font-size: toRem(16px);
+              &:last-child {
+                padding-right: $space;
+                width: 1px;
+              }
+            }
           }
+        }
 
-          & + .row {
-            margin-top: 0;
-          }
+        tbody {
+          tr {
+            cursor: pointer;
 
-          &:hover,
-          &.selected {
-            background: $background;
-          }
-
-          &.selected {
-            cursor: default;
+            &:hover, &.selected {
+              td {
+                background-color: $background;
+              }
+            }
           }
         }
       }
@@ -218,17 +296,9 @@ export default {
     > .menu {
       @extend %light-background;
 
-      .table {
-        .body {
-          .row {
-            background: transparent !important;
-            color: white;
-
-            &:hover,
-            &.selected {
-              color: $grey;
-            }
-          }
+      .body {
+        .aph-fixed-table {
+          //
         }
       }
     }
