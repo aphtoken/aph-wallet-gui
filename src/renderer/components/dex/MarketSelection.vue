@@ -11,7 +11,7 @@
       </template>
     </div>
     <div class="selection">
-      <aph-select :options="markets" v-model="$store.state.currentMarket"></aph-select>
+      <market-mega-selector></market-mega-selector>
     </div>
     <div class="market">
       <div class="day-values">
@@ -49,7 +49,13 @@
 </template>
 
 <script>
+import MarketMegaSelector from './MarketMegaSelector';
+
 export default {
+  components: {
+    MarketMegaSelector,
+  },
+
   computed: {
     markets() {
       return this.$store.state.markets.reduce(
@@ -111,26 +117,11 @@ export default {
 
   .selection {
     margin-bottom: $space;
-
-    .aph-select--label {
-      @extend %selected-text;
-      @extend %light-background;
-
-      font-size: toRem(20px);
-      height: auto;
-      padding-left: $space;
-      text-align: left;
-    }
-    .aph-select .aph-icon svg {
-      height: 12px;
-    }
-    .aph-select .aph-icon path {
-      fill: $purple;
-    }
   }
 
   .market {
     @extend %tile-light;
+
     padding: $space;
     display: flex;
     flex-direction: row;
@@ -227,4 +218,3 @@ export default {
   }
 }
 </style>
-
