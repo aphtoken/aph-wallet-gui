@@ -1,6 +1,6 @@
 <template>
   <section id="dex--chart">
-    <div class="header">
+    <div class="header tab">
       <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
       <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
     </div>
@@ -433,7 +433,7 @@ export default {
       while (groupSize * Math.pow(10, this.depthPrecision) < 1) {
         this.depthPrecision += 1;
       }
-      
+
       groupSize = this.roundToDepthPrecision(groupSize).dividedBy(5);
       return groupSize;
     }

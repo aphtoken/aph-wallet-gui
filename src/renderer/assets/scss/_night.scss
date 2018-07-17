@@ -1,22 +1,22 @@
 #authenticated-wrapper {
   &.Night {
     #dex {
-      color: #aeaeb8;
-      background-color: #1f1d33;
+      color: $copy-night;
+      background-color: $background-night;
 
       .aph-input input {
-        color: #ffffff;
+        color: white;
       }
 
       .aph-select  {
         .aph-select--dropdown {
-          background: #1f1d33;
-          color: #aeaeb8;
+          background: $background-night;
+          color: $copy-night;
 
           > li {
             &.selected, &:hover {
               background-color: $purple;
-              color: #ffffff;
+              color: white;
             }
           }
         }
@@ -24,17 +24,17 @@
 
       .aph-select.is-light {
         .aph-select--label {
-          background: #1f1d33;
-          color: #ffffff;
+          background: $background-night;
+          color: white;
         }
         .fill {
-          fill: #ffffff;
+          fill: white;
         }
       }
 
       .aph-icon {
         .fill {
-          fill: #ffffff;
+          fill: white;
         }
       }
 
@@ -83,7 +83,7 @@
       #dex--orderform .body .side .sell-btn.selected, #dex--orderform .body .footer .order-btn.sell-btn:hover {
         background-color: #441e35;
       }
-      
+
       .aph-modal-wrapper {
         background: rgba(206, 205, 509, 0.35);
 
@@ -97,7 +97,7 @@
       }
 
       %selected-text {
-        color: #ffffff;
+        color: white;
       }
 
       %light-background {
