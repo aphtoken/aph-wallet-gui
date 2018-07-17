@@ -6,11 +6,13 @@
     </div>
     <div class="menu">
       <div class="base-currencies">
-        <div @click="baseCurrency = currency" :class="['currency', {active: baseCurrency === currency}]" v-for="currency in baseCurrencies" :key="currency">{{ currency }}</div>
+        <div @click="baseCurrency = currency" :class="['currency', {active: baseCurrency === currency}]"
+             v-for="currency in baseCurrencies" :key="currency">{{ currency }}</div>
       </div>
       <div class="table">
         <div class="body">
-          <div @click="selectMarket(market)" :class="['row', {selected: market.marketName === $store.state.currentMarket.marketName}]" v-for="market in filteredMarkets" :key="market.marketName">
+          <div @click="selectMarket(market)" :class="['row', {selected: market.marketName === $store.state.currentMarket.marketName}]"
+               v-for="market in filteredMarkets" :key="market.marketName">
             <div class="cell">{{ market.marketName }}</div>
           </div>
         </div>
@@ -35,7 +37,7 @@ export default {
 
   computed: {
     baseCurrencies() {
-      return _.uniq(_.map(this.$store.state.markets, 'baseCurrency'));
+      return _.map(this.$store.state.markets, 'baseCurrency');
     },
 
     filteredMarkets() {
