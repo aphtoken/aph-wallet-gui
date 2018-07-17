@@ -44,6 +44,7 @@ export {
   setSearchTransactionToDate,
   setSearchTransactions,
   setSendInProgress,
+  setSendModel,
   setShowAddContactModal,
   setShowAddTokenModal,
   setShowClaimGasModal,
@@ -307,6 +308,10 @@ function setShowSendRequestLedgerSignature(state, value) {
 
 function setSendInProgress(state, value) {
   state.sendInProgress = value;
+}
+
+function setSendModel(state, value) {
+  state.sendModel = value;
 }
 
 function setShowWalletBackupModal(state, value) {

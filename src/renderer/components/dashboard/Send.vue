@@ -68,6 +68,7 @@
 
 <script>
 import { BigNumber } from 'bignumber.js';
+import { mapGetters } from 'vuex';
 let sendTimeoutIntervalId;
 let storeUnwatch;
 
@@ -110,6 +111,9 @@ export default {
     shouldDisableNextButton() {
       return !this.address || !this.amount || !this.currency || !parseFloat(this.amount);
     },
+    ...mapGetters([
+      'sendModel',
+    ]),
   },
 
   data() {
@@ -224,14 +228,30 @@ export default {
     },
   },
 
-
   mounted() {
+    if (this.$store.state.sendInProgress) {
+      this.address = this.sendModel.address;
+      this.amount = this.sendModel.amount;
+      this.contact = this.sendModel.contact;
+      this.currency = this.sendModel.currency;
+      this.showConfirmation = this.sendModel.showConfirmation;
+      this.sending = this.sendModel.sending;
+    }
+
     storeUnwatch = this.$store.watch(
       () => {
         return this.$store.state.sendInProgress;
-      }, () => {
-        if (this.$store.state.sendInProgress === false
-          && this.sending === true) {
+      }, (sendInProgress) => {
+        this.$store.commit('setSendModel', !sendInProgress ? {} : {
+          address: this.address,
+          amount: this.amount,
+          contact: this.contact,
+          currency: this.currency,
+          showConfirmation: this.showConfirmation,
+          sending: this.sending,
+        });
+
+        if (sendInProgress === false && this.sending === true) {
           this.end();
         }
       });

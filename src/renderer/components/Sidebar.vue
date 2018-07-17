@@ -4,7 +4,7 @@
       <aph-icon name="logo-mark"></aph-icon>
     </div>
     <div class="menu link-list">
-      <router-link to="/authenticated/dashboard">
+      <router-link :to="sendInProgress ? '/authenticated/dashboard/confirming': '/authenticated/dashboard'">
         <span class="icon">
           <aph-icon name="dashboard"></aph-icon>
         </span>
@@ -93,6 +93,7 @@ export default {
       'currentNetwork',
       'lastReceivedBlock',
       'version',
+      'sendInProgress',
     ]),
   },
 

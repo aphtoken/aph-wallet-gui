@@ -59,11 +59,7 @@ export default {
     },
 
     showSendView() {
-      if (this.$store.state.sendInProgress === true) {
-        return;
-      }
-
-      this.$router.push('/authenticated/dashboard/send');
+      this.$router.push(`/authenticated/dashboard/${this.$store.state.sendInProgress ? 'confirming' : 'send'}`);
     },
   },
 

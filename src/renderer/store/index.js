@@ -42,6 +42,7 @@ const state = {
   searchTransactionToDate: null,
   searchTransactions: [],
   sendInProgress: false,
+  sendModel: {},
   showAddContactModal: false,
   showAddTokenModal: false,
   showClaimGasModal: false,
