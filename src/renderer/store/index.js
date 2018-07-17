@@ -35,6 +35,7 @@ const state = {
   orderPrice: '',
   orderQuantity: '',
   orderToConfirm: false,
+  ordersToShow: '',
   portfolio: null,
   recentTransactions: [],
   requests: {},

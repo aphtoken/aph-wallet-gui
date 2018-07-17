@@ -1,0 +1,9 @@
+diff a/src/renderer/constants.js b/src/renderer/constants.js	(rejected hunks)
+@@ -74,6 +78,7 @@ export {
+   formats,
+   intervals,
+   loadStates,
++  orders,
+   requests,
+   timeouts,
+ };

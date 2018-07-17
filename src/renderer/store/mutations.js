@@ -38,6 +38,7 @@ export {
   setOrderPrice,
   setOrderQuantity,
   setOrderToConfirm,
+  setOrdersToShow,
   setPortfolio,
   setRecentTransactions,
   setSearchTransactionFromDate,
@@ -363,9 +364,11 @@ function updateRequest(state, { identifier, message }, status) {
 function setStyleMode(state, style) {
   state.styleMode = style;
 }
+
 function setMarkets(state, markets) {
   state.markets = markets;
 }
+
 function setCurrentMarket(state, market) {
   if (state.currentMarket) {
     if (!market || state.currentMarket.marketName !== market.marketName) {
@@ -374,25 +377,32 @@ function setCurrentMarket(state, market) {
       });
     }
   }
+
   state.currentMarket = market;
+  state.ordersToShow = market.marketName;
+
   if (state.currentMarket) {
     this.dispatch('subscribeToMarket', {
       market: state.currentMarket,
     });
   }
 }
+
 function setOrderPrice(state, price) {
   state.orderPrice = price;
 }
+
 function setOrderQuantity(state, quantity) {
   state.orderQuantity = quantity;
 }
+
 function orderBookSnapshotReceived(state, res) {
   const orderBook = dex.formOrderBook(res.asks, res.bids);
   orderBook.pair = res.pair;
 
   Vue.set(state, 'orderBook', orderBook);
 }
+
 function orderBookUpdateReceived(state, res) {
   if (!state.orderBook || state.orderBook.pair !== res.pair) {
     return;
@@ -402,19 +412,28 @@ function orderBookUpdateReceived(state, res) {
   const side = res.side === 'ask' ? orderBook.asks : orderBook.bids;
   Vue.set(state.orderBook, res.side, side);
 }
+
 function setTradeHistory(state, trades) {
   state.tradeHistory = trades;
 }
+
 function setOrderHistory(state, orders) {
   state.orderHistory = orders;
 }
+
 function setOrderToConfirm(state, order) {
   state.orderToConfirm = order;
   state.showOrderConfirmationModal = !!order;
 }
+
+function setOrdersToShow(state, value) {
+  state.ordersToShow = value;
+}
+
 function setDepositWithdrawModalModel(state, model) {
   state.depositWithdrawModalModel = model;
 }
+
 function SOCKET_ONOPEN(state, event) {
   state.socket.client = event.target;
   state.socket.isConnected = true;
@@ -423,6 +442,7 @@ function SOCKET_ONOPEN(state, event) {
     state.socket.opened();
   }
 }
+
 function SOCKET_ONCLOSE(state) {
   state.socket.client = null;
   state.socket.isConnected = false;
@@ -430,6 +450,7 @@ function SOCKET_ONCLOSE(state) {
     state.socket.connectionClosed = moment().utc();
   }
 }
+
 function SOCKET_ONMESSAGE(state, message) {
   state.lastMessage = message;
 

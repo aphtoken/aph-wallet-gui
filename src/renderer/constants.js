@@ -72,6 +72,10 @@ const loadStates = {
   READY: 'READY',
 };
 
+const orders = {
+  ALL_SWITCH: 'All',
+};
+
 const requests = {
   FAILED: 'failed',
   PENDING: 'pending',
@@ -94,10 +98,13 @@ export {
   defaultSettings,
   formats,
   intervals,
+  langs,
+  languages,
   loadStates,
+  messages,
+  messages,
+  orders,
   requests,
   timeouts,
-  messages,
-  languages,
 };
 
