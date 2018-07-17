@@ -4,7 +4,7 @@
       <aph-icon name="search"></aph-icon>
       <input placeholder="Search" v-model="searchBy">
     </div>
-    <button class="add-token-btn" v-if="shouldShowAddTokenButton" @click="showAddTokenModal">Add token</button>
+    <button class="add-token-btn" v-if="shouldShowAddTokenButton" @click="showAddTokenModal">{{$t('addToken')}}</button>
     <div class="holdings">
       <aph-holding v-for="(holding, index) in filteredHoldings" :holding="holding" :key="index" :onRemove="remove"></aph-holding>
     </div>

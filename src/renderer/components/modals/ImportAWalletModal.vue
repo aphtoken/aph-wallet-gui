@@ -2,13 +2,13 @@
   <modal-wrapper id="aph-import-a-wallet-modal" identifier="importWallet">
     <div class="body">
       <aph-icon name="wallet"></aph-icon>
-      <aph-input placeholder="Name" v-model="walletName"></aph-input>
-      <aph-input placeholder="Private key" v-model="wif"></aph-input>
-      <aph-input placeholder="Passphrase" v-model="passphrase" type="password"></aph-input>
-      <aph-input placeholder="Confirm passphrase" v-model="passphraseConfirm" type="password"></aph-input>
+      <aph-input :placeholder="$t('name')" v-model="walletName"></aph-input>
+      <aph-input :placeholder="$t('privateKey')" v-model="wif"></aph-input>
+      <aph-input :placeholder="$t('passphrase')" v-model="passphrase" type="password"></aph-input>
+      <aph-input :placeholder="$t('confirmPassphrase')" v-model="passphraseConfirm" type="password"></aph-input>
     </div>
     <div class="footer">
-      <div class="cancel-btn" @click="onCancel">Cancel</div>
+      <div class="cancel-btn" @click="onCancel">{{$t('cancel')}}</div>
       <button class="login-btn" @click="save" :disabled="shouldDisableSaveButton">{{ buttonLabel }}</button>
     </div>
   </modal-wrapper>
@@ -24,7 +24,7 @@ export default {
 
   computed: {
     buttonLabel() {
-      return this.$isPending('importWallet') ? 'Saving...' : 'Import';
+      return this.$isPending('importWallet') ? this.$t('saving') : this.$t('import');
     },
 
     passphrasesMatch() {

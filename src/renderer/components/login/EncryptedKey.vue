@@ -1,9 +1,9 @@
 <template>
   <section id="login--saved-wallet">
     <login-form-wrapper identifier="openEncryptedKey">
-      <aph-input :hasError="$isFailed('openEncryptedKey')" v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
-      <aph-input :hasError="$isFailed('openEncryptedKey')" v-model="encryptedKey" placeholder="Enter your encrypted key here" type="password"></aph-input>
-      <button class="login" @click="login" :disabled="shouldDisableLoginButton">Login</button>
+      <aph-input :hasError="$isFailed('openEncryptedKey')" v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password"></aph-input>
+      <aph-input :hasError="$isFailed('openEncryptedKey')" v-model="encryptedKey" :placeholder="$t('enterYourEncryptedKey')" type="password"></aph-input>
+      <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{$t('login')}}</button>
     </login-form-wrapper>
   </section>
 </template>

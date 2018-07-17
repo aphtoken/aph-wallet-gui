@@ -3,21 +3,21 @@
     <section id="dex--orderform">
       <div class="body" v-if="$store.state.currentMarket">
         <div class="balance" :title="quoteBalanceToolTip">
-          <div class="label">BALANCE ({{ $store.state.currentMarket.quoteCurrency }})</div>
+          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.quoteCurrency }})</div>
           <div class="value">{{ $formatNumber(quoteHolding.totalBalance) }}</div>
         </div>
         <div class="balance" :title="baseBalanceToolTip">
-          <div class="label">BALANCE ({{ $store.state.currentMarket.baseCurrency }})</div>
+          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
           <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
         </div>
         <div class="balance" :title="aphBalanceToolTip">
-          <div class="label">BALANCE (APH)</div>
+          <div class="label">{{$t('balance')}} (APH)</div>
           <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
         </div>
 
         <div class="side">
-          <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">Buy</div>
-          <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">Sell</div>
+          <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}}</div>
+          <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}}</div>
         </div>
         <div class="orderType">
           <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
@@ -37,13 +37,13 @@
         <div class="options">
           <div class="option" v-if="orderType === 'Limit'">
             <input type="checkbox" id="post-only" v-model="postOnly" />
-            <label for="post-only">Post Only</label>
+            <label for="post-only">{{$t('postOnly')}}</label>
           </div>
         </div>       
       </div>
       <div class="footer">
         <div class="estimate">
-          <div class="label">ESTIMATE ({{ $store.state.currentMarket.baseCurrency }})</div>
+          <div class="label">{{$t('estimate')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
           <div class="value">{{ $formatTokenAmount(estimate) }}</div>
         </div>
         <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
@@ -52,16 +52,16 @@
         </button>
         <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="test-buttons">
           <div class="row">
-            <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">Deposit {{ baseHolding.symbol }}</button>
-            <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">Withdraw {{ baseHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">{{$t('deposit')}} {{ baseHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">{{$t('withdraw')}} {{ baseHolding.symbol }}</button>
           </div>
           <div class="row">
-            <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">Deposit {{ quoteHolding.symbol }}</button>
-            <button @click="showDepositWithdrawModal(false, quoteHolding)" class="test-btn">Withdraw {{ quoteHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">{{$t('deposit')}} {{ quoteHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(false, quoteHolding)" class="test-btn">{{$t('withdraw')}} {{ quoteHolding.symbol }}</button>
           </div>
           <div class="row" v-if="quoteHolding.symbol !== 'APH'">
-            <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">Deposit APH</button>
-            <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">Withdraw APH</button>
+            <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">{{$t('depositAPH')}}</button>
+            <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">{{$t('withdrawAPH')}}</button>
             <!-- Only the contract owner or manager can do this.
             <button @click="setMarket" class="test-btn">Setup Market</button> -->
           </div>
@@ -163,22 +163,28 @@ export default {
     },
     quoteBalanceToolTip() {
       try {
+      /* eslint-disable max-len */
         const walletBalance = this.quoteHolding.balance
           ? this.$formatNumber(this.quoteHolding.balance) : '0';
         const contractBalance = this.quoteHolding.contractBalance
           ? this.$formatNumber(this.quoteHolding.contractBalance) : '0';
-        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
+        const openOrdersBalance = this.quoteHolding.openOrdersBalance
+          ? this.$formatNumber(this.quoteHolding.openOrdersBalance) : '0';
+        return this.$t('walletBalanceContractBalance', { walletBalance, contractBalance, openOrdersBalance });
       } catch (e) {
         return '';
       }
     },
     baseBalanceToolTip() {
       try {
+      /* eslint-disable max-len */
         const walletBalance = this.baseHolding.balance
           ? this.$formatNumber(this.baseHolding.balance) : '0';
         const contractBalance = this.baseHolding.contractBalance
           ? this.$formatNumber(this.baseHolding.contractBalance) : '0';
-        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
+        const openOrdersBalance = this.baseHolding.openOrdersBalance
+          ? this.$formatNumber(this.baseHolding.openOrdersBalance) : '0';
+        return this.$t('walletBalanceContractBalance', { walletBalance, contractBalance, openOrdersBalance });
       } catch (e) {
         return '';
       }
@@ -189,16 +195,18 @@ export default {
           ? this.$formatNumber(this.aphHolding.balance) : '0';
         const contractBalance = this.aphHolding.contractBalance
           ? this.$formatNumber(this.aphHolding.contractBalance) : '0';
-        return `Wallet Balance: ${walletBalance}\nContract Balance: ${contractBalance}`;
+        const openOrdersBalance = this.aphHolding.openOrdersBalance
+          ? this.$formatNumber(this.aphHolding.openOrdersBalance) : '0';
+        return this.$t('walletBalanceContractBalance', { walletBalance, contractBalance, openOrdersBalance });
       } catch (e) {
         return '';
       }
     },
     priceLabel() {
-      return `Price (${this.$store.state.currentMarket.baseCurrency})`;
+      return this.$t('priceBase', { base: this.$store.state.currentMarket.baseCurrency });
     },
     amountLabel() {
-      return `Amount (${this.$store.state.currentMarket.quoteCurrency})`;
+      return this.$t('amountQuote', { quote: this.$store.state.currentMarket.quoteCurrency });
     },
     estimate() {
       try {
@@ -219,7 +227,9 @@ export default {
       }
     },
     orderButtonLabel() {
-      return this.$isPending('placeOrder') === false ? `Place ${this.side} Order` : 'Placing Order...';
+      return this.$isPending('placeOrder') === false ?
+        this.$t('placeSideOrder', { side: this.side }) :
+        this.$t('placingOrder');
     },
     shouldDisableOrderButton() {
       if (this.isOutOfDate) {
@@ -275,7 +285,7 @@ export default {
 
     setPercent(value) {
       if (this.orderType === 'Limit' && !this.$store.state.orderPrice) {
-        this.$services.alerts.error('Please enter a price first.');
+        this.$services.alerts.error(this.$('pleaseEnterAPrice'));
         return;
       }
 
@@ -316,8 +326,11 @@ export default {
 
       book.forEach((l) => {
         const takeQuantity = l.quantity.isGreaterThan(quantityRemaining) ? quantityRemaining : l.quantity;
-        quantityRemaining -= takeQuantity;
-        totalMultiple = totalMultiple.plus(takeQuantity * l.price);
+        if (quantityRemaining.isLessThanOrEqualTo(0)) {
+          return;
+        }
+        quantityRemaining = quantityRemaining.minus(takeQuantity);
+        totalMultiple = totalMultiple.plus(takeQuantity.multipliedBy(l.price));
       });
 
       return (totalMultiple / quantity).toString();
@@ -363,8 +376,12 @@ export default {
     depositWithdrawConfirmed(isDeposit, holding, amount) {
       this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.asset, Number(amount))
         .then(() => {
-          this.$services.alerts.success(
-            `${amount} ${holding.symbol} ${isDeposit ? 'Deposit' : 'Withdraw'} Relayed to Network.`);
+          const message = this.$t('relayedToNetwork', {
+            amount,
+            symbol: holding.symbol,
+            action: (isDeposit ? this.t('deposit') : this.$t('withdraw')),
+          });
+          this.$services.alerts.success(message);
         })
         .catch((e) => {
           this.$services.alerts.exception(e);
@@ -380,7 +397,7 @@ export default {
         this.$constants.assets.GAS,
         10, 0.00001, 0.0000, 0.0001)
         .then(() => {
-          this.$services.alerts.success('setMarket Invocation Relayed');
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
         })
         .catch((e) => {
           this.$services.alerts.exception(e);

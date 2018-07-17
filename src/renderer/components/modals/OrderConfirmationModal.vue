@@ -2,22 +2,22 @@
   <modal-wrapper id="aph-order-confirmation-modal" identifier="placeOrder">
     <template>
       <div class="body">
-        <h2>Confirm Your Order:</h2>
+        <h2>{{$t('confirmYourOrder')}}</h2>
         <p class="description">
-          Are you sure that you would like to place a
+          {{$t('areYouSureYouWouldLikeToPlace')}}
           <span class="type">{{ $store.state.orderToConfirm.orderType }}</span>
           <span :class="['side', $store.state.orderToConfirm.side]">{{ $store.state.orderToConfirm.side }}</span>
-          <span class="postOnly" v-if="$store.state.orderToConfirm.postOnly === true">Post Only</span>
+          <span class="postOnly" v-if="$store.state.orderToConfirm.postOnly === true">{{$t('postOnly')}}</span>
           order for
           <span class="quantity">{{ $formatNumber($store.state.orderToConfirm.quantity) }}</span>
           <span class="currency">{{ $store.state.orderToConfirm.market.quoteCurrency }}</span>
           <span v-if="$store.state.orderToConfirm.orderType === 'Limit'">
-            at a unit price of
+            {{$t('atAUnitPriceOf')}}
             <span class="price">
               {{ $formatNumber($store.state.orderToConfirm.price) }}
               {{ $store.state.orderToConfirm.market.baseCurrency }}
             </span>
-            for a total of
+            {{$t('forATotalOf')}}
             <span class="price">
               {{ $formatNumber($store.state.orderToConfirm.price * $store.state.orderToConfirm.quantity) }}
               {{ $store.state.orderToConfirm.market.baseCurrency }}
@@ -25,55 +25,59 @@
           </span>?
         </p>
         <div v-if="offersToTake.length === 0">
-          This will be a maker order that will be left on the book until someone takes it. You will not be charged a fee for this trade.
+          {{$t('thisWillBeAMakerOrder')}}
         </div>
         <div class="taking" v-if="offersToTake.length > 0 && $store.state.orderToConfirm.postOnly === true">
-          This order would take the following offers:
+          {{$t('thisOrderWouldTakeTheFollowing')}}
           <div>
             <div class="offer" v-for="(offer, index) in offersToTake" :key="index">
               x{{ $formatNumber(offer.quantity) }} @{{ $formatNumber(offer.price) }}
             </div>
-            <br />This means that it is ineligible as a Post Only order.
+            <br />{{$t('thisMeansThatItIsIneligible')}}
           </div>
         </div>
         <div class="taking" v-if="offersToTake.length > 0 && $store.state.orderToConfirm.postOnly === false">
-          You will be immediately taking these {{ offersToTake.length }} offers:
+          {{$t('youWillBeImmediatelyTaking', { count: offersToTake.length })}}
           <div>
             <div class="offer" v-for="(offer, index) in offersToTake" :key="index">
               x{{ $formatNumber(offer.quantity) }} @{{ $formatNumber(offer.price) }}
             </div>
           </div>
           <div v-if="backupOffersToTake.length > 0">
-            We've also matched {{ backupOffersToTake.length }} backup orders that may be matched in the event that any of these orders are taken already.
+            {{$t('weveAlsoMatchedBackupOrders', { count: backupOffersToTake.length })}}
           </div>
           <div v-if="$formatNumber($store.state.orderToConfirm.minTakerFees) !== $formatNumber($store.state.orderToConfirm.maxTakerFees)">
-            The fee for completing your trade will depend on the final number of offers matched but will be between {{ $formatNumber($store.state.orderToConfirm.minTakerFees) }} APH and {{ $formatNumber($store.state.orderToConfirm.maxTakerFees) }} APH
+            {{$t('theFeeForCompletingYourTradeWillDepend', { min: $formatNumber($store.state.orderToConfirm.minTakerFees), max: $formatNumber($store.state.orderToConfirm.maxTakerFees)})}}
           </div>
           <div v-else>
-            The fee for completing your trade will be {{ $formatNumber($store.state.orderToConfirm.maxTakerFees) }} APH
+            {{$t('theFeeForCompletingYourTradeWillBe', { amount: $formatNumber($store.state.orderToConfirm.maxTakerFees)})}}
           </div>
           <div v-if="$store.state.orderToConfirm.deposits.length > 0">
             <div class="deposit" v-for="(deposit, index) in $store.state.orderToConfirm.deposits" :key="index">
-              This order requires {{ $formatNumber(deposit.quantityRequired) }} {{ deposit.symbol }} to be completed.
-              Your current contract balance is only {{ $formatNumber(deposit.currentQuantity) }} {{ deposit.symbol }}.
-              Submitting this order will first submit {{ $formatNumber(deposit.quantityToDeposit) }} {{ deposit.symbol }} in order to process successfully.
+              {{$t('thisOrderRequires', {
+                  quantity: $formatNumber(deposit.quantityRequired),
+                  symbol: deposit.symbol,
+                  balance: $formatNumber(deposit.currentQuantity),
+                  deposit: $formatNumber(deposit.quantityToDeposit),
+                })
+              }}
             </div>
           </div>
         </div>
         <div v-if="offersToTake.length > 0 && $store.state.orderToConfirm.quantityToTake < $store.state.orderToConfirm.quantity && $store.state.orderToConfirm.postOnly === false">
           <div v-if="offersToTake.length > 0">
-            You will also be creating the following maker order that will be left on the book until someone takes it. You will not be charged a fee for this trade:
+            {{$t('youWillBeCreatingTheFollowingMakerOrder')}}
             <div class="offer">
               {{ $store.state.orderToConfirm.side }} x{{ $formatNumber($store.state.orderToConfirm.quantity.minus($store.state.orderToConfirm.quantityToTake))}} @{{ $formatNumber($store.state.orderToConfirm.price) }}
             </div>
           </div>
           <div v-else>
-            This will be a maker order that will be left on the book until someone takes it. You will not be charged a fee for this trade.
+            {{$t('thisWillBeAMakerOrderLeftOnTheBook')}}
           </div>
         </div>
       </div>
       <div class="footer">
-        <div class="cancel-btn" @click="onCancel">Cancel</div>
+        <div class="cancel-btn" @click="onCancel">{{$t('cancel')}}</div>
         <button class="confirm-btn" @click="onConfirmed" :disabled="shouldDisableConfirmButton">
           {{ buttonLabel }}
         </button>
@@ -96,7 +100,7 @@ export default {
     },
 
     buttonLabel() {
-      return this.$isPending('placeOrder') ? `${this.orderStatus}...` : 'Submit';
+      return this.$isPending('placeOrder') ? `${this.orderStatus}...` : this.$t('submit');
     },
 
     shouldDisableConfirmButton() {

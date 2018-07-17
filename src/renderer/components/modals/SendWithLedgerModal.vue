@@ -2,7 +2,7 @@
   <modal-wrapper id="aph-send-with-ledger-modal">
     <div class="body">{{ prompt }}</div>
     <div class="footer">
-      <div class="cancel-btn" @click="cancel">Cancel</div>
+      <div class="cancel-btn" @click="cancel">{{$t('cancel')}}</div>
     </div>
   </modal-wrapper>
 </template>
@@ -17,10 +17,10 @@ export default {
   computed: {
     prompt() {
       if (this.$store.state.showSendRequestLedgerSignature === true) {
-        return 'Please confirm the transaction on your Ledger device.';
+        return this.$t('pleaseConfirmTheTransactionOnYourLedgerDevice');
       }
 
-      return 'Please connect your Ledger device, unlock it and open the NEO application.';
+      return this.$t('pleaseConnectYourLedgerDevice');
     },
   },
 
