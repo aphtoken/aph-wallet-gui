@@ -1,7 +1,7 @@
 <template>
   <section id="assets">
     <div class="header">
-      <h1 class="underlined">Assets</h1>
+      <h1 class="underlined">{{$t('assets')}}</h1>
     </div>
     <div class="body">
       <div class="grid">
@@ -12,7 +12,7 @@
           <div class="add-token" @click="showAddTokenModal">
             <div class="btn-square">
               <aph-icon name="create"></aph-icon>
-              <p>Add token</p>
+              <p>{{$t('addToken')}}</p>
             </div>
             <div class="btn-circle">
               <aph-icon name="plus"></aph-icon>

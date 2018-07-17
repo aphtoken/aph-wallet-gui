@@ -8,43 +8,43 @@
         <span class="icon">
           <aph-icon name="dashboard"></aph-icon>
         </span>
-        <span class="label">Dashboard</span>
+        <span class="label">{{$t('dashboard')}}</span>
       </router-link>
       <router-link v-if="currentNetwork.net !== 'MainNet'" to="/authenticated/dex">
         <span class="icon">
           <aph-icon name="dex"></aph-icon>
         </span>
-        <span class="label">Trade DEX</span>
+        <span class="label">{{$t('tradeDEX')}}</span>
       </router-link>
       <router-link v-else to="/authenticated/buy-aph">
         <span class="icon">
           <aph-icon name="dex"></aph-icon>
         </span>
-        <span class="label">Buy Aph</span>
+        <span class="label">{{$t('buyAph')}}</span>
       </router-link>
       <router-link to="/authenticated/assets">
         <span class="icon">
           <aph-icon name="wallet"></aph-icon>
         </span>
-        <span class="label">Assets</span>
+        <span class="label">{{$t('assets')}}</span>
       </router-link>
       <router-link to="/authenticated/history">
         <span class="icon">
           <aph-icon name="history"></aph-icon>
         </span>
-        <span class="label">History</span>
+        <span class="label">{{$t('history')}}</span>
       </router-link>
       <router-link to="/authenticated/token-sale">
         <span class="icon">
           <aph-icon name="ico"></aph-icon>
         </span>
-        <span class="label">Join ICO</span>
+        <span class="label">{{$t('joinIco')}}</span>
       </router-link>
       <router-link to="/authenticated/settings">
         <span class="icon">
           <aph-icon name="settings"></aph-icon>
         </span>
-        <span class="label">Settings</span>
+        <span class="label">{{$t('settings')}}</span>
       </router-link>
     </div>
     <div class="logout-wrapper" @click.prevent="logout">
@@ -53,11 +53,11 @@
     <div class="footer link-list">
       <div class="network-status">
         <div class="block">
-          <span class="network">{{ currentNetwork ? currentNetwork.net : 0 }} block</span>
+          <span class="network">{{ currentNetwork ? currentNetwork.net : 0 }} {{$t('block')}}</span>
           <span class="index">{{ currentNetwork && currentNetwork.bestBlock ? currentNetwork.bestBlock.index : 0}}</span>
         </div>
         <div class="last-update">
-          <div v-if="showNetworkError" class="network-error">Unable to Reach Network</div>
+          <div v-if="showNetworkError" class="network-error">{{$t('unableToReachNetwork')}}</div>
           <div v-else>
             <aph-timestamp-from-now :timestamp="lastReceivedBlock"></aph-timestamp-from-now>
           </div>

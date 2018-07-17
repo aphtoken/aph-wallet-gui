@@ -1,11 +1,8 @@
 <template>
   <section id="dex--chart">
-    <div class="header" v-if="isOutOfDate">
-      <h1>Aphelion DEX Out of Date</h1>
-    </div>
-    <div class="header tab" v-else>
-      <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">Candlesticks</h1>
-      <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">Depth</h1>
+    <div class="header">
+      <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
+      <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
     </div>
     <div class="body" v-if="isOutOfDate">
       <p>
@@ -262,7 +259,7 @@ export default {
           datafeed: datafeed,
           library_path: 'static/charting_library/',
           locale: "en",
-          drawings_access: { type: 'black', tools: [ { name: "Regression Trend" } ] },
+          drawings_access: { type: 'black', tools: [ { name: this.$t('regressionTrend') } ] },
           disabled_features: [
             "use_localstorage_for_settings","header_symbol_search","header_interval_dialog_button","header_screenshot","header_undo_redo",
             "header_compare","symbol_info","display_market_status","display_market_status",
@@ -450,11 +447,11 @@ export default {
 
   .header {
     padding: $space $space 0;
-    
+
     h1 {
       @extend %underlined-header-sm;
     }
-    
+
     &.tab {
       display: flex;
       justify-content: flex-end;

@@ -1,12 +1,12 @@
 <template>
   <section id="history--search">
     <div class="header">
-      <h1 class="underlined">Search</h1>
+      <h1 class="underlined">{{$t('search')}}</h1>
     </div>
     <div class="body">
       <aph-select :light="true" :options="dateRanges" :initial-value="dateRanges[0]" v-model="selectedDateRange"></aph-select>
       <div id="search-custom" :class="[{isCustom: selectedDateRange == 'custom'}]">
-        <div class="custom-search-label">Custom Search</div>
+        <div class="custom-search-label">{{$t('customSearch')}}</div>
         <aph-date-picker placeholder="From" v-model="fromDate" ref="fromDate"></aph-date-picker>
         <aph-date-picker placeholder="To" v-model="toDate" ref="toDate"></aph-date-picker>
       </div>
@@ -23,23 +23,23 @@ export default {
       selectedDateRange: '7',
       dateRanges: [
         {
-          label: 'All',
+          label: this.$t('all'),
           value: 'all',
         },
         {
-          label: 'Last 7 days',
+          label: this.$t('last7Days'),
           value: '7',
         },
         {
-          label: 'Last 30 days',
+          label: this.$t('last30Days'),
           value: '30',
         },
         {
-          label: 'Last 90 days',
+          label: this.$t('last90Days'),
           value: '90',
         },
         {
-          label: 'Custom',
+          label: this.$t('custom'),
           value: 'custom',
         },
       ],

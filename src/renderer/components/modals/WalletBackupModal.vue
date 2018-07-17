@@ -1,35 +1,35 @@
 <template>
   <modal-wrapper id="aph-wallet-backup-modal">
     <div class="body">
-      <p class="help-text">Save and backup the keys below.</p>
-      <p class="help-text">If you lose them, you lose access to your assets.</p>
+      <p class="help-text">{{$t('saveAndBackupTheKeys')}}</p>
+      <p class="help-text">{{$t('ifYouLoseThem')}}</p>
       <div class="qr-codes">
         <div class="qr-code">
           <vue-qrcode :value="$store.state.currentWallet.address" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
-          <p class="help-text">Public Address</p>
+          <p class="help-text">{{$t('publicAddress')}}</p>
         </div>
         <div class="qr-code">
           <vue-qrcode :value="$store.state.currentWallet.wif" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
-          <p class="help-text">Encrypted Private Key</p>
+          <p class="help-text">{{$t('encryptedPrivateKey')}}</p>
         </div>
       </div>
       <div class="data">
         <div class="wallet-data public-address">
-          <div class="label">Public Address</div>
+          <div class="label">{{$t('publicAddress')}}</div>
           <div class="value">
             <p>{{ $store.state.currentWallet.address }}</p>
             <aph-copy-text :text="$store.state.currentWallet.address"></aph-copy-text>
           </div>
         </div>
         <div class="wallet-data encrypted-key">
-          <div class="label">Encrypted Key</div>
+          <div class="label">{{$t('encryptedKey')}}</div>
           <div class="value">
             <p>{{ $store.state.currentWallet.encryptedWIF }}</p>
             <aph-copy-text :text="$store.state.currentWallet.encryptedWIF"></aph-copy-text>
           </div>
         </div>
         <div class="wallet-data private-key">
-          <div class="label">Private Key</div>
+          <div class="label">{{$t('privateKey')}}</div>
           <div class="value">
             <p>{{ $store.state.currentWallet.privateKey }}</p>
             <aph-copy-text :text="$store.state.currentWallet.privateKey"></aph-copy-text>
@@ -44,10 +44,10 @@
         </div>
       </div>
       <div class="btn-group">
-        <div @click="print()" class="btn print">Print</div>
+        <div @click="print()" class="btn print">{{$t('print')}}</div>
       </div>
       <div class="btn-group">
-        <div @click="onDone()" class="btn done">Done</div>
+        <div @click="onDone()" class="btn done">{{$t('done')}}</div>
       </div>
     </div>
   </modal-wrapper>

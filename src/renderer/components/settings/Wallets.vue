@@ -1,7 +1,7 @@
 <template>
   <section id="settings--wallets">
     <div class="header">
-      <h1 class="underlined">Wallets</h1>
+      <h1 class="underlined">{{$t('wallets')}}</h1>
     </div>
     <div class="body">
       <div class="left">
@@ -14,7 +14,7 @@
         <div class="import-wallet" @click="showImportAWalletModal">
           <div class="import-wallet-btn">
             <aph-icon name="wallet"></aph-icon>
-            <p>Import a wallet</p>
+            <p>{{$t('importWallet')}}</p>
           </div>
           <div class="btn-circle">
             <aph-icon name="plus"></aph-icon>

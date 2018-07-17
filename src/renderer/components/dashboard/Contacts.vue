@@ -1,12 +1,12 @@
 <template>
   <section id="dashboard--contacts">
     <div class="header">
-      <h1 class="underlined">Contacts</h1>
+      <h1 class="underlined">{{$t('contacts')}}</h1>
     </div>
     <div class="body">
       <div v-if="!$store.state.contacts.length" class="zero-state">
         <aph-icon name="no-contacts"></aph-icon>
-        <div class="label">No contacts</div>
+        <div class="label">{{$t('noContacts')}}</div>
       </div>
       <div v-else class="table">
         <div v-for="(contact, index) in $store.state.contacts" :key="index" @click="useContact(contact)" class="contact">

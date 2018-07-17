@@ -2,11 +2,11 @@
   <section id="settings--address-book">
     <div class="contacts-table">
       <div class="header">
-        <h1 class="underlined">Address Book</h1>
+        <h1 class="underlined">{{$t('addressBook')}}</h1>
       </div>
       <div class="search-field">
         <aph-icon name="search"></aph-icon>
-        <input placeholder="Search" v-model="searchBy">
+        <input :placeholder="$t('search')" v-model="searchBy">
       </div>
       <div class="contacts">
         <div class="body">
@@ -21,12 +21,12 @@
               <div class="section">
                 <div class="row">
                   <div class="column">
-                    <div class="label">Address</div>
+                    <div class="label">{{$t('address')}}</div>
                     <div class="value">{{ contact.address }}</div>
                   </div>
                   <div class="column right">
                     <div class="edit" @click="showEditContactModal(contact)">
-                      <aph-icon name="back"></aph-icon>Edit
+                      <aph-icon name="back"></aph-icon>{{$t('edit')}}
                     </div>
                   </div>
                 </div>
@@ -37,7 +37,7 @@
       </div>
     </div>
     <div class="add-contact">
-      <div class="cta">Add contact</div>
+      <div class="cta">{{$t('addContact')}}</div>
       <div class="btn-circle" @click="showAddContactModal">
         <aph-icon name="plus"></aph-icon>
       </div>

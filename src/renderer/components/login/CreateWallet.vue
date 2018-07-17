@@ -1,11 +1,11 @@
 <template>
   <section id="login--create-wallet">
     <login-form-wrapper identifier="createWallet">
-      <p class="help-text">Choose a name for your new wallet:</p>
-      <aph-input v-model="walletName" placeholder="Enter your wallet name here"></aph-input>
-      <p class="help-text">Choose a passphrase to encrypt your private key:</p>
-      <aph-input v-model="passphrase" placeholder="Enter your passphrase here" type="password"></aph-input>
-      <aph-input v-model="passphraseConfirm" placeholder="Repeat your passphrase here" type="password"></aph-input>
+      <p class="help-text">{{$t('chooseAName')}}</p>
+      <aph-input v-model="walletName" :placeholder="$t('enterYourWalletName')"></aph-input>
+      <p class="help-text">{{$t('chooseAPassphrase')}}</p>
+      <aph-input v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password"></aph-input>
+      <aph-input v-model="passphraseConfirm" :placeholder="$t('repeatYourPassphrase')" type="password"></aph-input>
       <button class="create" @click="create" :disabled="shouldDisableCreateButton">{{ buttonLabel }}</button>
     </login-form-wrapper>
   </section>
@@ -21,7 +21,7 @@ export default {
 
   computed: {
     buttonLabel() {
-      return this.$isPending('createWallet') ? 'Creating...' : 'Create';
+      return this.$isPending('createWallet') ? this.$t('creating') : this.$t('create');
     },
 
     passphrasesMatch() {

@@ -1,47 +1,48 @@
 <template>
   <section id="login--wallet-created" v-if="wallet">
     <p class="help-text">
-      Your keys are now encrypted and saved in your local application storage as '{{ wallet.label }}'
+      {{$t('yourKeysAreNowEncryptedAs', { lable: wallet.label })}}
     </p>
     <p class="help-text">
-      You must save and backup the keys below.
+      {{$t('youMustSaveAndBackupTheKeys')}}
     </p>
     <p class="help-text">
-      If you lose them, you lose access to your assets.
+      {{$t('ifYouLoseThem')}}
     </p>
     <div v-if="wallet" class="qr-codes">
       <div class="qr-code">
         <vue-qrcode :value="wallet.address" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
-        <p class="help-text">Public Address</p>
+        <p class="help-text">{{$t('publicAddress')}}</p>
       </div>
       <div class="qr-code">
         <vue-qrcode :value="wallet.wif" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
-        <p class="help-text">Encrypted Private Key</p>
+        <p class="help-text">{{$t('encryptedPrivateKey')}}</p>
       </div>
     </div>
     <div class="wallet-data passphrase">
-      <div class="label">Passphrase</div>
+      <div class="label">{{$t('passphrase')}}</div>
       <div class="value">
         <p>{{ wallet.passphrase }}</p>
         <aph-copy-text :text="wallet.passphrase"></aph-copy-text>
       </div>
     </div>
     <div class="wallet-data public-address">
-      <div class="label">Public Address</div>
+      <div class="label">{{$t('publicAddress')}}</div>
       <div class="value">
         <p>{{ wallet.address }}</p>
         <aph-copy-text :text="wallet.address"></aph-copy-text>
       </div>
     </div>
     <div class="wallet-data encrypted-key">
-      <div class="label">Encrypted Key</div>
+      <div class="label">{{$t('encryptedKey')}}</div>
       <div class="value">
         <p>{{ wallet.encryptedWIF }}</p>
+
         <aph-copy-text :text="wallet.encryptedWIF"></aph-copy-text>
       </div>
     </div>
     <div class="wallet-data private-key">
-      <div class="label">Private Key</div>
+      <div class="label">{{$t('privateKey')}}</div>
       <div class="value">
         <p>{{ wallet.privateKey }}</p>
         <aph-copy-text :text="wallet.privateKey"></aph-copy-text>
@@ -55,10 +56,10 @@
       </div>
     </div>
     <div class="btn-group">
-      <div @click="print()" class="btn print">Print</div>
+      <div @click="print()" class="btn print">{{$t('print')}}</div>
     </div>
     <div class="btn-group">
-      <router-link to="dashboard" class="done">Go To My Wallet</router-link>
+      <router-link to="dashboard" class="done">{{$t('goToMyWallet')}}</router-link>
     </div>
   </section>
 </template>

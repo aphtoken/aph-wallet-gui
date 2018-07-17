@@ -104,7 +104,7 @@ export default {
 
     placeholder: {
       default() {
-        return 'No Option Selected';
+        return this.$t('noOptionSelected');
       },
       type: String,
     },

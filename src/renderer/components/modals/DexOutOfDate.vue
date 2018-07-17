@@ -1,14 +1,13 @@
 <template>
   <modal-wrapper id="dex-out-of-date-modal">
     <div class="body">
-      <h1>Aphelion DEX Out of Date</h1>
+      <h1>{{$t('aphelionDexOUtOfDate')}}</h1>
       <p>
-        The DEX contract has been updated. A corresponding wallet upgrade is required to continue to use the DEX. 
-        Please use the controls below to cancel your orders and withdraw your funds from the contract back to your wallet and then download the latest version.
+        {{$t('theDexContractHasBeenUpdated')}}
       </p>
     </div>
     <div class="footer">
-      <div class="accept-btn" @click="accept">Accept</div>
+      <div class="accept-btn" @click="accept">{{$t('accept')}}</div>
     </div>
   </modal-wrapper>
 </template>

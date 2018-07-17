@@ -1,7 +1,7 @@
 <template>
   <section id="dashboard--price" v-if="$store.state.statsToken">
     <div class="header">
-      <h1 class="underlined">Price</h1>
+      <h1 class="underlined">{{$t('price')}}</h1>
       <div class="current-value">
         <div class="label">{{ $formatDate(date) }}</div>
         <div class="amount">{{ $store.state.statsToken.symbol }} {{ $formatMoney($store.state.statsToken.unitValue) }}</div>
@@ -9,15 +9,15 @@
     </div>
     <div class="sub-header">
       <div class="volume">
-        <div class="label">Volume</div>
+        <div class="label">{{$t('volume')}}</div>
         <div class="value">{{ $formatMoneyWithoutCents(volume) }}</div>
       </div>
       <div class="low">
-        <div class="label">Low</div>
+        <div class="label">{{$t('low')}}</div>
         <div class="value">{{ $formatMoney(low > $store.state.statsToken.unitValue ? $store.state.statsToken.unitValue : low) }}</div>
       </div>
       <div class="high">
-        <div class="label">High</div>
+        <div class="label">{{$t('high')}}</div>
         <div class="value">{{ $formatMoney(high < $store.state.statsToken.unitValue ? $store.state.statsToken.unitValue : high) }}</div>
       </div>
     </div>
