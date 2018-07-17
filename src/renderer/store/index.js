@@ -62,7 +62,7 @@ const state = {
     reconnectError: false,
   },
   statsToken: null,
-  styleMode: 'Day',
+  styleMode: 'Night',
   tradeHistory: null,
   transactionDetails: {},
   version: pjson.version,

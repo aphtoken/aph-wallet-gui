@@ -1,7 +1,7 @@
 <template>
   <section id="settings--wallet-actions" v-if="canBackupWallet">
     <div class="body">
-      <button class="backup-wallet" @click="showWalletBackupModal">Backup Wallet</button>
+      <button class="backup-wallet" @click="showWalletBackupModal">{{$t('backupWallet')}}</button>
     </div>
   </section>
 </template>

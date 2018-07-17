@@ -81,6 +81,7 @@ export default {
   sync() {
     store.commit('setCurrency', this.getCurrency());
     store.commit('setCurrencySymbol', this.getCurrencySymbol());
+    store.commit('setStyleMode', this.getStyleMode());
   },
 
   getStyleMode() {

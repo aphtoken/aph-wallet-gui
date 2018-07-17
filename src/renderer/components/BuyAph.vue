@@ -1,4 +1,3 @@
-@@ -0,0 +1,129 @@
 <template>
   <section id="buy-aph">
     <div class="icons">
@@ -9,21 +8,19 @@
       <img src="~@/assets/img/Kucoin_icon.svg" />
     </div>
     <div class="header">
-      <h1 class="underlined">APH Tokens Now Listed On Kucoin!</h1>
+      <h1 class="underlined">{{$t('nowListedOnKucoin')}}</h1>
     </div>
     <div class="body">
       <p>
-        Coming Soon: Aphelion DEX is a fully integrated, wallet based peer-to-peer decentralized trading
-        solution that will be updated directly into this wallet in a future release.
+        {{$t('comingSoon')}}
       </p>
       <p>
-        Trades will be powered by APH tokens to be redistributed to all APH token holders via the Aphelion
-        Decentralized Exchange Asset Ledger (D.E.A.L) smart contract.
+        {{$t('tradesWillBePoweredBy')}}
       </p>
-      <h2>Get Your APH Tokens Here</h2>
+      <h2>{{$t('getYourAPHTokens')}}</h2>
     </div>
     <div class="footer">
-      <a class="link-btn" :href="kucoinUrl" title="Open Kucoin in your browser" target="_blank">Buy Now</a>
+      <a class="link-btn" :href="kucoinUrl" :title="$t('openKucoinInBrowser')" target="_blank">{{$t('buyNow')}}</a>
     </div>
   </section>
 </template>

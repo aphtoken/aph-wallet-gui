@@ -1,14 +1,14 @@
 <template>
   <section id="dex--order-book">
     <div class="header">
-      <h1 class="underlined">Order book</h1>
+      <h1 class="underlined">{{$t('orderBook')}}</h1>
     </div>
     <div class="body">
       <div class="book" v-if="$store.state.orderBook">
         <div class="order-book-table asks">
           <div class="header">
             <div class="cell">price ({{ $store.state.currentMarket.baseCurrency }})</div>
-            <div class="cell">size</div>
+            <div class="cell">{{$t('size')}}</div>
             <div class="cell">&nbsp;</div>
           </div>
           <div class="body">
@@ -23,7 +23,7 @@
           </div>
         </div>
         <div class="spread-divider">
-          <div class="label">spread</div>
+          <div class="label">{{$t('spread')}}</div>
           <div class="value">{{ $formatNumber($store.state.orderBook.spread) }}</div>
           <div>&nbsp;</div>
         </div>

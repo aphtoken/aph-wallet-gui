@@ -1,7 +1,7 @@
 <template>
   <section id="dashboard--holdings">
     <div class="header">
-      <h1 class="underlined">My holdings</h1>
+      <h1 class="underlined">{{$t('myHoldings')}}</h1>
     </div>
     <div class="body">
       <aph-holding v-for="(holding, index) in holdings" :holding="holding" :on-click="viewHoldingDetail" :class="[{active: isActive(holding)}]" :key="index"></aph-holding>

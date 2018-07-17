@@ -459,7 +459,16 @@ export default {
                 .then((res) => {
                   holdingBalance.contractBalance = toBigNumber(res);
                   holdingBalance.totalBalance = toBigNumber(holdingBalance.balance)
-                    .plus(holdingBalance.contractBalance);
+                    .plus(holdingBalance.contractBalance).plus(holdingBalance.openOrdersBalance);
+                })
+                .catch((e) => {
+                  alerts.networkException(e);
+                }));
+              promises.push(dex.fetchOpenOrderBalance(holdingBalance.asset)
+                .then((res) => {
+                  holdingBalance.openOrdersBalance = toBigNumber(res);
+                  holdingBalance.totalBalance = toBigNumber(holdingBalance.balance)
+                    .plus(holdingBalance.contractBalance).plus(holdingBalance.openOrdersBalance);
                 })
                 .catch((e) => {
                   alerts.networkException(e);
@@ -530,7 +539,17 @@ export default {
               promises.push(dex.fetchContractBalance(nep5balance.asset)
                 .then((res) => {
                   nep5balance.contractBalance = toBigNumber(res);
-                  nep5balance.totalBalance = toBigNumber(nep5balance.balance).plus(nep5balance.contractBalance);
+                  nep5balance.totalBalance = toBigNumber(nep5balance.balance)
+                    .plus(nep5balance.contractBalance).plus(nep5balance.openOrdersBalance);
+                })
+                .catch((e) => {
+                  alerts.networkException(e);
+                }));
+              promises.push(dex.fetchOpenOrderBalance(nep5balance.asset)
+                .then((res) => {
+                  nep5balance.openOrdersBalance = toBigNumber(res);
+                  nep5balance.totalBalance = toBigNumber(nep5balance.balance)
+                    .plus(nep5balance.contractBalance).plus(nep5balance.openOrdersBalance);
                 })
                 .catch((e) => {
                   alerts.networkException(e);

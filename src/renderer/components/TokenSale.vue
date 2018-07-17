@@ -8,30 +8,30 @@
       </div>
     </div>
     <div class="header">
-      <h1 class="underlined">Participate in an Initial Coin Offering (ICO)</h1>
+      <h1 class="underlined">{{$t('participateInIco')}}</h1>
     </div>
     <div class="body">
-      <aph-select :options="tokens" placeholder="Select ICO" v-model="token"></aph-select>
-      <aph-input class="script-hash" placeholder="Enter the ICO Script Hash" v-model="scriptHash" v-if="token && token.symbol === 'Custom'"></aph-input>
-      <aph-select :options="currencies" placeholder="Buy With" v-model="currency"></aph-select>
+      <aph-select :options="tokens" :placeholder="$t('selectIco')" v-model="token"></aph-select>
+      <aph-input class="script-hash" :placeholder="$t('enterIcoScriptHash')" v-model="scriptHash" v-if="token && token.symbol === 'Custom'"></aph-input>
+      <aph-select :options="currencies" :placeholder="$t('buyWith')" v-model="currency"></aph-select>
       <div class="amount">
         <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
         <div class="symbol">{{ currency ? currency.value : '' }}</div>
-        <div class="max" v-if="currency" @click="setAmountToMax">max</div>
+        <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
       </div>
       <div class="estimated-value">
-        <div class="label">Estimated Amount</div>
+        <div class="label">{{$t('estimatedAmount')}}</div>
         <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
       </div>
     </div>
     <div class="disclaimer">
-      <h2>Disclaimer - Urgent Instructions</h2>
-      <p>Ensure that you are only sending tokens which are accepted for this ICO;</p>
-      <p>Submitting multiple times could result in loss of funds;</p>
-      <p>Aphelion is not responsible for loss of funds;</p>
+      <h2>{{$t('disclaimerUrgent')}}</h2>
+      <p>{{$t('ensureThatYouAreOnlySendingTokens')}}</p>
+      <p>{{$t('submittingMultipleTimesWarning')}}</p>
+      <p>{{$t('aphelionIsNotResponsible')}}</p>
       <div class="disclaimer-accept">
         <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
-        <label for="confirm-disclaimer">I Agree, I am responsible for this transfer of funds.</label>
+        <label for="confirm-disclaimer">{{$t('iAgree')}}</label>
       </div>
     </div>
     <div class="footer">
@@ -82,7 +82,7 @@ export default {
         }, []);
 
       list.push({
-        label: 'Use an ICO Script Hash',
+        label: this.$t('useAnIcoScriptHash'),
         value: {
           symbol: 'Custom',
           assetId: '',
@@ -133,7 +133,7 @@ export default {
     },
 
     sendButtonLabel() {
-      return this.sending ? 'Waiting for confirmation...' : 'Purchase Now';
+      return this.sending ? this.$t('waitingForConfirmation') : this.$t('purchaseNow');
     },
 
     shouldDisableSendButton() {
@@ -194,13 +194,13 @@ export default {
       }
 
       if (icoScriptHash.length !== 40) {
-        this.$services.alerts.error('Please enter a valid ICO script hash');
+        this.$services.alerts.error(this.$t('pleaseEnterValidScriptHash'));
         this.sending = false;
         return;
       }
 
       if (this.amount > this.currency.balance) {
-        this.$services.alerts.error(`Amount entered greater than your current ${this.currency.symbol} balance.`);
+        this.$services.alerts.error(this.$t('amountEnteredGreaterThanBalance', { symbol: this.currency.symbol }));
         this.sending = false;
         return;
       }
@@ -209,7 +209,8 @@ export default {
         this.currency.asset, this.amount)
         .then((res) => {
           this.$services.alerts.success(
-            `Token Sale Participation Successful. Your Balance of ${res.symbol} is now ${res.balance}`);
+            this.$t('tokenSaleSuccessful', { symbol: res.symbol, balance: res.balance }),
+          );
           this.$store.dispatch('fetchHoldings', { done: null });
           this.sending = false;
         })

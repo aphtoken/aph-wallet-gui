@@ -28,7 +28,7 @@
     </div>
     <div v-else class="zero-state">
       <aph-icon name="no-transactions"></aph-icon>
-      <div class="label">Unable to reach trading server.</div>
+      <div class="label">{{$t('unableToReachTradingServer')}}</div>
     </div>
     <dex-demo-confirmation v-if="!$store.state.acceptDexDemoVersion && !isOutOfDate"></dex-demo-confirmation>
     <dex-out-of-date v-if="isOutOfDate && !this.$store.state.acceptDexOutOfDate"></dex-out-of-date>

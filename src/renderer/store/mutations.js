@@ -3,7 +3,7 @@ import Vue from 'vue';
 import moment from 'moment';
 
 import { requests } from '../constants';
-import { alerts, db, neo, settings, dex } from '../services';
+import { alerts, db, neo, dex } from '../services';
 
 export {
   clearActiveTransaction,
@@ -179,6 +179,9 @@ async function setHoldings(state, holdings) {
     state.statsToken = _.find(state.holdings, (o) => {
       return o.symbol === state.statsToken.symbol;
     });
+    if (!state.statsToken && !_.isEmpty(holdings)) {
+      state.statsToken = holdings[0];
+    }
   }
 
   if (!state.currentWallet || !state.currentNetwork) {
@@ -355,7 +358,6 @@ function updateRequest(state, { identifier, message }, status) {
 
 function setStyleMode(state, style) {
   state.styleMode = style;
-  settings.setStyleMode(style);
 }
 
 function setMarkets(state, markets) {

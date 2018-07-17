@@ -4,8 +4,8 @@
     <router-view></router-view>
     <flash-message class="vue-flash-container"></flash-message>
     <div id="fixed-notifications">
-      <div id="out-of-date" v-if="isOutOfDate">A new version is available. <a :href="newVersionDownloadUrl" :title="newVersionDownloadUrl" target="_blank">Click here</a> to download v{{this.$store.state.latestVersion.version}}.</div>
-      <div id="demo-dex" v-if="shouldShowDexDemoWarning">You are viewing a Test Aphelion DEX Version. Mainnet coming soon.</div>
+      <div id="out-of-date" v-if="isOutOfDate">{{$t('newVersionAvailable')}} <a :href="newVersionDownloadUrl" :title="newVersionDownloadUrl" target="_blank">{{$t('clickHere')}}</a> {{$t('toDownload')}} v{{this.$store.state.latestVersion.version}}.</div>
+      <div id="demo-dex" v-if="shouldShowDexDemoWarning">{{$t('testDEXVersion')}}</div>
     </div>
   </div>
 </template>
