@@ -26,6 +26,7 @@ export const searchTransactionFromDate = state => state.searchTransactionFromDat
 export const searchTransactionToDate = state => state.searchTransactionToDate;
 export const searchTransactions = state => state.searchTransactions;
 export const sendInProgress = state => state.sendInProgress;
+export const sendModel = state => state.sendModel;
 export const showAddContactModal = state => state.showAddContactModal;
 export const showAddTokenModal = state => state.showAddTokenModal;
 export const showOrderConfirmationModal = state => state.showOrderConfirmationModal;
