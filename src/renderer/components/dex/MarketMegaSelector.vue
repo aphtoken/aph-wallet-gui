@@ -37,7 +37,7 @@ export default {
 
   computed: {
     baseCurrencies() {
-      return _.map(this.$store.state.markets, 'baseCurrency');
+      return _.uniq(_.map(this.$store.state.markets, 'baseCurrency'));
     },
 
     filteredMarkets() {
