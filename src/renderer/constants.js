@@ -102,7 +102,6 @@ export {
   languages,
   loadStates,
   messages,
-  messages,
   orders,
   requests,
   timeouts,
