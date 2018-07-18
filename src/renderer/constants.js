@@ -12,7 +12,7 @@ const languages = [{
   value: 'en',
 },
 {
-  label: 'German',
+  label: 'Deutsche',
   value: 'de',
 },
 ];
