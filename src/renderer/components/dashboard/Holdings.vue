@@ -35,7 +35,7 @@ export default {
     },
 
     viewHoldingDetail(holding) {
-      if (this.sendInProgress === true) {
+      if (this.sendInProgress) {
         return;
       }
 
