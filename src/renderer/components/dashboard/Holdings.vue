@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 let loadHoldingsIntervalId;
 export default {
   computed: {
@@ -18,6 +19,10 @@ export default {
         return !!name && !!symbol;
       });
     },
+
+    ...mapGetters([
+      'sendInProgress',
+    ]),
   },
 
   methods: {
@@ -30,7 +35,7 @@ export default {
     },
 
     viewHoldingDetail(holding) {
-      if (this.$store.state.sendInProgress === true) {
+      if (this.sendInProgress) {
         return;
       }
 
