@@ -159,11 +159,11 @@ export default {
         balance: 0,
         totalBalance: 0,
         contractBalance: 0,
+        openOrdersBalance: 0,
       };
     },
     quoteBalanceToolTip() {
       try {
-      /* eslint-disable max-len */
         const walletBalance = this.quoteHolding.balance
           ? this.$formatNumber(this.quoteHolding.balance) : '0';
         const contractBalance = this.quoteHolding.contractBalance
@@ -177,7 +177,6 @@ export default {
     },
     baseBalanceToolTip() {
       try {
-      /* eslint-disable max-len */
         const walletBalance = this.baseHolding.balance
           ? this.$formatNumber(this.baseHolding.balance) : '0';
         const contractBalance = this.baseHolding.contractBalance
