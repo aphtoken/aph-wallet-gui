@@ -42,7 +42,7 @@ const state = {
   searchTransactionFromDate: moment().startOf('day').subtract(7, 'days'),
   searchTransactionToDate: null,
   searchTransactions: [],
-  sendInProgress: false,
+  sendInProgress: {},
   sendModel: {},
   showAddContactModal: false,
   showAddTokenModal: false,

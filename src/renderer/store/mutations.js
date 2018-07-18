@@ -96,7 +96,7 @@ function handleLogout(state) {
   state.recentTransactions = [];
   state.searchTransactions = [];
   state.nep5Balances = {};
-  state.sendInProgress = false;
+  state.sendInProgress = {};
   state.currentMarket = null;
   neo.fetchNEP5Tokens();
 }
@@ -307,11 +307,11 @@ function setShowSendRequestLedgerSignature(state, value) {
 }
 
 function setSendInProgress(state, value) {
-  state.sendInProgress = value;
+  Vue.set(state.sendInProgress, state.currentNetwork.net, value);
 }
 
 function setSendModel(state, value) {
-  state.sendModel = value;
+  Vue.set(state.sendModel, state.currentNetwork.net, value);
 }
 
 function setShowWalletBackupModal(state, value) {

@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 let loadTransactionsIntervalId;
 
 export default {
@@ -39,6 +40,10 @@ export default {
           });
         });
     },
+
+    ...mapGetters([
+      'sendInProgress',
+    ]),
   },
 
   methods: {
@@ -51,7 +56,7 @@ export default {
     },
 
     viewTransaction({ details }) {
-      if (this.$store.state.sendInProgress === true) {
+      if (this.sendInProgress === true) {
         return;
       }
       this.$router.replace('/authenticated/dashboard');
