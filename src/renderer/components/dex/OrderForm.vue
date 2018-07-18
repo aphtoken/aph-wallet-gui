@@ -1,6 +1,6 @@
 <template>
   <div>
-    <section id="dex--orderform">
+    <section id="dex--order-form">
       <div class="body" v-if="$store.state.currentMarket">
         <div class="balance" :title="quoteBalanceToolTip">
           <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.quoteCurrency }})</div>
@@ -19,7 +19,7 @@
           <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}}</div>
           <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}}</div>
         </div>
-        <div class="orderType">
+        <div class="order-type">
           <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
         </div>
         <div class="price" v-if="orderType === 'Limit'">
@@ -39,7 +39,7 @@
             <input type="checkbox" id="post-only" v-model="postOnly" />
             <label for="post-only">{{$t('postOnly')}}</label>
           </div>
-        </div>       
+        </div>
       </div>
       <div class="footer">
         <div class="estimate">
@@ -285,7 +285,7 @@ export default {
 
     setPercent(value) {
       if (this.orderType === 'Limit' && !this.$store.state.orderPrice) {
-        this.$services.alerts.error(this.$('pleaseEnterAPrice'));
+        this.$services.alerts.error(this.$t('pleaseEnterAPrice'));
         return;
       }
 
@@ -409,20 +409,22 @@ export default {
 
 <style lang="scss">
 #dex .grid--cell > div:first-child {
-  height:100%;
+  height: 100%;
 }
-#dex--orderform {
-  @extend %tile-light; 
-  position: relative;
+
+#dex--order-form {
+  @extend %tile-light;
+
   display: flex;
   flex-direction: column;
-  min-width: toRem(280px);
   height: 100%;
   justify-content: space-between;
+  min-width: toRem(280px);
+  position: relative;
 
   .body {
     overflow: auto;
-    
+
     .side {
       display: flex;
       margin-top: $space;
@@ -458,20 +460,22 @@ export default {
       }
     }
 
-    .orderType {
+    .order-type {
       margin: $space 0;
     }
 
     .percentages {
+      background: $light-grey;
+      border-radius: $border-radius;
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
 
       .percent-btn {
-        flex: none;
+        @extend %small-uppercase-grey-label-dark;
+
         cursor: pointer;
-        font-family: GilroyMedium;
-        color: $grey;
+        flex: 1;
+        padding: $space 0;
         text-align: center;
 
         &:hover {
@@ -486,8 +490,8 @@ export default {
 
     .aph-input {
       border-color: $background;
-      padding-left: toRem(16px);
       margin-bottom: $space;
+      padding-left: toRem(16px);
 
       &.focused {
         border-color: $purple;
@@ -505,8 +509,8 @@ export default {
 
     .options {
       color: $grey;
-      text-align: center;
       margin: $space 0 $space;
+      text-align: center;
     }
   }
 
@@ -524,6 +528,7 @@ export default {
     .order-btn, .test-btn {
       @extend %btn-outline;
       @extend %selected-text;
+
       font-family: GilroySemibold;
 
       &:disabled {
@@ -548,6 +553,7 @@ export default {
     .test-buttons {
       height: auto;
       width: 100%;
+
       .row {
         display: flex;
         flex-direction: row;
@@ -558,10 +564,10 @@ export default {
       }
 
       .test-btn {
+        border-width: $border-width-thin;
+        font-size: toRem(12px);
         height: toRem(26px);
         padding: $space-xs 0;
-        font-size: toRem(12px);
-        border-width: $border-width-thin;
 
         & + .test-btn {
           margin-left: $space;
@@ -571,9 +577,9 @@ export default {
   }
 
   .balance, .estimate {
+    align-items: center;
     display: flex;
     flex-direction: row;
-    align-items: center;
 
     .label {
       @extend %small-uppercase-grey-label-dark;
@@ -590,6 +596,20 @@ export default {
 
     & + .balance {
       margin-top: $space;
+    }
+  }
+}
+
+.Night {
+  #dex--order-form {
+    .body {
+      .percentages {
+        background: $background-night;
+
+        .percent-btn {
+          @extend %small-uppercase-grey-label;
+        }
+      }
     }
   }
 }
