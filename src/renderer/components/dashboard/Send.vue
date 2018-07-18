@@ -34,7 +34,7 @@
           </div>
         </div>
       </div>
-      <div class="waiting" v-if="sendInProgress === true">{{$t('waitingForTransaction')}}</div>
+      <div class="waiting" v-if="sendInProgress">{{$t('waitingForTransaction')}}</div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">{{$t('back')}}</button>
         <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
@@ -252,7 +252,7 @@ export default {
           sending: this.sending,
         });
 
-        if (sendInProgress === false && this.sending === true) {
+        if (!sendInProgress && this.sending) {
           this.end();
         }
       });

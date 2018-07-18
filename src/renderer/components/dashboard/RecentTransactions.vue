@@ -56,7 +56,7 @@ export default {
     },
 
     viewTransaction({ details }) {
-      if (this.sendInProgress === true) {
+      if (this.sendInProgress) {
         return;
       }
       this.$router.replace('/authenticated/dashboard');
