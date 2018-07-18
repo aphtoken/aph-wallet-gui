@@ -106,7 +106,6 @@ function handleNetworkChange(state) {
   state.recentTransactions = [];
   state.searchTransactions = [];
   state.nep5Balances = {};
-  state.sendInProgress = false;
   state.currentMarket = null;
   neo.fetchNEP5Tokens();
 }
