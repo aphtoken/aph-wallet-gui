@@ -29,7 +29,7 @@ export default {
   balance: 'BALANCE',
   block: 'Block',
   buy: 'Buy',
-  buyAph: 'buy Aph',
+  buyAph: 'Buy APH',
   buyNow: 'Buy Now',
   buyWith: 'Buy With',
   bytes: '{bytes} Bytes',
