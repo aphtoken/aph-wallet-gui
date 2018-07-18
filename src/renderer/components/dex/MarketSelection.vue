@@ -11,7 +11,7 @@
       </template>
     </div>
     <div class="selection">
-      <aph-select :options="markets" v-model="$store.state.currentMarket"></aph-select>
+      <market-mega-selector></market-mega-selector>
     </div>
     <div class="market">
       <div class="day-values">
@@ -49,24 +49,45 @@
 </template>
 
 <script>
-export default {
-  computed: {
-    markets() {
-      return this.$store.state.markets.reduce(
-        (result, market) => {
-          result.push({
-            label: market.marketName,
-            value: market,
-          });
+import MarketMegaSelector from './MarketMegaSelector';
 
-          return result;
-        }, []);
+export default {
+  components: {
+    MarketMegaSelector,
+  },
+
+  computed: {
+    storeStateCurrentMarket() {
+      return this.$store.state.currentMarket;
     },
   },
+
+  data() {
+    return {
+      currentMarket: {},
+    };
+  },
+
 
   methods: {
     toggleNightMode() {
       this.$services.settings.setStyleMode(this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
+    },
+  },
+
+  mounted() {
+    this.currentMarket = this.$store.state.currentMarket;
+  },
+
+  watch: {
+    currentMarket(newVal) {
+      this.$store.commit('setCurrentMarket', newVal);
+    },
+
+    storeStateCurrentMarket(newVal) {
+      if (!this.currentMarket) {
+        this.currentMarket = newVal;
+      }
     },
   },
 };
@@ -111,26 +132,11 @@ export default {
 
   .selection {
     margin-bottom: $space;
-
-    .aph-select--label {
-      @extend %selected-text;
-      @extend %light-background;
-
-      font-size: toRem(20px);
-      height: auto;
-      padding-left: $space;
-      text-align: left;
-    }
-    .aph-select .aph-icon svg {
-      height: 12px;
-    }
-    .aph-select .aph-icon path {
-      fill: $purple;
-    }
   }
 
   .market {
     @extend %tile-light;
+
     padding: $space;
     display: flex;
     flex-direction: row;
@@ -227,4 +233,3 @@ export default {
   }
 }
 </style>
-

@@ -45,6 +45,10 @@
         </table>
       </div>
     </div>
+    <div class="footer">
+      <div :class="['option', {active: $store.state.ordersToShow === $constants.orders.ALL_SWITCH}]" @click="$store.commit('setOrdersToShow', $constants.orders.ALL_SWITCH)">All</div>
+      <div :class="['option', {active: $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket.marketName }}</div>
+    </div>
   </section>
 </template>
 
@@ -82,6 +86,16 @@ export default {
         default:
           return this.openOrders;
       }
+    },
+
+    filteredOrders() {
+      if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
+        return this.ordersForTable;
+      }
+
+      return this.ordersForTable.filter((order) => {
+        return order.marketName === this.$store.state.currentMarket.marketName;
+      });
     },
   },
 
@@ -153,7 +167,7 @@ export default {
 
 
   .body {
-    height: calc(100% - 42px);
+    height: calc(100% - 73px);
     overflow-y: auto;
     padding: $space;
 
@@ -188,6 +202,27 @@ export default {
             }
           }
         }
+      }
+    }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: space-evenly;
+
+    .option {
+      border-bottom: $border-width-thick solid transparent;
+      color: $purple;
+      cursor: pointer;
+      flex: none;
+      font-family: GilroyMedium;
+      font-size: toRem(14px);
+      margin-left: $space;
+      padding: $space-sm $space;
+      text-align: center;
+
+      &:hover, &.active {
+        border-color: $purple;
       }
     }
   }

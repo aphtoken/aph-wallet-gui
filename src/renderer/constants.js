@@ -1,20 +1,20 @@
 import en from './l10n/en';
-// import de from './l10n/de';
+import de from './l10n/de';
 
 // i18n
 const messages = {
   en,
-  // de,
+  de,
 };
 
 const languages = [{
   label: 'English',
   value: 'en',
 },
-//   {
-//   label: 'German',
-//   value: 'de',
-// }
+{
+  label: 'German',
+  value: 'de',
+},
 ];
 
 const assets = {
@@ -72,6 +72,10 @@ const loadStates = {
   READY: 'READY',
 };
 
+const orders = {
+  ALL_SWITCH: 'All',
+};
+
 const requests = {
   FAILED: 'failed',
   PENDING: 'pending',
@@ -94,10 +98,11 @@ export {
   defaultSettings,
   formats,
   intervals,
+  languages,
   loadStates,
+  messages,
+  orders,
   requests,
   timeouts,
-  messages,
-  languages,
 };
 

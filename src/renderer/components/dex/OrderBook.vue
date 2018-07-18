@@ -49,7 +49,6 @@ let loadBookIntervalId;
 let storeUnwatch;
 
 export default {
-
   beforeDestroy() {
     clearInterval(loadBookIntervalId);
     storeUnwatch();
@@ -121,8 +120,8 @@ export default {
   flex-direction: column;
 
   .header {
-    padding: $space $space 0;
     flex: none;
+    padding: $space $space 0;
 
     h1.underlined {
       @extend %underlined-header-sm;
@@ -205,7 +204,7 @@ export default {
             }
           }
         }
-        
+
         &.asks {
           .body {
             flex-direction: column-reverse;
