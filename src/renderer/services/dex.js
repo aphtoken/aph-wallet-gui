@@ -584,9 +584,9 @@ export default {
       totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
     }
 
-    order.offersToTake.forEach((o) => {
+    order.offersToTake.forEach((offer) => {
       if (o.isBackupOffer !== true) {
-        totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? o.quantity.multipliedBy(o.price) : o.quantity);
+        totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? offer.quantity.multipliedBy(offer.price) : offer.quantity);
         totalFees = totalFees.plus(order.side === 'Buy' ? order.market.buyFee : order.market.sellFee);
       }
     });
@@ -626,9 +626,9 @@ export default {
 
         const watchInterval = setInterval(() => {
           let waiting = false;
-          order.deposits.forEach((d) => {
-            const holding = neo.getHolding(d.assetId);
-            if (holding.contractBalance.isLessThan(d.quantityRequired)) {
+          order.deposits.forEach((deposit) => {
+            const holding = neo.getHolding(deposit.assetId);
+            if (holding.contractBalance.isLessThan(deposit.quantityRequired)) {
               waiting = true;
             }
           });
@@ -852,7 +852,7 @@ export default {
                     resolve(res.tx);
                   })
                   .catch((e) => {
-                    reject(e);
+                    reject(`Deposit Failed. ${e.message}`);
                   });
               } else {
                 reject('Transaction rejected');
