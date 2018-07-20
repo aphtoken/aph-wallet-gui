@@ -35,7 +35,6 @@
 
       <div class="token-details">
         <aph-token-icon :symbol="$store.state.currentMarket.quoteCurrency"></aph-token-icon>
-
         <div class="base-price">
           {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
         </div>
@@ -45,7 +44,7 @@
         <span class="label">{{$t('change')}} ({{$store.state.currentMarket.quoteCurrency}})</span>
         <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">
           {{ $formatNumber($store.state.tradeHistory.change24Hour) }}
-          ({{ $formatNumber(percentChange) }}%)
+          ({{ $formatNumber(percentChangeAbsolute) }}%)
         </div>
       </div>
     </div>
@@ -68,7 +67,7 @@ export default {
     baseCurrencyUnitPrice() {
       return neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue;
     },
-    percentChange() {
+    percentChangeAbsolute() {
       return Math.abs(this.$store.state.tradeHistory.change24HourPercent);
     },
   },
