@@ -37,7 +37,7 @@ export default {
   cancelUc: 'CANCEL',
   cancelled: 'CANCELLED',
   candlesticks: 'Candlesticks',
-  change: 'change',
+  change24H: '24h change',
   chooseAName: 'Choose a name for your new wallet:',
   chooseAPassphrase: 'Choose a passphrase to encrypt your private key:',
   claimGas: 'Claim {gas} Gas',

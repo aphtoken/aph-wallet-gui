@@ -41,7 +41,7 @@
         <div class="base-price-converted">
           {{ $formatMoney($store.state.tradeHistory.close24Hour * baseCurrencyUnitPrice) }}
         </div>
-        <span class="label">{{$t('change')}} ({{$store.state.currentMarket.quoteCurrency}})</span>
+        <span class="label">{{ $t('change24H') }} ({{ $store.state.currentMarket.quoteCurrency }})</span>
         <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">
           {{ $formatNumber($store.state.tradeHistory.change24Hour) }}
           ({{ $formatNumber(percentChangeAbsolute) }}%)
@@ -53,7 +53,6 @@
 
 <script>
 import MarketMegaSelector from './MarketMegaSelector';
-import neo from '../../services/neo';
 
 export default {
   components: {
@@ -65,7 +64,7 @@ export default {
       return this.$store.state.currentMarket;
     },
     baseCurrencyUnitPrice() {
-      return neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue;
+      return this.$services.neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue;
     },
     percentChangeAbsolute() {
       return Math.abs(this.$store.state.tradeHistory.change24HourPercent);
