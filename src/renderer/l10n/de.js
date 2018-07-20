@@ -20,7 +20,7 @@ export default {
   amountQuote: 'Menge ({quote})',
   aphelionDexOutOfDate: 'Aphelion DEX Version ist veraltet',
   aphelionDexTest: 'Aphelion DEX Test Version',
-  aphelionIsNotResponsible: 'Aphelion ist nicht für den Verlust von Geldmitteln verantwortlich;',
+  aphelionIsNotResponsible: 'Aphelion ist nicht für den Verlust von Geldmitteln verantwortlich.',
   areYouSureYouWouldLikeToPlace: 'Bist Du sicher, dass du diesen Auftrag einstellen willst?',
   assets: 'Vermögenswerte',
   atAUnitPriceOf: 'zu einem Stückpreis von',
@@ -85,12 +85,12 @@ export default {
   edit: 'Bearbeiten',
   encryptedKey: 'Encrypted key',
   encryptedPrivateKey: 'Encrypted Private Key',
-  ensureThatYouAreOnlySendingTokens: 'Stelle sicher, dass Du nur Token sendest, die für diesen ICO akzeptiert werden;',
+  ensureThatYouAreOnlySendingTokens: 'Stelle sicher, dass Du nur Token sendest, die für diesen ICO akzeptiert werden.',
   enterAmount: 'Menge eingeben',
   enterIcoScriptHash: 'ICO Script Hash eingeben',
   enterNameOfWalletToDelete: 'Den Namen Deines zu löschenden Wallets eingeben',
   enterPassphraseToLogin: 'Deine Passphrase zum Einloggen geben',
-  enterSendToAddress: 'Empfangsadresse eingeben',
+  enterSendToAddress: 'Empfängeradresse eingeben',
   enterYourEncryptedKey: 'Deinen encrypted key hier eingeben',
   enterYourPassphrase: 'Deine Passphrase hier eingeben',
   enterYourPrivateKeyWIF: 'Deinen private key (WIF) hier eingeben',
@@ -140,7 +140,7 @@ export default {
   nightMode: 'Nacht-Modus',
   noContacts: 'Keine Kontakte',
   noLedgerDeviceFound: 'Keinen Ledger gefunden. Bitte stecke Deinen Ledger ein, entsperre ihn und öffne' +
-                       ' die NEO-Anwendung.',
+  ' die NEO-Anwendung.',
   noOptionSelected: 'Keine Option ausgewählt',
   noSavedWallets: 'Du hast noch keine Wallets gespeichert. Willst Du ein Neues erstellen?',
   noTransactions: 'Keine Transaktionen',
@@ -182,7 +182,7 @@ export default {
   repeatYourPassphrase: 'Wiederhole Deine Passphrase hier',
   save: 'Speichern',
   saveAndBackupTheKeys: 'Speichern und sichern der unteren Keys (Schlüssel).',
-  savedWallet: 'Wallet gespeichert',
+  savedWallet: 'Gespeicherte Wallets',
   saving: 'Speichern...',
   search: 'Suche',
   secondsAgo: '{seconds} Sekunden zuvor',
@@ -200,7 +200,7 @@ export default {
   status: 'status',
   steps: 'Schritte:',
   submit: 'Übermitteln',
-  submittingMultipleTimesWarning: 'Das mehrfache Einreichen könnte zu einem Verlust von Geldmitteln führen;',
+  submittingMultipleTimesWarning: 'Das mehrfache Einreichen könnte zu einem Verlust von Geldmitteln führen.',
   success: 'Erfolgreich!',
   systemFee: 'Systemgebühr',
   testDEXVersion: 'Du nutzt eine Test Aphelion DEX Version. Das Mainnet Release kommt bald.',
@@ -213,7 +213,7 @@ export default {
   hängt von der endgültigen Anzahl der Angebote ab, liegt aber zwischen {min}
   APH und {max} APH`,
   thisIsAPreliminaryDemo: `Dies ist eine vorläufige Demo- und Testversion der
-  Aphelion DEX. Es funktioniert auf dem Neo Testnet, das möglichweise eine schlechtere Performance bietet.
+  Aphelion DEX. Diese Version arbeitet auf dem Neo Testnet, das möglichweise eine schlechtere Performance bietet.
   Die Mainnet Version erscheint bald.`,
   thisMeansThatItIsIneligible: 'Dies bedeutet, dass eine Post-Only-Ordner nicht zulässig ist.',
   thisOrderRequires: `Diese Order benötigt {quantity} {symbol} um ausgeführt zu werden.
@@ -248,7 +248,7 @@ export default {
   unableToReachNetwork: 'Kann das Netzwerk nicht erreichen',
   unableToReachTradingServer: 'Kann den Trading Server nicht erreichen.',
   unconfirmed: 'Nicht bestätigt',
-  unitsTotal: 'units total',
+  unitsTotal: 'Gesamtmenge',
   useAnIcoScriptHash: 'Nutzte einen ICO Script Hash',
   value: 'Value',
   vol: 'VOL',
@@ -274,6 +274,5 @@ export default {
   sie von jemanden bedient wird. Du musst für diesen Trade keine Gebühr zahlen:`,
   youWillBeImmediatelyTaking: 'Du wirst diese {count}\n Angebote sofort annehmen:',
   yourKeysAreNowEncryptedAs: 'Deine Keys sind nun verschlüsselt und in Deinem lokalen Anwendungsordner gespeichert ' +
-                             'als \'{label}\'',
+  'als \'{label}\'',
 };
-
