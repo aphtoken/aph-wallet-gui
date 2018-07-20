@@ -43,7 +43,10 @@
           {{ $formatMoney($store.state.tradeHistory.close24Hour * baseCurrencyUnitPrice) }}
         </div>
         <span class="label">{{$t('change')}} ({{$store.state.currentMarket.quoteCurrency}})</span>
-        <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">{{ $formatNumber($store.state.tradeHistory.change24Hour) }}</div>
+        <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">
+          {{ $formatNumber($store.state.tradeHistory.change24Hour) }}
+          ({{ $formatNumber(percentChange) }}%)
+        </div>
       </div>
     </div>
   </section>
@@ -64,6 +67,9 @@ export default {
     },
     baseCurrencyUnitPrice() {
       return neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue;
+    },
+    percentChange() {
+      return Math.abs(this.$store.state.tradeHistory.change24HourPercent);
     },
   },
 
@@ -214,20 +220,10 @@ export default {
           &:before {
             content: "+";
           }
-
-          &:after {
-            content: "%";
-            margin-left: $space-xs;
-          }
         }
 
         &.decrease {
           color: $red;
-        }
-
-        &:after {
-          content: "%";
-          margin-left: $space-xs;
         }
       }
     }
