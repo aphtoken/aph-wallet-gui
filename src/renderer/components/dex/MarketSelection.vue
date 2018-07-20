@@ -40,7 +40,7 @@
           {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
         </div>
         <div class="base-price-converted">
-          {{ $formatMoney($store.state.tradeHistory.close24Hour) }}
+          {{ $formatMoney($store.state.tradeHistory.close24Hour * baseCurrencyUnitPrice) }}
         </div>
         <span class="label">{{$t('change')}} ({{$store.state.currentMarket.quoteCurrency}})</span>
         <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">{{ $formatNumber($store.state.tradeHistory.change24Hour) }}</div>
@@ -51,6 +51,7 @@
 
 <script>
 import MarketMegaSelector from './MarketMegaSelector';
+import neo from '../../services/neo';
 
 export default {
   components: {
@@ -61,6 +62,9 @@ export default {
     storeStateCurrentMarket() {
       return this.$store.state.currentMarket;
     },
+    baseCurrencyUnitPrice() {
+      return neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue;
+    },
   },
 
   data() {
@@ -68,7 +72,6 @@ export default {
       currentMarket: {},
     };
   },
-
 
   methods: {
     toggleNightMode() {
@@ -183,9 +186,6 @@ export default {
         margin-top: $space;
       }
 
-      .aph-token-icon {
-      }
-
       .market-name {
         font-family: GilroySemibold;
         margin-top: $space;
@@ -202,7 +202,7 @@ export default {
 
       .base-price-converted {
         font-family: GilroySemibold;
-        font-size: toRem(16px);
+        font-size: toRem(12px);
       }
 
       .change {
