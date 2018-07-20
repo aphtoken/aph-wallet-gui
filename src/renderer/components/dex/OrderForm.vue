@@ -42,9 +42,13 @@
         </div>
       </div>
       <div class="footer">
+        <div class="neo-total">
+          <div class="label">{{$t('total')}} ({{ quoteHolding.symbol }})</div>
+          <div class="value">{{ $store.state.orderQuantity != '' ?  $formatNumber($store.state.orderQuantity) : 0 }}</div>
+        </div>
         <div class="estimate">
-          <div class="label">{{$t('estimate')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
-          <div class="value">{{ $formatTokenAmount(estimate) }}</div>
+          <div class="label">{{$t('estimate')}} ({{ $services.settings.getCurrency() }})</div>
+          <div class="value">{{ $formatMoney(estimate) }}</div>
         </div>
         <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
               :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
@@ -575,7 +579,11 @@ export default {
     }
   }
 
-  .balance, .estimate {
+  .neo-total {
+    margin-bottom: toRem(8px);
+  }
+
+  .balance, .estimate, .neo-total {
     align-items: center;
     display: flex;
     flex-direction: row;

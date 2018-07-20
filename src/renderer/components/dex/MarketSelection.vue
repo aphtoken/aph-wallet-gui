@@ -35,13 +35,16 @@
 
       <div class="token-details">
         <aph-token-icon :symbol="$store.state.currentMarket.quoteCurrency"></aph-token-icon>
-        <div class="market-name">{{ $store.state.currentMarket.marketName }}</div>
-        <div class="price">
-          <span class="label">{{$t('priceUc')}}</span>
-          <div class="base-price">
-            {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
-          </div>
-          <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">{{ $formatNumber($store.state.tradeHistory.change24Hour) }}</div>
+        <div class="base-price">
+          {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
+        </div>
+        <div class="base-price-converted">
+          {{ $formatMoney($store.state.tradeHistory.close24Hour * baseCurrencyUnitPrice) }}
+        </div>
+        <span class="label">{{ $t('change24H') }} ({{ $store.state.currentMarket.quoteCurrency }})</span>
+        <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">
+          {{ $formatNumber($store.state.tradeHistory.change24Hour) }}
+          ({{ $formatNumber(percentChangeAbsolute) }}%)
         </div>
       </div>
     </div>
@@ -60,6 +63,12 @@ export default {
     storeStateCurrentMarket() {
       return this.$store.state.currentMarket;
     },
+    baseCurrencyUnitPrice() {
+      return this.$services.neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue;
+    },
+    percentChangeAbsolute() {
+      return Math.abs(this.$store.state.tradeHistory.change24HourPercent);
+    },
   },
 
   data() {
@@ -67,7 +76,6 @@ export default {
       currentMarket: {},
     };
   },
-
 
   methods: {
     toggleNightMode() {
@@ -163,7 +171,7 @@ export default {
       }
 
       .value {
-        flex: 4;
+        flex: 3;
         font-family: GilroySemibold;
         font-size: toRem(12px);
       }
@@ -178,7 +186,8 @@ export default {
       display: flex;
       flex-direction: column;
 
-      .aph-token-icon {
+      > *:nth-child(n + 2) {
+        margin-top: $space;
       }
 
       .market-name {
@@ -186,26 +195,22 @@ export default {
         margin-top: $space;
       }
 
-      .price {
-        align-items: flex-end;
-        display: flex;
-        flex-direction: column;
-        margin-top: $space;
+      .label {
+        @extend %small-uppercase-grey-label-dark;
+      }
 
-        .label {
-          @extend %small-uppercase-grey-label-dark;
-        }
+      .base-price {
+        font-family: GilroySemibold;
+        font-size: toRem(16px);
+      }
 
-        .base-price {
-          font-family: GilroySemibold;
-          font-size: toRem(16px);
-          margin-top: $space-sm;
-        }
+      .base-price-converted {
+        font-family: GilroySemibold;
+        font-size: toRem(12px);
       }
 
       .change {
         font-size: toRem(12px);
-        margin-top: $space-sm;
 
         &.increase {
           color: $green;
@@ -213,20 +218,10 @@ export default {
           &:before {
             content: "+";
           }
-
-          &:after {
-            content: "%";
-            margin-left: $space-xs;
-          }
         }
 
         &.decrease {
           color: $red;
-        }
-
-        &:after {
-          content: "%";
-          margin-left: $space-xs;
         }
       }
     }
