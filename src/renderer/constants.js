@@ -1,21 +1,24 @@
 import en from './l10n/en';
-// import de from './l10n/de';
+import de from './l10n/de';
+import nl from './l10n/nl';
 
 // i18n
 const messages = {
   en,
-  // de,
+  de,
+  nl,
 };
 
 const languages = [{
   label: 'English',
   value: 'en',
-},
-//   {
-//   label: 'German',
-//   value: 'de',
-// }
-];
+}, {
+  label: 'Deutsche',
+  value: 'de',
+}, {
+  label: 'Nederlands',
+  value: 'nl',
+}];
 
 const assets = {
   GAS: '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7',

@@ -29,7 +29,7 @@ export default {
   balance: 'BALANCE',
   block: 'Block',
   buy: 'Buy',
-  buyAph: 'buy Aph',
+  buyAph: 'Buy APH',
   buyNow: 'Buy Now',
   buyWith: 'Buy With',
   bytes: '{bytes} Bytes',
@@ -37,6 +37,7 @@ export default {
   cancelUc: 'CANCEL',
   cancelled: 'CANCELLED',
   candlesticks: 'Candlesticks',
+  change24H: '24h change',
   chooseAName: 'Choose a name for your new wallet:',
   chooseAPassphrase: 'Choose a passphrase to encrypt your private key:',
   claimGas: 'Claim {gas} Gas',
@@ -232,6 +233,7 @@ export default {
   token: 'Token',
   tokenSaleSuccessful: 'Token Sale Participation Successful. Your Balance of {symbol} is now {balance}',
   tokenStats: 'Token Stats',
+  total: 'Total',
   totalSupply: 'Total Supply',
   tradeDEX: 'Trade DEX',
   tradeHistory: 'Trade history',
@@ -261,7 +263,9 @@ export default {
   waitingForNEO: 'Waiting for NEO transfer confirmation.',
   waitingForTransaction: 'Waiting for transaction to appear on block explorer...',
   walletBalance: 'Wallet Balance',
-  walletBalanceContractBalance: 'Wallet Balance: {walletBalance}\nContract Balance: {contractBalance}',
+  walletBalanceContractBalance: 'Wallet Balance: {walletBalance}\n' +
+                                'Contract Balance: {contractBalance}\n' +
+                                'Open Orders Balance: {openOrdersBalance}',
   wallets: 'Wallets',
   weveAlsoMatchedBackupOrders: `We've also matched {count} backup orders that
   may be matched in the event that any of these orders are taken already.`,

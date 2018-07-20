@@ -173,8 +173,9 @@ export default {
               history.low24Hour = _.minBy(todayTrades, (t) => { return t.price; }).price;
               history.high24Hour = _.maxBy(todayTrades, (t) => { return t.price; }).price;
               history.volume24Hour = _.sumBy(todayTrades, (t) => { return t.quantity; });
-              history.change24Hour = Math.round(((history.close24Hour - history.open24Hour)
+              history.change24HourPercent = Math.round(((history.close24Hour - history.open24Hour)
                 / history.open24Hour) * 10000) / 100;
+              history.change24Hour = history.close24Hour - history.open24Hour;
             } else {
               if (history.trades.length > 0) {
                 history.close24Hour = history.trades[0].price;
@@ -184,6 +185,7 @@ export default {
               }
               history.volume24Hour = 0;
               history.change24Hour = 0;
+              history.change24HourPercent = 0;
             }
             resolve(history);
           })
