@@ -35,14 +35,12 @@
 
       <div class="token-details">
         <aph-token-icon :symbol="$store.state.currentMarket.quoteCurrency"></aph-token-icon>
-        <div class="market-name">{{ $store.state.currentMarket.marketName }}</div>
-        <div class="price">
-          <span class="label">{{$t('priceUc')}}</span>
-          <div class="base-price">
-            {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
-          </div>
-          <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">{{ $formatNumber($store.state.tradeHistory.change24Hour) }}</div>
+
+        <div class="base-price">
+          {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
         </div>
+        <span class="label">{{$t('change')}} ({{$store.state.currentMarket.quoteCurrency}})</span>
+        <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">{{ $formatNumber($store.state.tradeHistory.change24Hour) }}</div>
       </div>
     </div>
   </section>
@@ -178,6 +176,10 @@ export default {
       display: flex;
       flex-direction: column;
 
+      > *:nth-child(n + 2) {
+        margin-top: $space;
+      }
+
       .aph-token-icon {
       }
 
@@ -186,26 +188,22 @@ export default {
         margin-top: $space;
       }
 
-      .price {
-        align-items: flex-end;
-        display: flex;
-        flex-direction: column;
-        margin-top: $space;
+      .label {
+        @extend %small-uppercase-grey-label-dark;
+      }
 
-        .label {
-          @extend %small-uppercase-grey-label-dark;
-        }
+      .base-price {
+        font-family: GilroySemibold;
+        font-size: toRem(16px);
+      }
 
-        .base-price {
-          font-family: GilroySemibold;
-          font-size: toRem(16px);
-          margin-top: $space-sm;
-        }
+      .base-price-converted {
+        font-family: GilroySemibold;
+        font-size: toRem(16px);
       }
 
       .change {
         font-size: toRem(12px);
-        margin-top: $space-sm;
 
         &.increase {
           color: $green;
