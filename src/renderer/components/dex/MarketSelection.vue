@@ -171,7 +171,7 @@ export default {
       }
 
       .value {
-        flex: 4;
+        flex: 3;
         font-family: GilroySemibold;
         font-size: toRem(12px);
       }
