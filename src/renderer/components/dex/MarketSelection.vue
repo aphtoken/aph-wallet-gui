@@ -39,6 +39,9 @@
         <div class="base-price">
           {{ $formatTokenAmount($store.state.tradeHistory.close24Hour) }}
         </div>
+        <div class="base-price-converted">
+          {{ $formatMoney($store.state.tradeHistory.close24Hour) }}
+        </div>
         <span class="label">{{$t('change')}} ({{$store.state.currentMarket.quoteCurrency}})</span>
         <div :class="['change', {decrease: $store.state.tradeHistory.change24Hour < 0, increase: $store.state.tradeHistory.change24Hour > 0}]">{{ $formatNumber($store.state.tradeHistory.change24Hour) }}</div>
       </div>
