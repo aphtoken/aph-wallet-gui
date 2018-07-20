@@ -43,7 +43,7 @@
       </div>
       <div class="footer">
         <div class="estimate">
-          <div class="label">{{$t('estimate')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
+          <div class="label">{{$t('estimate')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.baseCurrency : '' }})</div>
           <div class="value">{{ $formatTokenAmount(estimate) }}</div>
         </div>
         <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
@@ -62,10 +62,10 @@
           <div class="row" v-if="quoteHolding.symbol !== 'APH'">
             <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">{{$t('depositAPH')}}</button>
             <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">{{$t('withdrawAPH')}}</button>
-            <!-- Only the contract owner or manager can do this.
-            <button @click="setMarket" class="test-btn">Setup Market</button> -->
           </div>
         </div>
+        <!-- Only the contract owner or manager can do this.
+            <button @click="setMarket" class="test-btn">Setup Market</button> -->
       </div>
     </section>
     <aph-order-confirmation-modal v-if="$store.state.showOrderConfirmationModal"

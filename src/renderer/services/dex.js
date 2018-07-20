@@ -14,7 +14,7 @@ import wallets from './wallets';
 import ledger from './ledger';
 import { store } from '../store';
 
-import { assets } from '../constants';
+import { assets, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SENDER = 0xfa;
 const TX_ATTR_USAGE_SCRIPT = 0x20;
@@ -574,24 +574,29 @@ export default {
   },
 
   formDepositsForOrder(order) {
-    let totalOfferQuantityToSell = new BigNumber(0);
+    let totalQuantityToSell = new BigNumber(0);
     let totalFees = new BigNumber(0);
+    const sellAssetHolding = neo.getHolding(order.assetIdToSell);
+
+    if (order.quantity.isGreaterThan(0) && sellAssetHolding.canPull === false) {
+      totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
+    }
+
     order.offersToTake.forEach((o) => {
       if (o.isBackupOffer !== true) {
-        totalOfferQuantityToSell = totalOfferQuantityToSell.plus(order.side === 'Buy' ? o.quantity.multipliedBy(o.price) : o.quantity);
+        totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? o.quantity.multipliedBy(o.price) : o.quantity);
         totalFees = totalFees.plus(order.side === 'Buy' ? order.market.buyFee : order.market.sellFee);
       }
     });
 
-    const sellAssetHolding = neo.getHolding(order.assetIdToSell);
     order.deposits = [];
-    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalOfferQuantityToSell))) {
+    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalQuantityToSell))) {
       order.deposits.push({
         symbol: sellAssetHolding.symbol,
         assetId: order.assetIdToSell,
         currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
-        quantityRequired: new BigNumber(totalOfferQuantityToSell),
-        quantityToDeposit: new BigNumber(totalOfferQuantityToSell).minus(sellAssetHolding.contractBalance),
+        quantityRequired: new BigNumber(totalQuantityToSell),
+        quantityToDeposit: new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance),
       });
     }
 
@@ -617,10 +622,26 @@ export default {
           depositPromises.push(this.depositAsset(d.assetId, d.quantityToDeposit.toNumber()));
         });
 
+        const watchInterval = setInterval(() => {
+          let waiting = false;
+          order.deposits.forEach((d) => {
+            const holding = neo.getHolding(d.assetId);
+            if (holding.contractBalance.isLessThan(d.quantityRequired)) {
+              waiting = true;
+            }
+          });
+
+          if (waiting === false) {
+            clearInterval(watchInterval);
+            resolve(order);
+          }
+        }, intervals.BLOCK);
+
         Promise.all(depositPromises)
           .then(() => {
             store.dispatch('fetchHoldings', {
               done: () => {
+                clearInterval(watchInterval);
                 setTimeout(() => {
                   resolve(order);
                 }, 5000);
@@ -786,59 +807,84 @@ export default {
       try {
         let neoToSend = 0;
         let gasToSend = 0;
+        let holding = null;
 
         if (assetId === assets.NEO) {
-          const neoHolding = neo.getHolding(assets.NEO);
+          holding = neo.getHolding(assets.NEO);
           neoToSend = quantity;
-          if (neoToSend > neoHolding.balance) {
+          if (neoToSend > holding.balance) {
             reject('Insufficient NEO.');
             return;
           }
-        }
-
-        if (assetId === assets.GAS) {
-          const gasHolding = neo.getHolding(assets.GAS);
+        } else if (assetId === assets.GAS) {
+          holding = neo.getHolding(assets.GAS);
           gasToSend = quantity;
-          if (gasToSend > gasHolding.balance) {
+          if (gasToSend > holding.balance) {
             reject('Insufficient GAS.');
+            return;
+          }
+        } else {
+          holding = neo.getHolding(assetId);
+          if (holding.balance.isLessThan(quantity)) {
+            reject(`Insufficient ${holding != null ? holding.symbol : assetId}.`);
             return;
           }
         }
 
-        this.executeContractTransaction('deposit',
-          [
-            u.reverseHex(assetId),
-            u.num2fixed8(quantity),
-          ], neoToSend, gasToSend)
-          .then((res) => {
-            if (res.success) {
-              alerts.success('Deposit relayed, waiting for confirmation...');
-              neo.monitorTransactionConfirmation(res.tx, true)
-                .then(() => {
-                  const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-                  if (inMemoryHolding) {
-                    inMemoryHolding.balance = null;
-                  }
+        if (holding.canPull !== false) {
+          this.executeContractTransaction('deposit',
+            [
+              u.reverseHex(assetId),
+              u.num2fixed8(quantity),
+            ], neoToSend, gasToSend)
+            .then((res) => {
+              if (res.success) {
+                alerts.success('Deposit relayed, waiting for confirmation...');
+                neo.monitorTransactionConfirmation(res.tx, true)
+                  .then(() => {
+                    const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
+                    if (inMemoryHolding) {
+                      inMemoryHolding.balance = null;
+                    }
 
-                  resolve(res.tx);
-                })
-                .catch((e) => {
-                  reject(e);
-                });
-            } else {
-              reject('Transaction rejected');
-            }
+                    resolve(res.tx);
+                  })
+                  .catch((e) => {
+                    reject(e);
+                  });
+              } else {
+                reject('Transaction rejected');
+              }
 
-            // set in memory holding balance to null so it will pick up the new balance
-            // if it was skipping it before because we didn't hold any
-            const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-            if (inMemoryHolding) {
-              inMemoryHolding.balance = null;
-            }
+              // set in memory holding balance to null so it will pick up the new balance
+              // if it was skipping it before because we didn't hold any
+              const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
+              if (inMemoryHolding) {
+                inMemoryHolding.balance = null;
+              }
+            })
+            .catch((e) => {
+              reject(`Deposit Failed. ${e.message}`);
+            });
+        } else {
+          const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+          neo.sendFunds(dexAddress, assetId, quantity, true, () => {
+            alerts.success('Deposit relayed, waiting for confirmation...');
           })
-          .catch((e) => {
-            reject(`Deposit Failed. ${e.message}`);
-          });
+            .then((tx) => {
+              resolve(tx);
+
+              // set in memory holding balance to null so it will pick up the new balance
+              // if it was skipping it before because we didn't hold any
+              const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
+              if (inMemoryHolding) {
+                inMemoryHolding.balance = null;
+              }
+            })
+            .catch((e) => {
+              reject(`Deposit Failed. ${e.message}`);
+            });
+        }
       } catch (e) {
         reject(`Deposit Failed. ${e.message}`);
       }

@@ -519,6 +519,7 @@ export default {
                   nep5balance.name = val.name;
                   nep5balance.totalBalance = toBigNumber(nep5balance.balance).plus(nep5balance.contractBalance);
                   nep5balance.decimals = val.decimals;
+                  nep5balance.canPull = nep5.canPull;
 
                   if (val.balance > 0 || nep5.isCustom === true) {
                     if (nep5.isCustom !== true && nep5balance.totalBalance.isGreaterThan(0)) {
@@ -677,6 +678,7 @@ export default {
                   name: fetchedToken.name,
                   network: currentNetwork.net,
                   decimals: fetchedToken.decimals,
+                  canPull: fetchedToken.canPull,
                 };
                 let isDefaultToken = false;
                 defaultList.forEach((defaultToken) => {
