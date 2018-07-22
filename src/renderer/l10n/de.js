@@ -39,6 +39,7 @@ export default {
   candlesticks: 'Candlesticks',
   chooseAName: 'Wählen einen Namen für Dein neues Wallet:',
   chooseAPassphrase: 'Gib eine Passphrase ein, um Deinen privaten Schlüssel (private Key) zu verschlüsseln:',
+  claim: 'Claim',
   claimGas: 'Claim {gas} GAS',
   claiming: 'Claiming...',
   claimingGas: `Das Claiming GAS, welches sich aus Deinem NEO-Bestand angesammelt hat,
@@ -51,6 +52,7 @@ export default {
   und dezentrale Peer-to-Peer Handelsplattform,
   die in zukünftigen Versionen direkt in dieses 
   Wallet integriert wird.`,
+  commit: 'Commit',
   completedOrders: 'Ausgeführte Order',
   confirmPassphrase: 'Passphrase bestätigen',
   confirmRemove: 'Bist Du sicher, dass Du es entfernen möchtest?',

@@ -39,6 +39,7 @@ export default {
   candlesticks: 'Candlesticks',
   chooseAName: 'Kies een naam voor je nieuwe wallet:',
   chooseAPassphrase: 'Kies een wachtwoord om uw persoonlijke sleutel te coderen:',
+  claim: 'Claim',
   claimGas: 'Claim {gas} Gas',
   claiming: 'Claiming...',
   claimingGas: `Het claimen van GAS dat zich heeft opgebouwd door het bezitten van NEO bestaat uit
@@ -51,6 +52,7 @@ export default {
 +gebaseerd peer-to-peer handelsoplossing
 +die in de toekomstige versie meteen zal worden geupdate in deze
 +wallet.`,
+  commit: 'Commit',
   completedOrders: 'Voltooide Orders',
   confirmPassphrase: 'Bevestig Wachtwoord',
   confirmRemove: 'Weet je zeker dat je wilt verwijderen',

@@ -117,6 +117,10 @@ export default new Router({
           component: require('@/components/BuyAph').default,
         },
         {
+          path: 'commit',
+          component: require('@/components/Commit').default,
+        },
+        {
           path: 'dex',
           component: require('@/components/Dex').default,
           children: [

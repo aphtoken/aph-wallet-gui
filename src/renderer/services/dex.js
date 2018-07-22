@@ -1465,6 +1465,131 @@ export default {
     });
   },
 
+  fetchCommitState() {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentWallet = wallets.getCurrentWallet();
+        const contributionKey = `${wallet.getScriptHashFromAddress(currentWallet.address)}`; // todo, build rest of storage key here;
+
+        const rpcClient = network.getRpcClient();
+        rpcClient.query({
+          method: 'getstorage',
+          params: [assets.DEX_SCRIPT_HASH, contributionKey],
+        })
+          .then((res) => {
+            // todo, parse response
+            resolve(u.reverseHex(res.result));
+          })
+          .catch((e) => {
+            reject(`Failed to fetch commit state. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch commit state. ${e.message}`);
+      }
+    });
+  },
+
+  commitAPH(quantity) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('commit',
+          [
+            u.num2fixed8(quantity),
+          ])
+          .then((res) => {
+            if (res.success) {
+              alerts.success('Commit relayed, waiting for confirmation...');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
+                  if (inMemoryHolding) {
+                    inMemoryHolding.balance = null;
+                  }
+
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(`Commit Failed. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Commit Failed. ${e.message}`);
+      }
+    });
+  },
+
+  claimAPH() {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('claim',
+          [])
+          .then((res) => {
+            if (res.success) {
+              alerts.success('Claim relayed, waiting for confirmation...');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
+                  if (inMemoryHolding) {
+                    inMemoryHolding.balance = null;
+                  }
+
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(`Claim Failed. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Claim Failed. ${e.message}`);
+      }
+    });
+  },
+
+  compoundAPH() {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('compound',
+          [])
+          .then((res) => {
+            if (res.success) {
+              alerts.success('Compound relayed, waiting for confirmation...');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
+                  if (inMemoryHolding) {
+                    inMemoryHolding.balance = null;
+                  }
+
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(`Compound Failed. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Compound Failed. ${e.message}`);
+      }
+    });
+  },
+
   setMarket(quoteAssetId, baseAssetId, minimumSize, minimumTickSize, buyFee, sellFee) {
     return new Promise((resolve, reject) => {
       try {

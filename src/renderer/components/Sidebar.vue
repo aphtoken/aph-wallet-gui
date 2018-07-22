@@ -16,6 +16,12 @@
         </span>
         <span class="label">{{$t('tradeDEX')}}</span>
       </router-link>
+      <router-link v-if="currentNetwork.net !== 'MainNet'" to="/authenticated/commit">
+        <span class="icon">
+          <aph-icon name="commit"></aph-icon>
+        </span>
+        <span class="label">{{$t('commit')}} APH</span>
+      </router-link>
       <router-link v-else to="/authenticated/buy-aph">
         <span class="icon">
           <aph-icon name="dex"></aph-icon>

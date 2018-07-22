@@ -40,6 +40,7 @@ export default {
   change24H: '24h change',
   chooseAName: 'Choose a name for your new wallet:',
   chooseAPassphrase: 'Choose a passphrase to encrypt your private key:',
+  claim: 'Claim',
   claimGas: 'Claim {gas} Gas',
   claiming: 'Claiming...',
   claimingGas: `Claiming GAS which has accumulated from your NEO holdings takes
@@ -52,6 +53,7 @@ export default {
   based peer-to-peer decentralized trading
   solution that will be updated directly into this wallet in a future
   release.`,
+  commit: 'Commit',
   completedOrders: 'Completed Orders',
   confirmPassphrase: 'Confirm passphrase',
   confirmRemove: 'Are you sure you\'d like to remove',
