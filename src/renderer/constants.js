@@ -1,12 +1,15 @@
 import en from './l10n/en';
 import de from './l10n/de';
 import nl from './l10n/nl';
-
+import cn from './l10n/cn';
+import ko from './l10n/ko';
 // i18n
 const messages = {
   en,
   de,
   nl,
+  cn,
+  ko,
 };
 
 const languages = [{
@@ -18,6 +21,12 @@ const languages = [{
 }, {
   label: 'Nederlands',
   value: 'nl',
+}, {
+  label: '中文',
+  value: 'cn',
+}, {
+  label: '한국어',
+  value: 'ko',
 }];
 
 const assets = {
