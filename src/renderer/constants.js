@@ -3,6 +3,9 @@ import de from './l10n/de';
 import nl from './l10n/nl';
 import cn from './l10n/cn';
 import ko from './l10n/ko';
+import jp from './l10n/jp';
+import ru from './l10n/ru';
+
 // i18n
 const messages = {
   en,
@@ -10,23 +13,31 @@ const messages = {
   nl,
   cn,
   ko,
+  jp,
+  ru,
 };
 
 const languages = [{
   label: 'English',
   value: 'en',
 }, {
+  label: '中文',
+  value: 'cn',
+}, {
   label: 'Deutsche',
   value: 'de',
+}, {
+  label: '日本語',
+  value: 'jp',
+}, {
+  label: '한국어',
+  value: 'ko',
 }, {
   label: 'Nederlands',
   value: 'nl',
 }, {
-  label: '中文',
-  value: 'cn',
-}, {
-  label: '한국어',
-  value: 'ko',
+  label: 'русский',
+  value: 'ru',
 }];
 
 const assets = {
