@@ -1465,11 +1465,43 @@ export default {
     });
   },
 
-  fetchCommitState() {
+  fetchCommitState(address) {
     return new Promise((resolve, reject) => {
       try {
-        const currentWallet = wallets.getCurrentWallet();
-        const contributionKey = `${wallet.getScriptHashFromAddress(currentWallet.address)}`; // todo, build rest of storage key here;
+        this.fetchCommitUserState(address)
+          .then((commitState) => {
+            this.fetchCommitDEXState()
+              .then((dexState) => {
+                commitState.totalUnitsContributed = dexState.totalUnitsContributed;
+                commitState.lastAppliedFeeSnapshot = dexState.lastAppliedFeeSnapshot;
+                commitState.totalFeeUnits = dexState.totalFeeUnits;
+                commitState.totalFeesCollected = dexState.totalFeesCollected;
+
+                commitState.feesCollectedSinceCommit = commitState.totalFeesCollected - commitState.feesCollectedSnapshot;
+                commitState.userWeight = (commitState.totalFeesCollected - commitState.feesCollectedSnapshot) * commitState.quantityCommitted;
+                commitState.networkWeight = (commitState.totalFeeUnits - commitState.feeUnitsSnapshot);
+                commitState.weightPercentage = commitState.userWeight / commitState.networkWeight;
+
+                // commitState.availableToClaim = (commitState.lastAppliedFeeSnapshot - commitState.feesCollectedSnapshot) * user weight / network weight during commitment
+                resolve(commitState);
+              })
+              .catch((e) => {
+                reject(`Failed to fetch commit state. ${e.message}`);
+              });
+          })
+          .catch((e) => {
+            reject(`Failed to fetch commit state. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch commit state. ${e.message}`);
+      }
+    });
+  },
+
+  fetchCommitUserState(address) {
+    return new Promise((resolve, reject) => {
+      try {
+        const contributionKey = `${u.reverseHex(wallet.getScriptHashFromAddress(address))}${u.reverseHex(assets.APH)}d0`;
 
         const rpcClient = network.getRpcClient();
         rpcClient.query({
@@ -1477,8 +1509,81 @@ export default {
           params: [assets.DEX_SCRIPT_HASH, contributionKey],
         })
           .then((res) => {
-            // todo, parse response
-            resolve(u.reverseHex(res.result));
+            const commitState = {
+              userScriptHash: wallet.getScriptHashFromAddress(address),
+              quantityCommitted: 0,
+              contributionHeight: 0,
+              contributionTimestamp: 0,
+              compoundHeight: 0,
+              feesCollectedSnapshot: 0,
+              feeUnitsSnapshot: 0,
+            };
+
+            if (!res || !res.result || res.result.length < 120) {
+              resolve(commitState);
+            }
+
+            commitState.quantityCommitted = u.fixed82num(res.result.substr(40, 16));
+            commitState.contributionHeight = u.fixed82num(res.result.substr(56, 16)) * 100000000;
+            commitState.compoundHeight = u.fixed82num(res.result.substr(72, 16)) * 100000000;
+            commitState.feesCollectedSnapshot = u.fixed82num(res.result.substr(98, 16));
+            commitState.feeUnitsSnapshot = u.fixed82num(res.result.substr(104, 16));
+
+            rpcClient.getBlock(commitState.contributionHeight)
+              .then((data) => {
+                commitState.contributionTimestamp = data.time;
+                resolve(commitState);
+              });
+          })
+          .catch((e) => {
+            reject(`Failed to fetch commit state. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch commit state. ${e.message}`);
+      }
+    });
+  },
+
+  fetchCommitDEXState() {
+    return new Promise((resolve, reject) => {
+      try {
+        const rpcClient = network.getRpcClient();
+        rpcClient.query({
+          method: 'getstorage',
+          params: [assets.DEX_SCRIPT_HASH, `${u.reverseHex(assets.APH)}fa`],
+        })
+          .then((res) => {
+            const dexState = {
+              totalUnitsContributed: 0,
+              lastAppliedFeeSnapshot: 0,
+              totalFeeUnits: 0,
+            };
+
+            if (!res || !res.result || res.result.length < 48) {
+              resolve(dexState);
+            }
+
+            dexState.totalUnitsContributed = u.fixed82num(res.result.substr(0, 16));
+            dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 16));
+            dexState.totalFeeUnits = u.fixed82num(res.result.substr(32, 16));
+
+
+            rpcClient.query({
+              method: 'getstorage',
+              params: [assets.DEX_SCRIPT_HASH, `${u.reverseHex(assets.APH)}fc`],
+            })
+              .then((res) => {
+                if (!res || !res.result || res.result.length < 32) {
+                  dexState.totalFeesCollected = 0;
+                  resolve(dexState);
+                }
+
+                dexState.totalFeesCollected = u.fixed82num(res.result.substr(0, 16));
+                resolve(dexState);
+              })
+              .catch((e) => {
+                reject(`Failed to fetch commit state. ${e.message}`);
+              });
           })
           .catch((e) => {
             reject(`Failed to fetch commit state. ${e.message}`);

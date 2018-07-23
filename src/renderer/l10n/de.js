@@ -46,6 +46,7 @@ export default {
   erfordert mehrere Schritte. Wir haben den Vorgang automatisiert, aber er kann bis zu
   5 Minuten dauern.`,
   clickHere: 'Hier klicken',
+  close: 'Close',
   closingYourWallet: `Das vorzeitige Schließen Deines APH Wallets kann dazu führen,
   dass der Claim GAS Vorgang fehlschlägt und erneut ausgeführt werden muss`,
   comingSoon: `Bald erhältlich: Die Aphelion DEX ist eine vollintegrierte
@@ -53,6 +54,13 @@ export default {
   die in zukünftigen Versionen direkt in dieses 
   Wallet integriert wird.`,
   commit: 'Commit',
+  commitInfoHeader: `A portion of the fees from trades can be claimed by Aphelion 
+holders that have committed APH balance.`,
+  commitInfoBody1: `On each match, the taker pays the match fee based on the market settings, 
+  and 80 % of the fee is added to the total fees collected on behalf of contributors.`,
+  commitInfoBody2: `After committing APH, 4,800 blocks must occur before fees may be claimed. 
+  Amounts earned are relative to the amount committed and proportional weight compared to other
+  contributors during the time of commitment`,
   completedOrders: 'Ausgeführte Order',
   confirmPassphrase: 'Passphrase bestätigen',
   confirmRemove: 'Bist Du sicher, dass Du es entfernen möchtest?',

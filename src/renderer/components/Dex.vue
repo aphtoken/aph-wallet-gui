@@ -45,7 +45,7 @@ export default {
     clearInterval(this.interval);
   },
 
-  beforeMount() {
+  mounted() {
     this.$store.state.showPortfolioHeader = false;
     this.$store.dispatch('fetchMarkets', {
       done: () => {
