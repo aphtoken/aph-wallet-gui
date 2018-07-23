@@ -10,43 +10,43 @@
           <span class="icon">
             <aph-icon name="dashboard"></aph-icon>
           </span>
-          <span class="label">{{$t('dashboard')}}</span>
+          <span class="label">{{ $t('dashboard') }}</span>
         </router-link>
         <router-link v-if="currentNetwork.net !== 'MainNet'" to="/authenticated/dex">
           <span class="icon">
             <aph-icon name="dex"></aph-icon>
           </span>
-          <span class="label">{{$t('tradeDEX')}}</span>
+          <span class="label">{{ $t('tradeDEX') }}</span>
         </router-link>
         <router-link v-else to="/authenticated/buy-aph">
           <span class="icon">
             <aph-icon name="dex"></aph-icon>
           </span>
-          <span class="label">{{$t('buyAph')}}</span>
+          <span class="label">{{ $t('buyAph') }}</span>
         </router-link>
         <router-link to="/authenticated/assets">
           <span class="icon">
             <aph-icon name="wallet"></aph-icon>
           </span>
-          <span class="label">{{$t('assets')}}</span>
+          <span class="label">{{ $t('assets') }}</span>
         </router-link>
         <router-link to="/authenticated/history">
           <span class="icon">
             <aph-icon name="history"></aph-icon>
           </span>
-          <span class="label">{{$t('history')}}</span>
+          <span class="label">{{ $t('history') }}</span>
         </router-link>
         <router-link to="/authenticated/token-sale">
           <span class="icon">
             <aph-icon name="ico"></aph-icon>
           </span>
-          <span class="label">{{$t('joinIco')}}</span>
+          <span class="label">{{ $t('joinIco') }}</span>
         </router-link>
         <router-link to="/authenticated/settings">
           <span class="icon">
             <aph-icon name="settings"></aph-icon>
           </span>
-          <span class="label">{{$t('settings')}}</span>
+          <span class="label">{{ $t('settings') }}</span>
         </router-link>
       </div>
       <div class="logout-wrapper" @click.prevent="logout">

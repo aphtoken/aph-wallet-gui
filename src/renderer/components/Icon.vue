@@ -449,10 +449,10 @@ export default {
   }
 
   .double-arrow-left {
-    path:first-child {
+    .fill:first-child {
       transform: rotate(90deg) translate(-20.5px, -25.5px);
     }
-    path:last-child {
+    .fill:last-child {
       transform: rotate(90deg) translate(-20.5px, -29.5px);
     }
   }
@@ -464,10 +464,10 @@ export default {
   }
 
   .double-arrow-right {
-    path:first-child {
+    .fill:first-child {
       transform: rotate(270deg) translate(-29.5px, -20.5px);
     }
-    path:last-child {
+    .fill:last-child {
       transform: rotate(270deg) translate(-29.5px, -24.5px);
     }
   }
