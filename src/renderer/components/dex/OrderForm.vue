@@ -233,12 +233,9 @@ export default {
     },
     estimate() {
       try {
-        if (!this.$store.state.orderQuantity) {
-          return 0;
-        }
-
-        return new BigNumber(this.price).multipliedBy(
-          new BigNumber(this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue));
+        return new BigNumber(this.total).multipliedBy(
+          new BigNumber(this.$store.state.currentMarket ?
+            this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue : 0));
       } catch (e) {
         console.log(e);
         return 0;
