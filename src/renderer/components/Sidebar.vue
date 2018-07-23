@@ -1,7 +1,7 @@
 <template>
-  <section id="sidebar" :class="{'collapsed': togglable && collapsed, 'expanded': togglable && !collapsed}">
-    <aph-icon v-if="togglable" @click.native="collapsed = !collapsed" class="toggle" :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'"></aph-icon>
-    <template v-if="!togglable || (togglable && !collapsed)">
+  <section id="sidebar" :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
+    <aph-icon v-if="toggleable" @click.native="collapsed = !collapsed" class="toggle" :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'"></aph-icon>
+    <template v-if="!toggleable || (toggleable && !collapsed)">
       <div class="header">
         <aph-icon name="logo-mark"></aph-icon>
       </div>
@@ -79,7 +79,7 @@ const SECONDS_BEFORE_NETWORK_ERROR = 120;
 export default {
   data() {
     return {
-      togglable: false,
+      toggleable: false,
       collapsed: true,
     };
   },
@@ -115,7 +115,7 @@ export default {
   },
   watch: {
     $route(to) {
-      this.togglable = to.matched.some(record => record.meta.isMenuTogglable);
+      this.toggleable = to.matched.some(record => record.meta.isMenuToggleable);
     },
     collapsed(collapsed) {
       document.querySelector('#authenticated-wrapper > .content')

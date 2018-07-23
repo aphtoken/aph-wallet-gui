@@ -120,7 +120,7 @@ export default new Router({
           path: 'dex',
           component: require('@/components/Dex').default,
           meta: {
-            isMenuTogglable: true,
+            isMenuToggleable: true,
           },
           children: [
             {
