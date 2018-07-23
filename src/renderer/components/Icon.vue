@@ -108,10 +108,22 @@
         transform="translate(-20.5 -22.5)" />
     </svg>
 
+    <!-- double-arrow-left -->
+    <svg class="icon double-arrow-left" v-if="name === 'double-arrow-left'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 9">
+      <path class="fill cls-1" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" />
+      <path class="fill cls-1" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" />  
+    </svg>
+
     <!-- arrow-right -->
     <svg class="icon arrow-right" v-if="name === 'arrow-right'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 9">
       <path class="fill cls-1" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z"
         transform="translate(-20.5 -22.5)" />
+    </svg>
+
+    <!-- double-arrow-right -->
+    <svg class="icon double-arrow-right" v-if="name === 'double-arrow-right'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 9">
+      <path class="fill cls-1" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" />
+      <path class="fill cls-1" d="M25,27.5a.47.47,0,0,1-.35-.15l-4-4a.49.49,0,0,1,.7-.7L25,26.29l3.65-3.64a.49.49,0,0,1,.7.7l-4,4A.47.47,0,0,1,25,27.5Z" />
     </svg>
 
     <!-- add -->
@@ -436,9 +448,27 @@ export default {
     }
   }
 
+  .double-arrow-left {
+    .fill:first-child {
+      transform: rotate(90deg) translate(-20.5px, -25.5px);
+    }
+    .fill:last-child {
+      transform: rotate(90deg) translate(-20.5px, -29.5px);
+    }
+  }
+
   .arrow-right {
     path {
       transform: rotate(270deg) translate(-29.5px, -22.5px);
+    }
+  }
+
+  .double-arrow-right {
+    .fill:first-child {
+      transform: rotate(270deg) translate(-29.5px, -20.5px);
+    }
+    .fill:last-child {
+      transform: rotate(270deg) translate(-29.5px, -24.5px);
     }
   }
 
