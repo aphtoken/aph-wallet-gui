@@ -251,7 +251,9 @@ export default {
   waitingForNEO: 'NEO 전송 확인을 기다리는 중입니다.',
   waitingForTransaction: '거래가 블록 탐색기에 표시될때까지 기다리는 중...',
   walletBalance: '지갑 잔액',
-  walletBalanceContractBalance: '지갑 잔액: {walletBalance}\n계약 잔액: {contractBalance}',
+  walletBalanceContractBalance: `지갑 잔액: {walletBalance}
+  계약 잔액: {contractBalance}
+  미결 주문 잔액: {openOrdersBalance}`,
   wallets: '지갑',
   weveAlsoMatchedBackupOrders: `We've also matched {count} backup orders that
   may be matched in the event that any of these orders are taken already.`,

@@ -250,7 +250,9 @@ export default {
   waitingForNEO: '正在等待NEO转账确认。',
   waitingForTransaction: '正在等待交易在区块浏览器中出现......',
   walletBalance: '钱包余额',
-  walletBalanceContractBalance: '钱包余额：{walletBalance}\n 合同余额: {contractBalance}',
+  walletBalanceContractBalance: `钱包余额：{walletBalance}
+  合同余额: {contractBalance}
+  未结订单余额 {openOrdersBalance}`,
   wallets: '钱包',
   weveAlsoMatchedBackupOrders: `我们已匹配到了{count}，即如果这些订单中的任何一个已经被执行，
   则可能会匹配到备份订单。`,
