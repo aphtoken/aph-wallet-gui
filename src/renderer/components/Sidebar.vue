@@ -1,8 +1,10 @@
 <template>
   <section id="sidebar" :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
-    <aph-icon v-if="toggleable" 
-      @click.native="$store.commit('setMenuCollapsed', !collapsed)" class="toggle" 
-      :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'"></aph-icon>
+    <aph-icon class="toggle" 
+      v-if="toggleable"
+      @click.native="$store.commit('setMenuCollapsed', !collapsed)" 
+      :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'">
+    </aph-icon>
     <template v-if="!toggleable || (toggleable && !collapsed)">
       <div class="header">
         <aph-icon name="logo-mark"></aph-icon>
