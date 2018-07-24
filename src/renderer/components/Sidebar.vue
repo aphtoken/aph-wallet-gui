@@ -1,6 +1,8 @@
 <template>
   <section id="sidebar" :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
-    <aph-icon v-if="toggleable" @click.native="collapsed = !collapsed" class="toggle" :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'"></aph-icon>
+    <aph-icon v-if="toggleable" 
+      @click.native="$store.commit('setMenuCollapsed', !collapsed)" class="toggle" 
+      :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'"></aph-icon>
     <template v-if="!toggleable || (toggleable && !collapsed)">
       <div class="header">
         <aph-icon name="logo-mark"></aph-icon>
@@ -77,12 +79,6 @@ import { mapGetters } from 'vuex';
 const SECONDS_BEFORE_NETWORK_ERROR = 120;
 
 export default {
-  data() {
-    return {
-      toggleable: false,
-      collapsed: true,
-    };
-  },
   computed: {
     showNetworkError() {
       if (!this.$store.state.lastReceivedBlock || !this.$store.state.lastSuccessfulRequest) {
@@ -104,6 +100,11 @@ export default {
       'version',
       'sendInProgress',
     ]),
+
+    ...mapGetters({
+      toggleable: 'menuToggleable',
+      collapsed: 'menuCollapsed',
+    }),
   },
 
   methods: {
@@ -112,22 +113,13 @@ export default {
       this.$store.commit('handleLogout');
       this.$router.push('/login');
     },
+    setCollapsed(collapsed) {
+      this.$store.commit('setMenuCollapsed', collapsed);
+    },
   },
   watch: {
     $route(to) {
-      this.toggleable = to.matched.some(record => record.meta.isMenuToggleable);
-
-      if (!this.toggleable) {
-        document.querySelector('#authenticated-wrapper > .content')
-          .classList.remove('filler');
-      } else if (this.toggleable && !this.collapsed) {
-        document.querySelector('#authenticated-wrapper > .content')
-          .classList.add('filler');
-      }
-    },
-    collapsed(collapsed) {
-      document.querySelector('#authenticated-wrapper > .content')
-        .classList[collapsed ? 'remove' : 'add']('filler');
+      this.$store.commit('setMenuToggleable', to.matched.some(record => record.meta.isMenuToggleable));
     },
   },
 };
