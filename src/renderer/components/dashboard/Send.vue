@@ -34,7 +34,7 @@
           </div>
         </div>
       </div>
-      <div class="waiting" v-if="$store.state.sendInProgress === true">{{$t('waitingForTransaction')}}</div>
+      <div class="waiting" v-if="sendInProgress">{{$t('waitingForTransaction')}}</div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">{{$t('back')}}</button>
         <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
@@ -112,6 +112,7 @@ export default {
       return !this.address || !this.amount || !this.currency || !parseFloat(this.amount);
     },
     ...mapGetters([
+      'sendInProgress',
       'sendModel',
     ]),
   },
@@ -229,7 +230,7 @@ export default {
   },
 
   mounted() {
-    if (this.$store.state.sendInProgress) {
+    if (this.sendInProgress) {
       this.address = this.sendModel.address;
       this.amount = this.sendModel.amount;
       this.contact = this.sendModel.contact;
@@ -239,8 +240,8 @@ export default {
     }
 
     storeUnwatch = this.$store.watch(
-      () => {
-        return this.$store.state.sendInProgress;
+      (state, getters) => {
+        return getters.sendInProgress;
       }, (sendInProgress) => {
         this.$store.commit('setSendModel', !sendInProgress ? {} : {
           address: this.address,
@@ -251,7 +252,7 @@ export default {
           sending: this.sending,
         });
 
-        if (sendInProgress === false && this.sending === true) {
+        if (!sendInProgress && this.sending) {
           this.end();
         }
       });

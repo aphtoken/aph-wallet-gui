@@ -34,6 +34,8 @@ export {
   setLastSuccessfulRequest,
   setLatestVersion,
   setMarkets,
+  setMenuCollapsed,
+  setMenuToggleable,
   setOrderHistory,
   setOrderPrice,
   setOrderQuantity,
@@ -96,7 +98,7 @@ function handleLogout(state) {
   state.recentTransactions = [];
   state.searchTransactions = [];
   state.nep5Balances = {};
-  state.sendInProgress = false;
+  state.sendInProgress = {};
   state.currentMarket = null;
   neo.fetchNEP5Tokens();
 }
@@ -106,7 +108,6 @@ function handleNetworkChange(state) {
   state.recentTransactions = [];
   state.searchTransactions = [];
   state.nep5Balances = {};
-  state.sendInProgress = false;
   state.currentMarket = null;
   neo.fetchNEP5Tokens();
 }
@@ -308,11 +309,11 @@ function setShowSendRequestLedgerSignature(state, value) {
 }
 
 function setSendInProgress(state, value) {
-  state.sendInProgress = value;
+  Vue.set(state.sendInProgress, state.currentNetwork.net, value);
 }
 
 function setSendModel(state, value) {
-  state.sendModel = value;
+  Vue.set(state.sendModel, state.currentNetwork.net, value);
 }
 
 function setShowWalletBackupModal(state, value) {
@@ -432,6 +433,14 @@ function setOrdersToShow(state, value) {
 
 function setDepositWithdrawModalModel(state, model) {
   state.depositWithdrawModalModel = model;
+}
+
+function setMenuToggleable(state, menuToggleable) {
+  state.menuToggleable = menuToggleable;
+}
+
+function setMenuCollapsed(state, menuCollapsed) {
+  state.menuCollapsed = menuCollapsed;
 }
 
 function SOCKET_ONOPEN(state, event) {

@@ -1,70 +1,77 @@
 <template>
-  <section id="sidebar">
-    <div class="header">
-      <aph-icon name="logo-mark"></aph-icon>
-    </div>
-    <div class="menu link-list">
-      <router-link :to="sendInProgress ? '/authenticated/dashboard/confirming': '/authenticated/dashboard'">
-        <span class="icon">
-          <aph-icon name="dashboard"></aph-icon>
-        </span>
-        <span class="label">{{$t('dashboard')}}</span>
-      </router-link>
-      <router-link v-if="currentNetwork.net !== 'MainNet'" to="/authenticated/dex">
-        <span class="icon">
-          <aph-icon name="dex"></aph-icon>
-        </span>
-        <span class="label">{{$t('tradeDEX')}}</span>
-      </router-link>
-      <router-link v-else to="/authenticated/buy-aph">
-        <span class="icon">
-          <aph-icon name="dex"></aph-icon>
-        </span>
-        <span class="label">{{$t('buyAph')}}</span>
-      </router-link>
-      <router-link to="/authenticated/assets">
-        <span class="icon">
-          <aph-icon name="wallet"></aph-icon>
-        </span>
-        <span class="label">{{$t('assets')}}</span>
-      </router-link>
-      <router-link to="/authenticated/history">
-        <span class="icon">
-          <aph-icon name="history"></aph-icon>
-        </span>
-        <span class="label">{{$t('history')}}</span>
-      </router-link>
-      <router-link to="/authenticated/token-sale">
-        <span class="icon">
-          <aph-icon name="ico"></aph-icon>
-        </span>
-        <span class="label">{{$t('joinIco')}}</span>
-      </router-link>
-      <router-link to="/authenticated/settings">
-        <span class="icon">
-          <aph-icon name="settings"></aph-icon>
-        </span>
-        <span class="label">{{$t('settings')}}</span>
-      </router-link>
-    </div>
-    <div class="logout-wrapper" @click.prevent="logout">
-      <aph-icon name="logout"></aph-icon>
-    </div>
-    <div class="footer link-list">
-      <div class="network-status">
-        <div class="block">
-          <span class="network">{{ currentNetwork ? currentNetwork.net : 0 }} {{$t('block')}}</span>
-          <span class="index">{{ currentNetwork && currentNetwork.bestBlock ? currentNetwork.bestBlock.index : 0}}</span>
-        </div>
-        <div class="last-update">
-          <div v-if="showNetworkError" class="network-error">{{$t('unableToReachNetwork')}}</div>
-          <div v-else>
-            <aph-timestamp-from-now :timestamp="lastReceivedBlock"></aph-timestamp-from-now>
+  <section id="sidebar" :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
+    <aph-icon class="toggle" 
+      v-if="toggleable"
+      @click.native="setCollapsed(!collapsed)" 
+      :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'">
+    </aph-icon>
+    <template v-if="!toggleable || (toggleable && !collapsed)">
+      <div class="header">
+        <aph-icon name="logo-mark"></aph-icon>
+      </div>
+      <div class="menu link-list">
+        <router-link :to="sendInProgress ? '/authenticated/dashboard/confirming': '/authenticated/dashboard'">
+          <span class="icon">
+            <aph-icon name="dashboard"></aph-icon>
+          </span>
+          <span class="label">{{ $t('dashboard') }}</span>
+        </router-link>
+        <router-link v-if="currentNetwork.net !== 'MainNet'" to="/authenticated/dex">
+          <span class="icon">
+            <aph-icon name="dex"></aph-icon>
+          </span>
+          <span class="label">{{ $t('tradeDEX') }}</span>
+        </router-link>
+        <router-link v-else to="/authenticated/buy-aph">
+          <span class="icon">
+            <aph-icon name="dex"></aph-icon>
+          </span>
+          <span class="label">{{ $t('buyAph') }}</span>
+        </router-link>
+        <router-link to="/authenticated/assets">
+          <span class="icon">
+            <aph-icon name="wallet"></aph-icon>
+          </span>
+          <span class="label">{{ $t('assets') }}</span>
+        </router-link>
+        <router-link to="/authenticated/history">
+          <span class="icon">
+            <aph-icon name="history"></aph-icon>
+          </span>
+          <span class="label">{{ $t('history') }}</span>
+        </router-link>
+        <router-link to="/authenticated/token-sale">
+          <span class="icon">
+            <aph-icon name="ico"></aph-icon>
+          </span>
+          <span class="label">{{ $t('joinIco') }}</span>
+        </router-link>
+        <router-link to="/authenticated/settings">
+          <span class="icon">
+            <aph-icon name="settings"></aph-icon>
+          </span>
+          <span class="label">{{ $t('settings') }}</span>
+        </router-link>
+      </div>
+      <div class="logout-wrapper" @click.prevent="logout">
+        <aph-icon name="logout"></aph-icon>
+      </div>
+      <div class="footer link-list">
+        <div class="network-status">
+          <div class="block">
+            <span class="network">{{ currentNetwork ? currentNetwork.net : 0 }} {{$t('block')}}</span>
+            <span class="index">{{ currentNetwork && currentNetwork.bestBlock ? currentNetwork.bestBlock.index : 0}}</span>
+          </div>
+          <div class="last-update">
+            <div v-if="showNetworkError" class="network-error">{{$t('unableToReachNetwork')}}</div>
+            <div v-else>
+              <aph-timestamp-from-now :timestamp="lastReceivedBlock"></aph-timestamp-from-now>
+            </div>
           </div>
         </div>
+        <div class="version-number">{{ version }}</div>
       </div>
-      <div class="version-number">{{ version }}</div>
-    </div>
+    </template>
   </section>
 </template>
 
@@ -95,6 +102,11 @@ export default {
       'version',
       'sendInProgress',
     ]),
+
+    ...mapGetters({
+      toggleable: 'menuToggleable',
+      collapsed: 'menuCollapsed',
+    }),
   },
 
   methods: {
@@ -102,6 +114,14 @@ export default {
       this.$services.wallets.clearCurrentWallet();
       this.$store.commit('handleLogout');
       this.$router.push('/login');
+    },
+    setCollapsed(collapsed) {
+      this.$store.commit('setMenuCollapsed', collapsed);
+    },
+  },
+  watch: {
+    $route(to) {
+      this.$store.commit('setMenuToggleable', to.matched.some(record => record.meta.isMenuToggleable));
     },
   },
 };
@@ -113,6 +133,7 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: auto;
+  position: relative;
 
   .header {
     flex: none;
@@ -261,6 +282,40 @@ export default {
         font-family: GilroySemibold;
       }
     }
+  }
+
+  &.collapsed {
+    width: $left-sidebar-width-collapsed !important;
+  }
+
+  &.expanded {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    z-index: 10000;
+  }
+
+  .toggle {
+    position: absolute;
+    right: toRem($space);
+    top: 50%;
+    cursor: pointer;
+
+    svg {
+      width: toRem(20px);
+      height: toRem(20px);
+    }
+
+    .fill {
+      fill: #FFF;
+    }
+  }
+}
+
+#authenticated-wrapper .content {
+  &.filler {
+    margin-left: $left-sidebar-width-collapsed;
   }
 }
 </style>

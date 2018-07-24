@@ -1,5 +1,6 @@
 // Colors
 $background: #EEEEF9;
+$background-night: #1f1d33;
 $border-grey: #EEEEFA;
 $dark: #1A193B;
 $darker-grey: #66688D;
@@ -15,6 +16,7 @@ $dark-purple: #171629;
 $red: #FF2F54;
 $light-red: #FFDBDF;
 $softer-dark: #424258;
+$copy-night: #aeaeb8;
 
 $border-radius: 4px;
 $border-width-thick: toRem(5px);
@@ -32,6 +34,7 @@ $button-height: toRem(52px);
 $copy-line-height: 150%;
 $input-height: toRem(52px);
 $left-sidebar-width: toRem(300px);
+$left-sidebar-width-collapsed: toRem(48px);
 $letter-spacing: toRem(1.5px);
 $right-sidebar-width: toRem(400px);
 $space: $font-size;
