@@ -116,6 +116,14 @@ export default {
   watch: {
     $route(to) {
       this.toggleable = to.matched.some(record => record.meta.isMenuToggleable);
+
+      if (!this.toggleable) {
+        document.querySelector('#authenticated-wrapper > .content')
+          .classList.remove('filler');
+      } else if (this.toggleable && !this.collapsed) {
+        document.querySelector('#authenticated-wrapper > .content')
+          .classList.add('filler');
+      }
     },
     collapsed(collapsed) {
       document.querySelector('#authenticated-wrapper > .content')
