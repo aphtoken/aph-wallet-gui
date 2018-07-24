@@ -46,6 +46,7 @@ export default {
 +verschillende stappen.  We hebben het proces voor u geautomatiseerd maar het kan wel tot 
 +5 minuten duren.`,
   clickHere: 'Klik hier',
+  close: 'Close',
   closingYourWallet: `Het afsluiten van je wallet kan resulteren dat het GAS claim proces mislukt.  
 +Mocht dit gebeuren dan bestaat de kans dat het GAS claim proces herhaalt moet worden`,
   comingSoon: `Komt binnenkort: Aphelion DEX is een volledige gedecentraliseerde en geÔntegreerde wallet
@@ -53,6 +54,13 @@ export default {
 +die in de toekomstige versie meteen zal worden geupdate in deze
 +wallet.`,
   commit: 'Commit',
+  commitInfoHeader: `A portion of the fees from trades can be claimed by Aphelion 
+holders that have committed APH balance.`,
+  commitInfoBody1: `On each match, the taker pays the match fee based on the market settings, 
+  and 80 % of the fee is added to the total fees collected on behalf of contributors.`,
+  commitInfoBody2: `After committing APH, 4,800 blocks must occur before fees may be claimed. 
+  Amounts earned are relative to the amount committed and proportional weight compared to other
+  contributors during the time of commitment`,
   completedOrders: 'Voltooide Orders',
   confirmPassphrase: 'Bevestig Wachtwoord',
   confirmRemove: 'Weet je zeker dat je wilt verwijderen',

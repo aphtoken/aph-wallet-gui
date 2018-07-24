@@ -18,9 +18,11 @@ export {
   putAllNep5Balances,
   putTransactionDetail,
   resetRequests,
+  setAcceptCommitInfo,
   setAcceptDexDemoVersion,
   setAcceptDexOutOfDate,
   setActiveTransaction,
+  setCommitState,
   setContacts,
   setCurrency,
   setCurrencySymbol,
@@ -126,6 +128,10 @@ function resetRequests(state) {
   state.requests = {};
 }
 
+function setAcceptCommitInfo(state, value) {
+  state.acceptCommitInfo = value;
+}
+
 function setAcceptDexDemoVersion(state, value) {
   state.acceptDexDemoVersion = value;
 }
@@ -137,6 +143,16 @@ function setAcceptDexOutOfDate(state, value) {
 function setActiveTransaction(state, transaction) {
   state.activeTransaction = transaction;
   state.showPriceTile = false;
+}
+
+async function setCommitState(state, commitState) {
+  if (!state.currentWallet || !state.currentNetwork) {
+    return;
+  }
+
+  state.commitState = commitState;
+  const commitStorageKey = `commit.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  db.upsert(commitStorageKey, commitState);
 }
 
 function setContacts(state, contacts) {

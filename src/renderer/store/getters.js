@@ -1,6 +1,8 @@
+export const acceptCommitInfo = state => state.acceptCommitInfo;
 export const acceptDexDemoVersion = state => state.acceptDexDemoVersion;
 export const acceptDexOutOfDate = state => state.acceptDexOutOfDate;
 export const activeTransaction = state => state.activeTransaction;
+export const commitState = state => state.commitState;
 export const contacts = state => state.contacts;
 export const currency = state => state.currency;
 export const currencySymbol = state => state.currencySymbol;

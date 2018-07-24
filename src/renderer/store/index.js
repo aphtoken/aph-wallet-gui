@@ -11,9 +11,11 @@ Vue.use(Vuex);
 const pjson = require('../../../package.json');
 
 const state = {
+  acceptCommitInfo: false,
   acceptDexDemoVersion: false,
   acceptDexOutOfDate: false,
   activeTransaction: null,
+  commitState: null,
   contacts: [],
   currency: null,
   currencySymbol: null,

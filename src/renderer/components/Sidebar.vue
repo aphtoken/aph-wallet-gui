@@ -182,6 +182,10 @@ export default {
             height: toRem(42px);
           }
 
+          &.commit {
+            height: toRem(40px);
+          }
+
           &.wallet {
             height: toRem(35px);
           }
