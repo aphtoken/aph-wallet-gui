@@ -1478,14 +1478,16 @@ export default {
                 commitState.totalFeesCollected = dexState.totalFeesCollected;
 
                 commitState.feesCollectedSinceCommit = commitState.totalFeesCollected - commitState.feesCollectedSnapshot;
-                commitState.userWeight = commitState.feesCollectedSinceCommit * commitState.quantityCommitted;
+                // console.log(`commitState.feesCollectedSinceCommit: ${commitState.feesCollectedSinceCommit}`);
+                // console.log(`commitState.feesCollectedSnapshot: ${commitState.feesCollectedSnapshot}`);
+                commitState.userWeight = commitState.feesCollectedSinceCommit * commitState.quantityCommitted * 100000000;
                 // console.log(`userWeight: ${commitState.userWeight}`);
                 // Apply the fees not yet applied into the totalFeeUnits to get an accurate calculation.
                 if (commitState.lastAppliedFeeSnapshot < commitState.totalFeesCollected) {
                   // console.log(`commitState.totalUnitsContributed: ${commitState.totalUnitsContributed}`);
                   // console.log(`commitState.totalFeeUnits: ${commitState.totalFeeUnits}`);
                   // console.log(`commitState.totalFeesCollected: ${commitState.totalFeesCollected}`);
-                  // console.log(`commitState.lastAppliedFeeSnapshot: ${commitState.totalFeeUnits}`);
+                  // console.log(`commitState.lastAppliedFeeSnapshot: ${commitState.lastAppliedFeeSnapshot}`);
                   const feesCollectedSinceSnapshot = commitState.totalFeesCollected - commitState.lastAppliedFeeSnapshot;
                   // console.log(`feesCollectedSinceSnapshot: ${feesCollectedSinceSnapshot}`);
                   commitState.totalFeeUnits += feesCollectedSinceSnapshot * commitState.totalUnitsContributed;
@@ -1497,9 +1499,8 @@ export default {
                 commitState.weightFraction = commitState.userWeight / commitState.networkWeight;
                 // console.log(`commitState.weightFraction: ${commitState.weightFraction}`);
                 commitState.weightPercentage = Math.round(commitState.weightFraction * 100 * 10000) / 10000;
-                // console.log(`commitState.feesCollectedSinceCommit: ${commitState.feesCollectedSinceCommit}`);
                 commitState.availableToClaim = commitState.feesCollectedSinceCommit * commitState.weightFraction;
-                commitState.availableToClaim = Math.floor(commitState.availableToClaim * 10000000) / 100000000;
+                commitState.availableToClaim = Math.floor(commitState.availableToClaim * 100000000) / 100000000;
                 // console.log(`availableToClaim: ${commitState.availableToClaim}`);
                 resolve(commitState);
               })
@@ -1546,7 +1547,7 @@ export default {
             commitState.compoundHeight = u.fixed82num(res.result.substr(72, 16)) * 100000000;
             commitState.feesCollectedSnapshot = u.fixed82num(res.result.substr(88, 16));
             commitState.feeUnitsSnapshot = u.fixed82num(res.result.substr(104, 16));
-            console.log(`got commitState.feeUnitsSnapshot: ${commitState.feeUnitsSnapshot}`);
+            // console.log(`got commitState.feeUnitsSnapshot: ${commitState.feeUnitsSnapshot}`);
 
             rpcClient.getBlock(commitState.contributionHeight)
               .then((data) => {
@@ -1582,11 +1583,11 @@ export default {
               resolve(dexState);
             }
 
-            dexState.totalUnitsContributed = u.fixed82num(res.result.substr(0, 16));
+            dexState.totalUnitsContributed = u.fixed82num(res.result.substr(0, 16)) * 100000000;
             dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 16));
             dexState.totalFeeUnits = u.fixed82num(res.result.substr(32, 16));
-            console.log(`dexState.lastAppliedFeeSnapshot: ${dexState.lastAppliedFeeSnapshot}`);
-            console.log(`dexState.totalFeeUnits: ${dexState.totalFeeUnits}`);
+            // console.log(`dexState.lastAppliedFeeSnapshot: ${dexState.lastAppliedFeeSnapshot}`);
+            // console.log(`dexState.totalFeeUnits: ${dexState.totalFeeUnits}`);
 
             rpcClient.query({
               method: 'getstorage',
@@ -1599,7 +1600,7 @@ export default {
                 }
 
                 dexState.totalFeesCollected = u.fixed82num(res.result.substr(0, 16));
-                console.log(`dexState.totalFeesCollected: ${dexState.totalFeesCollected}`);
+                // console.log(`dexState.totalFeesCollected: ${dexState.totalFeesCollected}`);
                 resolve(dexState);
               })
               .catch((e) => {
