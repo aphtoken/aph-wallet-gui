@@ -1,5 +1,6 @@
 <template>
-  <section @click="collapsed ? setCollapsed(!collapsed) : null"  id="sidebar" :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
+  <section id="sidebar" @click="collapsed ? setCollapsed(!collapsed) : null" 
+    :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
     <aph-icon class="toggle" 
       v-if="toggleable"
       @click.stop.prevent.native="setCollapsed(!collapsed)" 
