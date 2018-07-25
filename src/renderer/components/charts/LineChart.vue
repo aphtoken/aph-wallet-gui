@@ -4,6 +4,10 @@ const { reactiveProp } = mixins;
 
 const DEFAULT_OPTIONS = {
   animation: false,
+  tooltips: {
+    intersect: false,
+    mode: 'index',
+  },
 };
 
 export default {
