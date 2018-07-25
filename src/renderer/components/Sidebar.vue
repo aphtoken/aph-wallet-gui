@@ -1,8 +1,9 @@
 <template>
-  <section id="sidebar" :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
+  <section id="sidebar" @click="collapsed ? setCollapsed(!collapsed) : null" 
+    :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
     <aph-icon class="toggle" 
       v-if="toggleable"
-      @click.native="setCollapsed(!collapsed)" 
+      @click.stop.prevent.native="setCollapsed(!collapsed)" 
       :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'">
     </aph-icon>
     <template v-if="!toggleable || (toggleable && !collapsed)">
@@ -121,7 +122,12 @@ export default {
   },
   watch: {
     $route(to) {
-      this.$store.commit('setMenuToggleable', to.matched.some(record => record.meta.isMenuToggleable));
+      const isToggleable = to.matched.some(record => record.meta.isMenuToggleable);
+      this.$store.commit('setMenuToggleable', isToggleable);
+
+      if (isToggleable) {
+        this.setCollapsed(true);
+      }
     },
   },
 };
@@ -285,7 +291,12 @@ export default {
   }
 
   &.collapsed {
+    cursor: pointer;
     width: $left-sidebar-width-collapsed !important;
+
+    &:hover {
+      background-color: $purple-hover;
+    }
   }
 
   &.expanded {
