@@ -1,8 +1,8 @@
 <template>
-  <section id="sidebar" :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
+  <section @click="collapsed ? setCollapsed(!collapsed) : null"  id="sidebar" :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
     <aph-icon class="toggle" 
       v-if="toggleable"
-      @click.native="setCollapsed(!collapsed)" 
+      @click.stop.prevent.native="setCollapsed(!collapsed)" 
       :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'">
     </aph-icon>
     <template v-if="!toggleable || (toggleable && !collapsed)">
@@ -285,7 +285,12 @@ export default {
   }
 
   &.collapsed {
+    cursor: pointer;
     width: $left-sidebar-width-collapsed !important;
+
+    &:hover {
+      background-color: $purple-hover;
+    }
   }
 
   &.expanded {
