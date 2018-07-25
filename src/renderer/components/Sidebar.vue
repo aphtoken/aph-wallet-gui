@@ -122,7 +122,12 @@ export default {
   },
   watch: {
     $route(to) {
-      this.$store.commit('setMenuToggleable', to.matched.some(record => record.meta.isMenuToggleable));
+      const isToggleable = to.matched.some(record => record.meta.isMenuToggleable);
+      this.$store.commit('setMenuToggleable', isToggleable);
+
+      if (isToggleable) {
+        this.setCollapsed(true);
+      }
     },
   },
 };
