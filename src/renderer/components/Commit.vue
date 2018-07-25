@@ -8,33 +8,22 @@
     <div class="body" v-if="$store.state.commitState">
       <div class="exchange-values">
         <div class="total">
-          <span class="icon">
+          <div class="icon">
             <aph-icon name="award"></aph-icon>
-          </span>
-          <div>
-            <div>Total fees collected by DEX for contributors</div>
+          </div>
+          <div class="exchange-val">
+            <div>Total Fees Collected by DEX</div>
             <div>{{$formatNumber($store.state.commitState.totalFeesCollected)}} APH</div>
             <div>Estimated USD {{feesWhenCommittedEstimate}}</div>
           </div>
         </div>
-        <div class="at-commit">
-          <span class="icon">
-            <aph-icon name="hex"></aph-icon>
-            <aph-icon name="star"></aph-icon>
-          </span>
-          <div>
-            <div>Total fees collected at time of commitment</div>
-            <div>{{$formatNumber($store.state.commitState.feesCollectedSnapshot)}} APH</div>
-            <div>Estimated USD {{feesWhenCommittedEstimate}}</div>
-          </div>
-        </div>
         <div class="since-commit">
-          <span class="icon">
+          <div class="icon">
             <aph-icon name="hex"></aph-icon>
             <aph-icon name="star"></aph-icon>
-          </span>
-          <div>
-            <div>Total fees collected since committed</div>
+          </div>
+          <div class="exchange-val">
+            <div>Fees Collected Durring Commitment</div>
             <div>{{$formatNumber($store.state.commitState.feesCollectedSinceCommit)}} APH</div>
             <div>Estimated USD {{feesWhenCommittedEstimate}}</div>
           </div>
@@ -56,13 +45,13 @@
         </div>
         <div class="weight">
           <h2 class="underlined">My Weight</h2>
-          <div class="highlight">{{$formatNumber($store.state.commitState.weightPercentage)}}</div>
+          <div class="highlight">{{$formatNumber($store.state.commitState.weightPercentage)}}%</div>
           <div><span>My Weight</span>{{$formatNumber($store.state.commitState.userWeight)}}</div>
           <div><span>Network Weight</span>{{$formatNumber($store.state.commitState.networkWeight)}}</div>
         </div>
         <div class="earned">
           <h2 class="underlined">Fees Earned</h2>
-          <div class="highlight">{{availableToClaim}} APH</div>
+          <div class="highlight">~{{$store.state.commitState.availableToClaim}} APH</div>
           <div>Estimated USD {{feesWhenCommittedEstimate}}</div>
         </div>
       </div>
@@ -117,7 +106,7 @@ export default {
 
   data() {
     return {
-      amountToCommit: '3',
+      amountToCommit: '10',
       feesWhenCommitted: 0,
       totalFeesCollected: 0,
       aphCommitted: 0,
@@ -214,46 +203,41 @@ export default {
       }
     }
     
-    .exchange-values {    
+    .exchange-values {
       display: flex;
       flex-direction: row;
+      justify-content: center;
         
       &> div {
-        display: flex;
+        display:flex;
         flex-direction: row;
         flex: 1;
-        max-width: toRem(500px);
-        margin: $space;
-        
-        &> div {
-          display: flex;
-          flex-direction: column;  
-      
-          .icon {
-            flex: 1;
-          }      
-        }
-      }
-      
-      
-      .icon {
-        position: relative;
-        svg {
-          position: absolute;
-          left: 50%;
-          top: 0;
-          
-          &.hex {
-            margin: toRem(-14px);
-            height: toRem(75px);
-            width: toRem(75px);
-            .fill {
-              fill: $grey;
+        max-width: toRem(400px);
+        margin-right: $space;
+
+        .icon {
+          flex: 0;
+          position: relative;
+          margin-right: toRem(5px);
+          svg {
+            position: relative;
+            margin-top: 10%;
+
+            &.hex {
+              height: toRem(75px);
+              width: toRem(75px);
+              .fill {
+                fill: $grey;
+              }
             }
           }
         }
+
+        &> .exchange-val {
+          display: flex;
+          flex-direction: column;
+        }
       }
-    
     }
     
     .user-values {

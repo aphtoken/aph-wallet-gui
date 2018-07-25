@@ -1,7 +1,7 @@
 <template>
   <modal-wrapper id="dex-out-of-date-modal">
     <div class="body">
-      <h1>{{$t('aphelionDexOUtOfDate')}}</h1>
+      <h1>{{$t('aphelionDexOutOfDate')}}</h1>
       <p>
         {{$t('theDexContractHasBeenUpdated')}}
       </p>
