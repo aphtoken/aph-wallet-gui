@@ -50,9 +50,9 @@ const assets = {
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
 
   // privnet
-  /* DEX_SCRIPT_HASH: '8da505f3025bede243323ea3e3ccf0785b129e83',
+  /* DEX_SCRIPT_HASH: 'e0556a9376bbf6b3e6c7ec3171b8782153f0efcd',
   APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac',
-  ATI: 'a9ffe1c85f55d0545898a9e749cde53c05151760', */
+  ATI: '155153854ed377549a72cc1643e481bf25b48390', */
 };
 
 const charts = {

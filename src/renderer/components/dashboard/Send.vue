@@ -79,7 +79,7 @@ export default {
   computed: {
     currencies() {
       return this.$store.state.holdings.reduce(
-        (result, { name, symbol, asset, isNep5, unitValue, balance }) => {
+        (result, { name, symbol, asset, isNep5, unitValue, balance, decimals }) => {
           if (!name || !symbol) {
             return result;
           }
@@ -94,6 +94,7 @@ export default {
               label: `${name} (${balance})`,
               unitValue,
               balance,
+              decimals,
             },
             asset,
             isNep5,
@@ -148,15 +149,25 @@ export default {
       }
 
       let cleanAmount = this.amount.replace(/[^\d.]/g, '');
+      if (_.split(cleanAmount, '.').length > 2) {
+        cleanAmount = `${_.split(cleanAmount, '.')[0]}.${_.split(cleanAmount, '.')[1]}`;
+      }
 
       if (cleanAmount && cleanAmount.length > 0) {
-        if (this.currency && this.currency.symbol === 'NEO') {
-          cleanAmount = Math.floor(new BigNumber(cleanAmount)).toFixed(0);
+        if (this.currency) {
+          cleanAmount = new BigNumber(cleanAmount).toFixed(this.currency.decimals != null ? this.currency.decimals : 8);
         } else if (cleanAmount[cleanAmount.length - 1] !== '.'
           && cleanAmount[cleanAmount.length - 1] !== '0') {
           const n = new BigNumber(cleanAmount);
           cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
         }
+      }
+
+      if (cleanAmount.indexOf('.') > -1) {
+        cleanAmount = _.trimEnd(cleanAmount, '0');
+      }
+      if (this.amount && this.amount.length > 0 && this.amount[this.amount.length - 1] !== '.') {
+        cleanAmount = _.trimEnd(cleanAmount, '.');
       }
 
       if (this.amount !== cleanAmount) {
