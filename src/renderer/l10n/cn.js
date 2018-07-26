@@ -264,5 +264,4 @@ export default {
   在它被接受之前我们会一直保留。此次交易我们不会收取您任何费用:`,
   youWillBeImmediatelyTaking: '您将立即接受这些 {count}\n 报价：',
   yourKeysAreNowEncryptedAs: '您的密钥现在已加密并保存在本地应用程序的存储中，名称为 \'{label}\'',
->>>>>>> development
 };
