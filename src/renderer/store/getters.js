@@ -18,6 +18,8 @@ export const lastReceivedBlock = state => state.lastReceivedBlock;
 export const lastSuccessfulRequest = state => state.lastSuccessfulRequest;
 export const latestVersion = state => state.latestVersion;
 export const markets = state => state.markets;
+export const menuCollapsed = state => state.menuCollapsed;
+export const menuToggleable = state => state.menuToggleable;
 export const nep5Balances = state => state.nep5Balances;
 export const orderBook = state => state.orderBook;
 export const orderHistory = state => state.orderHistory;

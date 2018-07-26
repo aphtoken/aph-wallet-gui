@@ -286,7 +286,9 @@ holders that have committed APH balance.`,
   waitingForNEO: 'Warte auf die NEO Transferbestätigung.',
   waitingForTransaction: 'Warte, bis die Transaktion im Blockexplorer erscheint...',
   walletBalance: 'Wallet Bestand',
-  walletBalanceContractBalance: 'Wallet Bestand: {walletBalance}\nContract Bestand: {contractBalance}',
+  walletBalanceContractBalance: `Wallet Bestand: {walletBalance}
+  Contract Bestand: {contractBalance}
+  Offene Bestellungen Guthaben {openOrdersBalance}`,
   wallets: 'Wallets',
   weveAlsoMatchedBackupOrders: `Wir haben auch {count} Ersatz-Order, die erst dann greifen, 
   falls einer dieser Order bereits zuvor ausgeführt wurde.`,

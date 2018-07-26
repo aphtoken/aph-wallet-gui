@@ -33,6 +33,8 @@ const state = {
   lastSuccessfulRequest: null,
   latestVersion: null,
   markets: [],
+  menuToggleable: false,
+  menuCollapsed: true,
   nep5Balances: {},
   orderBook: null,
   orderHistory: null,

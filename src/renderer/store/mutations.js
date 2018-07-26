@@ -38,6 +38,8 @@ export {
   setLastSuccessfulRequest,
   setLatestVersion,
   setMarkets,
+  setMenuCollapsed,
+  setMenuToggleable,
   setOrderHistory,
   setOrderPrice,
   setOrderQuantity,
@@ -457,6 +459,14 @@ function setOrderToConfirm(state, order) {
 
 function setOrdersToShow(state, value) {
   state.ordersToShow = value;
+}
+
+function setMenuToggleable(state, menuToggleable) {
+  state.menuToggleable = menuToggleable;
+}
+
+function setMenuCollapsed(state, menuCollapsed) {
+  state.menuCollapsed = menuCollapsed;
 }
 
 function SOCKET_ONOPEN(state, event) {
