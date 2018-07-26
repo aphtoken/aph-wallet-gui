@@ -42,21 +42,23 @@
     </template>
     <template v-else>
       <div class="body">
-        <div class="currency">
-          <aph-select :options="currencies" :light="true" placeholder="Select a currency" v-model="currency"></aph-select>
-        </div>
-        <div class="address">
-          <aph-input :placeholder="$t('enterSendToAddress')" v-model="address"></aph-input>
-        </div>
-        <div class="amount">
-          <aph-input :placeholder="$t('enterAmount')" v-model="amount"></aph-input>
-          <div class="symbol">{{ currency ? currency.value : '' }}</div>
-          <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
-        </div>
-        <div class="estimated-value">
-          <div class="label">{{$t('estimated')}}</div>
-          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
-        </div>
+        <aph-form :on-submit="next">
+          <div class="currency">
+            <aph-select :options="currencies" :light="true" placeholder="Select a currency" v-model="currency"></aph-select>
+          </div>
+          <div class="address">
+            <aph-input :placeholder="$t('enterSendToAddress')" v-model="address"></aph-input>
+          </div>
+          <div class="amount">
+            <aph-input :placeholder="$t('enterAmount')" v-model="amount"></aph-input>
+            <div class="symbol">{{ currency ? currency.value : '' }}</div>
+            <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
+          </div>
+          <div class="estimated-value">
+            <div class="label">{{$t('estimated')}}</div>
+            <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
+          </div>
+        </aph-form>
       </div>
       <div class="footer">
         <router-link class="cancel-btn" to="/dashboard">{{$t('cancel')}}</router-link>

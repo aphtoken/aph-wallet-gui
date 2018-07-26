@@ -1,12 +1,10 @@
 <template>
   <section id="login--saved-wallet">
-    <login-form-wrapper identifier="openSavedWallet">
+    <login-form-wrapper identifier="openSavedWallet" :on-submit="login">
       <div v-if="wallets.length > 0">
-        <form @submit.prevent="login">
-          <aph-select v-model="wallet" :options="wallets" :placeholder="$t('selectAWallet')"></aph-select>
-          <aph-input :hasError="$isFailed('openSavedWallet')" v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password"></aph-input>
-          <button class="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
-        </form>
+        <aph-select v-model="wallet" :options="wallets" :placeholder="$t('selectAWallet')"></aph-select>
+        <aph-input :hasError="$isFailed('openSavedWallet')" v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password"></aph-input>
+        <button class="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
       </div>
       <div v-else>
         <p class="help-text">{{$t('noSavedWallets')}}</p>

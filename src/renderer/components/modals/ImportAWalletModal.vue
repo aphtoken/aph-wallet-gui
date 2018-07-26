@@ -1,11 +1,13 @@
 <template>
   <modal-wrapper id="aph-import-a-wallet-modal" identifier="importWallet">
     <div class="body">
-      <aph-icon name="wallet"></aph-icon>
-      <aph-input :placeholder="$t('name')" v-model="walletName"></aph-input>
-      <aph-input :placeholder="$t('privateKey')" v-model="wif"></aph-input>
-      <aph-input :placeholder="$t('passphrase')" v-model="passphrase" type="password"></aph-input>
-      <aph-input :placeholder="$t('confirmPassphrase')" v-model="passphraseConfirm" type="password"></aph-input>
+      <aph-form :on-submit="save">
+        <aph-icon name="wallet"></aph-icon>
+        <aph-input :placeholder="$t('name')" v-model="walletName"></aph-input>
+        <aph-input :placeholder="$t('privateKey')" v-model="wif"></aph-input>
+        <aph-input :placeholder="$t('passphrase')" v-model="passphrase" type="password"></aph-input>
+        <aph-input :placeholder="$t('confirmPassphrase')" v-model="passphraseConfirm" type="password"></aph-input>
+      </aph-form>
     </div>
     <div class="footer">
       <div class="cancel-btn" @click="onCancel">{{$t('cancel')}}</div>
@@ -49,6 +51,10 @@ export default {
 
   methods: {
     save() {
+      if (!this.passphrase || !this.passphraseConfirm || !this.walletName || !this.wif) {
+        return;
+      }
+
       if (this.$isPending('importWallet')) {
         return;
       }

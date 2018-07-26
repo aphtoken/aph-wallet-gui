@@ -11,18 +11,20 @@
       <h1 class="underlined">{{$t('participateInIco')}}</h1>
     </div>
     <div class="body">
-      <aph-select :options="tokens" :placeholder="$t('selectIco')" v-model="token"></aph-select>
-      <aph-input class="script-hash" :placeholder="$t('enterIcoScriptHash')" v-model="scriptHash" v-if="token && token.symbol === 'Custom'"></aph-input>
-      <aph-select :options="currencies" :placeholder="$t('buyWith')" v-model="currency"></aph-select>
-      <div class="amount">
-        <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
-        <div class="symbol">{{ currency ? currency.value : '' }}</div>
-        <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
-      </div>
-      <div class="estimated-value">
-        <div class="label">{{$t('estimatedAmount')}}</div>
-        <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
-      </div>
+      <aph-form :on-submit="send">
+        <aph-select :options="tokens" :placeholder="$t('selectIco')" v-model="token"></aph-select>
+        <aph-input class="script-hash" :placeholder="$t('enterIcoScriptHash')" v-model="scriptHash" v-if="token && token.symbol === 'Custom'"></aph-input>
+        <aph-select :options="currencies" :placeholder="$t('buyWith')" v-model="currency"></aph-select>
+        <div class="amount">
+          <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
+          <div class="symbol">{{ currency ? currency.value : '' }}</div>
+          <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
+        </div>
+        <div class="estimated-value">
+          <div class="label">{{$t('estimatedAmount')}}</div>
+          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
+        </div>
+      </aph-form>
     </div>
     <div class="disclaimer">
       <h2>{{$t('disclaimerUrgent')}}</h2>
@@ -35,7 +37,7 @@
       </div>
     </div>
     <div class="footer">
-      <button class="send-btn" @click="send()" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
+      <button class="send-btn" @click="send" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
     </div>
   </section>
 </template>
