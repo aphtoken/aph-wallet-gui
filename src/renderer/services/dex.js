@@ -592,23 +592,11 @@ export default {
     });
 
     order.deposits = [];
-<<<<<<< HEAD
-=======
-    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalQuantityToSell))) {
-      order.deposits.push({
-        symbol: sellAssetHolding.symbol,
-        assetId: order.assetIdToSell,
-        currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
-        quantityRequired: new BigNumber(totalQuantityToSell),
-        quantityToDeposit: new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance),
-      });
-    }
->>>>>>> development
 
     if (totalFees.isGreaterThan(0)) {
       const aphAssetHolding = neo.getHolding(assets.APH);
       if (order.assetIdToSell === assets.APH) {
-        totalOfferQuantityToSell = totalOfferQuantityToSell.plus(totalFees);
+        totalQuantityToSell = totalQuantityToSell.plus(totalFees);
       } else if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
         order.deposits.push({
           symbol: aphAssetHolding.symbol,
@@ -620,13 +608,13 @@ export default {
       }
     }
 
-    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalOfferQuantityToSell))) {
+    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalQuantityToSell))) {
       order.deposits.push({
         symbol: sellAssetHolding.symbol,
         assetId: order.assetIdToSell,
         currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
-        quantityRequired: new BigNumber(totalOfferQuantityToSell),
-        quantityToDeposit: new BigNumber(totalOfferQuantityToSell).minus(sellAssetHolding.contractBalance),
+        quantityRequired: new BigNumber(totalQuantityToSell),
+        quantityToDeposit: new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance),
       });
     }
   },
