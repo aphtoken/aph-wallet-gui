@@ -42,9 +42,9 @@
         </div>
       </div>
       <div class="footer">
-        <div class="neo-total">
-          <div class="label">{{$t('total')}} ({{ quoteHolding.symbol }})</div>
-          <div class="value">{{ $store.state.orderQuantity != '' ?  $formatNumber($store.state.orderQuantity) : 0 }}</div>
+        <div class="total">
+          <div class="label">{{$t('total')}} ({{ baseHolding.symbol }})</div>
+          <div class="value">{{ $formatNumber(total) }}</div>
         </div>
         <div class="estimate">
           <div class="label">{{$t('estimate')}} ({{ $services.settings.getCurrency() }})</div>
@@ -211,19 +211,31 @@ export default {
     amountLabel() {
       return this.$t('amountQuote', { quote: this.$store.state.currentMarket.quoteCurrency });
     },
-    estimate() {
+    price() {
+      let price = this.$store.state.orderPrice;
+      if (!price) {
+        // market order
+        price = this.marketPriceForQuantity(this.side, this.$store.state.orderQuantity);
+      }
+      return price;
+    },
+    total() {
       try {
         if (!this.$store.state.orderQuantity) {
           return 0;
         }
 
-        let price = this.$store.state.orderPrice;
-        if (!price) {
-          // market order
-          price = this.marketPriceForQuantity(this.side, this.$store.state.orderQuantity);
-        }
-
-        return new BigNumber(price).multipliedBy(new BigNumber(this.$store.state.orderQuantity));
+        return new BigNumber(this.price).multipliedBy(new BigNumber(this.$store.state.orderQuantity));
+      } catch (e) {
+        console.log(e);
+        return 0;
+      }
+    },
+    estimate() {
+      try {
+        return new BigNumber(this.total).multipliedBy(
+          new BigNumber(this.$store.state.currentMarket ?
+            this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue : 0));
       } catch (e) {
         console.log(e);
         return 0;
@@ -579,11 +591,11 @@ export default {
     }
   }
 
-  .neo-total {
+  .total {
     margin-bottom: toRem(8px);
   }
 
-  .balance, .estimate, .neo-total {
+  .balance, .estimate, .total {
     align-items: center;
     display: flex;
     flex-direction: row;

@@ -1,7 +1,7 @@
 <template>
   <section id="authenticated-wrapper" :class="[$store.state.styleMode]">
     <sidebar></sidebar>
-    <div class="content">
+    <div @click="menuToggleable && !menuCollapsed ? $store.commit('setMenuCollapsed', true) : null" :class="{'filler': menuToggleable && !menuCollapsed}" class="content">
       <portfolio-header v-if="$store.state.showPortfolioHeader"></portfolio-header>
       <router-view></router-view>
       <aph-claim-gas-modal v-if="$store.state.showClaimGasModal"></aph-claim-gas-modal>
@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import PortfolioHeader from './PortfolioHeader';
 import Sidebar from './Sidebar';
 import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
@@ -43,6 +44,13 @@ export default {
       outOfDate: false,
       latestWalletVersion: '',
     };
+  },
+
+  computed: {
+    ...mapGetters([
+      'menuCollapsed',
+      'menuToggleable',
+    ]),
   },
 };
 </script>

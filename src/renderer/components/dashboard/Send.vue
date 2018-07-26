@@ -149,6 +149,7 @@ export default {
       }
 
       let cleanAmount = this.amount.replace(/[^\d.]/g, '');
+
       const cleanSplit = _.split(cleanAmount, '.');
       if (cleanSplit.length > 2) {
         cleanAmount = `${cleanSplit[0]}.${cleanSplit[1]}`;
@@ -168,6 +169,7 @@ export default {
       if (cleanAmount.indexOf('.') > -1) {
         cleanAmount = _.trimEnd(cleanAmount, '0');
       }
+
       // remove decimal point if it is the last character
       if (this.amount && this.amount.length > 0 && this.amount[this.amount.length - 1] !== '.') {
         cleanAmount = _.trimEnd(cleanAmount, '.');
