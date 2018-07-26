@@ -177,11 +177,7 @@ export default {
                     tickMarkLength: 20,
                   },
                   ticks: {
-                    callback(label, index) {
-                      if (index % 2 !== 0) {
-                        return '';
-                      }
-
+                    callback(label) {
                       switch (_this.timeframeOption) {
                         case 'D':
                           return _this.$formatTime(label);
