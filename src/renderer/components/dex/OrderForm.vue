@@ -23,10 +23,10 @@
           <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
         </div>
         <div class="price" v-if="orderType === 'Limit'">
-          <aph-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-input>
+          <aph-dex-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-dex-input>
         </div>
         <div class="quantity">
-          <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
+          <aph-dex-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-dex-input>
         </div>
         <div class="percentages">
           <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
