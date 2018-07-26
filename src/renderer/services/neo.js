@@ -623,16 +623,16 @@ export default {
 
     if (holding) {
       if (holding.balance && !isBigNumber(holding.balance)) {
-        holding.balance = toBigNumber(holding.balance);
+        holding.balance = toBigNumber(parseFloat(holding.balance));
       }
       if (holding.contractBalance && !isBigNumber(holding.contractBalance)) {
-        holding.contractBalance = toBigNumber(holding.contractBalance);
+        holding.contractBalance = toBigNumber(parseFloat(holding.contractBalance));
       }
       if (!holding.totalBalance) {
-        holding.totalBalance = holding.balance.plus(holding.contractBalance);
+        holding.totalBalance = holding.balance.plus(parseFloat(holding.contractBalance));
       }
       if (holding.totalBalance && !isBigNumber(holding.totalBalance)) {
-        holding.totalBalance = toBigNumber(holding.totalBalance);
+        holding.totalBalance = toBigNumber(parseFloat(holding.totalBalance));
       }
     }
 

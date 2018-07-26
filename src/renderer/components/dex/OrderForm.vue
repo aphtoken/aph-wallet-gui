@@ -238,7 +238,7 @@ export default {
 
       try {
         return new BigNumber(this.total).multipliedBy(
-          new BigNumber(parseFloat(holding)));
+          new BigNumber(holding));
       } catch (e) {
         console.log(e);
         return 0;
