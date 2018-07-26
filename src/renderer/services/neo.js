@@ -430,7 +430,7 @@ export default {
             res.result.balances.forEach((fetchedBalance) => {
               const holdingBalance = {
                 asset: fetchedBalance.asset.replace('0x', ''),
-                balance: fetchedBalance.value,
+                balance: parseFloat(fetchedBalance.value),
                 symbol: fetchedBalance.asset.replace('0x', '') === NEO_ASSET_ID ? 'NEO' : 'GAS',
                 name: fetchedBalance.asset.replace('0x', '') === NEO_ASSET_ID ? 'NEO' : 'GAS',
                 isNep5: false,
@@ -568,7 +568,7 @@ export default {
                         holdingBalance.totalSupply = val.total_supply;
                         holdingBalance.marketCap = val[`market_cap_${lowercaseCurrency}`];
                         holdingBalance.change24hrPercent = val.percent_change_24h;
-                        holdingBalance.unitValue = val[`price_${lowercaseCurrency}`];
+                        holdingBalance.unitValue = parseFloat(val[`price_${lowercaseCurrency}`]);
                         holdingBalance.unitValue24hrAgo = holdingBalance.unitValue
                           / (1 + (holdingBalance.change24hrPercent / 100.0));
                         holdingBalance.change24hrValue = (holdingBalance.unitValue * holdingBalance.balance)
@@ -623,16 +623,16 @@ export default {
 
     if (holding) {
       if (holding.balance && !isBigNumber(holding.balance)) {
-        holding.balance = toBigNumber(parseFloat(holding.balance));
+        holding.balance = toBigNumber(holding.balance);
       }
       if (holding.contractBalance && !isBigNumber(holding.contractBalance)) {
-        holding.contractBalance = toBigNumber(parseFloat(holding.contractBalance));
+        holding.contractBalance = toBigNumber(holding.contractBalance);
       }
       if (!holding.totalBalance) {
-        holding.totalBalance = holding.balance.plus(parseFloat(holding.contractBalance));
+        holding.totalBalance = holding.balance.plus(holding.contractBalance);
       }
       if (holding.totalBalance && !isBigNumber(holding.totalBalance)) {
-        holding.totalBalance = toBigNumber(parseFloat(holding.totalBalance));
+        holding.totalBalance = toBigNumber(holding.totalBalance);
       }
     }
 
