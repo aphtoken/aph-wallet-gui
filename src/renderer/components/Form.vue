@@ -8,9 +8,7 @@
 export default {
   methods: {
     handleOnSubmit() {
-      if (this.onSubmit) {
-        this.onSubmit();
-      }
+      this.onSubmit();
     },
   },
 
