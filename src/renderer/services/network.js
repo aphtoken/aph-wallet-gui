@@ -23,14 +23,14 @@ const NETWORKS = [
       rpc: 'https://testneo.aphelion-neo.com:20331',
     },
   },
-  {
+  /* {
     label: 'PrivNet',
     value: {
       aph: 'http://localhost:62433/api',
       net: 'PrivNet',
       rpc: 'http://localhost:30338',
     },
-  },
+  }, */
 ];
 
 let loadNetworkStatusIntervalId;
