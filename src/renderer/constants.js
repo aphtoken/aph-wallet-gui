@@ -52,7 +52,7 @@ const assets = {
   // privnet
   /* DEX_SCRIPT_HASH: 'b102048babc8f1811f854dbc1ccf26183f45adbe',
   APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac',
-  ATI: 'a9ffe1c85f55d0545898a9e749cde53c05151760', */
+  ATI: '155153854ed377549a72cc1643e481bf25b48390', */
 };
 
 const charts = {

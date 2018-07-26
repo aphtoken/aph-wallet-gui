@@ -103,6 +103,7 @@ export default {
     if (loadNetworkStatusIntervalId) {
       clearInterval(loadNetworkStatusIntervalId);
     }
+
     if (network.net === 'PrivNet') {
       const config = {
         name: 'PrivNet',

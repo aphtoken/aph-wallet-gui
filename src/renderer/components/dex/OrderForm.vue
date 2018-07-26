@@ -70,6 +70,8 @@
           <!-- Only the contract owner or manager can do this.
           <button @click="setMarket" class="test-btn">Setup Market</button>-->
         </div>
+        <!-- Only the contract owner or manager can do this.
+            <button @click="setMarket" class="test-btn">Setup Market</button> -->
       </div>
     </section>
     <aph-order-confirmation-modal v-if="$store.state.showOrderConfirmationModal"
