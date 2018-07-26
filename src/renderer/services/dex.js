@@ -585,7 +585,7 @@ export default {
     }
 
     order.offersToTake.forEach((offer) => {
-      if (o.isBackupOffer !== true) {
+      if (offer.isBackupOffer !== true) {
         totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? offer.quantity.multipliedBy(offer.price) : offer.quantity);
         totalFees = totalFees.plus(order.side === 'Buy' ? order.market.buyFee : order.market.sellFee);
       }

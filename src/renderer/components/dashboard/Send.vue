@@ -149,8 +149,10 @@ export default {
       }
 
       let cleanAmount = this.amount.replace(/[^\d.]/g, '');
-      if (_.split(cleanAmount, '.').length > 2) {
-        cleanAmount = `${_.split(cleanAmount, '.')[0]}.${_.split(cleanAmount, '.')[1]}`;
+
+      const cleanSplit = _.split(cleanAmount, '.');
+      if (cleanSplit.length > 2) {
+        cleanAmount = `${cleanSplit[0]}.${cleanSplit[1]}`;
       }
 
       if (cleanAmount && cleanAmount.length > 0) {
@@ -163,9 +165,12 @@ export default {
         }
       }
 
+      // remove trailing zeros if there is a decimal
       if (cleanAmount.indexOf('.') > -1) {
         cleanAmount = _.trimEnd(cleanAmount, '0');
       }
+
+      // remove decimal point if it is the last character
       if (this.amount && this.amount.length > 0 && this.amount[this.amount.length - 1] !== '.') {
         cleanAmount = _.trimEnd(cleanAmount, '.');
       }
