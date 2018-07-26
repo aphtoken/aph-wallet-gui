@@ -1,6 +1,10 @@
 <template>
   <modal-wrapper id="commit-info-modal">
     <div class="body">
+      <div class="icons">
+        <aph-icon name="hex"></aph-icon>
+        <aph-icon name="commit"></aph-icon>
+      </div>
       <h1>{{$t('commitInfoHeader')}}</h1>
       <p>{{$t('commitInfoBody1')}}</p>
       <p>{{$t('commitInfoBody2')}}</p>
@@ -31,6 +35,7 @@ export default {
 #commit-info-modal {
   .content {
     width: toRem(700px);
+    overflow: visible;
   }
   
   .body {
@@ -48,6 +53,42 @@ export default {
       line-height: $copy-line-height;
       margin: 0;
     }
+    
+      
+        
+    .icons {
+      position: relative;
+      margin: toRem(-80px) auto toRem(80px) auto;
+      width: toRem(40px);
+      height: toRem(40px);     
+          
+      .aph-icon {
+        position: absolute;
+        width: toRem(40px);
+        height: toRem(40px);
+
+        .icon {
+          svg {
+            position: relative;
+            margin-top: 10%;
+          }
+            
+          &.commit {
+            margin: toRem(5px) 0 0 0;
+            .fill {
+              fill: white;
+            }
+          }
+            
+          &.hex {
+            margin: toRem(-25px);
+            .fill {
+              fill: $purple;
+            }
+          }
+        }
+      }
+    }  
   }
 
   .footer {

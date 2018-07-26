@@ -25,18 +25,23 @@ const assets = {
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
 
   // TODO: these different per network
-  DEX_SCRIPT_HASH: '927e87a5a86581cf1345ce40edde64ed40e4994f',
+  /* DEX_SCRIPT_HASH: '927e87a5a86581cf1345ce40edde64ed40e4994f',
   APH: '591eedcd379a8981edeefe04ef26207e1391904a',
-  ATI: '155153854ed377549a72cc1643e481bf25b48390',
+  ATI: '155153854ed377549a72cc1643e481bf25b48390', */
 
   // privnet
-  /* DEX_SCRIPT_HASH: '8da505f3025bede243323ea3e3ccf0785b129e83',
+  DEX_SCRIPT_HASH: 'b102048babc8f1811f854dbc1ccf26183f45adbe',
   APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac',
-  ATI: 'a9ffe1c85f55d0545898a9e749cde53c05151760', */
+  ATI: 'a9ffe1c85f55d0545898a9e749cde53c05151760',
 };
 
 const charts = {
   DEBOUNCE: 500,
+};
+
+const claiming = {
+  CLAIM_BLOCKS: 4800,
+  COMPOUND_BLOCKS: 4800,
 };
 
 const database = {
@@ -97,6 +102,7 @@ const timeouts = {
 export {
   assets,
   charts,
+  claiming,
   database,
   defaultSettings,
   formats,

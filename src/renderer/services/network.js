@@ -23,6 +23,14 @@ const NETWORKS = [
       rpc: 'https://testneo.aphelion-neo.com:20331',
     },
   },
+  {
+    label: 'PrivNet',
+    value: {
+      aph: 'http://localhost:62433/api',
+      net: 'PrivNet',
+      rpc: 'http://localhost:30338',
+    },
+  },
 ];
 
 let loadNetworkStatusIntervalId;
@@ -95,6 +103,17 @@ export default {
     if (loadNetworkStatusIntervalId) {
       clearInterval(loadNetworkStatusIntervalId);
     }
+    if (network.net === 'PrivNet') {
+      const config = {
+        name: 'PrivNet',
+        extra: {
+          neoscan: 'http://localhost:4000/api/main_net',
+        },
+      };
+      const privateNet = new rpc.Network(config);
+      settings.addNetwork(privateNet, true);
+    }
+
     this.loadStatus();
     loadNetworkStatusIntervalId = setInterval(() => {
       this.loadStatus();

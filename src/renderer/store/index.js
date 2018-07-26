@@ -15,6 +15,8 @@ const state = {
   acceptDexDemoVersion: false,
   acceptDexOutOfDate: false,
   activeTransaction: null,
+  claimModalModel: null,
+  commitModalModel: null,
   commitState: null,
   contacts: [],
   currency: null,

@@ -14,7 +14,7 @@ import wallets from './wallets';
 import ledger from './ledger';
 import { store } from '../store';
 
-import { assets } from '../constants';
+import { assets, claiming } from '../constants';
 
 const TX_ATTR_USAGE_SENDER = 0xfa;
 const TX_ATTR_USAGE_SCRIPT = 0x20;
@@ -587,19 +587,12 @@ export default {
 
     const sellAssetHolding = neo.getHolding(order.assetIdToSell);
     order.deposits = [];
-    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalOfferQuantityToSell))) {
-      order.deposits.push({
-        symbol: sellAssetHolding.symbol,
-        assetId: order.assetIdToSell,
-        currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
-        quantityRequired: new BigNumber(totalOfferQuantityToSell),
-        quantityToDeposit: new BigNumber(totalOfferQuantityToSell).minus(sellAssetHolding.contractBalance),
-      });
-    }
 
     if (totalFees.isGreaterThan(0)) {
       const aphAssetHolding = neo.getHolding(assets.APH);
-      if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
+      if (order.assetIdToSell === assets.APH) {
+        totalOfferQuantityToSell = totalOfferQuantityToSell.plus(totalFees);
+      } else if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
         order.deposits.push({
           symbol: aphAssetHolding.symbol,
           assetId: assets.APH,
@@ -608,6 +601,16 @@ export default {
           quantityToDeposit: new BigNumber(totalFees).minus(aphAssetHolding.contractBalance),
         });
       }
+    }
+
+    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalOfferQuantityToSell))) {
+      order.deposits.push({
+        symbol: sellAssetHolding.symbol,
+        assetId: order.assetIdToSell,
+        currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
+        quantityRequired: new BigNumber(totalOfferQuantityToSell),
+        quantityToDeposit: new BigNumber(totalOfferQuantityToSell).minus(sellAssetHolding.contractBalance),
+      });
     }
   },
 
@@ -1477,31 +1480,26 @@ export default {
                 commitState.totalFeeUnits = dexState.totalFeeUnits;
                 commitState.totalFeesCollected = dexState.totalFeesCollected;
 
-                commitState.feesCollectedSinceCommit = commitState.totalFeesCollected - commitState.feesCollectedSnapshot;
-                // console.log(`commitState.feesCollectedSinceCommit: ${commitState.feesCollectedSinceCommit}`);
-                // console.log(`commitState.feesCollectedSnapshot: ${commitState.feesCollectedSnapshot}`);
-                commitState.userWeight = commitState.feesCollectedSinceCommit * commitState.quantityCommitted * 100000000;
-                // console.log(`userWeight: ${commitState.userWeight}`);
                 // Apply the fees not yet applied into the totalFeeUnits to get an accurate calculation.
                 if (commitState.lastAppliedFeeSnapshot < commitState.totalFeesCollected) {
-                  // console.log(`commitState.totalUnitsContributed: ${commitState.totalUnitsContributed}`);
-                  // console.log(`commitState.totalFeeUnits: ${commitState.totalFeeUnits}`);
-                  // console.log(`commitState.totalFeesCollected: ${commitState.totalFeesCollected}`);
-                  // console.log(`commitState.lastAppliedFeeSnapshot: ${commitState.lastAppliedFeeSnapshot}`);
                   const feesCollectedSinceSnapshot = commitState.totalFeesCollected - commitState.lastAppliedFeeSnapshot;
-                  // console.log(`feesCollectedSinceSnapshot: ${feesCollectedSinceSnapshot}`);
                   commitState.totalFeeUnits += feesCollectedSinceSnapshot * commitState.totalUnitsContributed;
-                  // console.log(`after applying snapshot commitState.totalFeeUnits: ${commitState.totalFeeUnits}`);
                   commitState.lastAppliedFeeSnapshot = commitState.totalFeesCollected;
                 }
-                commitState.networkWeight = (commitState.totalFeeUnits - commitState.feeUnitsSnapshot);
-                // console.log(`commitState.networkWeight: ${commitState.networkWeight}`);
-                commitState.weightFraction = commitState.userWeight / commitState.networkWeight;
-                // console.log(`commitState.weightFraction: ${commitState.weightFraction}`);
-                commitState.weightPercentage = Math.round(commitState.weightFraction * 100 * 10000) / 10000;
-                commitState.availableToClaim = commitState.feesCollectedSinceCommit * commitState.weightFraction;
-                commitState.availableToClaim = Math.floor(commitState.availableToClaim * 100000000) / 100000000;
-                // console.log(`availableToClaim: ${commitState.availableToClaim}`);
+                commitState.networkWeight = Math.round(commitState.totalFeeUnits - commitState.feeUnitsSnapshot);
+
+                if (commitState.contributionHeight > 0) {
+                  commitState.ableToClaimHeight = commitState.contributionHeight + claiming.CLAIM_BLOCKS;
+                  commitState.ableToCompoundHeight = commitState.contributionHeight + claiming.COMPOUND_BLOCKS;
+
+                  commitState.feesCollectedSinceCommit = commitState.totalFeesCollected - commitState.feesCollectedSnapshot;
+                  commitState.userWeight = commitState.feesCollectedSinceCommit * commitState.quantityCommitted * 100000000;
+                  commitState.weightFraction = commitState.networkWeight > 0 ? commitState.userWeight / commitState.networkWeight : 0;
+                  commitState.weightPercentage = Math.round(commitState.weightFraction * 100 * 10000) / 10000;
+
+                  commitState.availableToClaim = commitState.feesCollectedSinceCommit * commitState.weightFraction;
+                  commitState.availableToClaim = Math.floor(commitState.availableToClaim * 100000000) / 100000000;
+                }
                 resolve(commitState);
               })
               .catch((e) => {
@@ -1531,20 +1529,21 @@ export default {
             const commitState = {
               userScriptHash: wallet.getScriptHashFromAddress(address),
               quantityCommitted: 0,
-              contributionHeight: 0,
-              contributionTimestamp: 0,
-              compoundHeight: 0,
+              contributionHeight: null,
+              contributionTimestamp: null,
+              compoundHeight: null,
               feesCollectedSnapshot: 0,
               feeUnitsSnapshot: 0,
             };
 
             if (!res || !res.result || res.result.length < 120) {
               resolve(commitState);
+              return;
             }
 
             commitState.quantityCommitted = u.fixed82num(res.result.substr(40, 16));
-            commitState.contributionHeight = u.fixed82num(res.result.substr(56, 16)) * 100000000;
-            commitState.compoundHeight = u.fixed82num(res.result.substr(72, 16)) * 100000000;
+            commitState.contributionHeight = Math.round(u.fixed82num(res.result.substr(56, 16)) * 100000000);
+            commitState.compoundHeight = Math.round(u.fixed82num(res.result.substr(72, 16)) * 100000000);
             commitState.feesCollectedSnapshot = u.fixed82num(res.result.substr(88, 16));
             commitState.feeUnitsSnapshot = u.fixed82num(res.result.substr(104, 16));
             // console.log(`got commitState.feeUnitsSnapshot: ${commitState.feeUnitsSnapshot}`);
@@ -1579,15 +1578,11 @@ export default {
               totalFeeUnits: 0,
             };
 
-            if (!res || !res.result || res.result.length < 48) {
-              resolve(dexState);
+            if (res.result && res.result.length >= 48) {
+              dexState.totalUnitsContributed = u.fixed82num(res.result.substr(0, 16)) * 100000000;
+              dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 16));
+              dexState.totalFeeUnits = u.fixed82num(res.result.substr(32, 16));
             }
-
-            dexState.totalUnitsContributed = u.fixed82num(res.result.substr(0, 16)) * 100000000;
-            dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 16));
-            dexState.totalFeeUnits = u.fixed82num(res.result.substr(32, 16));
-            // console.log(`dexState.lastAppliedFeeSnapshot: ${dexState.lastAppliedFeeSnapshot}`);
-            // console.log(`dexState.totalFeeUnits: ${dexState.totalFeeUnits}`);
 
             rpcClient.query({
               method: 'getstorage',
@@ -1597,6 +1592,7 @@ export default {
                 if (!res || !res.result || res.result.length < 32) {
                   dexState.totalFeesCollected = 0;
                   resolve(dexState);
+                  return;
                 }
 
                 dexState.totalFeesCollected = u.fixed82num(res.result.substr(0, 16));

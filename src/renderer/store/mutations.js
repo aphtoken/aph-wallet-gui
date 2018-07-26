@@ -22,6 +22,8 @@ export {
   setAcceptDexDemoVersion,
   setAcceptDexOutOfDate,
   setActiveTransaction,
+  setClaimModalModel,
+  setCommitModalModel,
   setCommitState,
   setContacts,
   setCurrency,
@@ -145,6 +147,14 @@ function setActiveTransaction(state, transaction) {
   state.showPriceTile = false;
 }
 
+function setClaimModalModel(state, model) {
+  state.claimModalModel = model;
+}
+
+function setCommitModalModel(state, model) {
+  state.commitModalModel = model;
+}
+
 async function setCommitState(state, commitState) {
   if (!state.currentWallet || !state.currentNetwork) {
     return;
@@ -182,6 +192,10 @@ function setCurrentNetwork(state, network) {
   }
 
   state.currentNetwork = network;
+}
+
+function setDepositWithdrawModalModel(state, model) {
+  state.depositWithdrawModalModel = model;
 }
 
 async function setHoldings(state, holdings) {
@@ -443,10 +457,6 @@ function setOrderToConfirm(state, order) {
 
 function setOrdersToShow(state, value) {
   state.ordersToShow = value;
-}
-
-function setDepositWithdrawModalModel(state, model) {
-  state.depositWithdrawModalModel = model;
 }
 
 function SOCKET_ONOPEN(state, event) {
