@@ -232,10 +232,13 @@ export default {
       }
     },
     estimate() {
+      const holding = this.$store.state.currentMarket ?
+        this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue :
+        0;
+
       try {
         return new BigNumber(this.total).multipliedBy(
-          new BigNumber(this.$store.state.currentMarket ?
-            this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue : 0));
+          new BigNumber(parseFloat(holding)));
       } catch (e) {
         console.log(e);
         return 0;
