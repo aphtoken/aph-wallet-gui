@@ -18,9 +18,11 @@
         <div class="remove" @click="showRemoveConfirmation">{{$t('remove')}}</div>
       </div>
       <div class="body">
-        <aph-icon name="wallet"></aph-icon>
-        <div class="wallet-name">{{ $store.state.currentLoginToWallet.label }}</div>
-        <aph-input v-if="isNotCurrentWallet" :placeholder="loginMessage" :light="true" v-model="passphrase" type="password"></aph-input>
+        <aph-form :on-submit="login">
+          <aph-icon name="wallet"></aph-icon>
+          <div class="wallet-name">{{ $store.state.currentLoginToWallet.label }}</div>
+          <aph-input v-if="isNotCurrentWallet" :placeholder="loginMessage" :light="true" v-model="passphrase" type="password"></aph-input>
+        </aph-form>
       </div>
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">{{$t('cancel')}}</div>

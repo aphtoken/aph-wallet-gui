@@ -1,8 +1,10 @@
 <template>
   <modal-wrapper id="aph-add-token-modal" identifier="addToken">
     <div class="body">
-      <aph-icon name="create"></aph-icon>
-      <aph-input placeholder="Script Hash or Token Symbol" :light="true" v-model="hashOrSymbol"></aph-input>
+      <aph-form :on-submit="add">
+        <aph-icon name="create"></aph-icon>
+        <aph-input placeholder="Script Hash or Token Symbol" :light="true" v-model="hashOrSymbol"></aph-input>
+      </aph-form>
     </div>
     <div class="footer">
       <button class="cancel-btn" @click="onCancel">Cancel</button>
@@ -33,6 +35,10 @@ export default {
 
   methods: {
     add() {
+      if (!this.hashOrSymbol) {
+        return;
+      }
+
       this.$store.dispatch('addToken', {
         hashOrSymbol: this.hashOrSymbol,
         done: () => {

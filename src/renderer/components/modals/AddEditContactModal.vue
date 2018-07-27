@@ -4,9 +4,11 @@
       <div class="remove" @click="remove">{{$t('remove')}}</div>
     </div>
     <div class="body">
-      <aph-icon name="user"></aph-icon>
-      <aph-input placeholder="Name" :light="true" v-model="name"></aph-input>
-      <aph-input placeholder="Address" v-model="address"></aph-input>
+      <aph-form :on-submit="addOrSave">
+        <aph-icon name="user"></aph-icon>
+        <aph-input placeholder="Name" :light="true" v-model="name"></aph-input>
+        <aph-input placeholder="Address" v-model="address"></aph-input>
+      </aph-form>
     </div>
     <div class="footer">
       <button class="cancel-btn" @click="onCancel">{{$t('cancel')}}</button>
@@ -40,6 +42,10 @@ export default {
 
   methods: {
     add() {
+      if (!this.address || !this.name) {
+        return;
+      }
+
       if (this.$services.contacts.contactExists(this.name.trim())) {
         this.$services.alerts.error(this.$t('contactExists', { name: this.name.trim() }));
         return;
@@ -51,6 +57,14 @@ export default {
       }).sync();
 
       this.onCancel();
+    },
+
+    addOrSave() {
+      if (this.prevAddress) {
+        this.save();
+      } else {
+        this.add();
+      }
     },
 
     save() {
