@@ -10,7 +10,7 @@
           <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
           <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
         </div>
-        <div class="balance" :title="aphBalanceToolTip">
+        <div class="balance" :title="aphBalanceToolTip" v-if="quoteHolding.symbol !== 'APH'">
           <div class="label">{{$t('balance')}} (APH)</div>
           <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
         </div>
