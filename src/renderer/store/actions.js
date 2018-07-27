@@ -11,6 +11,7 @@ export {
   claimGas,
   createWallet,
   deleteWallet,
+  fetchCommitState,
   fetchHoldings,
   fetchLatestVersion,
   fetchPortfolio,
@@ -115,6 +116,32 @@ async function fetchCachedData(id, defaultValue) {
   return result;
 }
 
+async function fetchCommitState({ commit }) {
+  const currentNetwork = network.getSelectedNetwork();
+  const currentWallet = wallets.getCurrentWallet();
+  let commitState;
+
+  commit('startRequest', { identifier: 'fetchCommitState' });
+
+  const commitStorageKey = `commit.${currentWallet.address}.${currentNetwork.net}`;
+
+  try {
+    commitState = await fetchCachedData(commitStorageKey);
+    commit('setCommitState', commitState);
+  } catch (commitState) {
+    commit('setCommitState', commitState);
+  }
+
+  try {
+    commitState = await dex.fetchCommitState(currentWallet.address);
+    commit('setCommitState', commitState);
+    commit('endRequest', { identifier: 'fetchCommitState' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'fetchCommitState', message });
+  }
+}
+
 async function fetchHoldings({ commit }, { done }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
@@ -126,9 +153,6 @@ async function fetchHoldings({ commit }, { done }) {
 
   try {
     holdings = await fetchCachedData(holdingsStorageKey);
-    if (done) {
-      done();
-    }
     commit('setHoldings', holdings);
   } catch (holdings) {
     commit('setHoldings', holdings);
@@ -136,6 +160,9 @@ async function fetchHoldings({ commit }, { done }) {
 
   try {
     holdings = await neo.fetchHoldings(currentWallet.address);
+    if (done) {
+      done();
+    }
     commit('setHoldings', holdings.holdings);
     commit('endRequest', { identifier: 'fetchHoldings' });
   } catch (message) {

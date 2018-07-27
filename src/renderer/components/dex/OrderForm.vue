@@ -67,6 +67,8 @@
             <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">{{$t('depositAPH')}}</button>
             <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">{{$t('withdrawAPH')}}</button>
           </div>
+          <!-- Only the contract owner or manager can do this.
+          <button @click="setMarket" class="test-btn">Setup Market</button>-->
         </div>
         <!-- Only the contract owner or manager can do this.
             <button @click="setMarket" class="test-btn">Setup Market</button> -->

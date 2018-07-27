@@ -50,13 +50,18 @@ const assets = {
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
 
   // privnet
-  /* DEX_SCRIPT_HASH: 'e0556a9376bbf6b3e6c7ec3171b8782153f0efcd',
+  /* DEX_SCRIPT_HASH: 'b102048babc8f1811f854dbc1ccf26183f45adbe',
   APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac',
   ATI: '155153854ed377549a72cc1643e481bf25b48390', */
 };
 
 const charts = {
   DEBOUNCE: 500,
+};
+
+const claiming = {
+  CLAIM_BLOCKS: 4800,
+  COMPOUND_BLOCKS: 4800,
 };
 
 const database = {
@@ -117,6 +122,7 @@ const timeouts = {
 export {
   assets,
   charts,
+  claiming,
   database,
   defaultSettings,
   formats,

@@ -14,7 +14,7 @@ import wallets from './wallets';
 import ledger from './ledger';
 import { store } from '../store';
 
-import { assets, intervals } from '../constants';
+import { assets, claiming, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SENDER = 0xfa;
 const TX_ATTR_USAGE_SCRIPT = 0x20;
@@ -565,6 +565,7 @@ export default {
                 }
               })
               .catch((e) => {
+                // console.log(e);
                 reject(new Error(`APH API Error: ${e.message}`));
               });
           })
@@ -593,19 +594,12 @@ export default {
     });
 
     order.deposits = [];
-    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalQuantityToSell))) {
-      order.deposits.push({
-        symbol: sellAssetHolding.symbol,
-        assetId: order.assetIdToSell,
-        currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
-        quantityRequired: new BigNumber(totalQuantityToSell),
-        quantityToDeposit: new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance),
-      });
-    }
 
     if (totalFees.isGreaterThan(0)) {
       const aphAssetHolding = neo.getHolding(assets.APH);
-      if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
+      if (order.assetIdToSell === assets.APH) {
+        totalQuantityToSell = totalQuantityToSell.plus(totalFees);
+      } else if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
         order.deposits.push({
           symbol: aphAssetHolding.symbol,
           assetId: assets.APH,
@@ -614,6 +608,16 @@ export default {
           quantityToDeposit: new BigNumber(totalFees).minus(aphAssetHolding.contractBalance),
         });
       }
+    }
+
+    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalQuantityToSell))) {
+      order.deposits.push({
+        symbol: sellAssetHolding.symbol,
+        assetId: order.assetIdToSell,
+        currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
+        quantityRequired: new BigNumber(totalQuantityToSell),
+        quantityToDeposit: new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance),
+      });
     }
   },
 
@@ -1508,6 +1512,251 @@ export default {
           });
       } catch (e) {
         reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e.message}`);
+      }
+    });
+  },
+
+  fetchCommitState(address) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.fetchCommitUserState(address)
+          .then((commitState) => {
+            this.fetchCommitDEXState()
+              .then((dexState) => {
+                commitState.totalUnitsContributed = dexState.totalUnitsContributed;
+                commitState.lastAppliedFeeSnapshot = dexState.lastAppliedFeeSnapshot;
+                commitState.totalFeeUnits = dexState.totalFeeUnits;
+                commitState.totalFeesCollected = dexState.totalFeesCollected;
+
+                // Apply the fees not yet applied into the totalFeeUnits to get an accurate calculation.
+                if (commitState.lastAppliedFeeSnapshot < commitState.totalFeesCollected) {
+                  const feesCollectedSinceSnapshot = commitState.totalFeesCollected - commitState.lastAppliedFeeSnapshot;
+                  commitState.totalFeeUnits += feesCollectedSinceSnapshot * commitState.totalUnitsContributed;
+                  commitState.lastAppliedFeeSnapshot = commitState.totalFeesCollected;
+                }
+                commitState.networkWeight = Math.round(commitState.totalFeeUnits - commitState.feeUnitsSnapshot);
+
+                if (commitState.contributionHeight > 0) {
+                  commitState.ableToClaimHeight = commitState.contributionHeight + claiming.CLAIM_BLOCKS;
+                  commitState.ableToCompoundHeight = commitState.compoundHeight + claiming.COMPOUND_BLOCKS;
+
+                  commitState.feesCollectedSinceCommit = commitState.totalFeesCollected - commitState.feesCollectedSnapshot;
+                  commitState.userWeight = commitState.feesCollectedSinceCommit * commitState.quantityCommitted * 100000000;
+                  commitState.weightFraction = commitState.networkWeight > 0 ? commitState.userWeight / commitState.networkWeight : 0;
+                  commitState.weightPercentage = Math.round(commitState.weightFraction * 100 * 10000) / 10000;
+
+                  commitState.availableToClaim = commitState.feesCollectedSinceCommit * commitState.weightFraction;
+                  commitState.availableToClaim = Math.floor(commitState.availableToClaim * 100000000) / 100000000;
+                }
+                resolve(commitState);
+              })
+              .catch((e) => {
+                reject(`Failed to fetch commit state. ${e.message}`);
+              });
+          })
+          .catch((e) => {
+            reject(`Failed to fetch commit state. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch commit state. ${e.message}`);
+      }
+    });
+  },
+
+  fetchCommitUserState(address) {
+    return new Promise((resolve, reject) => {
+      try {
+        const contributionKey = `${u.reverseHex(wallet.getScriptHashFromAddress(address))}${u.reverseHex(assets.APH)}d0`;
+
+        const rpcClient = network.getRpcClient();
+        rpcClient.query({
+          method: 'getstorage',
+          params: [assets.DEX_SCRIPT_HASH, contributionKey],
+        })
+          .then((res) => {
+            const commitState = {
+              userScriptHash: wallet.getScriptHashFromAddress(address),
+              quantityCommitted: 0,
+              contributionHeight: null,
+              contributionTimestamp: null,
+              compoundHeight: null,
+              feesCollectedSnapshot: 0,
+              feeUnitsSnapshot: 0,
+            };
+
+            if (!res || !res.result || res.result.length < 120) {
+              resolve(commitState);
+              return;
+            }
+
+            commitState.quantityCommitted = u.fixed82num(res.result.substr(40, 16));
+            commitState.contributionHeight = Math.round(u.fixed82num(res.result.substr(56, 16)) * 100000000);
+            commitState.compoundHeight = Math.round(u.fixed82num(res.result.substr(72, 16)) * 100000000);
+            commitState.feesCollectedSnapshot = u.fixed82num(res.result.substr(88, 16));
+            commitState.feeUnitsSnapshot = u.fixed82num(res.result.substr(104, 16));
+            // console.log(`got commitState.feeUnitsSnapshot: ${commitState.feeUnitsSnapshot}`);
+
+            rpcClient.getBlock(commitState.contributionHeight)
+              .then((data) => {
+                commitState.contributionTimestamp = data.time;
+                resolve(commitState);
+              });
+          })
+          .catch((e) => {
+            reject(`Failed to fetch commit state. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch commit state. ${e.message}`);
+      }
+    });
+  },
+
+  fetchCommitDEXState() {
+    return new Promise((resolve, reject) => {
+      try {
+        const rpcClient = network.getRpcClient();
+        rpcClient.query({
+          method: 'getstorage',
+          params: [assets.DEX_SCRIPT_HASH, `${u.reverseHex(assets.APH)}fa`],
+        })
+          .then((res) => {
+            const dexState = {
+              totalUnitsContributed: 0,
+              lastAppliedFeeSnapshot: 0,
+              totalFeeUnits: 0,
+            };
+
+            if (res.result && res.result.length >= 48) {
+              dexState.totalUnitsContributed = u.fixed82num(res.result.substr(0, 16)) * 100000000;
+              dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 16));
+              dexState.totalFeeUnits = u.fixed82num(res.result.substr(32, 16));
+            }
+
+            rpcClient.query({
+              method: 'getstorage',
+              params: [assets.DEX_SCRIPT_HASH, `${u.reverseHex(assets.APH)}fc`],
+            })
+              .then((res) => {
+                if (!res || !res.result || res.result.length < 32) {
+                  dexState.totalFeesCollected = 0;
+                  resolve(dexState);
+                  return;
+                }
+
+                dexState.totalFeesCollected = u.fixed82num(res.result.substr(0, 16));
+                // console.log(`dexState.totalFeesCollected: ${dexState.totalFeesCollected}`);
+                resolve(dexState);
+              })
+              .catch((e) => {
+                reject(`Failed to fetch commit state. ${e.message}`);
+              });
+          })
+          .catch((e) => {
+            reject(`Failed to fetch commit state. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch commit state. ${e.message}`);
+      }
+    });
+  },
+
+  commitAPH(quantity) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('commit',
+          [
+            u.num2fixed8(quantity),
+          ])
+          .then((res) => {
+            if (res.success) {
+              alerts.success('Commit relayed, waiting for confirmation...');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
+                  if (inMemoryHolding) {
+                    inMemoryHolding.balance = null;
+                  }
+
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(`Commit Failed. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Commit Failed. ${e.message}`);
+      }
+    });
+  },
+
+  claimAPH() {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('claim',
+          [])
+          .then((res) => {
+            if (res.success) {
+              alerts.success('Claim relayed, waiting for confirmation...');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
+                  if (inMemoryHolding) {
+                    inMemoryHolding.balance = null;
+                  }
+
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(`Claim Failed. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Claim Failed. ${e.message}`);
+      }
+    });
+  },
+
+  compoundAPH() {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('compound',
+          [])
+          .then((res) => {
+            if (res.success) {
+              alerts.success('Compound relayed, waiting for confirmation...');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
+                  if (inMemoryHolding) {
+                    inMemoryHolding.balance = null;
+                  }
+
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(`Compound Failed. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Compound Failed. ${e.message}`);
       }
     });
   },
