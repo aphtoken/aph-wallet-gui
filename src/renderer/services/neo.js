@@ -430,7 +430,7 @@ export default {
             res.result.balances.forEach((fetchedBalance) => {
               const holdingBalance = {
                 asset: fetchedBalance.asset.replace('0x', ''),
-                balance: parseFloat(fetchedBalance.value),
+                balance: fetchedBalance.value,
                 symbol: fetchedBalance.asset.replace('0x', '') === NEO_ASSET_ID ? 'NEO' : 'GAS',
                 name: fetchedBalance.asset.replace('0x', '') === NEO_ASSET_ID ? 'NEO' : 'GAS',
                 isNep5: false,
