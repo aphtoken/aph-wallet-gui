@@ -321,7 +321,7 @@ export default {
         ])
           .then((res) => {
             if (res.success && res.result.length >= 1) {
-              resolve(u.fixed82num(parseFloat(res.result)));
+              resolve(u.fixed82num(res.result));
             } else if (res.success && res.result === '0') {
               resolve(0);
             } else {
