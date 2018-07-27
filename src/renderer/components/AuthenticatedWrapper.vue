@@ -66,7 +66,7 @@ export default {
     width: $left-sidebar-width;
 
     @include lowRes() {
-      width: toRem(240px);
+      width: $left-sidebar-width-lowres;
     }
   }
 
