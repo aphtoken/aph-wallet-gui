@@ -397,7 +397,7 @@ export default {
           const message = this.$t('relayedToNetwork', {
             amount,
             symbol: holding.symbol,
-            action: (isDeposit ? this.t('deposit') : this.$t('withdraw')),
+            action: (isDeposit ? this.$t('deposit') : this.$t('withdraw')),
           });
           this.$services.alerts.success(message);
         })
