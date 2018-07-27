@@ -344,7 +344,10 @@ export default {
           return order.assetIdToGive === assetId && (order.status === 'Open' || order.status === 'PartiallyFilled');
         });
 
-        resolve(_.sumBy(openOrdersForAsset, 'quantityToGive'));
+        resolve(_.sumBy(openOrdersForAsset, (order) => {
+          return order.quantity === order.quantityToGive
+            ? order.quantityRemaining : order.quantityRemaining * order.price;
+        }));
       } catch (e) {
         reject(`Error fetching open order balance for ${assetId}. Error: ${e.message}`);
       }
@@ -581,10 +584,11 @@ export default {
     let totalFees = new BigNumber(0);
     const sellAssetHolding = neo.getHolding(order.assetIdToSell);
 
-    // This should be the same for assets that can be pulled as what will be calculated below.
-    // if (order.quantity.isGreaterThan(0) && sellAssetHolding.canPull === false) {
-    //   totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
-    // }
+    if (sellAssetHolding.canPull === false && order.quantity.isGreaterThan(0)) {
+      totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
+    } else if (sellAssetHolding.decimals < 8) {
+      totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
+    }
 
     order.offersToTake.forEach((offer) => {
       if (offer.isBackupOffer !== true) {
@@ -611,12 +615,18 @@ export default {
     }
 
     if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalQuantityToSell))) {
+      let quantityToDeposit = new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance);
+      if (sellAssetHolding.decimals < 8) {
+        quantityToDeposit = new BigNumber(quantityToDeposit.toFixed(sellAssetHolding.decimals));
+        quantityToDeposit = quantityToDeposit.plus(1 / (10 ** sellAssetHolding.decimals));
+      }
+
       order.deposits.push({
         symbol: sellAssetHolding.symbol,
         assetId: order.assetIdToSell,
         currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
         quantityRequired: new BigNumber(totalQuantityToSell),
-        quantityToDeposit: new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance),
+        quantityToDeposit,
       });
     }
   },
