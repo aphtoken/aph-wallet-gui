@@ -580,9 +580,10 @@ export default {
     let totalFees = new BigNumber(0);
     const sellAssetHolding = neo.getHolding(order.assetIdToSell);
 
-    if (order.quantity.isGreaterThan(0) && sellAssetHolding.canPull === false) {
-      totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
-    }
+    // This should be the same for assets that can be pulled as what will be calculated below.
+    // if (order.quantity.isGreaterThan(0) && sellAssetHolding.canPull === false) {
+    //   totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
+    // }
 
     order.offersToTake.forEach((offer) => {
       if (offer.isBackupOffer !== true) {
