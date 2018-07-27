@@ -67,7 +67,11 @@
         </div>
         <div class="claim-info">
           <div class="value" v-if="$store.state.commitState.quantityCommitted > 0">
-            <div v-if="$store.state.commitState.ableToCompoundHeight > currentBlock">
+            <div v-if="$store.state.commitState.ableToClaimHeight > currentBlock">
+              <h2>{{$store.state.commitState.ableToClaimHeight - currentBlock}}</h2>
+              <div>{{$t('blocksUntilClaim')}} ({{$store.state.commitState.ableToCompoundHeight}})</div>
+            </div>
+            <div v-else-if="$store.state.commitState.ableToCompoundHeight > currentBlock">
               <h2>{{$store.state.commitState.ableToCompoundHeight - currentBlock}}</h2>
               <div>{{$t('blocksUntilCompound')}} ({{$store.state.commitState.ableToCompoundHeight}})</div>
             </div>

@@ -30,6 +30,7 @@ export default {
   backupWallet: 'Backup Wallet',
   balance: 'BALANCE',
   block: 'Block',
+  blocksUntilClaim: 'Blocks Until Eligible for Fees',
   blocksUntilCompound: 'Blocks Until Compound',
   buy: 'Buy',
   buyAph: 'Buy APH',

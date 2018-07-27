@@ -565,6 +565,7 @@ export default {
                 }
               })
               .catch((e) => {
+                // console.log(e);
                 reject(new Error(`APH API Error: ${e.message}`));
               });
           })
@@ -1537,7 +1538,7 @@ export default {
 
                 if (commitState.contributionHeight > 0) {
                   commitState.ableToClaimHeight = commitState.contributionHeight + claiming.CLAIM_BLOCKS;
-                  commitState.ableToCompoundHeight = commitState.contributionHeight + claiming.COMPOUND_BLOCKS;
+                  commitState.ableToCompoundHeight = commitState.compoundHeight + claiming.COMPOUND_BLOCKS;
 
                   commitState.feesCollectedSinceCommit = commitState.totalFeesCollected - commitState.feesCollectedSnapshot;
                   commitState.userWeight = commitState.feesCollectedSinceCommit * commitState.quantityCommitted * 100000000;
