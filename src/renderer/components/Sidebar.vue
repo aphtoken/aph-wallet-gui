@@ -3,7 +3,7 @@
     :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
     <aph-icon class="toggle" 
       v-if="toggleable"
-      @click.stop.prevent.native="setCollapsed(!collapsed)" 
+      @click.stop.prevent="setCollapsed(!collapsed)" 
       :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'">
     </aph-icon>
     <template v-if="!toggleable || (toggleable && !collapsed)">
@@ -149,7 +149,7 @@ export default {
 
   .header {
     flex: none;
-    padding: $space-xl;
+    padding: toRem($space-xl);
 
     .logo-mark {
       .fill {
@@ -158,7 +158,7 @@ export default {
     }
 
     @include lowRes() {
-      padding-bottom: $space-lg;
+      padding-bottom: toRem($space-lg);
     }
   }
 
@@ -303,10 +303,6 @@ export default {
   &.collapsed {
     cursor: pointer;
     width: $left-sidebar-width-collapsed !important;
-
-    &:hover {
-      background-color: $purple-hover;
-    }
   }
 
   &.expanded {
@@ -315,21 +311,42 @@ export default {
     left: 0px;
     height: 100%;
     z-index: 10000;
+    width: $left-sidebar-width-expanded !important;
+
+    @include lowRes() {
+      width: $left-sidebar-width-expanded-lowres !important;
+    }
+
+    > .header, > .menu {
+      width: $left-sidebar-width;
+
+      @include lowRes() {
+        width: $left-sidebar-width-lowres;
+      }
+    }
   }
 
   .toggle {
     position: absolute;
-    right: toRem($space);
-    top: 50%;
+    right: 0;
     cursor: pointer;
+    width: $left-sidebar-width-collapsed;
+    height: 100%;
 
     svg {
+      position: absolute;
+      top: 50%;
+      right: toRem($space);
       width: toRem(20px);
       height: toRem(20px);
     }
 
     .fill {
       fill: #FFF;
+    }
+
+    &:hover {
+      background-color: $purple-hover;
     }
   }
 }
