@@ -4,14 +4,14 @@
       <aph-icon name="hex"></aph-icon>
       <aph-icon name="claim"></aph-icon>
     </div>
-    <div class="header" v-if="$store.state.commitState.ableToCompoundHeight <= this.currentBlock">
+    <div class="header" v-if="$store.state.commitState.ableToClaimHeight <= this.currentBlock">
       {{$t('claim')}} ~{{$store.state.commitState.availableToClaim}} APH
     </div>
     <div class="header" v-else>
       {{$t('claim')}} 0 APH
     </div>
     <div class="body">
-      <div v-if="$store.state.commitState.ableToCompoundHeight <= this.currentBlock">
+      <div v-if="$store.state.commitState.ableToClaimHeight <= this.currentBlock">
         <p>
           {{$t('areYouSureYouWantToClaim')}}
         </p>
@@ -32,7 +32,7 @@
         </p>
         <p>
           {{$t('waitAnAdditionalBlocks', { 
-            blocks: $store.state.commitState.ableToCompoundHeight - this.currentBlock 
+            blocks: $store.state.commitState.ableToClaimHeight - this.currentBlock 
           })}}
         </p>
       </div>      
