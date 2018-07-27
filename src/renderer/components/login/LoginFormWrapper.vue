@@ -1,6 +1,8 @@
 <template>
   <div :class="['login-form-wrapper', {failed}]">
-    <slot></slot>
+    <aph-form :on-submit="onSubmit">
+      <slot></slot>
+    </aph-form>
     <request-error-message v-if="identifier" :identifier="identifier"></request-error-message>
   </div>
 </template>
@@ -22,6 +24,10 @@ export default {
   props: {
     identifier: {
       type: String,
+    },
+
+    onSubmit: {
+      type: Function,
     },
   },
 };

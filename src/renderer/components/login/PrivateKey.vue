@@ -1,6 +1,6 @@
 <template>
   <section id="login--saved-wallet">
-    <login-form-wrapper identifier="openPrivateKey">
+    <login-form-wrapper identifier="openPrivateKey" :on-submit="login">
       <aph-input :hasError="$isFailed('openPrivateKey')" v-model="wif" :placeholder="$t('enterYourPrivateKeyWIF')" type="password"></aph-input>
       <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{$t('login')}}</button>
     </login-form-wrapper>

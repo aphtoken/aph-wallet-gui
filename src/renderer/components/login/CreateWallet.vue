@@ -1,12 +1,12 @@
 <template>
   <section id="login--create-wallet">
-    <login-form-wrapper identifier="createWallet">
+    <login-form-wrapper identifier="createWallet" :on-submit="create">
       <p class="help-text">{{$t('chooseAName')}}</p>
       <aph-input v-model="walletName" :placeholder="$t('enterYourWalletName')"></aph-input>
       <p class="help-text">{{$t('chooseAPassphrase')}}</p>
       <aph-input v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password"></aph-input>
       <aph-input v-model="passphraseConfirm" :placeholder="$t('repeatYourPassphrase')" type="password"></aph-input>
-      <button class="create" @click="create" :disabled="shouldDisableCreateButton">{{ buttonLabel }}</button>
+      <button class="create" :disabled="shouldDisableCreateButton">{{ buttonLabel }}</button>
     </login-form-wrapper>
   </section>
 </template>
