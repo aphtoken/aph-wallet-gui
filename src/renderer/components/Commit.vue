@@ -57,15 +57,24 @@
       </div>
       <div class="actions">
         <div class="commit">
-          <div class="btn-square" @click="showCommitModal()">
-            <aph-icon name="commit"></aph-icon>
-            <p>{{$t('commit')}}</p>
-          </div>
+          <button class="btn-square" @click="showCommitModal()"
+              :disabled="shouldDisableCommitButton">
+            <div>
+              <aph-icon name="commit"></aph-icon>
+              <p>{{$t('commit')}}</p>
+            </div>
+          </button>
         </div>
         <div class="claim-info">
           <div class="value" v-if="$store.state.commitState.quantityCommitted > 0">
-            <h2>{{$store.state.commitState.ableToCompoundHeight - currentBlock}}</h2>
-            <div>{{$t('blocksUntilCompound')}} ({{$store.state.commitState.ableToCompoundHeight}})</div>
+            <div v-if="$store.state.commitState.ableToCompoundHeight > currentBlock">
+              <h2>{{$store.state.commitState.ableToCompoundHeight - currentBlock}}</h2>
+              <div>{{$t('blocksUntilCompound')}} ({{$store.state.commitState.ableToCompoundHeight}})</div>
+            </div>
+            <div v-else>
+              <h2>-</h2>
+              <div>{{$t('eligibleToCompound')}}</div>
+            </div>
             <div><span>{{$t('currentBlock')}}</span>{{ currentBlock }}</div>
           </div>
           <div class="value" v-else>
@@ -74,16 +83,20 @@
             <div><span>{{$t('currentBlock')}}</span>{{ currentBlock }}</div>
           </div>
           <div class="buttons">
-            <div class="btn-square" @click="showClaimModal()"
+            <button class="btn-square" @click="showClaimModal()"
               :disabled="shouldDisableClaimButton">
-              <aph-icon name="claim"></aph-icon>
-              <p>{{$t('claim')}}</p>
-            </div>
-            <div class="btn-square" @click="compound()"
+              <div>
+                <aph-icon name="claim"></aph-icon>
+                <p>{{$t('claim')}}</p>
+              </div>
+            </button>
+            <button class="btn-square" @click="compound()"
               :disabled="shouldDisableCompoundButton">
-              <aph-icon name="compound"></aph-icon>
-              <p>{{$t('compound')}}</p>
-            </div>
+              <div>
+                <aph-icon name="compound"></aph-icon>
+                <p>{{$t('compound')}}</p>
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -140,11 +153,15 @@ export default {
     ...mapGetters([
       'currentNetwork',
     ]),
+    shouldDisableCommitButton() {
+      return this.$store.state.commitState.quantityCommitted > 0;
+    },
     shouldDisableClaimButton() {
       return this.$store.state.commitState.quantityCommitted <= 0;
     },
     shouldDisableCompoundButton() {
-      return this.$store.state.commitState.quantityCommitted <= 0;
+      return this.$store.state.commitState.quantityCommitted <= 0
+        || this.$store.state.commitState.ableToCompoundHeight > this.currentBlock;
     },
     currentBlock() {
       return this.currentNetwork && this.currentNetwork.bestBlock ? this.currentNetwork.bestBlock.index : 0;
@@ -390,9 +407,18 @@ export default {
       .btn-square {
         @extend %btn-square;
 
-        height: auto;
+        height: toRem(225px);
         padding: 3rem 0;
         width: toRem(250px);
+        flex-direction: row;
+        
+        &>div {
+          width: 100%;
+        }
+            
+        &:disabled {
+          background-color: $grey;
+        }
 
         .aph-icon {
           .fill {

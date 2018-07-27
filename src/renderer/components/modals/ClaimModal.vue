@@ -4,14 +4,38 @@
       <aph-icon name="hex"></aph-icon>
       <aph-icon name="claim"></aph-icon>
     </div>
-    <div class="header">
+    <div class="header" v-if="$store.state.commitState.ableToCompoundHeight <= this.currentBlock">
       {{$t('claim')}} ~{{$store.state.commitState.availableToClaim}} APH
     </div>
+    <div class="header" v-else>
+      {{$t('claim')}} 0 APH
+    </div>
     <div class="body">
-      <p>
-        {{$t('areYouSureYouWantToClaim')}}
-      </p>
-      
+      <div v-if="$store.state.commitState.ableToCompoundHeight <= this.currentBlock">
+        <p>
+          {{$t('areYouSureYouWantToClaim')}}
+        </p>
+        <p>
+          {{$t('committedAPHBalance', { 
+            balance: $store.state.commitState.quantityCommitted 
+          })}}
+        </p>
+      </div>
+      <div v-else>
+        <p>
+          {{$t('notMetMinimumBlocksToClaim')}}
+        </p>
+        <p>
+          {{$t('youMayStillClaim', { 
+            balance: $store.state.commitState.quantityCommitted 
+          })}}
+        </p>
+        <p>
+          {{$t('waitAnAdditionalBlocks', { 
+            blocks: $store.state.commitState.ableToCompoundHeight - this.currentBlock 
+          })}}
+        </p>
+      </div>      
       <button class="commit-btn" @click="onConfirmed()">{{$t('claim')}}</button>
     </div>
     <div class="footer">
@@ -21,6 +45,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import ModalWrapper from './ModalWrapper';
 
 export default {
@@ -29,6 +54,12 @@ export default {
   },
 
   computed: {
+    ...mapGetters([
+      'currentNetwork',
+    ]),
+    currentBlock() {
+      return this.currentNetwork && this.currentNetwork.bestBlock ? this.currentNetwork.bestBlock.index : 0;
+    },
     aphHolding() {
       if (this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
