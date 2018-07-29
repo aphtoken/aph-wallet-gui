@@ -346,7 +346,10 @@ export default {
           return order.assetIdToGive === assetId && (order.status === 'Open' || order.status === 'PartiallyFilled');
         });
 
-        resolve(_.sumBy(openOrdersForAsset, 'quantityToGive'));
+        resolve(_.sumBy(openOrdersForAsset, (order) => {
+          return order.quantity === order.quantityToGive
+            ? order.quantityRemaining : order.quantityRemaining * order.price;
+        }));
       } catch (e) {
         reject(`Error fetching open order balance for ${assetId}. Error: ${e.message}`);
       }

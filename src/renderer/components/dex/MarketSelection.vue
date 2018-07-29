@@ -13,7 +13,7 @@
     <div class="selection">
       <market-mega-selector></market-mega-selector>
     </div>
-    <div class="market">
+    <div class="market" v-if="$store.state.tradeHistory">
       <div class="day-values">
         <div class="row">
           <div class="label">{{$t('vol')}}</div>
