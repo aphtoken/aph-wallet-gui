@@ -45,7 +45,7 @@ const assets = {
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
 
   // TODO: these different per network
-  DEX_SCRIPT_HASH: '927e87a5a86581cf1345ce40edde64ed40e4994f',
+  DEX_SCRIPT_HASH: '6408a93d5eff767b3179f21f2b52f5643dba9cc7',
   APH: '591eedcd379a8981edeefe04ef26207e1391904a',
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
 
@@ -60,8 +60,8 @@ const charts = {
 };
 
 const claiming = {
-  CLAIM_BLOCKS: 4800,
-  COMPOUND_BLOCKS: 4800,
+  CLAIM_BLOCKS: 180, // TODO: change to reading this from the contract, will be 4800 for MainNet
+  COMPOUND_BLOCKS: 180,
 };
 
 const database = {
