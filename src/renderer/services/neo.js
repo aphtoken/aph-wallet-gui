@@ -868,6 +868,7 @@ export default {
           privateKey: currentWallet.privateKey,
           balance: balance.balance,
           intents: api.makeIntent(intentAmounts, toAddress),
+          fees: currentNetwork.fee,
         };
 
         if (currentWallet.isLedger === true) {
@@ -901,6 +902,7 @@ export default {
           new u.Fixed8(amount).toReverseHex(),
         ],
       },
+      fees: currentNetwork.fee,
       gas: 0,
     };
 

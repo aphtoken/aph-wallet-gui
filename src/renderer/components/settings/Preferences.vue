@@ -5,22 +5,29 @@
     </div>
     <div class="body">
       <div class="row">
-        <div class="label">{{$t('language')}}</div>
-        <aph-select :light="true"
-                    :options="languages"
-                    :initialValue="selectedLanguage"
-                    v-model="selectedLanguage"
-                    :allow-empty-value="false"></aph-select>
+        <div class="column">
+          <div class="label">{{$t('language')}}</div>
+          <aph-select :light="true"
+                      :options="languages"
+                      :initialValue="selectedLanguage"
+                      v-model="selectedLanguage"
+                      :allow-empty-value="false"></aph-select>
+        </div>
+        <div class="column">
+          <div class="label">{{$t('currency')}}</div>
+          <aph-select :light="true" :options="currencies" :initialValue="selectedCurrency" v-model="selectedCurrency" :allow-empty-value="false"></aph-select>
+        </div>
       </div>
 
       <div class="row">
-        <div class="label">{{$t('currency')}}</div>
-        <aph-select :light="true" :options="currencies" :initialValue="selectedCurrency" v-model="selectedCurrency" :allow-empty-value="false"></aph-select>
-      </div>
-
-      <div class="row">
-        <div class="label">{{$t('network')}}</div>
-        <aph-select :light="true" :options="networks" :initialValue="selectedNetwork" v-model="selectedNetwork" :allow-empty-value="false"></aph-select>
+        <div class="column">
+          <div class="label">{{$t('network')}}</div>
+          <aph-select :light="true" :options="networks" :initialValue="selectedNetwork" v-model="selectedNetwork" :allow-empty-value="false"></aph-select>
+        </div>
+        <div class="column">
+          <div class="label">{{$t('networkFee')}}</div>
+          <aph-select :light="true" :options="networkFees" :initialValue="selectedNetworkFee" v-model="selectedNetworkFee" :allow-empty-value="false"></aph-select>
+        </div>
       </div>
     </div>
   </section>
@@ -31,22 +38,46 @@ export default {
   beforeMount() {
     this.currencies = this.$services.settings.getCurrenciesAsArray();
     this.networks = this.$services.network.getNetworks();
+    this.networkFees = this.$services.network.getNetworkFees().reduce(
+      (result, fee) => {
+        result.push({
+          label: this.$formatNumber(fee),
+          value: fee,
+        });
+
+        return result;
+      }, []);
     this.languages = this.$constants.languages;
     this.selectedLanguage = localStorage.getItem('language') || 'en';
     this.selectedCurrency = this.$services.settings.getCurrency();
+
+    const storedNetwork = this.$services.network.getSelectedNetwork();
     this.selectedNetwork = _.find(this.networks, (o) => {
-      return o.value.net === this.$services.network.getSelectedNetwork().net;
+      return o.value.net === storedNetwork.net;
     }).value;
+
+    if (!this.selectedNetwork && this.networks && this.networks.length > 0) {
+      this.selectedNetwork = this.networks[0];
+    }
+
+    if (storedNetwork) {
+      this.selectedNetwork.fee = storedNetwork.fee;
+      this.selectedNetworkFee = storedNetwork.fee;
+    } else {
+      this.selectedNetworkFee = 0;
+    }
   },
 
   data() {
     return {
       currencies: [],
       networks: [],
+      networkFees: [],
       languages: [],
       selectedLanguage: null,
       selectedCurrency: null,
       selectedNetwork: null,
+      selectedNetworkFee: 0,
     };
   },
 
@@ -61,7 +92,15 @@ export default {
         return;
       }
 
+      network.fee = this.selectedNetworkFee;
       this.$services.network.setSelectedNetwork(network);
+      this.$store.commit('handleNetworkChange');
+      this.$store.dispatch('fetchPortfolio');
+    },
+
+    selectedNetworkFee(fee) {
+      this.selectedNetwork.fee = fee;
+      this.$services.network.setSelectedNetwork(this.selectedNetwork);
       this.$store.commit('handleNetworkChange');
       this.$store.dispatch('fetchPortfolio');
     },
@@ -93,6 +132,18 @@ export default {
     padding: 0 $space-lg $space-lg;
 
     .row {
+      display: flex;
+      flex-direction: row;
+      
+      .column {
+        flex: 1;
+        margin-right: $space;
+        
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+      
       .label {
         @extend %small-uppercase-grey-label;
 
