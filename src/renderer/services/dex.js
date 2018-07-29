@@ -30,6 +30,8 @@ const WITHDRAW_STEP_WITHDRAW = '92';
 
 const toBigNumber = value => new BigNumber(String(value));
 
+let lastUTXOWithdrawn;
+
 export default {
   fetchMarkets() {
     return new Promise((resolve, reject) => {
@@ -1330,7 +1332,16 @@ export default {
                   });
 
                   if (!input) {
-                    reject('Unable to find marked input.');
+                    // skip displaying this error if we've already relayed this withdraw utxo, retry in case the explorer hasn't picked up the utxo yet
+                    if (lastUTXOWithdrawn !== `${utxoTxHash}${utxoIndex}`) {
+                      if (tryCount < 3) {
+                        setTimeout(() => {
+                          this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1);
+                        }, 10000);
+                        return;
+                      }
+                      reject('Unable to find marked input.');
+                    }
                     return;
                   }
 
@@ -1397,6 +1408,7 @@ export default {
 
             if (c.response.result === true) {
               alerts.success('Withdraw relayed, waiting for confirmation...');
+              lastUTXOWithdrawn = `${utxoTxHash}${utxoIndex}`;
             }
 
             resolve({
