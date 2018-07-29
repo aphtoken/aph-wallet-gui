@@ -270,7 +270,7 @@ export default {
 
         if (this.$store.state.styleMode === 'Night') {
           settings.overrides = {
-					  "paneProperties.background": "#222222",
+					  "paneProperties.background": "#18152c",
             "paneProperties.vertGridProperties.color": "#454545",
             "paneProperties.horzGridProperties.color": "#454545",
 					  "symbolWatermarkProperties.transparency": 90,
