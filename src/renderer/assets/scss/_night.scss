@@ -8,7 +8,7 @@
         color: white;
       }
 
-      .aph-select  {
+      .aph-select {
         .aph-select--dropdown {
           background: $background-night;
           color: $copy-night;
@@ -27,6 +27,7 @@
           background: $background-night;
           color: white;
         }
+
         .fill {
           fill: white;
         }
@@ -40,30 +41,20 @@
 
       .asks {
         .size-bar {
-          background-color: #441e35 !important;
-          border-color: #5b2f40 !important;
+          background-color: #5b2f40 !important;
 
-          span {
-            border-color: #5b2f40 !important;
-
-            &:after {
-              color: #5b2f40 !important;
-            }
+          &.size-total {
+            background-color: #441e35 !important;
           }
         }
       }
 
       .bids {
         .size-bar {
-          background-color: #233c40 !important;
-          border-color: #3b5459 !important;
+          background-color: #3b5459 !important;
 
-          span {
-            border-color: #3b5459 !important;
-
-            &:after {
-              color: #3b5459 !important;
-            }
+          &.size-total {
+            background-color: #233c40 !important;
           }
         }
       }
