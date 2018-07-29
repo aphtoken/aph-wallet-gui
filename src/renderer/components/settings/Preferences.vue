@@ -64,6 +64,7 @@ export default {
       this.$services.network.setSelectedNetwork(network);
       this.$store.commit('handleNetworkChange');
       this.$store.dispatch('fetchPortfolio');
+      this.$store.dispatch('fetchLatestVersion');
     },
 
     selectedLanguage(language) {
