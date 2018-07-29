@@ -104,6 +104,7 @@ function handleLogout(state) {
   state.nep5Balances = {};
   state.sendInProgress = {};
   state.currentMarket = null;
+  state.menuToggleable = false;
   neo.fetchNEP5Tokens();
 }
 
