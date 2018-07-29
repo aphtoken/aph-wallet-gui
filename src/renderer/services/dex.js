@@ -14,7 +14,7 @@ import wallets from './wallets';
 import ledger from './ledger';
 import { store } from '../store';
 
-import { assets } from '../constants';
+import { assets, claiming, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SENDER = 0xfa;
 const TX_ATTR_USAGE_SCRIPT = 0x20;
@@ -29,6 +29,8 @@ const WITHDRAW_STEP_MARK = '91';
 const WITHDRAW_STEP_WITHDRAW = '92';
 
 const toBigNumber = value => new BigNumber(String(value));
+
+let lastUTXOWithdrawn;
 
 export default {
   fetchMarkets() {
@@ -344,7 +346,10 @@ export default {
           return order.assetIdToGive === assetId && (order.status === 'Open' || order.status === 'PartiallyFilled');
         });
 
-        resolve(_.sumBy(openOrdersForAsset, 'quantityToGive'));
+        resolve(_.sumBy(openOrdersForAsset, (order) => {
+          return order.quantity === order.quantityToGive
+            ? order.quantityRemaining : order.quantityRemaining * order.price;
+        }));
       } catch (e) {
         reject(`Error fetching open order balance for ${assetId}. Error: ${e.message}`);
       }
@@ -565,6 +570,7 @@ export default {
                 }
               })
               .catch((e) => {
+                // console.log(e);
                 reject(new Error(`APH API Error: ${e.message}`));
               });
           })
@@ -576,30 +582,29 @@ export default {
   },
 
   formDepositsForOrder(order) {
-    let totalOfferQuantityToSell = new BigNumber(0);
+    let totalQuantityToSell = new BigNumber(0);
     let totalFees = new BigNumber(0);
-    order.offersToTake.forEach((o) => {
-      if (o.isBackupOffer !== true) {
-        totalOfferQuantityToSell = totalOfferQuantityToSell.plus(order.side === 'Buy' ? o.quantity.multipliedBy(o.price) : o.quantity);
+    const sellAssetHolding = neo.getHolding(order.assetIdToSell);
+
+    // This should be the same for assets that can be pulled as what will be calculated below.
+    // if (order.quantity.isGreaterThan(0) && sellAssetHolding.canPull === false) {
+    //   totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
+    // }
+
+    order.offersToTake.forEach((offer) => {
+      if (offer.isBackupOffer !== true) {
+        totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? offer.quantity.multipliedBy(offer.price) : offer.quantity);
         totalFees = totalFees.plus(order.side === 'Buy' ? order.market.buyFee : order.market.sellFee);
       }
     });
 
-    const sellAssetHolding = neo.getHolding(order.assetIdToSell);
     order.deposits = [];
-    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalOfferQuantityToSell))) {
-      order.deposits.push({
-        symbol: sellAssetHolding.symbol,
-        assetId: order.assetIdToSell,
-        currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
-        quantityRequired: new BigNumber(totalOfferQuantityToSell),
-        quantityToDeposit: new BigNumber(totalOfferQuantityToSell).minus(sellAssetHolding.contractBalance),
-      });
-    }
 
     if (totalFees.isGreaterThan(0)) {
       const aphAssetHolding = neo.getHolding(assets.APH);
-      if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
+      if (order.assetIdToSell === assets.APH) {
+        totalQuantityToSell = totalQuantityToSell.plus(totalFees);
+      } else if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
         order.deposits.push({
           symbol: aphAssetHolding.symbol,
           assetId: assets.APH,
@@ -608,6 +613,16 @@ export default {
           quantityToDeposit: new BigNumber(totalFees).minus(aphAssetHolding.contractBalance),
         });
       }
+    }
+
+    if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalQuantityToSell))) {
+      order.deposits.push({
+        symbol: sellAssetHolding.symbol,
+        assetId: order.assetIdToSell,
+        currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
+        quantityRequired: new BigNumber(totalQuantityToSell),
+        quantityToDeposit: new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance),
+      });
     }
   },
 
@@ -619,10 +634,26 @@ export default {
           depositPromises.push(this.depositAsset(d.assetId, d.quantityToDeposit.toNumber()));
         });
 
+        const watchInterval = setInterval(() => {
+          let waiting = false;
+          order.deposits.forEach((deposit) => {
+            const holding = neo.getHolding(deposit.assetId);
+            if (holding.contractBalance.isLessThan(deposit.quantityRequired)) {
+              waiting = true;
+            }
+          });
+
+          if (waiting === false) {
+            clearInterval(watchInterval);
+            resolve(order);
+          }
+        }, intervals.BLOCK);
+
         Promise.all(depositPromises)
           .then(() => {
             store.dispatch('fetchHoldings', {
               done: () => {
+                clearInterval(watchInterval);
                 setTimeout(() => {
                   resolve(order);
                 }, 5000);
@@ -788,59 +819,84 @@ export default {
       try {
         let neoToSend = 0;
         let gasToSend = 0;
+        let holding = null;
 
         if (assetId === assets.NEO) {
-          const neoHolding = neo.getHolding(assets.NEO);
+          holding = neo.getHolding(assets.NEO);
           neoToSend = quantity;
-          if (neoToSend > neoHolding.balance) {
+          if (neoToSend > holding.balance) {
             reject('Insufficient NEO.');
             return;
           }
-        }
-
-        if (assetId === assets.GAS) {
-          const gasHolding = neo.getHolding(assets.GAS);
+        } else if (assetId === assets.GAS) {
+          holding = neo.getHolding(assets.GAS);
           gasToSend = quantity;
-          if (gasToSend > gasHolding.balance) {
+          if (gasToSend > holding.balance) {
             reject('Insufficient GAS.');
+            return;
+          }
+        } else {
+          holding = neo.getHolding(assetId);
+          if (holding.balance.isLessThan(quantity)) {
+            reject(`Insufficient ${holding != null ? holding.symbol : assetId}.`);
             return;
           }
         }
 
-        this.executeContractTransaction('deposit',
-          [
-            u.reverseHex(assetId),
-            u.num2fixed8(quantity),
-          ], neoToSend, gasToSend)
-          .then((res) => {
-            if (res.success) {
-              alerts.success('Deposit relayed, waiting for confirmation...');
-              neo.monitorTransactionConfirmation(res.tx, true)
-                .then(() => {
-                  const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-                  if (inMemoryHolding) {
-                    inMemoryHolding.balance = null;
-                  }
+        if (holding.canPull !== false) {
+          this.executeContractTransaction('deposit',
+            [
+              u.reverseHex(assetId),
+              u.num2fixed8(quantity),
+            ], neoToSend, gasToSend)
+            .then((res) => {
+              if (res.success) {
+                alerts.success('Deposit relayed, waiting for confirmation...');
+                neo.monitorTransactionConfirmation(res.tx, true)
+                  .then(() => {
+                    const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
+                    if (inMemoryHolding) {
+                      inMemoryHolding.balance = null;
+                    }
 
-                  resolve(res.tx);
-                })
-                .catch((e) => {
-                  reject(e);
-                });
-            } else {
-              reject('Transaction rejected');
-            }
+                    resolve(res.tx);
+                  })
+                  .catch((e) => {
+                    reject(`Deposit Failed. ${e.message}`);
+                  });
+              } else {
+                reject('Transaction rejected');
+              }
 
-            // set in memory holding balance to null so it will pick up the new balance
-            // if it was skipping it before because we didn't hold any
-            const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-            if (inMemoryHolding) {
-              inMemoryHolding.balance = null;
-            }
+              // set in memory holding balance to null so it will pick up the new balance
+              // if it was skipping it before because we didn't hold any
+              const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
+              if (inMemoryHolding) {
+                inMemoryHolding.balance = null;
+              }
+            })
+            .catch((e) => {
+              reject(`Deposit Failed. ${e.message}`);
+            });
+        } else {
+          const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+          neo.sendFunds(dexAddress, assetId, quantity, true, () => {
+            alerts.success('Deposit relayed, waiting for confirmation...');
           })
-          .catch((e) => {
-            reject(`Deposit Failed. ${e.message}`);
-          });
+            .then((tx) => {
+              resolve(tx);
+
+              // set in memory holding balance to null so it will pick up the new balance
+              // if it was skipping it before because we didn't hold any
+              const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
+              if (inMemoryHolding) {
+                inMemoryHolding.balance = null;
+              }
+            })
+            .catch((e) => {
+              reject(`Deposit Failed. ${e.message}`);
+            });
+        }
       } catch (e) {
         reject(`Deposit Failed. ${e.message}`);
       }
@@ -1279,7 +1335,16 @@ export default {
                   });
 
                   if (!input) {
-                    reject('Unable to find marked input.');
+                    // skip displaying this error if we've already relayed this withdraw utxo, retry in case the explorer hasn't picked up the utxo yet
+                    if (lastUTXOWithdrawn !== `${utxoTxHash}${utxoIndex}`) {
+                      if (tryCount < 3) {
+                        setTimeout(() => {
+                          this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1);
+                        }, 10000);
+                        return;
+                      }
+                      reject('Unable to find marked input.');
+                    }
                     return;
                   }
 
@@ -1346,6 +1411,7 @@ export default {
 
             if (c.response.result === true) {
               alerts.success('Withdraw relayed, waiting for confirmation...');
+              lastUTXOWithdrawn = `${utxoTxHash}${utxoIndex}`;
             }
 
             resolve({
@@ -1461,6 +1527,251 @@ export default {
           });
       } catch (e) {
         reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e.message}`);
+      }
+    });
+  },
+
+  fetchCommitState(address) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.fetchCommitUserState(address)
+          .then((commitState) => {
+            this.fetchCommitDEXState()
+              .then((dexState) => {
+                commitState.totalUnitsContributed = dexState.totalUnitsContributed;
+                commitState.lastAppliedFeeSnapshot = dexState.lastAppliedFeeSnapshot;
+                commitState.totalFeeUnits = dexState.totalFeeUnits;
+                commitState.totalFeesCollected = dexState.totalFeesCollected;
+
+                // Apply the fees not yet applied into the totalFeeUnits to get an accurate calculation.
+                if (commitState.lastAppliedFeeSnapshot < commitState.totalFeesCollected) {
+                  const feesCollectedSinceSnapshot = commitState.totalFeesCollected - commitState.lastAppliedFeeSnapshot;
+                  commitState.totalFeeUnits += feesCollectedSinceSnapshot * commitState.totalUnitsContributed;
+                  commitState.lastAppliedFeeSnapshot = commitState.totalFeesCollected;
+                }
+                commitState.networkWeight = Math.round(commitState.totalFeeUnits - commitState.feeUnitsSnapshot);
+
+                if (commitState.contributionHeight > 0) {
+                  commitState.ableToClaimHeight = commitState.contributionHeight + claiming.CLAIM_BLOCKS;
+                  commitState.ableToCompoundHeight = commitState.compoundHeight + claiming.COMPOUND_BLOCKS;
+
+                  commitState.feesCollectedSinceCommit = commitState.totalFeesCollected - commitState.feesCollectedSnapshot;
+                  commitState.userWeight = commitState.feesCollectedSinceCommit * commitState.quantityCommitted * 100000000;
+                  commitState.weightFraction = commitState.networkWeight > 0 ? commitState.userWeight / commitState.networkWeight : 0;
+                  commitState.weightPercentage = Math.round(commitState.weightFraction * 100 * 10000) / 10000;
+
+                  commitState.availableToClaim = commitState.feesCollectedSinceCommit * commitState.weightFraction;
+                  commitState.availableToClaim = Math.floor(commitState.availableToClaim * 100000000) / 100000000;
+                }
+                resolve(commitState);
+              })
+              .catch((e) => {
+                reject(`Failed to fetch commit state. ${e.message}`);
+              });
+          })
+          .catch((e) => {
+            reject(`Failed to fetch commit state. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch commit state. ${e.message}`);
+      }
+    });
+  },
+
+  fetchCommitUserState(address) {
+    return new Promise((resolve, reject) => {
+      try {
+        const contributionKey = `${u.reverseHex(wallet.getScriptHashFromAddress(address))}${u.reverseHex(assets.APH)}d0`;
+
+        const rpcClient = network.getRpcClient();
+        rpcClient.query({
+          method: 'getstorage',
+          params: [assets.DEX_SCRIPT_HASH, contributionKey],
+        })
+          .then((res) => {
+            const commitState = {
+              userScriptHash: wallet.getScriptHashFromAddress(address),
+              quantityCommitted: 0,
+              contributionHeight: null,
+              contributionTimestamp: null,
+              compoundHeight: null,
+              feesCollectedSnapshot: 0,
+              feeUnitsSnapshot: 0,
+            };
+
+            if (!res || !res.result || res.result.length < 120) {
+              resolve(commitState);
+              return;
+            }
+
+            commitState.quantityCommitted = u.fixed82num(res.result.substr(40, 16));
+            commitState.contributionHeight = Math.round(u.fixed82num(res.result.substr(56, 16)) * 100000000);
+            commitState.compoundHeight = Math.round(u.fixed82num(res.result.substr(72, 16)) * 100000000);
+            commitState.feesCollectedSnapshot = u.fixed82num(res.result.substr(88, 16));
+            commitState.feeUnitsSnapshot = u.fixed82num(res.result.substr(104, 16));
+            // console.log(`got commitState.feeUnitsSnapshot: ${commitState.feeUnitsSnapshot}`);
+
+            rpcClient.getBlock(commitState.contributionHeight)
+              .then((data) => {
+                commitState.contributionTimestamp = data.time;
+                resolve(commitState);
+              });
+          })
+          .catch((e) => {
+            reject(`Failed to fetch commit state. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch commit state. ${e.message}`);
+      }
+    });
+  },
+
+  fetchCommitDEXState() {
+    return new Promise((resolve, reject) => {
+      try {
+        const rpcClient = network.getRpcClient();
+        rpcClient.query({
+          method: 'getstorage',
+          params: [assets.DEX_SCRIPT_HASH, `${u.reverseHex(assets.APH)}fa`],
+        })
+          .then((res) => {
+            const dexState = {
+              totalUnitsContributed: 0,
+              lastAppliedFeeSnapshot: 0,
+              totalFeeUnits: 0,
+            };
+
+            if (res.result && res.result.length >= 48) {
+              dexState.totalUnitsContributed = u.fixed82num(res.result.substr(0, 16)) * 100000000;
+              dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 16));
+              dexState.totalFeeUnits = u.fixed82num(res.result.substr(32, 16));
+            }
+
+            rpcClient.query({
+              method: 'getstorage',
+              params: [assets.DEX_SCRIPT_HASH, `${u.reverseHex(assets.APH)}fc`],
+            })
+              .then((res) => {
+                if (!res || !res.result || res.result.length < 32) {
+                  dexState.totalFeesCollected = 0;
+                  resolve(dexState);
+                  return;
+                }
+
+                dexState.totalFeesCollected = u.fixed82num(res.result.substr(0, 16));
+                // console.log(`dexState.totalFeesCollected: ${dexState.totalFeesCollected}`);
+                resolve(dexState);
+              })
+              .catch((e) => {
+                reject(`Failed to fetch commit state. ${e.message}`);
+              });
+          })
+          .catch((e) => {
+            reject(`Failed to fetch commit state. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch commit state. ${e.message}`);
+      }
+    });
+  },
+
+  commitAPH(quantity) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('commit',
+          [
+            u.num2fixed8(quantity),
+          ])
+          .then((res) => {
+            if (res.success) {
+              alerts.success('Commit relayed, waiting for confirmation...');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
+                  if (inMemoryHolding) {
+                    inMemoryHolding.balance = null;
+                  }
+
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(`Commit Failed. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Commit Failed. ${e.message}`);
+      }
+    });
+  },
+
+  claimAPH() {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('claim',
+          [])
+          .then((res) => {
+            if (res.success) {
+              alerts.success('Claim relayed, waiting for confirmation...');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
+                  if (inMemoryHolding) {
+                    inMemoryHolding.balance = null;
+                  }
+
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(`Claim Failed. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Claim Failed. ${e.message}`);
+      }
+    });
+  },
+
+  compoundAPH() {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('compound',
+          [])
+          .then((res) => {
+            if (res.success) {
+              alerts.success('Compound relayed, waiting for confirmation...');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
+                  if (inMemoryHolding) {
+                    inMemoryHolding.balance = null;
+                  }
+
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(`Compound Failed. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Compound Failed. ${e.message}`);
       }
     });
   },

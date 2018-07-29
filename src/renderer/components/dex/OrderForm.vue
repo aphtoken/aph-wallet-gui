@@ -10,7 +10,7 @@
           <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
           <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
         </div>
-        <div class="balance" :title="aphBalanceToolTip">
+        <div class="balance" :title="aphBalanceToolTip" v-if="quoteHolding.symbol !== 'APH'">
           <div class="label">{{$t('balance')}} (APH)</div>
           <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
         </div>
@@ -66,10 +66,12 @@
           <div class="row" v-if="quoteHolding.symbol !== 'APH'">
             <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">{{$t('depositAPH')}}</button>
             <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">{{$t('withdrawAPH')}}</button>
-            <!-- Only the contract owner or manager can do this.
-            <button @click="setMarket" class="test-btn">Setup Market</button> -->
           </div>
+          <!-- Only the contract owner or manager can do this.
+          <button @click="setMarket" class="test-btn">Setup Market</button>-->
         </div>
+        <!-- Only the contract owner or manager can do this.
+            <button @click="setMarket" class="test-btn">Setup Market</button> -->
       </div>
     </section>
     <aph-order-confirmation-modal v-if="$store.state.showOrderConfirmationModal"
@@ -232,10 +234,13 @@ export default {
       }
     },
     estimate() {
+      const holding = this.$store.state.currentMarket ?
+        this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue :
+        0;
+
       try {
         return new BigNumber(this.total).multipliedBy(
-          new BigNumber(this.$store.state.currentMarket ?
-            this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue : 0));
+          new BigNumber(holding));
       } catch (e) {
         console.log(e);
         return 0;
@@ -394,7 +399,7 @@ export default {
           const message = this.$t('relayedToNetwork', {
             amount,
             symbol: holding.symbol,
-            action: (isDeposit ? this.t('deposit') : this.$t('withdraw')),
+            action: (isDeposit ? this.$t('deposit') : this.$t('withdraw')),
           });
           this.$services.alerts.success(message);
         })

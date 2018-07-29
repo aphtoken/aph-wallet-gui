@@ -18,9 +18,13 @@ export {
   putAllNep5Balances,
   putTransactionDetail,
   resetRequests,
+  setAcceptCommitInfo,
   setAcceptDexDemoVersion,
   setAcceptDexOutOfDate,
   setActiveTransaction,
+  setClaimModalModel,
+  setCommitModalModel,
+  setCommitState,
   setContacts,
   setCurrency,
   setCurrencySymbol,
@@ -128,6 +132,10 @@ function resetRequests(state) {
   state.requests = {};
 }
 
+function setAcceptCommitInfo(state, value) {
+  state.acceptCommitInfo = value;
+}
+
 function setAcceptDexDemoVersion(state, value) {
   state.acceptDexDemoVersion = value;
 }
@@ -139,6 +147,24 @@ function setAcceptDexOutOfDate(state, value) {
 function setActiveTransaction(state, transaction) {
   state.activeTransaction = transaction;
   state.showPriceTile = false;
+}
+
+function setClaimModalModel(state, model) {
+  state.claimModalModel = model;
+}
+
+function setCommitModalModel(state, model) {
+  state.commitModalModel = model;
+}
+
+async function setCommitState(state, commitState) {
+  if (!state.currentWallet || !state.currentNetwork) {
+    return;
+  }
+
+  state.commitState = commitState;
+  const commitStorageKey = `commit.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  db.upsert(commitStorageKey, commitState);
 }
 
 function setContacts(state, contacts) {
@@ -168,6 +194,10 @@ function setCurrentNetwork(state, network) {
   }
 
   state.currentNetwork = network;
+}
+
+function setDepositWithdrawModalModel(state, model) {
+  state.depositWithdrawModalModel = model;
 }
 
 async function setHoldings(state, holdings) {
@@ -429,10 +459,6 @@ function setOrderToConfirm(state, order) {
 
 function setOrdersToShow(state, value) {
   state.ordersToShow = value;
-}
-
-function setDepositWithdrawModalModel(state, model) {
-  state.depositWithdrawModalModel = model;
 }
 
 function setMenuToggleable(state, menuToggleable) {

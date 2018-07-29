@@ -52,16 +52,15 @@
           <div v-else>
             {{$t('theFeeForCompletingYourTradeWillBe', { amount: $formatNumber($store.state.orderToConfirm.maxTakerFees)})}}
           </div>
-          <div v-if="$store.state.orderToConfirm.deposits.length > 0">
-            <div class="deposit" v-for="(deposit, index) in $store.state.orderToConfirm.deposits" :key="index">
-              {{$t('thisOrderRequires', {
-                  quantity: $formatNumber(deposit.quantityRequired),
-                  symbol: deposit.symbol,
-                  balance: $formatNumber(deposit.currentQuantity),
-                  deposit: $formatNumber(deposit.quantityToDeposit),
-                })
-              }}
-            </div>
+        </div>
+        <div v-if="$store.state.orderToConfirm.deposits.length > 0">
+          <div class="deposit" v-for="(deposit, index) in $store.state.orderToConfirm.deposits" :key="index">
+            {{$t('thisOrderRequires', {
+              quantity: $formatNumber(deposit.quantityRequired),
+              symbol: deposit.symbol,
+              balance: $formatNumber(deposit.currentQuantity),
+              deposit: $formatNumber(deposit.quantityToDeposit),
+            })}}
           </div>
         </div>
         <div v-if="offersToTake.length > 0 && $store.state.orderToConfirm.quantityToTake < $store.state.orderToConfirm.quantity && $store.state.orderToConfirm.postOnly === false">
