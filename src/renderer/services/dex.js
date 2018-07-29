@@ -990,6 +990,7 @@ export default {
             args: [
             ],
           },
+          fees: currentNetwork.fee,
           gas: 0,
         };
 
@@ -1204,6 +1205,7 @@ export default {
             args: [
             ],
           },
+          fees: currentNetwork.fee,
           gas: 0,
         };
 
@@ -1308,6 +1310,7 @@ export default {
             args: [
             ],
           },
+          fees: currentNetwork.fee,
           gas: 0,
         };
 
@@ -1862,6 +1865,7 @@ export default {
             operation,
             args: parameters,
           },
+          fees: currentNetwork.fee,
           gas: 0,
         };
 
