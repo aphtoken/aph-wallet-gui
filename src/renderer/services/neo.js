@@ -562,7 +562,7 @@ export default {
                         holdingBalance.change24hrValue = (holdingBalance.unitValue * holdingBalance.balance)
                           - (holdingBalance.unitValue24hrAgo * holdingBalance.balance);
                         holdingBalance.totalValue = holdingBalance.unitValue * holdingBalance.balance;
-                        if (holdingBalance.unitValue === null) {
+                        if (holdingBalance.unitValue === null || isNaN(holdingBalance.unitValue)) {
                           holdingBalance.totalValue = null;
                           holdingBalance.change24hrPercent = null;
                           holdingBalance.change24hrValue = null;
