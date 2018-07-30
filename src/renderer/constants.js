@@ -45,14 +45,14 @@ const assets = {
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
 
   // TODO: these different per network
-  DEX_SCRIPT_HASH: '6408a93d5eff767b3179f21f2b52f5643dba9cc7',
+  /* DEX_SCRIPT_HASH: '6408a93d5eff767b3179f21f2b52f5643dba9cc7',
   APH: '591eedcd379a8981edeefe04ef26207e1391904a',
-  ATI: '155153854ed377549a72cc1643e481bf25b48390',
+  ATI: '155153854ed377549a72cc1643e481bf25b48390', */
 
   // privnet
-  /* DEX_SCRIPT_HASH: 'b102048babc8f1811f854dbc1ccf26183f45adbe',
+  DEX_SCRIPT_HASH: 'b102048babc8f1811f854dbc1ccf26183f45adbe',
   APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac',
-  ATI: '155153854ed377549a72cc1643e481bf25b48390', */
+  ATI: '155153854ed377549a72cc1643e481bf25b48390',
 };
 
 const charts = {
