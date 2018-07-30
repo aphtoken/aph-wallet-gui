@@ -29,7 +29,7 @@
               <td class="status">
                 <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="btn-cancel" @click="cancelOrder(order)">
                   <div v-if="order.status === 'PartiallyFilled'">
-                    <p>{{$t('partial')}}</p>
+                    <p class="partial">{{$t('partial')}}</p>
                   </div>
                   <aph-icon name="cancel"></aph-icon>
                 </div>
@@ -200,6 +200,11 @@ export default {
             .fill {
               fill: $dark-grey;
             }
+          }
+          
+          .partial {
+            color: $purple;
+            margin: 0 $space;
           }
         }
       }
