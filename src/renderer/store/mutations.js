@@ -165,7 +165,7 @@ async function setCommitState(state, commitState) {
 
   state.commitState = commitState;
   const commitStorageKey = `commit.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  db.upsert(commitStorageKey, commitState);
+  db.upsert(commitStorageKey, JSON.stringify(commitState));
 }
 
 function setContacts(state, contacts) {
@@ -222,7 +222,8 @@ async function setHoldings(state, holdings) {
   }
 
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  db.upsert(holdingsStorageKey, holdings);
+  // NOTE: serializing objects that hold BigNumbers need to use JSON.stringify to be able to be de-serialized properly.
+  db.upsert(holdingsStorageKey, JSON.stringify(holdings));
 }
 
 function setLastReceivedBlock(state) {
@@ -243,7 +244,8 @@ function setPortfolio(state, portfolio) {
   }
 
   const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${state.currentNetwork.net}`;
-  db.upsert(portfolioStorageKey, portfolio);
+  // NOTE: Portfolio contains BigNumber values, so must be stringified.
+  db.upsert(portfolioStorageKey, JSON.stringify(portfolio));
 }
 
 function setRecentTransactions(state, transactions) {
