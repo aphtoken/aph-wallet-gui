@@ -16,23 +16,7 @@ import ledger from './ledger';
 import dex from './dex';
 import { store } from '../store';
 import { timeouts, intervals } from '../constants';
-
-const toBigNumber = (value) => {
-  let bigNumber = value;
-  if (!bigNumber.isNegative) {
-    if (bigNumber.c && bigNumber.e && bigNumber.s) {
-      bigNumber = new BigNumber(0);
-      bigNumber.c = value.c;
-      bigNumber.e = value.e;
-      bigNumber.s = value.s;
-    }
-  }
-
-  return new BigNumber(String(bigNumber));
-};
-const isBigNumber = (value) => {
-  return value.isNegative;
-};
+import { toBigNumber } from './formatting.js';
 
 const GAS_ASSET_ID = '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 const NEO_ASSET_ID = 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
@@ -626,16 +610,16 @@ export default {
     });
 
     if (holding) {
-      if (holding.balance && !isBigNumber(holding.balance)) {
+      if (holding.balance !== null) {
         holding.balance = toBigNumber(holding.balance);
       }
-      if (holding.contractBalance && !isBigNumber(holding.contractBalance)) {
+      if (holding.contractBalance !== null) {
         holding.contractBalance = toBigNumber(holding.contractBalance);
       }
       if (!holding.totalBalance) {
         holding.totalBalance = holding.balance.plus(holding.contractBalance);
       }
-      if (holding.totalBalance && !isBigNumber(holding.totalBalance)) {
+      if (holding.totalBalance !== null) {
         holding.totalBalance = toBigNumber(holding.totalBalance);
       }
     }
