@@ -19,6 +19,7 @@
         </div>
       </div>
     </div>
+    <aph-loader identifier="fetchTradeHistory"></aph-loader>
   </section>
 </template>
 
