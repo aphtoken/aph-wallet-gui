@@ -61,12 +61,19 @@ export default {
   commit: 'Commit',
   commitAphelionToBeEligible: 'Commmit Aphelion to Be Eligible',
   commitInfoHeader: `A portion of the fees from trades can be claimed by Aphelion 
-holders that have committed APH balance.`,
-  commitInfoBody1: `On each match, the taker pays the match fee based on the market settings, 
-  and 80 % of the fee is added to the total fees collected on behalf of contributors.`,
-  commitInfoBody2: `After committing APH, 4,800 blocks must occur before fees may be claimed. 
-  Amounts earned are relative to the amount committed and proportional weight compared to other
-  contributors during the time of commitment`,
+    holders that have committed APH balance.`,
+  commitInfoBody1: 'On each match, the taker pays the match fee based on the market settings ' +
+                   'and 80% of the fee is added to the total fees collected on behalf of contributors. ',
+  commitInfoBody2: 'After committing APH, {minClaimBlocks} blocks must occur before fees may be claimed. ' +
+                   'Amounts earned are relative to the amount committed and proportional weight compared to other ' +
+                   'contributors during the time of commitment.',
+  commitInfoBody3: 'Committing any amount of APH tokens first takes those tokens from the DEX contract balance, and ' +
+                   'then pulls the required difference needed directly from the wallet balance. Upon claiming, the ' +
+                   'claimed funds are placed back in the DEX contract balance, and must be withdrawn using the DEX ' +
+                   'Withdraw APH function.',
+  commitInfoBody4: 'The compound button allows compounding the APH commitment so that already earned fees will ' +
+                   'become part of the committed balance and increase the current commitment weight. Please Note: ' +
+                   'Compounding does not reset the time required to claim collected fees.',
   committedAPHBalance: 'Your committed APH balance of {balance} will also be returned to your contract balance.',
   completedOrders: 'Completed Orders',
   compound: 'Compound',

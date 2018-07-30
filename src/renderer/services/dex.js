@@ -13,6 +13,7 @@ import network from './network';
 import wallets from './wallets';
 import ledger from './ledger';
 import { store } from '../store';
+import { toBigNumber } from './formatting.js';
 
 import { assets, claiming, intervals } from '../constants';
 
@@ -27,8 +28,6 @@ const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xF4;
 const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xF5;
 const WITHDRAW_STEP_MARK = '91';
 const WITHDRAW_STEP_WITHDRAW = '92';
-
-const toBigNumber = value => new BigNumber(String(value));
 
 let lastUTXOWithdrawn;
 

@@ -9,18 +9,12 @@ import { formats } from '../constants';
 
 const nullOrUndefined = value => _.isNull(value) || _.isUndefined(value);
 
-const toBigNumber = (value) => {
-  let bigNumber = value;
-  if (!bigNumber.isNegative) {
-    if (bigNumber.c && bigNumber.e && bigNumber.s) {
-      bigNumber = new BigNumber(0);
-      bigNumber.c = value.c;
-      bigNumber.e = value.e;
-      bigNumber.s = value.s;
-    }
+export const toBigNumber = (value) => {
+  if (BigNumber.isBigNumber(value)) {
+    return value;
   }
 
-  return new BigNumber(String(bigNumber));
+  return new BigNumber(String(value));
 };
 
 const formatNumberBase = (value, wholeNumberFormat) => {
