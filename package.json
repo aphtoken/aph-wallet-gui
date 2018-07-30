@@ -1,6 +1,6 @@
 {
   "name": "aphelion-desktop-wallet",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "author": "Aphelion <info@aphelion.org>",
   "description": "Aphelion Desktop Wallet",
   "license": "LicenseRef-LICENSE",
@@ -53,7 +53,9 @@
       "icon": "build/icons/icon.ico"
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "build/icons",
+      "category": "Utilities",
+      "target": "AppImage"
     }
   },
   "dependencies": {
