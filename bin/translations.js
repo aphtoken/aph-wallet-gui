@@ -56,12 +56,19 @@ function merge(){
     const data = require(filePath);
     const todoData = require(fileTodoPath);
     const todoKeys = Object.keys(todoData).sort();
+    const newData = {};
 
     todoKeys.map(key => {
       data[key] = todoData[key];
     });
 
+    const sortedAllKeys = Object.keys(data).sort();
+
+    sortedAllKeys.map(key => {
+      newData[key] = data[key];
+    });
+
     const newFilePath = path.resolve('.', 'src', 'renderer', 'l10n', `${lang}.json`);
-    fs.writeFileSync(newFilePath, JSON.stringify(data, null, 2), { encoding: 'utf8' });
+    fs.writeFileSync(newFilePath, JSON.stringify(newData, null, 2), { encoding: 'utf8' });
   });
 }
