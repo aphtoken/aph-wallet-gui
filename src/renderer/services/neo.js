@@ -556,7 +556,8 @@ export default {
                         holdingBalance.totalSupply = val.total_supply;
                         holdingBalance.marketCap = val[`market_cap_${lowercaseCurrency}`];
                         holdingBalance.change24hrPercent = val.percent_change_24h;
-                        holdingBalance.unitValue = parseFloat(val[`price_${lowercaseCurrency}`]);
+                        holdingBalance.unitValue = val[`price_${lowercaseCurrency}`]
+                          ? parseFloat(val[`price_${lowercaseCurrency}`]) : 0;
                         holdingBalance.unitValue24hrAgo = holdingBalance.unitValue
                           / (1 + (holdingBalance.change24hrPercent / 100.0));
                         holdingBalance.change24hrValue = (holdingBalance.unitValue * holdingBalance.balance)
