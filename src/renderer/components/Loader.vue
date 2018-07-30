@@ -51,7 +51,7 @@ export default {
       type: String,
     },
     once: {
-      default: true,
+      default: false,
       type: Boolean,
     },
   },
