@@ -62,9 +62,9 @@ const state = {
   showSendRequestLedgerSignature: false,
   showSendWithLedgerModal: false,
   showWalletBackupModal: false,
+  lastMessage: null,
   socket: {
     isConnected: false,
-    lastMessage: null,
     client: null,
     reconnectError: false,
   },

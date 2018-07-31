@@ -36,7 +36,7 @@ export default {
   mounted() {
     this.loadTrades();
     loadTradesIntervalId = setInterval(() => {
-      this.loadTrades();
+      this.loadTrades(true);
     }, this.$constants.intervals.TRANSACTIONS_POLLING);
 
     storeUnwatch = this.$store.watch(
@@ -48,13 +48,14 @@ export default {
   },
 
   methods: {
-    loadTrades() {
+    loadTrades(isRequestSilent = false) {
       if (!this.$store.state.currentMarket) {
         return;
       }
 
       this.$store.dispatch('fetchTradeHistory', {
         marketName: this.$store.state.currentMarket.marketName,
+        isRequestSilent,
       });
     },
   },

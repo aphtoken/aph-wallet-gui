@@ -391,8 +391,8 @@ function startRequest(state, payload) {
   updateRequest(state, payload, requests.PENDING);
 }
 
-function updateRequest(state, { identifier, message }, status) {
-  Vue.set(state.requests, identifier, { status, message });
+function updateRequest(state, { identifier, message, isSilent }, status) {
+  Vue.set(state.requests, identifier, { status, message, isSilent });
 }
 
 function setStyleMode(state, style) {
