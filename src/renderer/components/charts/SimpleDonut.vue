@@ -10,12 +10,10 @@
 </template>
 
 <script>
-const PI = 3.14;
-
 export default {
   computed: {
     circumference() {
-      return Math.round(2 * this.radius * PI);
+      return Math.round(2 * this.radius * Math.PI);
     },
 
     formattedPercent() {
@@ -93,5 +91,3 @@ export default {
   }
 }
 </style>
-
-
