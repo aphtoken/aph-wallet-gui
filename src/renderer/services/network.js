@@ -25,7 +25,7 @@ const NETWORKS = [
       fee: 0,
     },
   },
-  {
+  /* {
     label: 'PrivNet',
     value: {
       aph: 'http://localhost:62433/api',
@@ -33,7 +33,7 @@ const NETWORKS = [
       rpc: 'http://localhost:30338',
       fee: 0,
     },
-  },
+  }, */
 ];
 
 const NETWORK_FEE_OPTIONS = [
