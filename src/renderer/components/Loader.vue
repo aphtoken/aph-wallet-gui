@@ -24,7 +24,7 @@ export default {
     },
   },
 
-  beforeCreate() {
+  created() {
     storeUnwatchLastMsg = this.$store.watch(
       (state) => {
         return state.lastMessage;
@@ -39,7 +39,9 @@ export default {
       (state) => {
         return state.requests[this.identifier];
       }, () => {
+        console.log(this.identifier);
         if (this.wsMessageType) {
+          console.log('PENDING');
           this.wsMessageReceiving = true;
         }
 

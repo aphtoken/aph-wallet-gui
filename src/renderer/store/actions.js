@@ -439,7 +439,6 @@ async function fetchTradeHistory({ commit }, { marketName, isRequestSilent }) {
 
 async function fetchOrderHistory({ commit }, { isRequestSilent }) {
   let orders;
-  console.log('isSilent:', isRequestSilent);
   commit('startRequest', { identifier: 'fetchOrderHistory', isSilent: isRequestSilent });
 
   try {

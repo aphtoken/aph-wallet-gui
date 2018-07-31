@@ -70,6 +70,20 @@ export default {
         return this.$store.state.currentMarket;
       }, () => {
         this.loadBook();
+
+        // if (oldValue && !newValue) {
+        //   this.$store.dispatch('unsubscribeFromMarket', {
+        //     market: oldValue,
+        //   });
+        // } else if (!oldValue || oldValue.marketName !== newValue.marketName) {
+        //   this.$store.dispatch('unsubscribeFromMarket', {
+        //     market: oldValue,
+        //   });
+
+        //   this.$store.dispatch('subscribeToMarket', {
+        //     market: newValue,
+        //   });
+        // }
       });
   },
 

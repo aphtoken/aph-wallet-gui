@@ -31,6 +31,7 @@
           <div class="label">{{$t('LOW')}}</div>
           <div class="value">{{ $formatTokenAmount($store.state.tradeHistory.low24Hour) }}</div>
         </div>
+        <aph-loader identifier="fetchTradeHistory"></aph-loader>
       </div>
 
       <div class="token-details">
