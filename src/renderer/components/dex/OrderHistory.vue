@@ -28,8 +28,9 @@
               <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
               <td class="status">
                 <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="btn-cancel" @click="cancelOrder(order)">
-                  <div v-if="order.status === 'PartiallyFilled'">
-                    <p class="partial">{{$t('partial')}}</p>
+                  <div v-if="order.status === 'PartiallyFilled'" class="partial">
+                    <aph-icon name="info"></aph-icon>
+                    <p>{{$t('partial')}}</p>
                   </div>
                   <aph-icon name="cancel"></aph-icon>
                 </div>
@@ -205,6 +206,16 @@ export default {
           .partial {
             color: $purple;
             margin: 0 $space;
+            align-items: center;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+
+            .aph-icon {
+              .fill {
+                fill: $purple !important;
+              }
+            }
           }
         }
       }
