@@ -16,23 +16,7 @@ import ledger from './ledger';
 import dex from './dex';
 import { store } from '../store';
 import { timeouts, intervals } from '../constants';
-
-const toBigNumber = (value) => {
-  let bigNumber = value;
-  if (!bigNumber.isNegative) {
-    if (bigNumber.c && bigNumber.e && bigNumber.s) {
-      bigNumber = new BigNumber(0);
-      bigNumber.c = value.c;
-      bigNumber.e = value.e;
-      bigNumber.s = value.s;
-    }
-  }
-
-  return new BigNumber(String(bigNumber));
-};
-const isBigNumber = (value) => {
-  return value.isNegative;
-};
+import { toBigNumber } from './formatting.js';
 
 const GAS_ASSET_ID = '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 const NEO_ASSET_ID = 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
@@ -572,13 +556,14 @@ export default {
                         holdingBalance.totalSupply = val.total_supply;
                         holdingBalance.marketCap = val[`market_cap_${lowercaseCurrency}`];
                         holdingBalance.change24hrPercent = val.percent_change_24h;
-                        holdingBalance.unitValue = parseFloat(val[`price_${lowercaseCurrency}`]);
+                        holdingBalance.unitValue = val[`price_${lowercaseCurrency}`]
+                          ? parseFloat(val[`price_${lowercaseCurrency}`]) : 0;
                         holdingBalance.unitValue24hrAgo = holdingBalance.unitValue
                           / (1 + (holdingBalance.change24hrPercent / 100.0));
                         holdingBalance.change24hrValue = (holdingBalance.unitValue * holdingBalance.balance)
                           - (holdingBalance.unitValue24hrAgo * holdingBalance.balance);
                         holdingBalance.totalValue = holdingBalance.unitValue * holdingBalance.balance;
-                        if (holdingBalance.unitValue === null) {
+                        if (holdingBalance.unitValue === null || isNaN(holdingBalance.unitValue)) {
                           holdingBalance.totalValue = null;
                           holdingBalance.change24hrPercent = null;
                           holdingBalance.change24hrValue = null;
@@ -626,16 +611,16 @@ export default {
     });
 
     if (holding) {
-      if (holding.balance && !isBigNumber(holding.balance)) {
+      if (holding.balance !== null) {
         holding.balance = toBigNumber(holding.balance);
       }
-      if (holding.contractBalance && !isBigNumber(holding.contractBalance)) {
+      if (holding.contractBalance !== null) {
         holding.contractBalance = toBigNumber(holding.contractBalance);
       }
       if (!holding.totalBalance) {
         holding.totalBalance = holding.balance.plus(holding.contractBalance);
       }
-      if (holding.totalBalance && !isBigNumber(holding.totalBalance)) {
+      if (holding.totalBalance !== null) {
         holding.totalBalance = toBigNumber(holding.totalBalance);
       }
     }
@@ -868,6 +853,7 @@ export default {
           privateKey: currentWallet.privateKey,
           balance: balance.balance,
           intents: api.makeIntent(intentAmounts, toAddress),
+          fees: currentNetwork.fee,
         };
 
         if (currentWallet.isLedger === true) {
@@ -901,6 +887,7 @@ export default {
           new u.Fixed8(amount).toReverseHex(),
         ],
       },
+      fees: currentNetwork.fee,
       gas: 0,
     };
 

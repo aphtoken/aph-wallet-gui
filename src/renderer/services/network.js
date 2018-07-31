@@ -13,6 +13,7 @@ const NETWORKS = [
       aph: 'https://mainnet.aphelion-neo.com:62443/api',
       net: 'MainNet',
       rpc: 'https://mainneo.aphelion-neo.com:10331',
+      fee: 0,
     },
   },
   {
@@ -21,6 +22,7 @@ const NETWORKS = [
       aph: 'https://testnet.aphelion-neo.com:62443/api',
       net: 'TestNet',
       rpc: 'https://testneo.aphelion-neo.com:20331',
+      fee: 0,
     },
   },
   /* {
@@ -29,8 +31,21 @@ const NETWORKS = [
       aph: 'http://localhost:62433/api',
       net: 'PrivNet',
       rpc: 'http://localhost:30338',
+      fee: 0,
     },
   }, */
+];
+
+const NETWORK_FEE_OPTIONS = [
+  0,
+  0.00000001,
+  0.0000001,
+  0.000001,
+  0.00001,
+  0.0001,
+  0.001,
+  0.01,
+  0.1,
 ];
 
 let loadNetworkStatusIntervalId;
@@ -40,11 +55,19 @@ export default {
     return _.sortBy(NETWORKS, 'label');
   },
 
+  getNetworkFees() {
+    return NETWORK_FEE_OPTIONS;
+  },
+
   getRpcClient() {
     return rpc.default.create.rpcClient(this.getSelectedNetwork().rpc);
   },
 
   getSelectedNetwork() {
+    return storage.get(NETWORK_STORAGE_KEY, _.first(NETWORKS).value);
+  },
+
+  getSelectedNetworkFee() {
     return storage.get(NETWORK_STORAGE_KEY, _.first(NETWORKS).value);
   },
 

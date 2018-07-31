@@ -270,12 +270,15 @@ export default {
 
         if (this.$store.state.styleMode === 'Night') {
           settings.overrides = {
-					  "paneProperties.background": "#222222",
+            "paneProperties.background": "#18152c",
             "paneProperties.vertGridProperties.color": "#454545",
             "paneProperties.horzGridProperties.color": "#454545",
-					  "symbolWatermarkProperties.transparency": 90,
-					  "scalesProperties.textColor" : "#AAA"
-				  };
+            "symbolWatermarkProperties.transparency": 90,
+            "scalesProperties.textColor": "#AAA",
+            "scalesProperties.backgroundColor": "#18152c",
+          };
+
+          settings.toolbar_bg = '#18152c';
 
           setTimeout(() => {
             for (var i = 0; i < window.frames.length; i++) {

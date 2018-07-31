@@ -20,7 +20,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(order, index) in ordersForTable" :key="index">
+            <tr v-for="(order, index) in filteredOrders" :key="index">
               <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
               <td class="type">{{ order.type }}</td>
               <td class="market">{{ order.marketName }}</td>

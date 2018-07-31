@@ -110,9 +110,17 @@ function createWallet({ commit }, { name, passphrase, passphraseConfirm }) {
   }, timeouts.NEO_API_CALL);
 }
 
-async function fetchCachedData(id, defaultValue) {
-  const result = await db.get(id, defaultValue);
+// Returns if a value is a string
+function isString(value) {
+  return typeof value === 'string' || value instanceof String;
+}
 
+async function fetchCachedData(id, defaultValue) {
+  let result = await db.get(id, defaultValue);
+
+  if (isString(result)) {
+    result = JSON.parse(result);
+  }
   return result;
 }
 
@@ -151,6 +159,7 @@ async function fetchHoldings({ commit }, { done }) {
 
   const holdingsStorageKey = `holdings.${currentWallet.address}.${currentNetwork.net}`;
 
+  // TODO: isn't this only useful if current state of holdings is empty? This should be optimized.
   try {
     holdings = await fetchCachedData(holdingsStorageKey);
     commit('setHoldings', holdings);

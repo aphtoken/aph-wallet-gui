@@ -13,6 +13,7 @@ import network from './network';
 import wallets from './wallets';
 import ledger from './ledger';
 import { store } from '../store';
+import { toBigNumber } from './formatting.js';
 
 import { assets, claiming, intervals } from '../constants';
 
@@ -27,8 +28,6 @@ const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xF4;
 const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xF5;
 const WITHDRAW_STEP_MARK = '91';
 const WITHDRAW_STEP_WITHDRAW = '92';
-
-const toBigNumber = value => new BigNumber(String(value));
 
 let lastUTXOWithdrawn;
 
@@ -586,10 +585,16 @@ export default {
     let totalFees = new BigNumber(0);
     const sellAssetHolding = neo.getHolding(order.assetIdToSell);
 
-    // This should be the same for assets that can be pulled as what will be calculated below.
-    // if (order.quantity.isGreaterThan(0) && sellAssetHolding.canPull === false) {
-    //   totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
-    // }
+    if (order.price) {
+      // limit maker order
+      if (sellAssetHolding.canPull === false && order.quantity.isGreaterThan(0)) {
+        // this is an MCT based token that can not be pulled from our DEX contract, have to send a deposit first
+        totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
+      } else if (sellAssetHolding.decimals < 8) {
+        // this is a token with < 8 decimals, NEO for example, make the deposit of the minimum amount needed to make the order
+        totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
+      }
+    }
 
     order.offersToTake.forEach((offer) => {
       if (offer.isBackupOffer !== true) {
@@ -616,12 +621,22 @@ export default {
     }
 
     if (sellAssetHolding.contractBalance.isLessThan(new BigNumber(totalQuantityToSell))) {
+      let quantityToDeposit = new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance);
+      if (sellAssetHolding.decimals < 8) {
+        const toDepositTruncated = new BigNumber(quantityToDeposit.toFixed(sellAssetHolding.decimals));
+        if (toDepositTruncated.isGreaterThanOrEqualTo(quantityToDeposit)) {
+          quantityToDeposit = toDepositTruncated;
+        } else {
+          quantityToDeposit = toDepositTruncated.plus(1 / (10 ** sellAssetHolding.decimals));
+        }
+      }
+
       order.deposits.push({
         symbol: sellAssetHolding.symbol,
         assetId: order.assetIdToSell,
         currentQuantity: new BigNumber(sellAssetHolding.contractBalance),
         quantityRequired: new BigNumber(totalQuantityToSell),
-        quantityToDeposit: new BigNumber(totalQuantityToSell).minus(sellAssetHolding.contractBalance),
+        quantityToDeposit,
       });
     }
   },
@@ -974,6 +989,7 @@ export default {
             args: [
             ],
           },
+          fees: currentNetwork.fee,
           gas: 0,
         };
 
@@ -1188,6 +1204,7 @@ export default {
             args: [
             ],
           },
+          fees: currentNetwork.fee,
           gas: 0,
         };
 
@@ -1292,6 +1309,7 @@ export default {
             args: [
             ],
           },
+          fees: currentNetwork.fee,
           gas: 0,
         };
 
@@ -1846,6 +1864,7 @@ export default {
             operation,
             args: parameters,
           },
+          fees: currentNetwork.fee,
           gas: 0,
         };
 

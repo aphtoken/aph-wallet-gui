@@ -14,6 +14,10 @@
             <div class="label">{{$t('value')}}</div>
             <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
           </div>
+          <div class="column" v-if="currentNetwork.fee > 0">
+            <div class="label">{{$t('networkFee')}}</div>
+            <div class="value">{{ $formatNumber(currentNetwork.fee) }}</div>
+          </div>
         </div>
         <div class="row">
           <div class="column">
@@ -57,6 +61,10 @@
           <div class="estimated-value">
             <div class="label">{{$t('estimated')}}</div>
             <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
+          </div>
+          <div class="network-fee" v-if="currentNetwork.fee > 0">
+            <div class="label">{{$t('networkFee')}}</div>
+            <div class="value">{{ $formatNumber(currentNetwork.fee) }} GAS</div>
           </div>
         </aph-form>
       </div>
@@ -105,6 +113,10 @@ export default {
 
           return result;
         }, []);
+    },
+
+    currentNetwork() {
+      return this.$services.network.getSelectedNetwork();
     },
 
     sendButtonLabel() {
@@ -363,7 +375,7 @@ export default {
       }
     }
 
-    .estimated-value {
+    .estimated-value, .network-fee {
       display: flex;
       margin-top: $space-lg;
       padding-left: toRem(16px);
