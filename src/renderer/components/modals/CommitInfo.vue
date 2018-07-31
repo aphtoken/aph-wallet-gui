@@ -7,7 +7,9 @@
       </div>
       <h1>{{$t('commitInfoHeader')}}</h1>
       <p>{{$t('commitInfoBody1')}}</p>
-      <p>{{$t('commitInfoBody2')}}</p>
+      <p>{{$t('commitInfoBody2', { minClaimBlocks: this.$constants.claiming.CLAIM_BLOCKS})}}</p>
+      <p>{{$t('commitInfoBody3')}}</p>
+      <p>{{$t('commitInfoBody4')}}</p>
     </div>
     <div class="footer">
       <div class="accept-btn" @click="accept">{{$t('close')}}</div>

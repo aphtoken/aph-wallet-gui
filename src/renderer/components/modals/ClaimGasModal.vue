@@ -2,7 +2,7 @@
   <modal-wrapper id="aph-claim-gas-modal" identifier="claimGas">
     <template>
       <div class="body" v-if="$store.state.gasClaim">
-        <p>{{$t('claimingGas')}}}}</p>
+        <p>{{$t('claimingGas')}}</p>
         <p>{{$t('pleaseWaitForGas')}}</p>
         <p>{{$t('closingYourWallet')}}.</p>
         <div class="checklist">
