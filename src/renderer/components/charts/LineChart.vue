@@ -45,6 +45,10 @@ export default {
 <style lang="scss" scoped>
 canvas {
   width: 100% !important;
+  max-height: toRem(500px);
+
+  @include lowRes() {
+    max-height: toRem(300px);
+  }
 }
 </style>
-
