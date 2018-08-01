@@ -18,11 +18,31 @@ if (argv.todo) {
   todo();
 } else if (argv.merge) {
   merge();
+} else if (argv.sort) {
+  sort();
 } else {
   console.log('Please run with either --todo or --merge');
   process.exit(1);
 }
 
+function sort(){
+  langs.unshift('en');
+  langs.map(lang => {
+    console.log(`---------------\nSorting language file: ${lang}`);
+    const path = require('path');
+    const filePath = path.resolve('.', 'src', 'renderer', 'l10n', lang)
+    const data = require(filePath);
+    const keys = Object.keys(data).sort();
+    const sortedData = {};
+
+    keys.map(key => {
+      sortedData[key] = data[key];
+    });
+
+    const newFilePath = path.resolve('.', 'src', 'renderer', 'l10n', `${lang}.json`);
+    fs.writeFileSync(newFilePath, JSON.stringify(sortedData, null, 2), { encoding: 'utf8' });
+  });
+}
 
 function todo(){
   langs.map(lang => {
