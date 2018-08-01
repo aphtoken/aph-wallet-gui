@@ -11,7 +11,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-let loadHoldingsIntervalId;
 export default {
   computed: {
     holdings() {
@@ -20,18 +19,14 @@ export default {
       });
     },
 
-    ...mapGetters([
-      'sendInProgress',
-    ]),
+    ...mapGetters({
+      sendInProgress: 'sendInProgress',
+    }),
   },
 
   methods: {
     isActive({ symbol }) {
       return _.get(this.$store.state.statsToken, 'symbol') === symbol;
-    },
-
-    loadHoldings() {
-      this.$store.dispatch('fetchHoldings', { done: null });
     },
 
     viewHoldingDetail(holding) {
@@ -42,18 +37,6 @@ export default {
       this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setStatsToken', holding);
     },
-  },
-
-  mounted() {
-    this.loadHoldings();
-
-    loadHoldingsIntervalId = setInterval(() => {
-      this.loadHoldings();
-    }, this.$constants.intervals.HOLDINGS_POLLING);
-  },
-
-  beforeDestroy() {
-    clearInterval(loadHoldingsIntervalId);
   },
 };
 </script>

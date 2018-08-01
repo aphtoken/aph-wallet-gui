@@ -572,12 +572,12 @@ export default {
                 // if it was skipping it before because we didn't hold any
                 const inMemoryHoldingBuy = _.get(store.state.nep5Balances, order.assetIdToBuy);
                 if (inMemoryHoldingBuy) {
-                  inMemoryHoldingBuy.balance = null;
+                  inMemoryHoldingBuy.needsRefresh = true;
                 }
 
                 const inMemoryHoldingSell = _.get(store.state.nep5Balances, order.assetIdToSell);
                 if (inMemoryHoldingSell) {
-                  inMemoryHoldingSell.balance = null;
+                  inMemoryHoldingSell.needsRefresh = true;
                 }
               })
               .catch((e) => {
@@ -818,17 +818,15 @@ export default {
                   reject('Cancel failed');
                 }
 
-                // todo standardize better
-                // set in memory holding balance to null so it will pick up the new balance
-                // if it was skipping it before because we didn't hold any
+                // Set in memory holding needsRefresh flag to cause retrieving the new balance
                 const inMemoryHoldingBuy = _.get(store.state.nep5Balances, order.assetIdToBuy);
                 if (inMemoryHoldingBuy) {
-                  inMemoryHoldingBuy.balance = null;
+                  inMemoryHoldingBuy.needsRefresh = true;
                 }
 
                 const inMemoryHoldingSell = _.get(store.state.nep5Balances, order.assetIdToSell);
                 if (inMemoryHoldingSell) {
-                  inMemoryHoldingSell.balance = null;
+                  inMemoryHoldingSell.needsRefresh = true;
                 }
               })
               .catch((e) => {
@@ -867,8 +865,13 @@ export default {
           }
         } else {
           holding = neo.getHolding(assetId);
+          const holdingAsset = holding != null ? holding.symbol : assetId;
           if (holding.balance === null || holding.balance.isLessThan(quantity)) {
-            reject(`Insufficient ${holding != null ? holding.symbol : assetId}.`);
+            reject(`Insufficient ${holdingAsset}.`);
+            return;
+          }
+          if (holding.needsRefresh === true) {
+            reject(`Balance of asset ${holdingAsset} is currently refreshing. Please try again.`);
             return;
           }
         }
@@ -886,7 +889,8 @@ export default {
                   .then(() => {
                     const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
                     if (inMemoryHolding) {
-                      inMemoryHolding.balance = null;
+                      // Set in memory holding needsRefresh flag to cause retrieving balances again
+                      inMemoryHolding.needsRefresh = true;
                     }
 
                     resolve(res.tx);
@@ -898,11 +902,10 @@ export default {
                 reject('Transaction rejected');
               }
 
-              // set in memory holding balance to null so it will pick up the new balance
-              // if it was skipping it before because we didn't hold any
+              // Set in memory holding needsRefresh flag to cause retrieving balances again
               const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
               if (inMemoryHolding) {
-                inMemoryHolding.balance = null;
+                inMemoryHolding.needsRefresh = true;
               }
             })
             .catch((e) => {
@@ -916,11 +919,10 @@ export default {
             .then((tx) => {
               resolve(tx);
 
-              // set in memory holding balance to null so it will pick up the new balance
-              // if it was skipping it before because we didn't hold any
+              // Set in memory holding needsRefresh flag to cause retrieving balances again
               const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
               if (inMemoryHolding) {
-                inMemoryHolding.balance = null;
+                inMemoryHolding.needsRefresh = true;
               }
             })
             .catch((e) => {
@@ -1705,7 +1707,7 @@ export default {
                 .then(() => {
                   const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
                   if (inMemoryHolding) {
-                    inMemoryHolding.balance = null;
+                    inMemoryHolding.needsRefresh = true;
                   }
 
                   resolve(res.tx);
@@ -1738,7 +1740,7 @@ export default {
                 .then(() => {
                   const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
                   if (inMemoryHolding) {
-                    inMemoryHolding.balance = null;
+                    inMemoryHolding.needsRefresh = true;
                   }
 
                   resolve(res.tx);
@@ -1769,10 +1771,7 @@ export default {
               alerts.success('Compound relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
-                  if (inMemoryHolding) {
-                    inMemoryHolding.balance = null;
-                  }
+                  // Note: Compound doesn't change wallet nep5 balance; no need to require refresh of APH balance here.
 
                   resolve(res.tx);
                 })
