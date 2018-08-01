@@ -4,7 +4,7 @@
       <h1 :class="[{selected: tab === 'Open'}]" @click="selectTab('Open')">{{$t('openOrders')}} ({{ openOrders.length }})</h1>
       <h1 :class="[{selected: tab === 'Completed'}]" @click="selectTab('Completed')">{{$t('completedOrders')}} ({{ completedOrders.length }})</h1>
     </div>
-    <div class="body" v-if="$store.state.orderHistory">
+    <div class="body">
       <div class="history">
         <table class="order-history-table">
           <thead>
@@ -47,7 +47,7 @@
     </div>
     <div class="footer">
       <div :class="['option', {active: $store.state.ordersToShow === $constants.orders.ALL_SWITCH}]" @click="$store.commit('setOrdersToShow', $constants.orders.ALL_SWITCH)">All</div>
-      <div :class="['option', {active: $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
+      <div :class="['option', {active: $store.state.currentMarket && $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
     </div>
     <aph-loader identifier="fetchOrderHistory"></aph-loader>
   </section>
