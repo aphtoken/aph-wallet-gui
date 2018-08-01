@@ -1256,26 +1256,9 @@ export default {
 
             c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
             c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
             return api.signTx(c);
-          })
-          .then((c) => {
-            const attachInvokedContract = {
-              invocationScript: ('00').repeat(2),
-              verificationScript: '',
-            };
-
-            // We need to order this for the VM.
-            const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
-            if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
-              c.tx.scripts.push(attachInvokedContract);
-            } else {
-              c.tx.scripts.unshift(attachInvokedContract);
-            }
-
-            return c;
           })
           .then((c) => {
             return api.sendTx(c);
