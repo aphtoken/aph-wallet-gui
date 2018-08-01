@@ -408,8 +408,13 @@ export default {
             order.quantityToMake = order.quantity.minus(order.quantityToTake);
             order.minTakerFees = new BigNumber(res.data.minTakerFees);
             order.maxTakerFees = new BigNumber(res.data.maxTakerFees);
-            order.expectedQuantityToGive = order.side === 'Buy' ? order.quantityToMake.multipliedBy(order.price) : order.quantityToMake;
-            order.expectedQuantityToReceive = order.side === 'Buy' ? order.quantityToMake : order.quantityToMake.multipliedBy(order.price);
+            if (order.price !== null) {
+              order.expectedQuantityToGive = order.side === 'Buy' ? order.quantityToMake.multipliedBy(order.price) : order.quantityToMake;
+              order.expectedQuantityToReceive = order.side === 'Buy' ? order.quantityToMake : order.quantityToMake.multipliedBy(order.price);
+            } else {
+              order.expectedQuantityToGive = new BigNumber(0);
+              order.expectedQuantityToReceive = new BigNumber(0);
+            }
 
             order.offersToTake.forEach((offer) => {
               offer.quantity = new BigNumber(offer.quantity);
@@ -862,7 +867,7 @@ export default {
           }
         } else {
           holding = neo.getHolding(assetId);
-          if (holding.balance.isLessThan(quantity)) {
+          if (holding.balance === null || holding.balance.isLessThan(quantity)) {
             reject(`Insufficient ${holding != null ? holding.symbol : assetId}.`);
             return;
           }
@@ -1636,7 +1641,7 @@ export default {
             commitState.contributionHeight = Math.round(u.fixed82num(res.result.substr(56, 16)) * 100000000);
             commitState.compoundHeight = Math.round(u.fixed82num(res.result.substr(72, 16)) * 100000000);
             commitState.feesCollectedSnapshot = u.fixed82num(res.result.substr(88, 16));
-            commitState.feeUnitsSnapshot = u.fixed82num(res.result.substr(104, 16));
+            commitState.feeUnitsSnapshot = u.fixed82num(res.result.substr(104, 32));
             // console.log(`got commitState.feeUnitsSnapshot: ${commitState.feeUnitsSnapshot}`);
 
             rpcClient.getBlock(commitState.contributionHeight)
@@ -1671,8 +1676,8 @@ export default {
 
             if (res.result && res.result.length >= 48) {
               dexState.totalUnitsContributed = u.fixed82num(res.result.substr(0, 16)) * 100000000;
-              dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 16));
-              dexState.totalFeeUnits = u.fixed82num(res.result.substr(32, 16));
+              dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 32));
+              dexState.totalFeeUnits = u.fixed82num(res.result.substr(48, 32));
             }
 
             rpcClient.query({
