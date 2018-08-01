@@ -1,26 +1,28 @@
 <template>
   <section id="buy-aph">
-    <div class="icons">
-      <img src="~@/assets/img/token-icons/APH.png">
-      <span class="icon">
-        <aph-icon name="plus"></aph-icon>
-      </span>
-      <img src="~@/assets/img/Kucoin_icon.svg" />
-    </div>
-    <div class="header">
-      <h1 class="underlined">{{$t('nowListedOnKucoin')}}</h1>
-    </div>
-    <div class="body">
-      <p>
-        {{$t('comingSoon')}}
-      </p>
-      <p>
-        {{$t('tradesWillBePoweredBy')}}
-      </p>
-      <h2>{{$t('getYourAPHTokens')}}</h2>
-    </div>
-    <div class="footer">
-      <a class="link-btn" :href="kucoinUrl" :title="$t('openKucoinInBrowser')" target="_blank">{{$t('buyNow')}}</a>
+    <div class="buy-aph-wrapper">
+      <div class="icons">
+        <img src="~@/assets/img/token-icons/APH.png">
+        <span class="icon">
+          <aph-icon name="plus"></aph-icon>
+        </span>
+        <img src="~@/assets/img/Kucoin_icon.svg" />
+      </div>
+      <div class="header">
+        <h1 class="underlined">{{$t('nowListedOnKucoin')}}</h1>
+      </div>
+      <div class="body">
+        <p>
+          {{$t('comingSoon')}}
+        </p>
+        <p>
+          {{$t('tradesWillBePoweredBy')}}
+        </p>
+        <h2>{{$t('getYourAPHTokens')}}</h2>
+      </div>
+      <div class="footer">
+        <a class="link-btn" :href="kucoinUrl" :title="$t('openKucoinInBrowser')" target="_blank">{{$t('buyNow')}}</a>
+      </div>
     </div>
   </section>
 </template>
@@ -48,14 +50,23 @@ export default {
   align-items: center;
   background-color: $dark-purple;
   display: flex;
-  flex-direction: column;
-  flex: 1;
-  justify-content: center;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  .buy-aph-wrapper {
+    flex: 0 0 auto;
+    padding: $space-xl;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+  }
 
   .icons {
     align-items: center;
     justify-content: center;
     display: flex;
+    flex: 0 0 auto;
 
     img {
       height: toRem(150px);
@@ -83,6 +94,7 @@ export default {
     font-family: GilroySemibold;
     margin-top: $space-xxl;
     text-align: center;
+    flex: 0 0 auto;
 
     h1.underlined {
       @extend %underlined-header;
@@ -104,6 +116,7 @@ export default {
     max-width: toRem(850px);
     padding: 0 $space-xl 0;
     text-align: center;
+    flex: 0 0 auto;
 
     p {
       color: white;
@@ -125,8 +138,10 @@ export default {
   .footer {
     display: flex;
     flex-direction: row;
-    flex: none;
+    flex: 0 0 auto;
     width: toRem(500px);
+    margin-left: auto;
+    margin-right: auto;
 
     .link-btn {
       @extend %btn-outline;

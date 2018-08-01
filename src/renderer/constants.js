@@ -36,7 +36,7 @@ const languages = [{
   label: 'Nederlands',
   value: 'nl',
 }, {
-  label: 'русский',
+  label: 'Русский',
   value: 'ru',
 }];
 
@@ -134,4 +134,3 @@ export {
   requests,
   timeouts,
 };
-

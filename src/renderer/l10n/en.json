@@ -157,6 +157,7 @@
   "next": "Next",
   "nightMode": "Night Mode",
   "noContacts": "No contacts",
+  "noDataAvailable": "No Data Available",
   "noLedgerDeviceFound": "No Ledger device found. Please plugin your Ledger in, unlock it and open the NEO application.",
   "noOptionSelected": "No Option Selected",
   "noSavedWallets": "You do not have any saved wallets. Create one?",
@@ -204,6 +205,7 @@
   "saving": "Saving...",
   "search": "Search",
   "secondsAgo": "{seconds} seconds ago",
+  "selectCurrency": "Select a currency",
   "selectAWallet": "Select a wallet",
   "selectIco": "Select ICO",
   "sell": "Sell",
@@ -214,6 +216,10 @@
   "setMarketRelayed": "setMarket Invocation Relayed",
   "settings": "Settings",
   "size": "size",
+  "shortDayLabel": "D",
+  "shortWeekLabel": "W",
+  "shortMonthLabel": "M",
+  "short3MonthLabel": "3M",
   "spread": "spread",
   "status": "status",
   "steps": "Steps:",
@@ -280,4 +286,3 @@
   "youWillBeImmediatelyTaking": "You will be immediately taking these {count} offers:",
   "yourKeysAreNowEncryptedAs": "Your keys are now encrypted and saved in your local application storage as '{label}'"
 }
-

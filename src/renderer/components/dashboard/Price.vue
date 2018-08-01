@@ -22,13 +22,18 @@
       </div>
     </div>
     <div class="body">
-      <line-chart ref="chart" :chart-data="chartData" :options="chartOptions" v-if="chartOptions"></line-chart>
+      <div v-if="isChartDataAvailable">
+        <line-chart ref="chart" :chart-data="chartData" :options="chartOptions" v-if="chartOptions"></line-chart>
+      </div>
+      <div class="text-center" v-else>
+        {{$t('noDataAvailable')}}
+      </div>
     </div>
     <div class="footer">
-      <div @click="changeTimeframe('D')" :class="['option', {active: timeframeOption === 'D'}]">D</div>
-      <div @click="changeTimeframe('W')" :class="['option', {active: timeframeOption === 'W'}]">W</div>
-      <div @click="changeTimeframe('M')" :class="['option', {active: timeframeOption === 'M'}]">M</div>
-      <div @click="changeTimeframe('3M')" :class="['option', {active: timeframeOption === '3M'}]">3M</div>
+      <div @click="changeTimeframe('D')" :class="['option', {active: timeframeOption === 'D'}]">{{$t('shortDayLabel')}}</div>
+      <div @click="changeTimeframe('W')" :class="['option', {active: timeframeOption === 'W'}]">{{$t('shortWeekLabel')}}</div>
+      <div @click="changeTimeframe('M')" :class="['option', {active: timeframeOption === 'M'}]">{{$t('shortMonthLabel')}}</div>
+      <div @click="changeTimeframe('3M')" :class="['option', {active: timeframeOption === '3M'}]">{{$t('short3MonthLabel')}}</div>
     </div>
   </section>
 </template>
@@ -211,7 +216,9 @@ export default {
             ],
           };
 
-          if (priceData.dates.length > 0 && this.$refs.chart) {
+          this.isChartDataAvailable = priceData.prices && priceData.prices.length;
+
+          if (priceData.dates.length && this.$refs.chart) {
             this.$refs.chart.render();
           }
         })
@@ -285,6 +292,7 @@ export default {
 
     > div {
       height: 100%;
+      position: relative;
     }
   }
 
@@ -315,4 +323,3 @@ export default {
   }
 }
 </style>
-
