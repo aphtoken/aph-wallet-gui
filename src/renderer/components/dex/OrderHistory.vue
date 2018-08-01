@@ -1,4 +1,4 @@
-<template>
+<template> 
   <section id="dex--order-history">
     <div class="header">
       <h1 :class="[{selected: tab === 'Open'}]" @click="selectTab('Open')">{{$t('openOrders')}} ({{ openOrders.length }})</h1>
@@ -47,7 +47,7 @@
     </div>
     <div class="footer">
       <div :class="['option', {active: $store.state.ordersToShow === $constants.orders.ALL_SWITCH}]" @click="$store.commit('setOrdersToShow', $constants.orders.ALL_SWITCH)">All</div>
-      <div :class="['option', {active: $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket.marketName }}</div>
+      <div :class="['option', {active: $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
     </div>
     <aph-loader identifier="fetchOrderHistory"></aph-loader>
   </section>
@@ -63,19 +63,19 @@ export default {
 
   computed: {
     openOrders() {
-      return _.filter(this.$store.state.orderHistory, (order) => {
+      return this.$store.state.orderHistory ? _.filter(this.$store.state.orderHistory, (order) => {
         return order.status === 'Open' || order.status === 'PartiallyFilled';
       }).map((order) => {
         return order;
-      });
+      }) : [];
     },
 
     completedOrders() {
-      return _.filter(this.$store.state.orderHistory, (order) => {
+      return this.$store.state.orderHistory ? _.filter(this.$store.state.orderHistory, (order) => {
         return order.status !== 'Open' && order.status !== 'PartiallyFilled';
       }).map((order) => {
         return order;
-      });
+      }) : [];
     },
 
     ordersForTable() {

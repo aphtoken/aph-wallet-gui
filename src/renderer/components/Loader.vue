@@ -1,10 +1,10 @@
 <template>
   <div v-if="($isPending(identifier) || (wsMessageType && wsMessageReceiving)) && !isSilent" 
     :style="{
-      'width': $parent.$el.clientWidth + 'px', 
-      'height': $parent.$el.clientHeight + 'px'
+      'width': $el.parentElement.clientWidth + 'px', 
+      'height': $el.parentElement.clientHeight + 'px'
     }" class="loader-container">
-    <div class="loader"></div>
+    <div :class="{ 'loader': !size, 'loader-sm': size === 'small' }"></div>
   </div>
 </template>
 
@@ -20,7 +20,7 @@ export default {
 
   computed: {
     isSilent() {
-      return this.$store.state.requests[this.identifier].isSilent;
+      return this.$store.state.requests[this.identifier] && this.$store.state.requests[this.identifier].isSilent;
     },
   },
 
@@ -31,21 +31,22 @@ export default {
       }, (msg) => {
         if (this.wsMessageType && msg.type && msg.type === this.wsMessageType) {
           this.wsMessageReceiving = false;
-          this.$parent.$el.style.position = null;
+          this.$el.parentElement.style.position = '';
         }
       });
 
     storeUnwatchRequests = this.$store.watch(
       (state) => {
         return state.requests[this.identifier];
-      }, () => {
-        console.log(this.identifier);
-        if (this.wsMessageType) {
-          console.log('PENDING');
+      }, (request) => {
+        if (this.wsMessageType && request.status === 'success') {
           this.wsMessageReceiving = true;
+          this.$el.parentElement.style.position = 'relative';
+        } else if (!this.wsMessageType && request.status === 'pending' && !this.isSilent) {
+          this.$el.parentElement.style.position = 'relative';
+        } else if (!this.wsMessageType && request.status === 'success' && !this.isSilent) {
+          this.$el.parentElement.style.position = '';
         }
-
-        this.$parent.$el.style.position = 'relative';
       });
   },
 
@@ -63,6 +64,10 @@ export default {
       default: null,
       type: String,
     },
+    size: {
+      default: null,
+      type: String,
+    },
   },
 };
 </script>
@@ -74,7 +79,10 @@ export default {
   top: 0px;
   left: 0px;
   .loader {
-    @include loader06($size: 50px, $color: $purple, $align: middle);
+    @include loader06($size: 36px, $color: $purple, $align: middle);
+  }
+  .loader-sm {
+    @include loader06($size: 25px, $color: $purple, $align: middle, $border-size: 5px);
   }
 }
 </style>

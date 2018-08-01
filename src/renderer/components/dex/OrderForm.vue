@@ -1,20 +1,19 @@
 <template>
   <div>
     <section id="dex--order-form">
-      <div class="body" v-if="$store.state.currentMarket">
+      <div class="body">
         <div class="balance" :title="quoteBalanceToolTip">
-          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.quoteCurrency }})</div>
+          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.quoteCurrency : '' }})</div>
           <div class="value">{{ $formatNumber(quoteHolding.totalBalance) }}</div>
         </div>
         <div class="balance" :title="baseBalanceToolTip">
-          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
+          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.baseCurrency : '' }})</div>
           <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
         </div>
         <div class="balance" :title="aphBalanceToolTip" v-if="quoteHolding.symbol !== 'APH'">
           <div class="label">{{$t('balance')}} (APH)</div>
           <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
         </div>
-
         <div class="side">
           <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}}</div>
           <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}}</div>
@@ -54,9 +53,9 @@
               :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
           {{ orderButtonLabel }}
         </button>
-        <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="test-buttons">
+        <div class="test-buttons">
           <div class="row">
-            <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">{{$t('deposit')}} {{ baseHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">{{ $t('deposit') }} {{ baseHolding.symbol }}</button>
             <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">{{$t('withdraw')}} {{ baseHolding.symbol }}</button>
           </div>
           <div class="row">
@@ -78,6 +77,7 @@
       :onConfirmed="orderConfirmed" :onCancel="hideOrderConfirmationModal"></aph-order-confirmation-modal>
     <aph-deposit-withdraw-modal v-if="$store.state.depositWithdrawModalModel"
       :onConfirmed="depositWithdrawConfirmed" :onCancel="hideDepositWithdrawModal"></aph-deposit-withdraw-modal>
+    <aph-loader v-if="!$store.state.holdings.length" identifier="fetchHoldings"></aph-loader>
   </div>
 </template>
 
@@ -94,11 +94,11 @@ export default {
     AphDepositWithdrawModal,
   },
 
-  mounted() {
+  created() {
     this.loadHoldings();
 
     loadHoldingsIntervalId = setInterval(() => {
-      this.loadHoldings();
+      this.loadHoldings(true);
     }, this.$constants.intervals.HOLDINGS_POLLING);
   },
 
@@ -208,10 +208,12 @@ export default {
       }
     },
     priceLabel() {
-      return this.$t('priceBase', { base: this.$store.state.currentMarket.baseCurrency });
+      return this.$store.state.currentMarket ?
+        this.$t('priceBase', { base: this.$store.state.currentMarket.baseCurrency }) : '';
     },
     amountLabel() {
-      return this.$t('amountQuote', { quote: this.$store.state.currentMarket.quoteCurrency });
+      return this.$store.state.currentMarket ?
+        this.$t('amountQuote', { quote: this.$store.state.currentMarket.quoteCurrency }) : '';
     },
     price() {
       let price = this.$store.state.orderPrice;
@@ -234,7 +236,7 @@ export default {
       }
     },
     estimate() {
-      const holding = this.$store.state.currentMarket ?
+      const holding = this.$store.state.currentMarket && this.$store.state.holdings.length ?
         this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue :
         0;
 
@@ -294,8 +296,8 @@ export default {
   },
 
   methods: {
-    loadHoldings() {
-      this.$store.dispatch('fetchHoldings', { done: null });
+    loadHoldings(isRequestSilent = false) {
+      this.$store.dispatch('fetchHoldings', { done: null, isRequestSilent });
     },
 
     setSide(side) {
@@ -428,6 +430,9 @@ export default {
 </script>
 
 <style lang="scss">
+[v-cloak] {
+  display: none;
+}
 #dex .grid--cell > div:first-child {
   height: 100%;
 }

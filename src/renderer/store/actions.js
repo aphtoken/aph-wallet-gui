@@ -150,12 +150,12 @@ async function fetchCommitState({ commit }) {
   }
 }
 
-async function fetchHoldings({ commit }, { done }) {
+async function fetchHoldings({ commit }, { done, isRequestSilent }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let holdings;
 
-  commit('startRequest', { identifier: 'fetchHoldings' });
+  commit('startRequest', { identifier: 'fetchHoldings', isSilent: isRequestSilent });
 
   const holdingsStorageKey = `holdings.${currentWallet.address}.${currentNetwork.net}`;
 
