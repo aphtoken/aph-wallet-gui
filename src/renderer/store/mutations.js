@@ -490,7 +490,7 @@ function SOCKET_ONCLOSE(state) {
 }
 
 function SOCKET_ONMESSAGE(state, message) {
-  state.lastMessage = message;
+  state.socket.lastMessage = message;
 
   if (message.subscribe && message.subscribe.indexOf('orderBook') > -1) {
     state.socket.subscribedMarket = message.subscribe.substring(message.subscribe.indexOf(':') + 1);

@@ -35,7 +35,7 @@ export default {
   created() {
     this.storeUnwatchLastMsg = this.$store.watch(
       (state) => {
-        return state.lastMessage;
+        return state.socket.lastMessage;
       }, (msg) => {
         if (this.wsMessageType && msg.type && msg.type === this.wsMessageType) {
           this.hide();
