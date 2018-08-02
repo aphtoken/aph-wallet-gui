@@ -165,6 +165,7 @@
   "notMetMinimumBlocksToClaim": "You have not met the minimum number of blocks required to collect fees.",
   "nowListedOnKucoin": "APH Tokens Now Listed On Kucoin!",
   "openKucoinInBrowser": "Open Kucoin in your browser",
+  "open" : "Open",
   "openOrders": "Open Orders",
   "order": "order",
   "orderBook": "Order book",

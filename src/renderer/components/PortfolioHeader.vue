@@ -33,8 +33,6 @@ import AddressModal from './modals/AddressModal';
 import SimpleDonut from './charts/SimpleDonut';
 import Zoom from './Zoom';
 
-let fetchPortfolioIntervalId;
-
 export default {
   components: {
     AddressModal,
@@ -49,10 +47,6 @@ export default {
   },
 
   methods: {
-    fetchPortfolio() {
-      this.$store.dispatch('fetchPortfolio');
-    },
-
     getCurrentWalletAddress() {
       return this.$services.wallets.getCurrentWallet().address;
     },
@@ -68,18 +62,6 @@ export default {
     showSendView() {
       this.$router.push(`/authenticated/dashboard/${this.sendInProgress ? 'confirming' : 'send'}`);
     },
-  },
-
-  mounted() {
-    this.fetchPortfolio();
-
-    fetchPortfolioIntervalId = setInterval(() => {
-      this.fetchPortfolio();
-    }, this.$constants.intervals.HOLDINGS_POLLING);
-  },
-
-  beforeDestroy() {
-    clearInterval(fetchPortfolioIntervalId);
   },
 };
 </script>

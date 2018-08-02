@@ -252,9 +252,8 @@ export default {
 
                         const inMemoryHolding = _.get(store.state.nep5Balances, fetchedTransaction.scriptHash);
                         if (inMemoryHolding) {
-                          // set in memory holding balance to null so it will pick up the new balance
-                          // if it was skipping it before because we didn't hold any
-                          inMemoryHolding.balance = null;
+                          // Set in memory holding needsRefresh flag to cause retrieving the new balance
+                          inMemoryHolding.needsRefresh = true;
                         }
                       }
                     }));
@@ -472,8 +471,10 @@ export default {
                 return;
               }
 
-              if (inMemory && inMemory.balance === 0) {
-                if (inMemory.balance > 0 || nep5.isCustom === true) {
+              if (inMemory && inMemory.balance === 0 && inMemory.needsRefresh === false) {
+                if (nep5.isCustom === true) {
+                  // We skip looking for balances that are 0 unless it has been determined that they need to be
+                  // refreshed. Seeing a recent transaction for a token will cause the needsRefresh flag to be set.
                   holdings.push(inMemory);
                 }
                 return;
@@ -481,7 +482,7 @@ export default {
 
               const nep5balance = {
                 asset: nep5.assetId.replace('0x', ''),
-                balance: new BigNumber(0),
+                balance: 0,
                 symbol: '',
                 name: '',
                 isNep5: true,
@@ -489,12 +490,16 @@ export default {
                 contractBalance: new BigNumber(0),
                 totalBalance: new BigNumber(0),
                 decimals: nep5.decimals,
+                needsRefresh: true,
               };
               localNep5Balances.push(nep5balance);
 
               promises.push(this.fetchNEP5Balance(address, nep5.assetId)
                 .then((val) => {
                   if (!val.symbol) {
+                    // If we can't get a token symbol for the token
+                    // console.log(`Token not found on this network: ${nep5.assetId} ${val.name}`);
+                    nep5balance.needsRefresh = false;
                     return; // token not found on this network
                   }
 
@@ -504,6 +509,7 @@ export default {
                   nep5balance.totalBalance = toBigNumber(nep5balance.balance).plus(nep5balance.contractBalance);
                   nep5balance.decimals = val.decimals;
                   nep5balance.canPull = nep5.canPull;
+                  nep5balance.needsRefresh = false;
 
                   if (val.balance > 0 || nep5.isCustom === true) {
                     if (nep5.isCustom !== true && nep5balance.totalBalance.isGreaterThan(0)) {
@@ -518,9 +524,18 @@ export default {
                 })
                 .catch((e) => {
                   if (e.message.indexOf('Expected a hexstring but got') > -1) {
+                    // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
                     tokens.remove(nep5.assetId, currentNetwork.net);
-                  }
-                  alerts.networkException(e);
+                    nep5balance.needsRefresh = false;
+                  } else if (e.message.indexOf('Invalid results length!') > -1) {
+                    // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
+                    nep5balance.needsRefresh = false;
+                  } /* else {
+                     console.log(`couldn't fetch token: ${nep5.assetId} ${e}`);
+                  } // else mep5balance.needsRefresh will stay true, causing retry getting balance next time */
+
+                  // We don't want to surface these errors to the user.
+                  // alerts.networkException(e);
                   reject(e);
                 }));
 
@@ -549,6 +564,10 @@ export default {
                 const valuationsPromises = [];
                 const lowercaseCurrency = settings.getCurrency().toLowerCase();
 
+                if (!restrictToSymbol) {
+                  store.commit('putAllNep5Balances', localNep5Balances);
+                }
+
                 holdings.forEach((holdingBalance) => {
                   valuationsPromises.push((done) => {
                     valuation.getValuation(holdingBalance.symbol)
@@ -568,8 +587,6 @@ export default {
                           holdingBalance.change24hrPercent = null;
                           holdingBalance.change24hrValue = null;
                         }
-
-                        store.commit('putAllNep5Balances', localNep5Balances);
                         done();
                       })
                       .catch((e) => {
@@ -578,13 +595,11 @@ export default {
                       });
                   });
                 });
-
                 return Async.series(valuationsPromises, (e) => {
                   if (e) {
                     return reject(e);
                   }
                   const res = { };
-
                   res.holdings = _.sortBy(holdings, [holding => holding.symbol.toLowerCase()], ['symbol']);
                   res.totalBalance = _.sumBy(holdings, 'totalValue');
                   res.change24hrValue = _.sumBy(holdings, 'change24hrValue');
@@ -628,7 +643,7 @@ export default {
     return holding;
   },
 
-  fetchNEP5Tokens() {
+  fetchNEP5Tokens(done) {
     const currentNetwork = network.getSelectedNetwork();
 
     return new Promise((resolve, reject) => {
@@ -680,6 +695,9 @@ export default {
               });
 
               tokens.putAll(localTokens);
+              if (done) {
+                done();
+              }
             })
             .catch((e) => {
               alerts.exception(new Error(`APH API Error: ${e.message}`));
@@ -696,7 +714,7 @@ export default {
   fetchNEP5Balance(address, assetId) {
     const currentNetwork = network.getSelectedNetwork();
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       return api.nep5.getToken(currentNetwork.rpc, assetId, address)
         .then((token) => {
           resolve({
@@ -707,8 +725,8 @@ export default {
             balance: token.balance,
           });
         })
-        .catch(() => {
-          resolve({ balance: 0 });
+        .catch((ex) => {
+          reject(ex);
         });
     });
   },
