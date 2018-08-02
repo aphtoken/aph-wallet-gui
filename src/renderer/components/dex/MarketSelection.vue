@@ -43,7 +43,7 @@
         <span class="label">{{ $t('change24H') }} ({{ $store.state.currentMarket ? $store.state.currentMarket.quoteCurrency : '' }})</span>
         <div :class="['change', {decrease: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour < 0 : false, increase: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour > 0 : false}]">
           {{ $formatNumber($store.state.tradeHistory ? $store.state.tradeHistory.change24Hour : 0) }}
-          ({{ $formatNumber($store.state.tradeHistory ? Math.abs($store.state.tradeHistory.change24HourPercent) : 0) }}%)
+          ({{ $formatNumber(percentChangeAbsolute) }}%)
         </div>
       </div>
       <aph-loader size="small" identifier="fetchTradeHistory"></aph-loader>
@@ -68,7 +68,7 @@ export default {
         this.$services.neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue : 0;
     },
     percentChangeAbsolute() {
-      return this.$store.state.tradeHistory && this.$store.state.tradeHistory.change24HourPercent ?
+      return this.$store.state.tradeHistory ?
         Math.abs(this.$store.state.tradeHistory.change24HourPercent) : 0;
     },
   },
