@@ -10,7 +10,6 @@
           <thead>
             <tr>
               <th>{{$t('order')}}</th>
-              <th>{{$t('type')}}</th>
               <th>{{$t('pairLc')}}</th>
               <th>{{$t('filled')}}</th>
               <th>{{$t('unitsTotal')}}</th>
@@ -22,7 +21,6 @@
           <tbody>
             <tr v-for="(order, index) in filteredOrders" :key="index">
               <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
-              <td class="type">{{ order.type }}</td>
               <td class="market">{{ order.marketName }}</td>
               <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
               <td class="units-total">{{ $formatNumber(order.quantity) }}</td>
@@ -30,8 +28,11 @@
               <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
               <td class="status">
                 <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="btn-cancel" @click="cancelOrder(order)">
+                  <div v-if="order.status === 'PartiallyFilled'" class="partial">
+                    <aph-icon name="info"></aph-icon>
+                    <p>{{$t('partial')}}</p>
+                  </div>
                   <aph-icon name="cancel"></aph-icon>
-                  <p>{{$t('cancelUc')}}</p>
                 </div>
                 <div v-else-if="order.status === 'Filled'">
                   <p>{{$t('filledUc')}}</p>
@@ -200,6 +201,21 @@ export default {
 
             .fill {
               fill: $dark-grey;
+            }
+          }
+          
+          .partial {
+            color: $purple;
+            margin: 0 $space;
+            align-items: center;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+
+            .aph-icon {
+              .fill {
+                fill: $purple !important;
+              }
             }
           }
         }

@@ -18,9 +18,13 @@
               {{ $store.state.orderToConfirm.market.baseCurrency }}
             </span>
             {{$t('forATotalOf')}}
-            <span class="price">
-              {{ $formatNumber($store.state.orderToConfirm.price * $store.state.orderToConfirm.quantity) }}
+            <span class="price" v-if="$store.state.orderToConfirm.side == 'Buy'">
+              {{ $formatNumber($store.state.orderToConfirm.expectedQuantityToGive) }}
               {{ $store.state.orderToConfirm.market.baseCurrency }}
+            </span>
+            <span class="price" v-else>
+              {{ $formatNumber($store.state.orderToConfirm.expectedQuantityToReceive) }}
+              {{ $store.state.orderToConfirm.market.quoteCurrency }}
             </span>
           </span>?
         </p>

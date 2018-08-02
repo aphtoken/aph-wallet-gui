@@ -53,7 +53,7 @@ export default {
   height: 100%;
 
   .header {
-    padding: $space-lg $space-lg 0;
+    padding: 0 $space-lg 0;
 
     h1.underlined {
       @extend %underlined-header;
@@ -134,5 +134,3 @@ export default {
   }
 }
 </style>
-
-

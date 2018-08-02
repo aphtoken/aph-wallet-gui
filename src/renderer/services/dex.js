@@ -404,9 +404,25 @@ export default {
 
             order.offersToTake = res.data.offersToTake;
 
-            order.offersToTake.forEach((o) => {
-              o.quantity = new BigNumber(o.quantity);
-              o.price = new BigNumber(o.price);
+            order.quantityToTake = new BigNumber(res.data.quantityToTake);
+            order.quantityToMake = order.quantity.minus(order.quantityToTake);
+            order.minTakerFees = new BigNumber(res.data.minTakerFees);
+            order.maxTakerFees = new BigNumber(res.data.maxTakerFees);
+            if (order.price !== null) {
+              order.expectedQuantityToGive = order.side === 'Buy' ? order.quantityToMake.multipliedBy(order.price) : order.quantityToMake;
+              order.expectedQuantityToReceive = order.side === 'Buy' ? order.quantityToMake : order.quantityToMake.multipliedBy(order.price);
+            } else {
+              order.expectedQuantityToGive = new BigNumber(0);
+              order.expectedQuantityToReceive = new BigNumber(0);
+            }
+
+            order.offersToTake.forEach((offer) => {
+              offer.quantity = new BigNumber(offer.quantity);
+              offer.price = new BigNumber(offer.price);
+              if (offer.isBackupOffer !== true) {
+                order.expectedQuantityToGive = order.expectedQuantityToGive.plus(order.side === 'Buy' ? offer.quantity.multipliedBy(offer.price) : offer.quantity);
+                order.expectedQuantityToReceive = order.expectedQuantityToReceive.plus(order.side === 'Buy' ? offer.quantity : offer.quantity.multipliedBy(offer.price));
+              }
             });
 
             if (!order.price) {
@@ -420,10 +436,6 @@ export default {
                 order.quantityToSell = quantityToGive.toNumber();
               }
             }
-
-            order.quantityToTake = new BigNumber(res.data.quantityToTake);
-            order.minTakerFees = new BigNumber(res.data.minTakerFees);
-            order.maxTakerFees = new BigNumber(res.data.maxTakerFees);
 
             const sellAssetHolding = neo.getHolding(order.assetIdToSell);
             if (sellAssetHolding === null) {
@@ -586,14 +598,17 @@ export default {
     const sellAssetHolding = neo.getHolding(order.assetIdToSell);
 
     if (order.price) {
-      // limit maker order
+      // limit order
       if (sellAssetHolding.canPull === false && order.quantity.isGreaterThan(0)) {
         // this is an MCT based token that can not be pulled from our DEX contract, have to send a deposit first
-        totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
+        totalQuantityToSell = order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity;
       } else if (sellAssetHolding.decimals < 8) {
         // this is a token with < 8 decimals, NEO for example, make the deposit of the minimum amount needed to make the order
-        totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity);
+        totalQuantityToSell = order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity;
       }
+
+      // back out portion of order that will be matched as taker trades
+      totalQuantityToSell = totalQuantityToSell.minus(order.side === 'Buy' ? order.quantityToTake.multipliedBy(order.price) : order.quantityToTake);
     }
 
     order.offersToTake.forEach((offer) => {
@@ -852,7 +867,7 @@ export default {
           }
         } else {
           holding = neo.getHolding(assetId);
-          if (holding.balance.isLessThan(quantity)) {
+          if (holding.balance === null || holding.balance.isLessThan(quantity)) {
             reject(`Insufficient ${holding != null ? holding.symbol : assetId}.`);
             return;
           }
@@ -1241,26 +1256,9 @@ export default {
 
             c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
             c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
             return api.signTx(c);
-          })
-          .then((c) => {
-            const attachInvokedContract = {
-              invocationScript: ('00').repeat(2),
-              verificationScript: '',
-            };
-
-            // We need to order this for the VM.
-            const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
-            if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
-              c.tx.scripts.push(attachInvokedContract);
-            } else {
-              c.tx.scripts.unshift(attachInvokedContract);
-            }
-
-            return c;
           })
           .then((c) => {
             return api.sendTx(c);
@@ -1626,7 +1624,7 @@ export default {
             commitState.contributionHeight = Math.round(u.fixed82num(res.result.substr(56, 16)) * 100000000);
             commitState.compoundHeight = Math.round(u.fixed82num(res.result.substr(72, 16)) * 100000000);
             commitState.feesCollectedSnapshot = u.fixed82num(res.result.substr(88, 16));
-            commitState.feeUnitsSnapshot = u.fixed82num(res.result.substr(104, 16));
+            commitState.feeUnitsSnapshot = u.fixed82num(res.result.substr(104, 32));
             // console.log(`got commitState.feeUnitsSnapshot: ${commitState.feeUnitsSnapshot}`);
 
             rpcClient.getBlock(commitState.contributionHeight)
@@ -1661,8 +1659,8 @@ export default {
 
             if (res.result && res.result.length >= 48) {
               dexState.totalUnitsContributed = u.fixed82num(res.result.substr(0, 16)) * 100000000;
-              dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 16));
-              dexState.totalFeeUnits = u.fixed82num(res.result.substr(32, 16));
+              dexState.lastAppliedFeeSnapshot = u.fixed82num(res.result.substr(16, 32));
+              dexState.totalFeeUnits = u.fixed82num(res.result.substr(48, 32));
             }
 
             rpcClient.query({

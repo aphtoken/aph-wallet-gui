@@ -120,7 +120,7 @@ function handleNetworkChange(state) {
 function putAllNep5Balances(state, nep5balances) {
   const balances = state.nep5Balances;
   nep5balances.forEach((nep5balance) => {
-    _.set(balances, nep5balance.assetId, nep5balance);
+    _.set(balances, nep5balance.asset, nep5balance);
   });
 }
 

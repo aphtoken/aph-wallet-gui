@@ -10,7 +10,7 @@
           <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.baseCurrency : '' }})</div>
           <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
         </div>
-        <div class="balance" :title="aphBalanceToolTip" v-if="quoteHolding.symbol !== 'APH'">
+        <div class="balance" :title="aphBalanceToolTip" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
           <div class="label">{{$t('balance')}} (APH)</div>
           <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
         </div>
@@ -62,7 +62,7 @@
             <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">{{$t('deposit')}} {{ quoteHolding.symbol }}</button>
             <button @click="showDepositWithdrawModal(false, quoteHolding)" class="test-btn">{{$t('withdraw')}} {{ quoteHolding.symbol }}</button>
           </div>
-          <div class="row" v-if="quoteHolding.symbol !== 'APH'">
+          <div class="row" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
             <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">{{$t('depositAPH')}}</button>
             <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">{{$t('withdrawAPH')}}</button>
           </div>

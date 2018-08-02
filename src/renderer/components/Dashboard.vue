@@ -27,16 +27,18 @@ export default {
 </script>
 
 <style lang="scss">
+
 #dashboard {
   display: flex;
-  flex-direction: row;
-  flex: 1;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   .grid {
     display: flex;
-    flex-direction: row;
-    flex: 1;
-    padding: $space;
+    flex: 0 0 auto;
+    padding: 0 $space $space;
   }
 
   .grid--column {
@@ -52,7 +54,7 @@ export default {
   .grid--cell {
     display: flex;
     flex-direction: row;
-    flex: 1;
+    flex: 0 0 auto;
     padding: $space;
 
     > * {
@@ -61,4 +63,3 @@ export default {
   }
 }
 </style>
-
