@@ -19,7 +19,7 @@ export default {
       }).map((holding) => {
         // Note: this must clone the holding or it will modify the holding without using store mutations and cause
         //       side effects. Saved data now has canRemove saved in cache in some wallet's db cache since this wasn't
-        //       previously doing a deep clone in assets/Table.vue; so we have to explicitly set it false here
+        //       previously doing a deep clone in assets/AssetTable.vue; so we have to explicitly set it false here
         return _.merge(_.cloneDeep(holding), {
           canRemove: false,
         });
