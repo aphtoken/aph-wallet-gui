@@ -568,17 +568,7 @@ export default {
                   reject('Order failed.');
                 }
 
-                // set in memory holding balance to null so it will pick up the new balance
-                // if it was skipping it before because we didn't hold any
-                const inMemoryHoldingBuy = _.get(store.state.nep5Balances, order.assetIdToBuy);
-                if (inMemoryHoldingBuy) {
-                  inMemoryHoldingBuy.needsRefresh = true;
-                }
-
-                const inMemoryHoldingSell = _.get(store.state.nep5Balances, order.assetIdToSell);
-                if (inMemoryHoldingSell) {
-                  inMemoryHoldingSell.needsRefresh = true;
-                }
+                store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
               })
               .catch((e) => {
                 // console.log(e);
@@ -818,16 +808,7 @@ export default {
                   reject('Cancel failed');
                 }
 
-                // Set in memory holding needsRefresh flag to cause retrieving the new balance
-                const inMemoryHoldingBuy = _.get(store.state.nep5Balances, order.assetIdToBuy);
-                if (inMemoryHoldingBuy) {
-                  inMemoryHoldingBuy.needsRefresh = true;
-                }
-
-                const inMemoryHoldingSell = _.get(store.state.nep5Balances, order.assetIdToSell);
-                if (inMemoryHoldingSell) {
-                  inMemoryHoldingSell.needsRefresh = true;
-                }
+                store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
               })
               .catch((e) => {
                 reject(new Error(`APH API Error: ${e.message}`));
@@ -887,11 +868,7 @@ export default {
                 alerts.success('Deposit relayed, waiting for confirmation...');
                 neo.monitorTransactionConfirmation(res.tx, true)
                   .then(() => {
-                    const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-                    if (inMemoryHolding) {
-                      // Set in memory holding needsRefresh flag to cause retrieving balances again
-                      inMemoryHolding.needsRefresh = true;
-                    }
+                    store.commit('setAssetHoldingsNeedRefresh', [assetId]);
 
                     resolve(res.tx);
                   })
@@ -903,10 +880,7 @@ export default {
               }
 
               // Set in memory holding needsRefresh flag to cause retrieving balances again
-              const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-              if (inMemoryHolding) {
-                inMemoryHolding.needsRefresh = true;
-              }
+              store.commit('setAssetHoldingsNeedRefresh', [assetId]);
             })
             .catch((e) => {
               reject(`Deposit Failed. ${e.message}`);
@@ -920,10 +894,7 @@ export default {
               resolve(tx);
 
               // Set in memory holding needsRefresh flag to cause retrieving balances again
-              const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-              if (inMemoryHolding) {
-                inMemoryHolding.needsRefresh = true;
-              }
+              store.commit('setAssetHoldingsNeedRefresh', [assetId]);
             })
             .catch((e) => {
               reject(`Deposit Failed. ${e.message}`);
@@ -1705,10 +1676,7 @@ export default {
               alerts.success('Commit relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
-                  if (inMemoryHolding) {
-                    inMemoryHolding.needsRefresh = true;
-                  }
+                  store.commit('setAssetHoldingsNeedRefresh', [assets.APH]);
 
                   resolve(res.tx);
                 })
@@ -1738,10 +1706,7 @@ export default {
               alerts.success('Claim relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
-                  if (inMemoryHolding) {
-                    inMemoryHolding.needsRefresh = true;
-                  }
+                  store.commit('setAssetHoldingsNeedRefresh', [assets.APH]);
 
                   resolve(res.tx);
                 })

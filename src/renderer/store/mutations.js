@@ -4,6 +4,7 @@ import moment from 'moment';
 
 import { requests } from '../constants';
 import { alerts, db, neo, dex } from '../services';
+import { store } from './index';
 
 export {
   clearActiveTransaction,
@@ -22,6 +23,7 @@ export {
   setAcceptDexDemoVersion,
   setAcceptDexOutOfDate,
   setActiveTransaction,
+  setAssetHoldingsNeedRefresh,
   setClaimModalModel,
   setCommitModalModel,
   setCommitState,
@@ -224,6 +226,15 @@ async function setHoldings(state, holdings) {
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
   // NOTE: serializing objects that hold BigNumbers need to use JSON.stringify to be able to be de-serialized properly.
   db.upsert(holdingsStorageKey, JSON.stringify(holdings));
+}
+
+function setAssetHoldingsNeedRefresh(state, assetIds) {
+  assetIds.forEach((assetId) => {
+    const holding = _.get(store.state.nep5Balances, assetId);
+    if (holding) {
+      holding.needsRefresh = true;
+    }
+  });
 }
 
 function setLastReceivedBlock(state) {

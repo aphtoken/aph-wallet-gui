@@ -250,11 +250,8 @@ export default {
                           to: fetchedTransaction.to,
                         });
 
-                        const inMemoryHolding = _.get(store.state.nep5Balances, fetchedTransaction.scriptHash);
-                        if (inMemoryHolding) {
-                          // Set in memory holding needsRefresh flag to cause retrieving the new balance
-                          inMemoryHolding.needsRefresh = true;
-                        }
+                        // Set in memory holding needsRefresh flag to cause retrieving the new balance
+                        store.commit('setAssetHoldingsNeedRefresh', [fetchedTransaction.scriptHash]);
                       }
                     }));
                 });
