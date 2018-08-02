@@ -18,18 +18,32 @@ import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
 import AphClaimGasModal from './modals/ClaimGasModal';
 
 let loadTokensIntervalId;
+let loadHoldingsIntervalId;
 
 export default {
   beforeDestroy() {
     clearInterval(loadTokensIntervalId);
+    clearInterval(loadHoldingsIntervalId);
   },
 
   mounted() {
-    this.$services.neo.fetchNEP5Tokens();
+    this.$services.neo.fetchNEP5Tokens(() => {
+      this.loadHoldings();
+    });
 
     loadTokensIntervalId = setInterval(() => {
       this.$services.neo.fetchNEP5Tokens();
     }, this.$constants.intervals.TOKENS_POLLING);
+
+    loadHoldingsIntervalId = setInterval(() => {
+      this.loadHoldings();
+    }, this.$constants.intervals.HOLDINGS_POLLING);
+  },
+
+  methods: {
+    loadHoldings() {
+      this.$store.dispatch('fetchHoldings', { });
+    },
   },
 
   components: {

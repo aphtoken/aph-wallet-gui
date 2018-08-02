@@ -14,7 +14,7 @@ export {
   fetchCommitState,
   fetchHoldings,
   fetchLatestVersion,
-  fetchPortfolio,
+  // fetchPortfolio,
   fetchRecentTransactions,
   findTransactions,
   importWallet,
@@ -153,6 +153,7 @@ async function fetchCommitState({ commit }) {
 async function fetchHoldings({ commit }, { done }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
+  let portfolio;
   let holdings;
 
   commit('startRequest', { identifier: 'fetchHoldings' });
@@ -167,28 +168,7 @@ async function fetchHoldings({ commit }, { done }) {
     commit('setHoldings', holdings);
   }
 
-  try {
-    holdings = await neo.fetchHoldings(currentWallet.address);
-    if (done) {
-      done();
-    }
-    commit('setHoldings', holdings.holdings);
-    commit('endRequest', { identifier: 'fetchHoldings' });
-  } catch (message) {
-    alerts.networkException(message);
-    commit('failRequest', { identifier: 'fetchHoldings', message });
-  }
-}
-
-async function fetchPortfolio({ commit }) {
-  const currentNetwork = network.getSelectedNetwork();
-  const currentWallet = wallets.getCurrentWallet();
-  let portfolio;
-
-  commit('startRequest', { identifier: 'fetchPortfolio' });
-
   const portfolioStorageKey = `portfolios.${currentWallet.address}.${currentNetwork.net}`;
-
   try {
     portfolio = await fetchCachedData(portfolioStorageKey);
     commit('setPortfolio', portfolio);
@@ -197,19 +177,25 @@ async function fetchPortfolio({ commit }) {
   }
 
   try {
-    const holdings = await neo.fetchHoldings(currentWallet.address);
+    holdings = await neo.fetchHoldings(currentWallet.address);
+
+    commit('setHoldings', holdings.holdings);
     commit('setPortfolio', {
       balance: holdings.totalBalance,
       changePercent: holdings.change24hrPercent,
       changeValue: holdings.change24hrValue.toFixed(2),
     });
-    commit('endRequest', { identifier: 'fetchPortfolio' });
+    if (done) {
+      done();
+    }
+    commit('endRequest', { identifier: 'fetchHoldings' });
   } catch (message) {
-    alerts.exception(message);
-    commit('failRequest', { identifier: 'fetchPortfolio', message });
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'fetchHoldings', message });
   }
-}
 
+  return holdings;
+}
 async function fetchRecentTransactions({ commit }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
