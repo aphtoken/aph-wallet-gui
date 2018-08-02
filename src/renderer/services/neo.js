@@ -564,9 +564,8 @@ export default {
                 const valuationsPromises = [];
                 const lowercaseCurrency = settings.getCurrency().toLowerCase();
 
-                if (!restrictToSymbol) {
-                  store.commit('putAllNep5Balances', localNep5Balances);
-                }
+                // It's safe to do this even when restrictToSymbol is set since this only adds or replaces balances.
+                store.commit('putAllNep5Balances', localNep5Balances);
 
                 holdings.forEach((holdingBalance) => {
                   valuationsPromises.push((done) => {
