@@ -1,22 +1,27 @@
 <template>
   <div v-if="messageReceiving" 
     :style="{
-      'width': $el.parentElement.clientWidth + 'px', 
-      'height': $el.parentElement.clientHeight + 'px'
+      'width': `${$el.parentElement.clientWidth}px`, 
+      'height': `${$el.parentElement.clientHeight}px`
     }" class="loader-container">
-    <div :class="{ 'loader': !size, 'loader-sm': size === 'small' }"></div>
+    <div :class="{ 
+      'loader': !size, 
+      'loader-sm': size === 'small' 
+      }">
+    </div>
   </div>
 </template>
 
 <script>
-let storeUnwatchLastMsg;
-let storeUnwatchRequests;
-let isVisibleTimeout;
+import { requests } from '../constants';
 
 export default {
   data() {
     return {
       messageReceiving: false,
+      storeUnwatchLastMsg: null,
+      storeUnwatchRequests: null,
+      isVisibleTimeout: null,
     };
   },
 
@@ -28,33 +33,25 @@ export default {
   },
 
   created() {
-    storeUnwatchLastMsg = this.$store.watch(
+    this.storeUnwatchLastMsg = this.$store.watch(
       (state) => {
         return state.lastMessage;
       }, (msg) => {
         if (this.wsMessageType && msg.type && msg.type === this.wsMessageType) {
-          if (isVisibleTimeout) {
-            clearTimeout(isVisibleTimeout);
-          }
-
           this.hide();
         }
       });
 
-    storeUnwatchRequests = this.$store.watch(
+    this.storeUnwatchRequests = this.$store.watch(
       (state) => {
         return state.requests[this.identifier];
       }, (request) => {
-        if (((this.wsMessageType && request.status === 'success') ||
-          (!this.wsMessageType && request.status === 'pending')) && !this.isSilent) {
-          isVisibleTimeout = setTimeout(this.show.apply(this), 0);
+        if (((this.wsMessageType && request.status === requests.SUCCESS) ||
+          (!this.wsMessageType && request.status === requests.PENDING)) && !this.isSilent) {
+          this.isVisibleTimeout = setTimeout(this.show.bind(this), this.$constants.timeouts.RENDER_SPINNER);
         }
 
-        if (!this.wsMessageType && request.status === 'success') {
-          if (isVisibleTimeout) {
-            clearTimeout(isVisibleTimeout);
-          }
-
+        if (!this.wsMessageType && request.status === requests.SUCCESS) {
           this.hide();
         }
       });
@@ -66,14 +63,19 @@ export default {
       this.$el.parentElement.style.position = 'relative';
     },
     hide() {
+      if (this.isVisibleTimeout) {
+        clearTimeout(this.isVisibleTimeout);
+      }
+
       this.$el.parentElement.style.position = '';
       this.messageReceiving = false;
     },
   },
 
   beforeDestroy() {
-    storeUnwatchLastMsg();
-    storeUnwatchRequests();
+    this.storeUnwatchLastMsg();
+    this.storeUnwatchRequests();
+    this.clearIsVisibleTimeout();
   },
 
   props: {
