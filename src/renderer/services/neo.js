@@ -500,7 +500,7 @@ export default {
                 .then((val) => {
                   if (!val.symbol) {
                     // If we can't get a token symbol for the token
-                    console.log(`Token not found on this network: ${nep5.assetId} ${val.name} ${val.totalSupply}`);
+                    console.log(`Token not found on this network: ${nep5.assetId} ${val.name}`);
                     nep5balance.needsRefresh = false;
                     return; // token not found on this network
                   }
@@ -526,9 +526,18 @@ export default {
                 })
                 .catch((e) => {
                   if (e.message.indexOf('Expected a hexstring but got') > -1) {
+                    // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
                     tokens.remove(nep5.assetId, currentNetwork.net);
-                  } /* else mep5balance.needsRefresh will stay true, causing retry getting balance next time */
-                  alerts.networkException(e);
+                    nep5balance.needsRefresh = false;
+                  } else if (e.message.indexOf('Invalid results length!') > -1) {
+                    // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
+                    nep5balance.needsRefresh = false;
+                  } /* else {
+                     console.log(`couldn't fetch token: ${nep5.assetId} ${e}`);
+                  } // else mep5balance.needsRefresh will stay true, causing retry getting balance next time */
+
+                  // We don't want to surface these errors to the user.
+                  // alerts.networkException(e);
                   reject(e);
                 }));
 
@@ -707,7 +716,7 @@ export default {
   fetchNEP5Balance(address, assetId) {
     const currentNetwork = network.getSelectedNetwork();
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       return api.nep5.getToken(currentNetwork.rpc, assetId, address)
         .then((token) => {
           resolve({
@@ -718,8 +727,8 @@ export default {
             balance: token.balance,
           });
         })
-        .catch(() => {
-          resolve({ balance: 0 });
+        .catch((ex) => {
+          reject(ex);
         });
     });
   },
