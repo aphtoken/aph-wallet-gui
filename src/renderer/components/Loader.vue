@@ -1,5 +1,5 @@
 <template>
-  <div v-if="($isPending(identifier) || (wsMessageType && wsMessageReceiving)) && !isSilent" 
+  <div v-if="messageReceiving" 
     :style="{
       'width': $el.parentElement.clientWidth + 'px', 
       'height': $el.parentElement.clientHeight + 'px'
@@ -11,10 +11,12 @@
 <script>
 let storeUnwatchLastMsg;
 let storeUnwatchRequests;
+let isVisibleTimeout;
+
 export default {
   data() {
     return {
-      wsMessageReceiving: false,
+      messageReceiving: false,
     };
   },
 
@@ -30,7 +32,7 @@ export default {
         return state.lastMessage;
       }, (msg) => {
         if (this.wsMessageType && msg.type && msg.type === this.wsMessageType) {
-          this.wsMessageReceiving = false;
+          this.messageReceiving = false;
           this.$el.parentElement.style.position = '';
         }
       });
@@ -39,12 +41,20 @@ export default {
       (state) => {
         return state.requests[this.identifier];
       }, (request) => {
-        if (this.wsMessageType && request.status === 'success') {
-          this.wsMessageReceiving = true;
-          this.$el.parentElement.style.position = 'relative';
-        } else if (!this.wsMessageType && request.status === 'pending' && !this.isSilent) {
-          this.$el.parentElement.style.position = 'relative';
-        } else if (!this.wsMessageType && request.status === 'success' && !this.isSilent) {
+        if (isVisibleTimeout) {
+          clearTimeout(isVisibleTimeout);
+        }
+
+        if (((this.wsMessageType && request.status === 'success') ||
+          (!this.wsMessageType && request.status === 'pending')) && !this.isSilent) {
+          isVisibleTimeout = setTimeout(() => {
+            console.log('executing');
+            this.messageReceiving = true;
+            this.$el.parentElement.style.position = 'relative';
+          }, 0);
+        }
+
+        if (!this.wsMessageType && request.status === 'success') {
           this.$el.parentElement.style.position = '';
         }
       });
