@@ -32,8 +32,8 @@ export default {
   },
 
   methods: {
-    isActive({ symbol }) {
-      return _.get(this.$store.state.statsToken, 'symbol') === symbol;
+    isActive({ asset }) {
+      return _.get(this.$store.state.statsToken, 'asset') === asset;
     },
 
     viewHoldingDetail(holding) {
