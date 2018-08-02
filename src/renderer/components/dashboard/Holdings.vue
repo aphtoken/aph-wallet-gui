@@ -19,9 +19,9 @@ export default {
       });
     },
 
-    ...mapGetters({
-      sendInProgress: 'sendInProgress',
-    }),
+    ...mapGetters([
+      'sendInProgress',
+    ]),
   },
 
   methods: {
