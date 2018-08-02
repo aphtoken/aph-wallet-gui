@@ -59,6 +59,7 @@ export default {
       low: 0,
       volume: 0,
       current: 0,
+      isChartDataAvailable: false,
     };
   },
 
