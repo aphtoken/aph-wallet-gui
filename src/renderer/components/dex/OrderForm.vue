@@ -430,9 +430,6 @@ export default {
 </script>
 
 <style lang="scss">
-[v-cloak] {
-  display: none;
-}
 #dex .grid--cell > div:first-child {
   height: 100%;
 }
