@@ -27,12 +27,15 @@
               <td class="price">{{ $formatNumber(order.price) }}</td>
               <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
               <td class="status">
-                <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="btn-cancel" @click="cancelOrder(order)">
+                <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="open-or-partial">
                   <div v-if="order.status === 'PartiallyFilled'" class="partial">
                     <aph-icon name="info"></aph-icon>
                     <p>{{$t('partial')}}</p>
                   </div>
-                  <aph-icon name="cancel"></aph-icon>
+                  <div v-else class="partial">
+                    <p>{{$t('open')}}</p>
+                  </div>
+                  <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"></aph-icon>
                 </div>
                 <div v-else-if="order.status === 'Filled'">
                   <p>{{$t('filledUc')}}</p>
@@ -184,25 +187,12 @@ export default {
       td.status {
         @extend %small-uppercase-grey-label-dark;
 
-        .btn-cancel {
+        .open-or-partial {
           align-items: center;
-          cursor: pointer;
           display: flex;
           flex-direction: row;
           justify-content: flex-end;
 
-          .aph-icon {
-            margin-right: $space-sm;
-
-            svg {
-              height: toRem(20px);
-            }
-
-            .fill {
-              fill: $dark-grey;
-            }
-          }
-          
           .partial {
             color: $purple;
             margin: 0 $space;
@@ -215,6 +205,19 @@ export default {
               .fill {
                 fill: $purple !important;
               }
+            }
+          }
+          .aph-icon {
+            margin-right: $space-sm;
+            svg {
+              height: toRem(20px);
+            }
+          }
+
+          .btn-cancel {
+            cursor: pointer;
+            .fill {
+              fill: $dark-grey;
             }
           }
         }
