@@ -4,7 +4,7 @@
       <h1 class="underlined">{{$t('myHoldings')}}</h1>
     </div>
     <div class="body">
-      <aph-holding v-for="(holding, index) in holdings" :holding="holding" :on-click="viewHoldingDetail" :class="[{active: isActive(holding)}]" :key="index" :onRemove="remove"></aph-holding>
+      <aph-holding v-for="(holding, index) in holdings" :holding="holding" :on-click="viewHoldingDetail" :class="[{active: isActive(holding)}]" :key="index"></aph-holding>
     </div>
   </section>
 </template>
@@ -16,6 +16,13 @@ export default {
     holdings() {
       return this.$store.state.holdings.filter(({ name, symbol }) => {
         return !!name && !!symbol;
+      }).map((holding) => {
+        // Note: this must clone the holding or it will modify the holding without using store mutations and cause
+        //       side effects. Saved data now has canRemove saved in cache in some wallet's db cache since this wasn't
+        //       previously doing a deep clone in assets/Table.vue; so we have to explicitly set it false here
+        return _.merge(_.cloneDeep(holding), {
+          canRemove: false,
+        });
       });
     },
 
@@ -36,12 +43,6 @@ export default {
 
       this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setStatsToken', holding);
-    },
-
-    remove(holding) {
-      this.$services.tokens.remove(holding.asset, this.$store.state.currentNetwork.net);
-      this.$services.alerts.success(`Removed ${holding.symbol}`);
-      this.loadHoldings();
     },
   },
 };

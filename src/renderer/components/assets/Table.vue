@@ -12,11 +12,13 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 let loadHoldingsIntervalId;
 export default {
   computed: {
     filteredHoldings() {
       const searchBy = this.searchBy.toLowerCase();
+      // Note: filter creates a new collection, but the values will be the same objects held in the state.holdings
       return _.filter(this.$store.state.holdings, ({ name, symbol }) => {
         if (!name || !symbol) {
           return false;
@@ -25,8 +27,11 @@ export default {
         return name.toLowerCase().indexOf(searchBy) > -1
           || symbol.toLowerCase().indexOf(searchBy) > -1;
       }).map((holding) => {
-        const canRemove = holding.isCustom === true && holding.symbol !== 'APH';
-        return _.merge(holding, {
+        const canRemove = holding.isCustom === true && holding.symbol !== 'APH'
+          && holding.totalBalance.isEqualTo(new BigNumber(0));
+        // Note: this must clone the holding or it will modify the holding without using store mutations and cause
+        //       side effects.
+        return _.merge(_.cloneDeep(holding), {
           canRemove,
         });
       });
