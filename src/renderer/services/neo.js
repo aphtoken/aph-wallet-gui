@@ -494,13 +494,11 @@ export default {
               };
               localNep5Balances.push(nep5balance);
 
-              console.log(`Fetching balance for asset ${localNep5Balances.length}: '${nep5balance.asset}' 
-                           ${nep5.network} ${currentNetwork.net}`);
               promises.push(this.fetchNEP5Balance(address, nep5.assetId)
                 .then((val) => {
                   if (!val.symbol) {
                     // If we can't get a token symbol for the token
-                    console.log(`Token not found on this network: ${nep5.assetId} ${val.name}`);
+                    // console.log(`Token not found on this network: ${nep5.assetId} ${val.name}`);
                     nep5balance.needsRefresh = false;
                     return; // token not found on this network
                   }
