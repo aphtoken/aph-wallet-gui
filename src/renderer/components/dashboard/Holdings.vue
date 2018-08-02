@@ -4,7 +4,7 @@
       <h1 class="underlined">{{$t('myHoldings')}}</h1>
     </div>
     <div class="body">
-      <aph-holding v-for="(holding, index) in holdings" :holding="holding" :on-click="viewHoldingDetail" :class="[{active: isActive(holding)}]" :key="index"></aph-holding>
+      <aph-holding v-for="(holding, index) in holdings" :holding="holding" :on-click="viewHoldingDetail" :class="[{active: isActive(holding)}]" :key="index" :onRemove="remove"></aph-holding>
     </div>
   </section>
 </template>
@@ -36,6 +36,12 @@ export default {
 
       this.$router.replace('/authenticated/dashboard');
       this.$store.commit('setStatsToken', holding);
+    },
+
+    remove(holding) {
+      this.$services.tokens.remove(holding.asset, this.$store.state.currentNetwork.net);
+      this.$services.alerts.success(`Removed ${holding.symbol}`);
+      this.loadHoldings();
     },
   },
 };
