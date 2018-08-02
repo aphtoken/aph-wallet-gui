@@ -866,12 +866,12 @@ export default {
         } else {
           holding = neo.getHolding(assetId);
           const holdingAsset = holding != null ? holding.symbol : assetId;
-          if (holding.balance === null || holding.balance.isLessThan(quantity)) {
-            reject(`Insufficient ${holdingAsset}.`);
+          if (holding == null || holding.balance === null || holding.balance.isLessThan(quantity)) {
+            reject(`Insufficient balance of asset '${holdingAsset}'.`);
             return;
           }
           if (holding.needsRefresh === true) {
-            reject(`Balance of asset ${holdingAsset} is currently refreshing. Please try again.`);
+            reject(`Balance of asset '${holdingAsset}' is currently refreshing. Please try again.`);
             return;
           }
         }
