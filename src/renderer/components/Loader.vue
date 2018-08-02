@@ -22,7 +22,8 @@ export default {
 
   computed: {
     isSilent() {
-      return this.$store.state.requests[this.identifier] && this.$store.state.requests[this.identifier].isSilent;
+      return this.$store.state.requests[this.identifier] &&
+        this.$store.state.requests[this.identifier].isSilent;
     },
   },
 
@@ -32,8 +33,11 @@ export default {
         return state.lastMessage;
       }, (msg) => {
         if (this.wsMessageType && msg.type && msg.type === this.wsMessageType) {
-          this.messageReceiving = false;
-          this.$el.parentElement.style.position = '';
+          if (isVisibleTimeout) {
+            clearTimeout(isVisibleTimeout);
+          }
+
+          this.hide();
         }
       });
 
@@ -41,23 +45,30 @@ export default {
       (state) => {
         return state.requests[this.identifier];
       }, (request) => {
-        if (isVisibleTimeout) {
-          clearTimeout(isVisibleTimeout);
-        }
-
         if (((this.wsMessageType && request.status === 'success') ||
           (!this.wsMessageType && request.status === 'pending')) && !this.isSilent) {
-          isVisibleTimeout = setTimeout(() => {
-            console.log('executing');
-            this.messageReceiving = true;
-            this.$el.parentElement.style.position = 'relative';
-          }, 0);
+          isVisibleTimeout = setTimeout(this.show.apply(this), 0);
         }
 
         if (!this.wsMessageType && request.status === 'success') {
-          this.$el.parentElement.style.position = '';
+          if (isVisibleTimeout) {
+            clearTimeout(isVisibleTimeout);
+          }
+
+          this.hide();
         }
       });
+  },
+
+  methods: {
+    show() {
+      this.messageReceiving = true;
+      this.$el.parentElement.style.position = 'relative';
+    },
+    hide() {
+      this.$el.parentElement.style.position = '';
+      this.messageReceiving = false;
+    },
   },
 
   beforeDestroy() {
