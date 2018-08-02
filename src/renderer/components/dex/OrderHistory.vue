@@ -53,7 +53,7 @@
       <div :class="['option', {active: $store.state.ordersToShow === $constants.orders.ALL_SWITCH}]" @click="$store.commit('setOrdersToShow', $constants.orders.ALL_SWITCH)">All</div>
       <div :class="['option', {active: $store.state.currentMarket && $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
     </div>
-    <aph-loader identifier="fetchOrderHistory"></aph-loader>
+    <aph-spinner identifier="fetchOrderHistory"></aph-spinner>
   </section>
 </template>
 

@@ -41,7 +41,7 @@
         </div>
       </div>
     </div>
-    <aph-loader identifier="subscribeToMarket" ws-message-type="bookSnapshot"></aph-loader>
+    <aph-spinner identifier="subscribeToMarket" ws-message-type="bookSnapshot"></aph-spinner>
   </section>
 </template>
 

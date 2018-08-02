@@ -3,10 +3,10 @@
     :style="{
       'width': `${$el.parentElement.clientWidth}px`, 
       'height': `${$el.parentElement.clientHeight}px`
-    }" class="loader-container">
+    }" class="spinner-container">
     <div :class="{ 
-      'loader': !size, 
-      'loader-sm': size === 'small' 
+      'spinner': !size, 
+      'spinner-sm': size === 'small' 
       }">
     </div>
   </div>
@@ -97,14 +97,14 @@ export default {
 
 <style lang="scss">
 
-.loader-container {
+.spinner-container {
   position: absolute;
   top: 0px;
   left: 0px;
-  .loader {
+  .spinner {
     @include loader06($size: 36px, $color: $purple, $align: middle);
   }
-  .loader-sm {
+  .spinner-sm {
     @include loader06($size: 25px, $color: $purple, $align: middle, $border-size: 5px);
   }
 }

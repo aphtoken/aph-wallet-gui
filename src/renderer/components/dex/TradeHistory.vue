@@ -17,7 +17,7 @@
             <div class="cell time">{{ $formatDateShort(trade.tradeTime) }} {{ $formatTime(trade.tradeTime) }}</div>
           </div>
         </div>
-        <aph-loader identifier="fetchTradeHistory"></aph-loader>
+        <aph-spinner identifier="fetchTradeHistory"></aph-spinner>
       </div>
     </div>
   </section>

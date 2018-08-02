@@ -46,7 +46,7 @@
           ({{ $formatNumber(percentChangeAbsolute) }}%)
         </div>
       </div>
-      <aph-loader size="small" identifier="fetchTradeHistory"></aph-loader>
+      <aph-spinner size="small" identifier="fetchTradeHistory"></aph-spinner>
     </div>
   </section>
 </template>

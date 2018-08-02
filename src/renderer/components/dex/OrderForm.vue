@@ -77,7 +77,7 @@
       :onConfirmed="orderConfirmed" :onCancel="hideOrderConfirmationModal"></aph-order-confirmation-modal>
     <aph-deposit-withdraw-modal v-if="$store.state.depositWithdrawModalModel"
       :onConfirmed="depositWithdrawConfirmed" :onCancel="hideDepositWithdrawModal"></aph-deposit-withdraw-modal>
-    <aph-loader v-if="!$store.state.holdings.length" identifier="fetchHoldings"></aph-loader>
+    <aph-spinner v-if="!$store.state.holdings.length" identifier="fetchHoldings"></aph-spinner>
   </div>
 </template>
 
