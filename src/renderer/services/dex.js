@@ -7,6 +7,7 @@ import {
 } from '@cityofzion/neon-js';
 import Vue from 'vue';
 import { BigNumber } from 'bignumber.js';
+import tokens from './tokens';
 import alerts from './alerts';
 import neo from './neo';
 import network from './network';
@@ -1205,6 +1206,8 @@ export default {
           config.account = new wallet.Account(currentWallet.wif);
         }
 
+        const token = tokens.getOne(assetId, currentNetwork.net);
+
         api.fillKeys(config)
           .then(() => {
             return api.getBalanceFrom({
@@ -1229,11 +1232,30 @@ export default {
 
             c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+
+            if (token.canPull !== false) {
+              c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
+            }
+            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
             c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
             return api.signTx(c);
           })
           .then((c) => {
+            if (token.CanPull !== false) {
+              const attachInvokedContract = {
+                invocationScript: ('00').repeat(2),
+                verificationScript: '',
+              };
+              // We need to order this for the VM.
+              const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
+              if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+                c.tx.scripts.push(attachInvokedContract);
+              } else {
+                c.tx.scripts.unshift(attachInvokedContract);
+              }
+            }
+
             return api.sendTx(c);
           })
           .then((c) => {
