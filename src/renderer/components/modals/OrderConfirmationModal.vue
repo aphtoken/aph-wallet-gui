@@ -24,7 +24,7 @@
             </span>
             <span class="price" v-else>
               {{ $formatNumber($store.state.orderToConfirm.expectedQuantityToReceive) }}
-              {{ $store.state.orderToConfirm.market.quoteCurrency }}
+              {{ $store.state.orderToConfirm.market.baseCurrency }}
             </span>
           </span>?
         </p>

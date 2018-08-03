@@ -590,16 +590,22 @@ export default {
 
     if (order.price) {
       // limit order
+      let depositMakerQuantity = false;
+
       if (sellAssetHolding.canPull === false && order.quantity.isGreaterThan(0)) {
         // this is an MCT based token that can not be pulled from our DEX contract, have to send a deposit first
-        totalQuantityToSell = order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity;
+        depositMakerQuantity = true;
       } else if (sellAssetHolding.decimals < 8) {
         // this is a token with < 8 decimals, NEO for example, make the deposit of the minimum amount needed to make the order
-        totalQuantityToSell = order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity;
+        depositMakerQuantity = true;
+      } else if (order.offersToTake.length > 0 && order.quantityToMake.isGreaterThan(0)) {
+        // we have maker and taker quantities, need to deposit the maker quanity first because we don't know the order they will be confirmed
+        depositMakerQuantity = true;
       }
 
-      // back out portion of order that will be matched as taker trades
-      totalQuantityToSell = totalQuantityToSell.minus(order.side === 'Buy' ? order.quantityToTake.multipliedBy(order.price) : order.quantityToTake);
+      if (depositMakerQuantity) {
+        totalQuantityToSell = order.side === 'Buy' ? order.quantityToMake.multipliedBy(order.price) : order.quantityToMake;
+      }
     }
 
     order.offersToTake.forEach((offer) => {
