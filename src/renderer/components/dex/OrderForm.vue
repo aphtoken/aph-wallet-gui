@@ -535,7 +535,7 @@ export default {
           }
 
           .fill {
-            fill: $purple;
+            fill: $dark-grey;
           }
         }
       }
@@ -678,6 +678,16 @@ export default {
 
         .percent-btn {
           @extend %small-uppercase-grey-label;
+        }
+      }
+
+      .options {
+        .option {
+          .aph-icon {
+            .fill {
+              fill: $purple !important;
+            }
+          }
         }
       }
     }
