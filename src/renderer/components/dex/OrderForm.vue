@@ -41,22 +41,22 @@
         </button>
       </div>
       <div class="footer">
-        <div class="balance" :title="quoteBalanceToolTip">
+        <div @click="actionableHolding = quoteHolding" :class="['balance', {active: quoteHolding.symbol === actionableHolding.symbol}]" :title="quoteBalanceToolTip">
           <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.quoteCurrency }})</div>
           <div class="value">{{ $formatNumber(quoteHolding.totalBalance) }}</div>
         </div>
-        <div class="balance" :title="baseBalanceToolTip">
+        <div @click="actionableHolding = baseHolding" :class="['balance', {active: baseHolding.symbol === actionableHolding.symbol}]" :title="baseBalanceToolTip">
           <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
           <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
         </div>
-        <div class="balance" :title="aphBalanceToolTip" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
+        <div @click="actionableHolding = aphHolding" :class="['balance', {active: aphHolding.symbol === actionableHolding.symbol}]" :title="aphBalanceToolTip" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
           <div class="label">{{$t('balance')}} (APH)</div>
           <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
         </div>
         <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="footer-buttons">
           <div class="row">
-            <button @click="showDepositWithdrawModal(true, baseHolding)" class="footer-btn">{{$t('deposit')}} {{ baseHolding.symbol }}</button>
-            <button @click="showDepositWithdrawModal(false, baseHolding)" class="footer-btn">{{$t('withdraw')}} {{ baseHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(true)" class="footer-btn">{{$t('deposit')}} {{ actionableHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(false)" class="footer-btn">{{$t('withdraw')}} {{ actionableHolding.symbol }}</button>
           </div>
           <!-- Only the contract owner or manager can do this.
           <button @click="setMarket" class="footer-btn">Setup Market</button>-->
@@ -88,6 +88,8 @@ export default {
   mounted() {
     this.loadHoldings();
 
+    this.actionableHolding = this.quoteHolding;
+
     loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldings();
     }, this.$constants.intervals.HOLDINGS_POLLING);
@@ -98,6 +100,10 @@ export default {
   },
 
   computed: {
+    currentMarket() {
+      return this.$store.state.currentMarket;
+    },
+
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
@@ -105,9 +111,9 @@ export default {
     },
 
     quoteHolding() {
-      if (this.$store.state.currentMarket && this.$store.state.holdings) {
+      if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.$store.state.currentMarket.quoteAssetId;
+          return o.asset === this.currentMarket.quoteAssetId;
         });
 
         if (holding) {
@@ -116,16 +122,16 @@ export default {
       }
 
       return {
-        symbol: this.$store.state.currentMarket ? this.$store.state.currentMarket.quoteCurrency : '',
+        symbol: this.currentMarket ? this.currentMarket.quoteCurrency : '',
         balance: 0,
         totalBalance: 0,
         contractBalance: 0,
       };
     },
     baseHolding() {
-      if (this.$store.state.currentMarket && this.$store.state.holdings) {
+      if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.$store.state.currentMarket.baseAssetId;
+          return o.asset === this.currentMarket.baseAssetId;
         });
 
         if (holding) {
@@ -134,14 +140,14 @@ export default {
       }
 
       return {
-        symbol: this.$store.state.currentMarket ? this.$store.state.currentMarket.baseCurrency : '',
+        symbol: this.currentMarket ? this.currentMarket.baseCurrency : '',
         balance: 0,
         totalBalance: 0,
         contractBalance: 0,
       };
     },
     aphHolding() {
-      if (this.$store.state.currentMarket && this.$store.state.holdings) {
+      if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
           return o.asset === this.$constants.assets.APH;
         });
@@ -199,10 +205,10 @@ export default {
       }
     },
     priceLabel() {
-      return this.$t('priceBase', { base: this.$store.state.currentMarket.baseCurrency });
+      return this.$t('priceBase', { base: this.currentMarket.baseCurrency });
     },
     amountLabel() {
-      return this.$t('amountQuote', { quote: this.$store.state.currentMarket.quoteCurrency });
+      return this.$t('amountQuote', { quote: this.currentMarket.quoteCurrency });
     },
     price() {
       let price = this.$store.state.orderPrice;
@@ -225,8 +231,8 @@ export default {
       }
     },
     estimate() {
-      const holding = this.$store.state.currentMarket ?
-        this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue :
+      const holding = this.currentMarket ?
+        this.$services.neo.getHolding(this.currentMarket.baseAssetId).unitValue :
         0;
 
       try {
@@ -255,6 +261,7 @@ export default {
 
   data() {
     return {
+      actionableHolding: '',
       side: 'Buy',
       orderTypes: [{
         label: 'Market',
@@ -272,6 +279,10 @@ export default {
   },
 
   watch: {
+    currentMarket() {
+      this.actionableHolding = this.quoteHolding;
+    },
+
     orderType() {
       if (this.orderType === 'Market') {
         this.$store.commit('setOrderPrice', '');
@@ -354,7 +365,7 @@ export default {
 
       this.$store.dispatch('formOrder', {
         order: {
-          market: this.$store.state.currentMarket,
+          market: this.currentMarket,
           side: this.side,
           orderType: this.orderType,
           quantity: new BigNumber(this.$store.state.orderQuantity),
@@ -376,9 +387,9 @@ export default {
         },
       });
     },
-    showDepositWithdrawModal(isDeposit, holding) {
+    showDepositWithdrawModal(isDeposit) {
       this.$store.commit('setDepositWithdrawModalModel', {
-        isDeposit, holding,
+        isDeposit, selectedHolding: this.actionableHolding,
       });
     },
     hideDepositWithdrawModal() {
@@ -625,6 +636,16 @@ export default {
 
     & + .balance {
       margin-top: $space;
+    }
+  }
+
+  .balance {
+    cursor: pointer;
+
+    &.active {
+      .label {
+        font-family: GilroySemibold;
+      }
     }
   }
 }
