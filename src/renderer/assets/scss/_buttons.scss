@@ -85,7 +85,7 @@ button, input, optgroup, select, textarea {
 }
 
 %btn-square {
-  @include transition(background-color, border, box-shadow, color);
+  @include transition(background-color, border, box-shadow);
 
   background-color: white;
   border-radius: $border-radius;
@@ -119,6 +119,8 @@ button, input, optgroup, select, textarea {
   }
 
   p {
+    @include transition(color);
+
     font-size: toRem(14px);
     margin: $space 0;
     text-align: center;

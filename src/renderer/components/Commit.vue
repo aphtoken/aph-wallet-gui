@@ -57,13 +57,11 @@
       </div>
       <div class="actions">
         <div class="commit">
-          <button class="btn-square" @click="showCommitModal()"
+          <div class="btn-square" @click="showCommitModal()"
               :disabled="shouldDisableCommitButton">
-            <div>
-              <aph-icon name="commit"></aph-icon>
-              <p>{{$t('commit')}}</p>
-            </div>
-          </button>
+            <aph-icon name="commit"></aph-icon>
+            <p>{{$t('commit')}}</p>
+          </div>
         </div>
         <div class="claim-info">
           <div class="value" v-if="$store.state.commitState.quantityCommitted > 0">
@@ -79,28 +77,27 @@
               <h2>-</h2>
               <div>{{$t('eligibleToCompound')}}</div>
             </div>
-            <div><span>{{$t('currentBlock')}}</span>{{ currentBlock }}</div>
+            <div><span>{{$t('currentBlock')}}</span>{{ $formatNumber(currentBlock) }}</div>
           </div>
           <div class="value" v-else>
             <h2>-</h2>
-            <div>{{$t('commitAphelionToBeEligible')}}</div>
-            <div><span>{{$t('currentBlock')}}</span>{{ currentBlock }}</div>
+            <div class="help-text">{{$t('commitAphelionToBeEligible')}}</div>
+            <div class="block">
+              <div class="label">{{$t('currentBlock')}}</div>
+              <div class="value">{{ $formatNumber(currentBlock) }}</div>
+            </div>
           </div>
           <div class="buttons">
-            <button class="btn-square" @click="showClaimModal()"
+            <div class="btn-square claim" @click="showClaimModal()"
               :disabled="shouldDisableClaimButton">
-              <div>
-                <aph-icon name="claim"></aph-icon>
-                <p>{{$t('claim')}}</p>
-              </div>
-            </button>
-            <button class="btn-square" @click="compound()"
+              <aph-icon name="claim"></aph-icon>
+              <p>{{$t('claim')}}</p>
+            </div>
+            <div class="btn-square" @click="compound()"
               :disabled="shouldDisableCompoundButton">
-              <div>
-                <aph-icon name="compound"></aph-icon>
-                <p>{{$t('compound')}}</p>
-              </div>
-            </button>
+              <aph-icon name="compound"></aph-icon>
+              <p>{{$t('compound')}}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -259,7 +256,7 @@ export default {
 
     h1 {
       display: inline-block;
-      font-size: toRem(38px);
+      font-size: toRem(42px);
     }
 
     .learn-more {
@@ -387,7 +384,7 @@ export default {
       padding: $space-lg;
       margin: $space-lg 0;
 
-      &> div {
+      > div {
         flex: 1;
       }
 
@@ -417,21 +414,18 @@ export default {
       display: flex;
       flex-direction: row;
 
-      &> div {
+      > div {
         flex: 1;
+      }
+
+      > .commit {
+        margin-left: $space-lg;
       }
 
       .btn-square {
         @extend %btn-square;
 
-        height: toRem(225px);
-        padding: 3rem 0;
-        width: toRem(250px);
-        flex-direction: row;
-
-        &>div {
-          width: 100%;
-        }
+        background: $grey;
 
         &:disabled {
           background-color: $grey;
@@ -439,18 +433,17 @@ export default {
 
         .aph-icon {
           .fill {
-            fill: $dark;
+            fill: $dark-grey;
           }
         }
 
-        &:hover {
-          background: $purple;
-          color: white;
+        p {
+          color: $dark-grey;
+        }
 
-          .aph-icon {
-            .fill {
-              fill: white;
-            }
+        &:hover {
+          p {
+            color: white;
           }
         }
       }
@@ -458,21 +451,36 @@ export default {
 
       .claim-info {
         background-color: white;
-        padding: $space-lg;
-        max-height: toRem(300px);
+        padding: $space-lg $space-lg toRem(175px/2) $space-lg;
 
-        &> div {
+        > div {
          text-align: center;
-         text-transform: uppercase;
          font-size: toRem(18px);
 
-         &> div {
-          margin: $space;
-           span {
-            color: $dark-grey;
-            display: block;
-           }
-         }
+         > div {
+            span {
+              color: $dark-grey;
+              display: block;
+            }
+          }
+        }
+
+        .help-text {
+          @extend %small-uppercase-grey-label-dark;
+        }
+
+        .block {
+          margin-top: $space;
+
+          .label {
+            @extend %small-uppercase-grey-label-dark;
+          }
+
+          .value {
+            @extend %small-uppercase-grey-label-dark;
+
+            color: $dark;
+          }
         }
 
         h2 {
@@ -483,11 +491,28 @@ export default {
         .buttons {
           display: flex;
           flex-direction: row;
+          justify-content: center;
+          margin: $space 0 toRem(-175px);
 
 
           .btn-square {
-            flex: 1;
-            margin: $space-lg;
+            &.claim {
+              background: $purple;
+
+              p {
+                color: white;
+              }
+
+              .aph-icon {
+                .fill {
+                  fill: $dark;
+                }
+              }
+            }
+
+            & + .btn-square {
+              margin-left: $space-lg;
+            }
           }
         }
       }
