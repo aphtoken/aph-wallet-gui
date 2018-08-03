@@ -22,9 +22,10 @@
           <div @click="setPercent(1)" :class="['percent-btn', {selected: selectedPercent === 1}]">100%</div>
         </div>
         <div class="options">
-          <div class="option" v-if="orderType === 'Limit'">
-            <label for="post-only">{{$t('postOnly')}}</label>
-            <input type="checkbox" id="post-only" v-model="postOnly" />
+          <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
+            <label>{{$t('postOnly')}}</label>
+            <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
+            <aph-icon name="radio-off" v-else></aph-icon>
           </div>
         </div>
         <div class="total">
@@ -516,8 +517,27 @@ export default {
       color: $grey;
       margin: $space 0 $space;
 
-      #post-only {
-        margin-left: $space;
+      .option {
+        align-items: center;
+        cursor: pointer;
+        display: flex;
+        user-select: none;
+
+        label {
+          cursor: pointer;
+        }
+
+        .aph-icon {
+          margin-left: $space;
+
+          svg {
+            height: toRem(20px);
+          }
+
+          .fill {
+            fill: $purple;
+          }
+        }
       }
     }
 
@@ -660,6 +680,10 @@ export default {
           @extend %small-uppercase-grey-label;
         }
       }
+    }
+
+    .balance.active .label  {
+      @extend %small-uppercase-grey-label;
     }
   }
 }
