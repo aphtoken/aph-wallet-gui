@@ -7,6 +7,7 @@ import {
 } from '@cityofzion/neon-js';
 import Vue from 'vue';
 import { BigNumber } from 'bignumber.js';
+import tokens from './tokens';
 import alerts from './alerts';
 import neo from './neo';
 import network from './network';
@@ -568,17 +569,7 @@ export default {
                   reject('Order failed.');
                 }
 
-                // set in memory holding balance to null so it will pick up the new balance
-                // if it was skipping it before because we didn't hold any
-                const inMemoryHoldingBuy = _.get(store.state.nep5Balances, order.assetIdToBuy);
-                if (inMemoryHoldingBuy) {
-                  inMemoryHoldingBuy.needsRefresh = true;
-                }
-
-                const inMemoryHoldingSell = _.get(store.state.nep5Balances, order.assetIdToSell);
-                if (inMemoryHoldingSell) {
-                  inMemoryHoldingSell.needsRefresh = true;
-                }
+                store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
               })
               .catch((e) => {
                 // console.log(e);
@@ -599,16 +590,22 @@ export default {
 
     if (order.price) {
       // limit order
+      let depositMakerQuantity = false;
+
       if (sellAssetHolding.canPull === false && order.quantity.isGreaterThan(0)) {
         // this is an MCT based token that can not be pulled from our DEX contract, have to send a deposit first
-        totalQuantityToSell = order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity;
+        depositMakerQuantity = true;
       } else if (sellAssetHolding.decimals < 8) {
         // this is a token with < 8 decimals, NEO for example, make the deposit of the minimum amount needed to make the order
-        totalQuantityToSell = order.side === 'Buy' ? order.quantity.multipliedBy(order.price) : order.quantity;
+        depositMakerQuantity = true;
+      } else if (order.offersToTake.length > 0 && order.quantityToMake.isGreaterThan(0)) {
+        // we have maker and taker quantities, need to deposit the maker quanity first because we don't know the order they will be confirmed
+        depositMakerQuantity = true;
       }
 
-      // back out portion of order that will be matched as taker trades
-      totalQuantityToSell = totalQuantityToSell.minus(order.side === 'Buy' ? order.quantityToTake.multipliedBy(order.price) : order.quantityToTake);
+      if (depositMakerQuantity) {
+        totalQuantityToSell = order.side === 'Buy' ? order.quantityToMake.multipliedBy(order.price) : order.quantityToMake;
+      }
     }
 
     order.offersToTake.forEach((offer) => {
@@ -818,16 +815,7 @@ export default {
                   reject('Cancel failed');
                 }
 
-                // Set in memory holding needsRefresh flag to cause retrieving the new balance
-                const inMemoryHoldingBuy = _.get(store.state.nep5Balances, order.assetIdToBuy);
-                if (inMemoryHoldingBuy) {
-                  inMemoryHoldingBuy.needsRefresh = true;
-                }
-
-                const inMemoryHoldingSell = _.get(store.state.nep5Balances, order.assetIdToSell);
-                if (inMemoryHoldingSell) {
-                  inMemoryHoldingSell.needsRefresh = true;
-                }
+                store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
               })
               .catch((e) => {
                 reject(new Error(`APH API Error: ${e.message}`));
@@ -887,11 +875,7 @@ export default {
                 alerts.success('Deposit relayed, waiting for confirmation...');
                 neo.monitorTransactionConfirmation(res.tx, true)
                   .then(() => {
-                    const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-                    if (inMemoryHolding) {
-                      // Set in memory holding needsRefresh flag to cause retrieving balances again
-                      inMemoryHolding.needsRefresh = true;
-                    }
+                    store.commit('setAssetHoldingsNeedRefresh', [assetId]);
 
                     resolve(res.tx);
                   })
@@ -903,10 +887,7 @@ export default {
               }
 
               // Set in memory holding needsRefresh flag to cause retrieving balances again
-              const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-              if (inMemoryHolding) {
-                inMemoryHolding.needsRefresh = true;
-              }
+              store.commit('setAssetHoldingsNeedRefresh', [assetId]);
             })
             .catch((e) => {
               reject(`Deposit Failed. ${e.message}`);
@@ -920,10 +901,7 @@ export default {
               resolve(tx);
 
               // Set in memory holding needsRefresh flag to cause retrieving balances again
-              const inMemoryHolding = _.get(store.state.nep5Balances, assetId);
-              if (inMemoryHolding) {
-                inMemoryHolding.needsRefresh = true;
-              }
+              store.commit('setAssetHoldingsNeedRefresh', [assetId]);
             })
             .catch((e) => {
               reject(`Deposit Failed. ${e.message}`);
@@ -1234,6 +1212,8 @@ export default {
           config.account = new wallet.Account(currentWallet.wif);
         }
 
+        const token = tokens.getOne(assetId, currentNetwork.net);
+
         api.fillKeys(config)
           .then(() => {
             return api.getBalanceFrom({
@@ -1258,11 +1238,30 @@ export default {
 
             c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+
+            if (token.canPull !== false) {
+              c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
+            }
+
             c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
             return api.signTx(c);
           })
           .then((c) => {
+            if (token.canPull !== false) {
+              const attachInvokedContract = {
+                invocationScript: ('00').repeat(2),
+                verificationScript: '',
+              };
+              // We need to order this for the VM.
+              const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
+              if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+                c.tx.scripts.push(attachInvokedContract);
+              } else {
+                c.tx.scripts.unshift(attachInvokedContract);
+              }
+            }
+
             return api.sendTx(c);
           })
           .then((c) => {
@@ -1705,10 +1704,7 @@ export default {
               alerts.success('Commit relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
-                  if (inMemoryHolding) {
-                    inMemoryHolding.needsRefresh = true;
-                  }
+                  store.commit('setAssetHoldingsNeedRefresh', [assets.APH]);
 
                   resolve(res.tx);
                 })
@@ -1738,10 +1734,7 @@ export default {
               alerts.success('Claim relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  const inMemoryHolding = _.get(store.state.nep5Balances, assets.APH);
-                  if (inMemoryHolding) {
-                    inMemoryHolding.needsRefresh = true;
-                  }
+                  store.commit('setAssetHoldingsNeedRefresh', [assets.APH]);
 
                   resolve(res.tx);
                 })

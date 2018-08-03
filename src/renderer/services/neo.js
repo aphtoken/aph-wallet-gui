@@ -250,11 +250,8 @@ export default {
                           to: fetchedTransaction.to,
                         });
 
-                        const inMemoryHolding = _.get(store.state.nep5Balances, fetchedTransaction.scriptHash);
-                        if (inMemoryHolding) {
-                          // Set in memory holding needsRefresh flag to cause retrieving the new balance
-                          inMemoryHolding.needsRefresh = true;
-                        }
+                        // Set in memory holding needsRefresh flag to cause retrieving the new balance
+                        store.commit('setAssetHoldingsNeedRefresh', [fetchedTransaction.scriptHash]);
                       }
                     }));
                 });
@@ -564,9 +561,8 @@ export default {
                 const valuationsPromises = [];
                 const lowercaseCurrency = settings.getCurrency().toLowerCase();
 
-                if (!restrictToSymbol) {
-                  store.commit('putAllNep5Balances', localNep5Balances);
-                }
+                // It's safe to do this even when restrictToSymbol is set since this only adds or replaces balances.
+                store.commit('putAllNep5Balances', localNep5Balances);
 
                 holdings.forEach((holdingBalance) => {
                   valuationsPromises.push((done) => {

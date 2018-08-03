@@ -1,19 +1,7 @@
 <template>
   <div>
     <section id="dex--order-form">
-      <div class="body">
-        <div class="balance" :title="quoteBalanceToolTip">
-          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.quoteCurrency : '' }})</div>
-          <div class="value">{{ $formatNumber(quoteHolding.totalBalance) }}</div>
-        </div>
-        <div class="balance" :title="baseBalanceToolTip">
-          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.baseCurrency : '' }})</div>
-          <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
-        </div>
-        <div class="balance" :title="aphBalanceToolTip" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
-          <div class="label">{{$t('balance')}} (APH)</div>
-          <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
-        </div>
+      <div class="body" v-if="$store.state.currentMarket">
         <div class="side">
           <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}}</div>
           <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}}</div>
@@ -22,10 +10,10 @@
           <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
         </div>
         <div class="price" v-if="orderType === 'Limit'">
-          <aph-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-input>
+          <aph-dex-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-dex-input>
         </div>
         <div class="quantity">
-          <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
+          <aph-dex-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-dex-input>
         </div>
         <div class="percentages">
           <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
@@ -34,13 +22,12 @@
           <div @click="setPercent(1)" :class="['percent-btn', {selected: selectedPercent === 1}]">100%</div>
         </div>
         <div class="options">
-          <div class="option" v-if="orderType === 'Limit'">
-            <input type="checkbox" id="post-only" v-model="postOnly" />
-            <label for="post-only">{{$t('postOnly')}}</label>
+          <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
+            <label>{{$t('postOnly')}}</label>
+            <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
+            <aph-icon name="radio-off" v-else></aph-icon>
           </div>
         </div>
-      </div>
-      <div class="footer">
         <div class="total">
           <div class="label">{{$t('total')}} ({{ baseHolding.symbol }})</div>
           <div class="value">{{ $formatNumber(total) }}</div>
@@ -53,24 +40,30 @@
               :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
           {{ orderButtonLabel }}
         </button>
-        <div class="test-buttons">
+      </div>
+      <div class="footer">
+        <div @click="actionableHolding = quoteHolding" :class="['balance', {active: quoteHolding.symbol === actionableHolding.symbol}]" :title="quoteBalanceToolTip">
+          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.quoteCurrency }})</div>
+          <div class="value">{{ $formatNumber(quoteHolding.totalBalance) }}</div>
+        </div>
+        <div @click="actionableHolding = baseHolding" :class="['balance', {active: baseHolding.symbol === actionableHolding.symbol}]" :title="baseBalanceToolTip">
+          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
+          <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
+        </div>
+        <div @click="actionableHolding = aphHolding" :class="['balance', {active: aphHolding.symbol === actionableHolding.symbol}]" :title="aphBalanceToolTip" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
+          <div class="label">{{$t('balance')}} (APH)</div>
+          <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
+        </div>
+        <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="footer-buttons">
           <div class="row">
-            <button @click="showDepositWithdrawModal(true, baseHolding)" class="test-btn">{{ $t('deposit') }} {{ baseHolding.symbol }}</button>
-            <button @click="showDepositWithdrawModal(false, baseHolding)" class="test-btn">{{$t('withdraw')}} {{ baseHolding.symbol }}</button>
-          </div>
-          <div class="row">
-            <button @click="showDepositWithdrawModal(true, quoteHolding)" class="test-btn">{{$t('deposit')}} {{ quoteHolding.symbol }}</button>
-            <button @click="showDepositWithdrawModal(false, quoteHolding)" class="test-btn">{{$t('withdraw')}} {{ quoteHolding.symbol }}</button>
-          </div>
-          <div class="row" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
-            <button @click="showDepositWithdrawModal(true, aphHolding)" class="test-btn">{{$t('depositAPH')}}</button>
-            <button @click="showDepositWithdrawModal(false, aphHolding)" class="test-btn">{{$t('withdrawAPH')}}</button>
+            <button @click="showDepositWithdrawModal(true)" class="footer-btn">{{$t('deposit')}} {{ actionableHolding.symbol }}</button>
+            <button @click="showDepositWithdrawModal(false)" class="footer-btn">{{$t('withdraw')}} {{ actionableHolding.symbol }}</button>
           </div>
           <!-- Only the contract owner or manager can do this.
-          <button @click="setMarket" class="test-btn">Setup Market</button>-->
+          <button @click="setMarket" class="footer-btn">Setup Market</button>-->
         </div>
         <!-- Only the contract owner or manager can do this.
-            <button @click="setMarket" class="test-btn">Setup Market</button> -->
+            <button @click="setMarket" class="footer-btn">Setup Market</button> -->
       </div>
     </section>
     <aph-order-confirmation-modal v-if="$store.state.showOrderConfirmationModal"
@@ -97,6 +90,8 @@ export default {
   created() {
     this.loadHoldings();
 
+    this.actionableHolding = this.quoteHolding;
+
     loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldings(true);
     }, this.$constants.intervals.HOLDINGS_POLLING);
@@ -107,6 +102,10 @@ export default {
   },
 
   computed: {
+    currentMarket() {
+      return this.$store.state.currentMarket;
+    },
+
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
@@ -114,9 +113,9 @@ export default {
     },
 
     quoteHolding() {
-      if (this.$store.state.currentMarket && this.$store.state.holdings) {
+      if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.$store.state.currentMarket.quoteAssetId;
+          return o.asset === this.currentMarket.quoteAssetId;
         });
 
         if (holding) {
@@ -125,16 +124,16 @@ export default {
       }
 
       return {
-        symbol: this.$store.state.currentMarket ? this.$store.state.currentMarket.quoteCurrency : '',
+        symbol: this.currentMarket ? this.currentMarket.quoteCurrency : '',
         balance: 0,
         totalBalance: 0,
         contractBalance: 0,
       };
     },
     baseHolding() {
-      if (this.$store.state.currentMarket && this.$store.state.holdings) {
+      if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.$store.state.currentMarket.baseAssetId;
+          return o.asset === this.currentMarket.baseAssetId;
         });
 
         if (holding) {
@@ -143,14 +142,14 @@ export default {
       }
 
       return {
-        symbol: this.$store.state.currentMarket ? this.$store.state.currentMarket.baseCurrency : '',
+        symbol: this.currentMarket ? this.currentMarket.baseCurrency : '',
         balance: 0,
         totalBalance: 0,
         contractBalance: 0,
       };
     },
     aphHolding() {
-      if (this.$store.state.currentMarket && this.$store.state.holdings) {
+      if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
           return o.asset === this.$constants.assets.APH;
         });
@@ -208,12 +207,10 @@ export default {
       }
     },
     priceLabel() {
-      return this.$store.state.currentMarket ?
-        this.$t('priceBase', { base: this.$store.state.currentMarket.baseCurrency }) : '';
+      return this.$t('priceBase', { base: this.currentMarket.baseCurrency });
     },
     amountLabel() {
-      return this.$store.state.currentMarket ?
-        this.$t('amountQuote', { quote: this.$store.state.currentMarket.quoteCurrency }) : '';
+      return this.$t('amountQuote', { quote: this.currentMarket.quoteCurrency });
     },
     price() {
       let price = this.$store.state.orderPrice;
@@ -236,8 +233,8 @@ export default {
       }
     },
     estimate() {
-      const holding = this.$store.state.currentMarket && this.$store.state.holdings.length ?
-        this.$services.neo.getHolding(this.$store.state.currentMarket.baseAssetId).unitValue :
+      const holding = this.currentMarket ?
+        this.$services.neo.getHolding(this.currentMarket.baseAssetId).unitValue :
         0;
 
       try {
@@ -266,6 +263,7 @@ export default {
 
   data() {
     return {
+      actionableHolding: '',
       side: 'Buy',
       orderTypes: [{
         label: 'Market',
@@ -283,6 +281,10 @@ export default {
   },
 
   watch: {
+    currentMarket() {
+      this.actionableHolding = this.quoteHolding;
+    },
+
     orderType() {
       if (this.orderType === 'Market') {
         this.$store.commit('setOrderPrice', '');
@@ -365,7 +367,7 @@ export default {
 
       this.$store.dispatch('formOrder', {
         order: {
-          market: this.$store.state.currentMarket,
+          market: this.currentMarket,
           side: this.side,
           orderType: this.orderType,
           quantity: new BigNumber(this.$store.state.orderQuantity),
@@ -387,9 +389,9 @@ export default {
         },
       });
     },
-    showDepositWithdrawModal(isDeposit, holding) {
+    showDepositWithdrawModal(isDeposit) {
       this.$store.commit('setDepositWithdrawModalModel', {
-        isDeposit, holding,
+        isDeposit, holding: this.actionableHolding,
       });
     },
     hideDepositWithdrawModal() {
@@ -435,8 +437,6 @@ export default {
 }
 
 #dex--order-form {
-  @extend %tile-light;
-
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -445,41 +445,13 @@ export default {
   position: relative;
 
   .body {
+    @extend %tile-light;
+
+    flex: 1;
     overflow: auto;
 
     .side {
       display: flex;
-      margin-top: $space;
-
-      .buy-btn, .sell-btn {
-        @extend %btn-outline;
-        @extend %selected-text;
-
-        flex: 1;
-        font-family: GilroySemibold;
-
-        &:disabled {
-          border-color: $grey;
-        }
-      }
-
-      .buy-btn {
-        border-color: $green;
-        margin-right: $space-sm;
-
-        &:hover, &.selected {
-          background-color: $green;
-        }
-      }
-
-      .sell-btn {
-        border-color: $red;
-        margin-left: $space-sm;
-
-        &:hover, &.selected {
-          background-color: $red;
-        }
-      }
     }
 
     .order-type {
@@ -491,6 +463,7 @@ export default {
       border-radius: $border-radius;
       display: flex;
       flex-direction: row;
+      margin-top: $space;
 
       .percent-btn {
         @extend %small-uppercase-grey-label-dark;
@@ -510,13 +483,25 @@ export default {
       }
     }
 
-    .aph-input {
+    .order-btn {
+      @extend %btn-outline;
+      @extend %selected-text;
+
+      font-family: GilroySemibold;
+      margin: $space 0 0;
+
+      &:disabled {
+        color: $grey;
+      }
+    }
+
+    .aph-dex-input {
       border-color: $background;
-      margin-bottom: $space;
-      padding-left: toRem(16px);
 
       &.focused {
-        border-color: $purple;
+        .border {
+          border-color: $purple;
+        }
       }
 
       input {
@@ -532,7 +517,60 @@ export default {
     .options {
       color: $grey;
       margin: $space 0 $space;
-      text-align: center;
+
+      .option {
+        align-items: center;
+        cursor: pointer;
+        display: flex;
+        user-select: none;
+
+        label {
+          cursor: pointer;
+        }
+
+        .aph-icon {
+          margin-left: $space;
+
+          svg {
+            height: toRem(20px);
+          }
+
+          .fill {
+            fill: $dark-grey;
+          }
+        }
+      }
+    }
+
+    .buy-btn, .sell-btn {
+      @extend %btn-outline;
+      @extend %selected-text;
+
+      flex: 1;
+      font-family: GilroySemibold;
+
+      &:disabled {
+        background: transparent !important;
+        border-color: $grey;
+      }
+    }
+
+    .buy-btn {
+      border-color: $green;
+      margin-right: $space-sm;
+
+      &:hover, &.selected {
+        background-color: $green;
+      }
+    }
+
+    .sell-btn {
+      border-color: $red;
+      margin-left: $space-sm;
+
+      &:hover, &.selected {
+        background-color: $red;
+      }
     }
   }
 
@@ -541,13 +579,11 @@ export default {
   }
 
   .footer {
+    @extend %tile-light;
+
     margin-top: $space;
 
-    .order-btn {
-      margin: $space 0;
-    }
-
-    .order-btn, .test-btn {
+    .footer-btn {
       @extend %btn-outline;
       @extend %selected-text;
 
@@ -556,6 +592,7 @@ export default {
       &:disabled {
         color: $grey;
       }
+
       &.buy-btn {
         border-color: $green;
 
@@ -572,7 +609,7 @@ export default {
       }
     }
 
-    .test-buttons {
+    .footer-buttons {
       height: auto;
       width: 100%;
 
@@ -580,18 +617,16 @@ export default {
         display: flex;
         flex-direction: row;
 
-        & + .row {
-          margin-top: $space-xs;
-        }
+        margin-top: $space;
       }
 
-      .test-btn {
+      .footer-btn {
         border-width: $border-width-thin;
         font-size: toRem(12px);
-        height: toRem(26px);
+        height: toRem(34px);
         padding: $space-xs 0;
 
-        & + .test-btn {
+        & + .footer-btn {
           margin-left: $space;
         }
       }
@@ -624,6 +659,16 @@ export default {
       margin-top: $space;
     }
   }
+
+  .balance {
+    cursor: pointer;
+
+    &.active {
+      .label {
+        font-family: GilroySemibold;
+      }
+    }
+  }
 }
 
 .Night {
@@ -636,6 +681,20 @@ export default {
           @extend %small-uppercase-grey-label;
         }
       }
+
+      .options {
+        .option {
+          .aph-icon {
+            .fill {
+              fill: $purple !important;
+            }
+          }
+        }
+      }
+    }
+
+    .balance.active .label  {
+      @extend %small-uppercase-grey-label;
     }
   }
 }

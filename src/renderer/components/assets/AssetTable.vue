@@ -12,12 +12,14 @@
 </template>
 
 <script>
-let loadHoldingsIntervalId;
+
+import { mapGetters } from 'vuex';
 export default {
   computed: {
     filteredHoldings() {
       const searchBy = this.searchBy.toLowerCase();
-      return _.filter(this.$store.state.holdings, ({ name, symbol }) => {
+      // Note: filter creates a new collection, but the values will be the same objects held in the state.holdings
+      return _.filter(this.holdings, ({ name, symbol }) => {
         if (!name || !symbol) {
           return false;
         }
@@ -25,8 +27,12 @@ export default {
         return name.toLowerCase().indexOf(searchBy) > -1
           || symbol.toLowerCase().indexOf(searchBy) > -1;
       }).map((holding) => {
-        const canRemove = holding.isCustom === true && holding.symbol !== 'APH';
-        return _.merge(holding, {
+        const canRemove = holding.isCustom === true && holding.symbol !== 'APH'
+          && (holding.balance === 0);
+
+        // Note: this must clone the holding or it will modify the holding without using store mutations and cause
+        //       side effects.
+        return _.merge(_.cloneDeep(holding), {
           canRemove,
         });
       });
@@ -35,6 +41,10 @@ export default {
     shouldShowAddTokenButton() {
       return this.$store.state.holdings.length === 0 && this.$isDone('fetchHoldings');
     },
+
+    ...mapGetters([
+      'holdings',
+    ]),
   },
 
   data() {
@@ -57,18 +67,6 @@ export default {
     showAddTokenModal() {
       this.$store.commit('setShowAddTokenModal', true);
     },
-  },
-
-  mounted() {
-    this.loadHoldings();
-
-    loadHoldingsIntervalId = setInterval(() => {
-      this.loadHoldings();
-    }, this.$constants.intervals.HOLDINGS_POLLING);
-  },
-
-  beforeDestroy() {
-    clearInterval(loadHoldingsIntervalId);
   },
 };
 </script>

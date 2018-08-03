@@ -147,7 +147,7 @@ export default new Router({
             {
               path: '',
               components: {
-                left: require('@/components/assets/Table').default,
+                left: require('@/components/assets/AssetTable').default,
               },
             },
           ],

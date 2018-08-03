@@ -16,6 +16,13 @@ export default {
     holdings() {
       return this.$store.state.holdings.filter(({ name, symbol }) => {
         return !!name && !!symbol;
+      }).map((holding) => {
+        // Note: this must clone the holding or it will modify the holding without using store mutations and cause
+        //       side effects. Saved data now has canRemove saved in cache in some wallet's db cache since this wasn't
+        //       previously doing a deep clone in assets/AssetTable.vue; so we have to explicitly set it false here
+        return _.merge(_.cloneDeep(holding), {
+          canRemove: false,
+        });
       });
     },
 
@@ -25,8 +32,8 @@ export default {
   },
 
   methods: {
-    isActive({ symbol }) {
-      return _.get(this.$store.state.statsToken, 'symbol') === symbol;
+    isActive({ asset }) {
+      return _.get(this.$store.state.statsToken, 'asset') === asset;
     },
 
     viewHoldingDetail(holding) {
