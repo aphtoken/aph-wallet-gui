@@ -17,12 +17,25 @@
               {{ $formatNumber($store.state.orderToConfirm.price) }}
               {{ $store.state.orderToConfirm.market.baseCurrency }}
             </span>
-            {{$t('forATotalOf')}}
             <span class="price" v-if="$store.state.orderToConfirm.side == 'Buy'">
+              {{$t('forATotalOf')}}
               {{ $formatNumber($store.state.orderToConfirm.expectedQuantityToGive) }}
               {{ $store.state.orderToConfirm.market.baseCurrency }}
             </span>
             <span class="price" v-else>
+              {{$t('toReceiveATotalOf')}}
+              {{ $formatNumber($store.state.orderToConfirm.expectedQuantityToReceive) }}
+              {{ $store.state.orderToConfirm.market.baseCurrency }}
+            </span>
+          </span>
+          <span v-else>
+            <span class="price" v-if="$store.state.orderToConfirm.side == 'Buy'">
+              {{$t('forAnEstimatedTotalOf')}}
+              {{ $formatNumber($store.state.orderToConfirm.expectedQuantityToGive) }}
+              {{ $store.state.orderToConfirm.market.baseCurrency }}
+            </span>
+            <span class="price" v-else>
+              {{$t('toReceiveAnEstimatedTotalOf')}}
               {{ $formatNumber($store.state.orderToConfirm.expectedQuantityToReceive) }}
               {{ $store.state.orderToConfirm.market.baseCurrency }}
             </span>
