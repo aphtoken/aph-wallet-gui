@@ -593,7 +593,6 @@ export default {
         font-size: toRem(12px);
         height: toRem(34px);
         padding: $space-xs 0;
-        text-transform: uppercase;
 
         & + .footer-btn {
           margin-left: $space;

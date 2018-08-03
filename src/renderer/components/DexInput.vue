@@ -70,7 +70,6 @@ export default {
 
 <style lang="scss">
 .aph-dex-input {
-  // align-items: center;
   display: flex;
   flex-direction: column;
 
@@ -87,7 +86,7 @@ export default {
 
   .border {
     border-bottom: $border-thin;
-    border-color: white;
+    border-color: $light-grey;
     margin: $space-sm 0;
   }
 
