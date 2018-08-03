@@ -390,7 +390,7 @@ export default {
     },
     showDepositWithdrawModal(isDeposit) {
       this.$store.commit('setDepositWithdrawModalModel', {
-        isDeposit, selectedHolding: this.actionableHolding,
+        isDeposit, holding: this.actionableHolding,
       });
     },
     hideDepositWithdrawModal() {
