@@ -171,7 +171,7 @@ export default {
   @extend %tile-light;
 
   padding: $space $space-lg;
-  height: 95%;
+  height: 65vh;
 
   .header {
     display: flex;
