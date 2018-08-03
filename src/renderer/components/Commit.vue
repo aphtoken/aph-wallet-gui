@@ -6,17 +6,6 @@
     </div>
     <div class="body" v-if="$store.state.commitState">
       <div class="exchange-values">
-        <div class="total">
-          <div class="icons">
-            <aph-icon name="hex"></aph-icon>
-            <aph-icon name="award"></aph-icon>
-          </div>
-          <div class="exchange-val">
-            <div class="label">{{$t('totalFeesCollectedByDex')}}</div>
-            <div class="highlight">{{$formatNumber($store.state.commitState.totalFeesCollected)}} APH</div>
-            <div class="estimate"><span>{{ $t('estimated') }} ({{ $store.state.currency }})</span> {{$formatNumber(aphHolding ? aphHolding.unitValue * $store.state.commitState.totalFeesCollected : 0)}}</div>
-          </div>
-        </div>
         <div class="since-commit">
           <div class="icons">
             <aph-icon name="hex"></aph-icon>
@@ -25,7 +14,18 @@
           <div class="exchange-val">
             <div class="label">{{$t('totalFeesCollectedSinceCommit')}}</div>
             <div class="highlight">{{$formatNumber($store.state.commitState.feesCollectedSinceCommit)}} APH</div>
-            <div class="estimate"><span>{{ $t('estimated') }} ({{ $store.state.currency }})</span> {{$formatNumber(aphHolding ? aphHolding.unitValue * $store.state.commitState.feesCollectedSinceCommit : 0)}}</div>
+            <div class="estimate">{{ $t('estimated') }} ({{ $store.state.currency }}) <span>{{$formatNumber(aphHolding ? aphHolding.unitValue * $store.state.commitState.feesCollectedSinceCommit : 0)}}</span></div>
+          </div>
+        </div>
+        <div class="total">
+          <div class="icons">
+            <aph-icon name="hex"></aph-icon>
+            <aph-icon name="award"></aph-icon>
+          </div>
+          <div class="exchange-val">
+            <div class="label">{{$t('totalFeesCollectedByDex')}}</div>
+            <div class="highlight">{{$formatNumber($store.state.commitState.totalFeesCollected)}} APH</div>
+            <div class="estimate">{{ $t('estimated') }} ({{ $store.state.currency }}) <span>{{$formatNumber(aphHolding ? aphHolding.unitValue * $store.state.commitState.totalFeesCollected : 0)}}</span></div>
           </div>
         </div>
       </div>
@@ -255,7 +255,7 @@ export default {
   .header {
     color: $purple;
     font-family: GilroySemibold;
-    margin: 0 $space $space $space;
+    margin: 0 $space-lg $space;
 
     h1 {
       display: inline-block;
@@ -290,7 +290,7 @@ export default {
         margin-top: $space;
       }
     }
-    
+
 
     .icon {
       flex: 1;
@@ -300,114 +300,127 @@ export default {
         height: toRem(42px);
       }
     }
-    
+
     .exchange-values {
+      align-items: center;
       display: flex;
       flex-direction: row;
-      justify-content: center;
-        
-      &> div {
-        display:flex;
-        flex-direction: row;
-        flex: 1;
-        max-width: toRem(500px);
-        margin-right: $space;
 
-        &> .exchange-val {
+      > div {
+        display: flex;
+        flex-direction: row;
+        width: 25vw;
+
+        &.since-commit {
+          margin: 0 $space-lg;
+        }
+
+        .exchange-val {
           display: flex;
           flex-direction: column;
         }
       }
-      
+
       .label {
-        font-size: toRem(22px);
-        font-family: 'GilroySemibold';
+        font-family: 'GilroyMedium';
+        font-size: toRem(16px);
       }
-      
+
       .highlight {
         color: $purple;
-        font-size: toRem(28px);
+        font-size: toRem(22px);
         padding: $space-sm 0;
         font-family: 'GilroySemibold';
       }
-      
-      .estimate {
-        text-transform: uppercase;
-      }
-        
-      .icons {
-        position: relative;
-        margin: $space toRem(5px) 0 0;
-        width: toRem(80px);
-        height: toRem(80px);
-          
-        .aph-icon {
-          position: absolute;
-          width: toRem(40px);
-          height: toRem(40px);
 
-          .icon {
+      .estimate {
+        @extend %small-uppercase-grey-label-dark;
+
+        > span {
+          color: $dark;
+        }
+      }
+
+      .icons {
+        margin-right: $space-lg;
+        position: relative;
+
+        .aph-icon {
+          &.aph-icon--hex {
             svg {
-              position: relative;
-              margin-top: 10%;
+              height: toRem(100px);
             }
-            
-            &.star {
-              margin: toRem(5px) 0 0 0;
+
+            .fill {
+              fill: $grey;
             }
-            
-            &.hex {
-              margin: toRem(-25px);
-              .fill {
-                fill: $grey;
-              }
+          }
+
+          &.aph-icon--star, &.aph-icon--award {
+            left: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+
+            svg {
+              height: toRem(50px);
+            }
+
+            .fill {
+              fill: $dark;
+            }
+          }
+
+          &.aph-icon--star {
+            .fill {
+              fill: $purple;
             }
           }
         }
       }
     }
-              
+
     .user-values {
       background-color: white;
       display: flex;
       flex-direction: row;
       padding: $space-lg;
-      margin: $space 0;
-    
+      margin: $space-lg 0;
+
       &> div {
         flex: 1;
       }
-      
+
       h2.underlined {
         @extend %underlined-header-sm;
         font-size: toRem(24px);
       }
-      
+
       .highlight {
         color: $purple;
         font-family: 'GilroySemibold';
         font-size: toRem(18px);
         margin: 0 0 $space 0;
       }
-      
+
       .lower {
         text-transform: uppercase;
       }
-      
+
       span {
         color: $grey;
         margin: 0 $space 0 0;
       }
     }
-    
+
     .actions {
       display: flex;
       flex-direction: row;
-      
+
       &> div {
         flex: 1;
       }
-      
+
       .btn-square {
         @extend %btn-square;
 
@@ -415,11 +428,11 @@ export default {
         padding: 3rem 0;
         width: toRem(250px);
         flex-direction: row;
-        
+
         &>div {
           width: 100%;
         }
-            
+
         &:disabled {
           background-color: $grey;
         }
@@ -441,18 +454,18 @@ export default {
           }
         }
       }
-      
-      
+
+
       .claim-info {
         background-color: white;
         padding: $space-lg;
         max-height: toRem(300px);
-        
+
         &> div {
          text-align: center;
          text-transform: uppercase;
          font-size: toRem(18px);
-         
+
          &> div {
           margin: $space;
            span {
@@ -461,17 +474,17 @@ export default {
            }
          }
         }
-        
+
         h2 {
           color: $purple;
           font-size: 30px;
         }
-        
+
         .buttons {
           display: flex;
           flex-direction: row;
-          
-          
+
+
           .btn-square {
             flex: 1;
             margin: $space-lg;
