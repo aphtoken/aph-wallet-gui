@@ -1236,13 +1236,13 @@ export default {
             if (token.canPull !== false) {
               c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
             }
-            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
+
             c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
             return api.signTx(c);
           })
           .then((c) => {
-            if (token.CanPull !== false) {
+            if (token.canPull !== false) {
               const attachInvokedContract = {
                 invocationScript: ('00').repeat(2),
                 verificationScript: '',
