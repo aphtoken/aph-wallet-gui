@@ -171,6 +171,8 @@ export default {
   @extend %tile-light;
 
   padding: $space $space-lg;
+  display: flex;
+  flex-direction: column;
   height: 65vh;
 
   .header {
@@ -192,8 +194,9 @@ export default {
   }
 
   .body {
-    height: 90%;
+    flex-grow: 1;
     overflow-y: auto;
+    min-height: 0; /* for Firefox */
 
     > .zero-state {
       align-items: center;
