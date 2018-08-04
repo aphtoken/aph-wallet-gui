@@ -1,9 +1,9 @@
 <template>
-  <section id="sidebar" @click="collapsed ? setCollapsed(!collapsed) : null"
+  <section id="sidebar" @click="collapsed ? setCollapsed(!collapsed) : null" 
     :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
-    <aph-icon class="toggle"
+    <aph-icon class="toggle" 
       v-if="toggleable"
-      @click.stop.prevent="setCollapsed(!collapsed)"
+      @click.stop.prevent="setCollapsed(!collapsed)" 
       :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'">
     </aph-icon>
     <template v-if="!toggleable || (toggleable && !collapsed)">
@@ -244,7 +244,6 @@ export default {
     display: flex;
     flex: none;
     justify-content: center;
-    margin-top: $space-lg;
     margin-bottom: $space-lg;
 
     svg {
@@ -358,3 +357,5 @@ export default {
   }
 }
 </style>
+
+

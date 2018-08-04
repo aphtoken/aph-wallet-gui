@@ -34,13 +34,12 @@ export default {
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  padding: $space-lg;
 
   .grid {
     display: flex;
-    flex: 0 0 auto;
-    padding: 0 $space-lg $space-lg;
+    flex-direction: row;
+    flex: 1;
   }
 
   .grid--column {
@@ -62,3 +61,4 @@ export default {
   }
 }
 </style>
+

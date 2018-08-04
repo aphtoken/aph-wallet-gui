@@ -74,9 +74,8 @@ h1.underlined {
 #portfolio-header {
   display: flex;
   flex-direction: row;
-  padding: $space-lg;
+  padding: $space-lg $space-lg 0;
   align-items: center;
-  flex: 0 0 auto;
 
   .simple-donut {
     margin: 0 $space-xl 0 0;
@@ -93,7 +92,6 @@ h1.underlined {
     flex-direction: row;
     flex: none;
     width: $right-sidebar-width;
-    margin-left: $space-lg;
 
     > * {
       width: auto;
@@ -169,3 +167,5 @@ h1.underlined {
   }
 }
 </style>
+
+
