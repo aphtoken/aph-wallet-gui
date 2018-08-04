@@ -1,7 +1,7 @@
 <template>
   <div>
     <section id="dex--order-form">
-      <div class="body" v-if="this.currentMarket">
+      <div class="body">
         <div class="side">
           <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}}</div>
           <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}}</div>
@@ -41,7 +41,7 @@
           {{ orderButtonLabel }}
         </button>
       </div>
-      <div class="footer" v-if="quoteHolding.symbol && actionableHolding.symbol">
+      <div class="footer">
         <div @click="actionableHolding = quoteHolding" :class="['balance', {active: quoteHolding.symbol === actionableHolding.symbol}]" :title="quoteBalanceToolTip">
           <div class="label">{{$t('balance')}} ({{ quoteHolding.symbol }})</div>
           <div class="value">{{ $formatNumber(quoteHolding.totalBalance) }}</div>
