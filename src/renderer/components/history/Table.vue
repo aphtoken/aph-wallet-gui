@@ -193,9 +193,7 @@ export default {
   }
 
   .body {
-    flex-grow: 1;
     overflow-y: auto;
-    min-height: 0; /* for Firefox */
 
     > .zero-state {
       align-items: center;
