@@ -35,13 +35,17 @@
                   <div v-else class="partial">
                     <p>{{$t('open')}}</p>
                   </div>
-                  <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"></aph-icon>
+                  <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"
+                            :title="$t('cancel')"></aph-icon>
                 </div>
                 <div v-else-if="order.status === 'Filled'">
                   <p>{{$t('filledUc')}}</p>
                 </div>
                 <div v-else-if="order.status === 'Cancelled'">
                   <p>{{$t('cancelled')}}</p>
+                </div>
+                <div v-else-if="order.status === 'Cancelling'">
+                  <p>{{$t('cancelling')}}</p>
                 </div>
               </td>
             </tr>
@@ -67,7 +71,7 @@ export default {
   computed: {
     openOrders() {
       return _.filter(this.$store.state.orderHistory, (order) => {
-        return order.status === 'Open' || order.status === 'PartiallyFilled';
+        return order.status === 'Open' || order.status === 'PartiallyFilled' || order.status === 'Cancelling';
       }).map((order) => {
         return order;
       });
@@ -130,6 +134,8 @@ export default {
       this.$services.dex.cancelOrder(order)
         .then((res) => {
           this.$services.alerts.success(res);
+          order.status = 'Cancelling';
+          order.cancelledAt = moment.utc();
         })
         .catch((e) => {
           this.$services.alerts.error(e);

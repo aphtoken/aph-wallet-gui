@@ -111,6 +111,7 @@ const requests = {
 };
 
 const timeouts = {
+  CANCEL_ORDER: 5 * 60 * 1000,
   MONITOR_TRANSACTIONS: 10 * 60 * 1000,
   NEO_API_CALL: 500,
   RENDER_CHART: 100,
