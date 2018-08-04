@@ -48,7 +48,7 @@
       <div class="body">
         <aph-form :on-submit="next">
           <div class="currency">
-            <aph-select :options="currencies" :light="true" :placeholder="$t('selectCurrency')" v-model="currency"></aph-select>
+            <aph-select :options="currencies" :light="true" placeholder="Select a currency" v-model="currency"></aph-select>
           </div>
           <div class="address">
             <aph-input :placeholder="$t('enterSendToAddress')" v-model="address"></aph-input>

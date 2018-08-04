@@ -23,14 +23,11 @@ export default {
 <style lang="scss">
 #history {
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex: 1;
 
   .header {
-    padding: 0 $space-lg 0;
-    flex: 0 0 auto;
+    padding: $space-lg $space-lg 0;
 
     h1.underlined {
       @extend %underlined-header;
@@ -42,7 +39,8 @@ export default {
 
   .grid {
     display: flex;
-    flex: 0 0 auto;
+    flex-direction: row;
+    flex: 1;
     padding: $space-lg;
   }
 
@@ -97,3 +95,5 @@ export default {
   }
 }
 </style>
+
+
