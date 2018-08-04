@@ -1,8 +1,8 @@
 <template>
   <div v-if="messageReceiving" 
     :style="{
-      'width': `${$el.parentElement.clientWidth}px`, 
-      'height': `${$el.parentElement.clientHeight}px`
+      'width': `${parentWidth}px`, 
+      'height': `${parentHeight}px`
     }" class="spinner-container">
     <div :class="{ 
       'spinner': !size, 
@@ -13,8 +13,6 @@
 </template>
 
 <script>
-import { requests } from '../constants';
-
 export default {
   data() {
     return {
@@ -29,6 +27,12 @@ export default {
     isSilent() {
       return this.$store.state.requests[this.identifier] &&
         this.$store.state.requests[this.identifier].isSilent;
+    },
+    parentWidth() {
+      return this.$el.parentElement.clientWidth;
+    },
+    parentHeight() {
+      return this.$el.parentElement.clientHeight;
     },
   },
 
@@ -46,12 +50,13 @@ export default {
       (state) => {
         return state.requests[this.identifier];
       }, (request) => {
-        if (((this.wsMessageType && request.status === requests.SUCCESS) ||
-          (!this.wsMessageType && request.status === requests.PENDING)) && !this.isSilent) {
+        if (((this.wsMessageType && request.status === this.$constants.requests.SUCCESS) ||
+          (!this.wsMessageType && request.status === this.$constants.requests.PENDING)) && !this.isSilent) {
+          this.clearIsVisibleTimeout();
           this.isVisibleTimeout = setTimeout(this.show.bind(this), this.$constants.timeouts.RENDER_SPINNER);
         }
 
-        if (!this.wsMessageType && request.status === requests.SUCCESS) {
+        if (!this.wsMessageType && request.status === this.$constants.requests.SUCCESS) {
           this.hide();
         }
       });
@@ -63,12 +68,14 @@ export default {
       this.$el.parentElement.style.position = 'relative';
     },
     hide() {
+      this.clearIsVisibleTimeout();
+      this.$el.parentElement.style.position = '';
+      this.messageReceiving = false;
+    },
+    clearIsVisibleTimeout() {
       if (this.isVisibleTimeout) {
         clearTimeout(this.isVisibleTimeout);
       }
-
-      this.$el.parentElement.style.position = '';
-      this.messageReceiving = false;
     },
   },
 
@@ -86,6 +93,10 @@ export default {
     wsMessageType: {
       default: null,
       type: String,
+      validator(value) {
+        // Add additional websocket message types here
+        return ['bookSnapshot'].indexOf(value) !== -1;
+      },
     },
     size: {
       default: null,

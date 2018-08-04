@@ -43,7 +43,7 @@ export default {
   mounted() {
     this.loadTrades();
     loadTradesIntervalId = setInterval(() => {
-      this.loadTrades(true);
+      this.loadTradesSilently();
     }, this.$constants.intervals.TRANSACTIONS_POLLING);
 
     storeUnwatch = this.$store.watch(
@@ -55,14 +55,23 @@ export default {
   },
 
   methods: {
-    loadTrades(isRequestSilent = false) {
+    loadTrades() {
       if (!this.$store.state.currentMarket) {
         return;
       }
 
       this.$store.dispatch('fetchTradeHistory', {
         marketName: this.$store.state.currentMarket.marketName,
-        isRequestSilent,
+      });
+    },
+    loadTradesSilently() {
+      if (!this.$store.state.currentMarket) {
+        return;
+      }
+
+      this.$store.dispatch('fetchTradeHistory', {
+        marketName: this.$store.state.currentMarket.marketName,
+        isRequestSilent: true,
       });
     },
   },

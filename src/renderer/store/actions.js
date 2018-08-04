@@ -411,7 +411,8 @@ async function fetchMarkets({ commit }, { done }) {
 
 async function fetchTradeHistory({ commit }, { marketName, isRequestSilent }) {
   let trades;
-  commit('startRequest', { identifier: 'fetchTradeHistory', isSilent: isRequestSilent });
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'fetchTradeHistory' });
 
   try {
     trades = await dex.fetchTradeHistory(marketName);
@@ -425,7 +426,8 @@ async function fetchTradeHistory({ commit }, { marketName, isRequestSilent }) {
 
 async function fetchOrderHistory({ commit }, { isRequestSilent }) {
   let orders;
-  commit('startRequest', { identifier: 'fetchOrderHistory', isSilent: isRequestSilent });
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'fetchOrderHistory' });
 
   try {
     orders = await dex.fetchOrderHistory();

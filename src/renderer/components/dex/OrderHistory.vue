@@ -67,19 +67,27 @@ export default {
 
   computed: {
     openOrders() {
-      return this.$store.state.orderHistory ? _.filter(this.$store.state.orderHistory, (order) => {
+      if (!this.$store.state.orderHistory) {
+        return [];
+      }
+
+      return _.filter(this.$store.state.orderHistory, (order) => {
         return order.status === 'Open' || order.status === 'PartiallyFilled';
       }).map((order) => {
         return order;
-      }) : [];
+      });
     },
 
     completedOrders() {
-      return this.$store.state.orderHistory ? _.filter(this.$store.state.orderHistory, (order) => {
+      if (!this.$store.state.orderHistory) {
+        return [];
+      }
+
+      return _.filter(this.$store.state.orderHistory, (order) => {
         return order.status !== 'Open' && order.status !== 'PartiallyFilled';
       }).map((order) => {
         return order;
-      }) : [];
+      });
     },
 
     ordersForTable() {
@@ -108,7 +116,7 @@ export default {
     this.loadOrders();
 
     loadOrdersIntervalId = setInterval(() => {
-      this.loadOrders(true);
+      this.loadOrdersSilently();
     }, this.$constants.intervals.TRANSACTIONS_POLLING);
   },
 
@@ -123,8 +131,11 @@ export default {
       this.tab = tab;
     },
 
-    loadOrders(isRequestSilent = false) {
-      this.$store.dispatch('fetchOrderHistory', { isRequestSilent });
+    loadOrders() {
+      this.$store.dispatch('fetchOrderHistory');
+    },
+    loadOrdersSilently() {
+      this.$store.dispatch('fetchOrderHistory', { isRequestSilent: true });
     },
 
     cancelOrder(order) {

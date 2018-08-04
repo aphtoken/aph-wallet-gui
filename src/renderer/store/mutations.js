@@ -73,6 +73,7 @@ export {
   setTradeHistory,
   setWallets,
   startRequest,
+  startSilentRequest,
   SOCKET_ONOPEN,
   SOCKET_ONCLOSE,
   SOCKET_ONMESSAGE,
@@ -398,6 +399,10 @@ function setShowClaimGasModal(state, value) {
   state.showClaimGasModal = value;
 }
 
+function startSilentRequest(state, payload) {
+  updateRequest(state, Object.assign(payload, { isSilent: true }), requests.PENDING);
+}
+
 function startRequest(state, payload) {
   updateRequest(state, payload, requests.PENDING);
 }
@@ -531,6 +536,7 @@ function SOCKET_ONMESSAGE(state, message) {
     // unknown message type
     console.log(message);
   }
+  return false;
 }
 
 function SOCKET_RECONNECT_ERROR(state) {
