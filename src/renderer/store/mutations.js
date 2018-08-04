@@ -77,6 +77,7 @@ export {
   SOCKET_ONOPEN,
   SOCKET_ONCLOSE,
   SOCKET_ONMESSAGE,
+  SOCKET_RECONNECT,
   SOCKET_RECONNECT_ERROR,
 };
 
@@ -541,6 +542,14 @@ function SOCKET_ONMESSAGE(state, message) {
 
 function SOCKET_RECONNECT_ERROR(state) {
   state.socket.reconnectError = true;
+}
+
+function SOCKET_RECONNECT(state) {
+  if (state.currentMarket) {
+    this.dispatch('subscribeToMarket', {
+      market: state.currentMarket,
+    });
+  }
 }
 
 // Local functions
