@@ -170,8 +170,9 @@ export default {
 #history--table {
   @extend %tile-light;
 
+  display: flex;
+  flex-direction: column;
   padding: $space $space-lg;
-  height: 95%;
 
   .header {
     display: flex;
@@ -192,15 +193,14 @@ export default {
   }
 
   .body {
-    height: 90%;
     overflow-y: auto;
 
     > .zero-state {
       align-items: center;
       display: flex;
+      flex-direction: column;
       height: 100%;
       justify-content: center;
-      flex-direction: column;
 
       .aph-icon {
         svg {
