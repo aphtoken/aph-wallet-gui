@@ -42,7 +42,7 @@ export default {
 
   .grid {
     display: flex;
-    flex: 0 0 auto;
+    flex: 1;
     padding: $space-lg;
   }
 

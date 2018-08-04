@@ -16,7 +16,7 @@ import ledger from './ledger';
 import { store } from '../store';
 import { toBigNumber } from './formatting.js';
 
-import { assets, claiming, intervals } from '../constants';
+import { assets, claiming, intervals, timeouts } from '../constants';
 
 const TX_ATTR_USAGE_SENDER = 0xfa;
 const TX_ATTR_USAGE_SCRIPT = 0x20;
@@ -284,20 +284,30 @@ export default {
           .then((res) => {
             const orders = res.data.orders;
             orders.forEach((order) => {
-              const marketForOrder = _.filter(store.state.markets, (market) => {
+              const marketForOrder = _.find(store.state.markets, (market) => {
                 return market.marketName === order.marketName;
               });
 
-              if (!marketForOrder || marketForOrder.length === 0) {
+              if (!marketForOrder) {
                 return;
               }
 
               if (order.side === 'Buy') {
-                order.assetIdToGive = marketForOrder[0].baseAssetId;
+                order.assetIdToGive = marketForOrder.baseAssetId;
                 order.quantityToGive = order.price * order.quantity;
               } else {
-                order.assetIdToGive = marketForOrder[0].quoteAssetId;
+                order.assetIdToGive = marketForOrder.quoteAssetId;
                 order.quantityToGive = order.quantity;
+              }
+
+              const localOrder = _.find(store.state.orderHistory, (searchOrder) => {
+                return order.orderId === searchOrder.orderId;
+              });
+
+              if (localOrder && localOrder.status === 'Cancelling'
+                && moment.utc().diff(localOrder.cancelledAt, 'milliseconds') < timeouts.CANCEL_ORDER) {
+                order.status = localOrder.status;
+                order.cancelledAt = localOrder.cancelledAt;
               }
             });
             resolve(orders);
