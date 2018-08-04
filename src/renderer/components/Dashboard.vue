@@ -60,5 +60,17 @@ export default {
     }
   }
 }
+
+#app.authenticated-dashboard-send {
+  #dashboard {
+    .grid {
+      .grid--column {
+        .grid--cell.top-right {
+          flex: none;
+        }
+      }
+    }
+  }
+}
 </style>
 
