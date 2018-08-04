@@ -92,7 +92,7 @@ export default {
       type: String,
       validator(value) {
         // Add additional websocket message types here
-        return ['bookSnapshot'].indexOf(value) !== -1;
+        return _.includes(['bookSnapshot'], value);
       },
     },
     size: {

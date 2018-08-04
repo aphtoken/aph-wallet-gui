@@ -93,7 +93,7 @@ export default {
     this.actionableHolding = this.quoteHolding;
 
     loadHoldingsIntervalId = setInterval(() => {
-      this.loadHoldings(true);
+      this.loadHoldingsSilently();
     }, this.$constants.intervals.HOLDINGS_POLLING);
   },
 
@@ -306,10 +306,12 @@ export default {
   },
 
   methods: {
-    loadHoldings(isRequestSilent = false) {
-      this.$store.dispatch('fetchHoldings', { done: null, isRequestSilent });
+    loadHoldings() {
+      this.$store.dispatch('fetchHoldings', { done: null });
     },
-
+    loadHoldingsSilently() {
+      this.$store.dispatch('fetchHoldings', { done: null, isRequestSilent: true });
+    },
     setSide(side) {
       this.side = side;
       this.$store.commit('setOrderQuantity', '');

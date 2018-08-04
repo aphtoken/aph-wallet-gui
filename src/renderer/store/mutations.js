@@ -547,6 +547,7 @@ function SOCKET_RECONNECT(state) {
   if (state.currentMarket) {
     this.dispatch('subscribeToMarket', {
       market: state.currentMarket,
+      isRequestSilent: true,
     });
   }
 }

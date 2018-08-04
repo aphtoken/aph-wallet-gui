@@ -156,7 +156,8 @@ async function fetchHoldings({ commit }, { done, isRequestSilent }) {
   let portfolio;
   let holdings;
 
-  commit('startRequest', { identifier: 'fetchHoldings', isSilent: isRequestSilent });
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'fetchHoldings' });
 
   const holdingsStorageKey = `holdings.${currentWallet.address}.${currentNetwork.net}`;
 
@@ -483,12 +484,12 @@ async function pingSocket({ state, commit }) {
   }
 }
 
-async function subscribeToMarket({ state, commit }, { market }) {
+async function subscribeToMarket({ state, commit }, { market, isRequestSilent }) {
   if (!market) {
     return;
   }
-
-  commit('startRequest', { identifier: 'subscribeToMarket' });
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'subscribeToMarket' });
 
   try {
     state.socket.client.sendObj({ op: 'subscribe', args: `orderBook:${market.marketName}` });
