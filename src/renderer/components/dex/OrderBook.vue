@@ -41,6 +41,7 @@
         </div>
       </div>
     </div>
+    <aph-spinner identifier="subscribeToMarket" ws-message-type="bookSnapshot"></aph-spinner>
   </section>
 </template>
 
@@ -67,22 +68,8 @@ export default {
     storeUnwatch = this.$store.watch(
       () => {
         return this.$store.state.currentMarket;
-      }, (oldValue, newValue) => {
+      }, () => {
         this.loadBook();
-
-        if (oldValue && !newValue) {
-          this.$store.dispatch('unsubscribeFromMarket', {
-            market: oldValue,
-          });
-        } else if (!oldValue || oldValue.marketName !== newValue.marketName) {
-          this.$store.dispatch('unsubscribeFromMarket', {
-            market: oldValue,
-          });
-
-          this.$store.dispatch('subscribeToMarket', {
-            market: newValue,
-          });
-        }
       });
   },
 

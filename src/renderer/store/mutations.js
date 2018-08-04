@@ -73,9 +73,11 @@ export {
   setTradeHistory,
   setWallets,
   startRequest,
+  startSilentRequest,
   SOCKET_ONOPEN,
   SOCKET_ONCLOSE,
   SOCKET_ONMESSAGE,
+  SOCKET_RECONNECT,
   SOCKET_RECONNECT_ERROR,
 };
 
@@ -398,12 +400,16 @@ function setShowClaimGasModal(state, value) {
   state.showClaimGasModal = value;
 }
 
+function startSilentRequest(state, payload) {
+  updateRequest(state, Object.assign(payload, { isSilent: true }), requests.PENDING);
+}
+
 function startRequest(state, payload) {
   updateRequest(state, payload, requests.PENDING);
 }
 
-function updateRequest(state, { identifier, message }, status) {
-  Vue.set(state.requests, identifier, { status, message });
+function updateRequest(state, { identifier, message, isSilent }, status) {
+  Vue.set(state.requests, identifier, { status, message, isSilent });
 }
 
 function setStyleMode(state, style) {
@@ -501,7 +507,7 @@ function SOCKET_ONCLOSE(state) {
 }
 
 function SOCKET_ONMESSAGE(state, message) {
-  state.lastMessage = message;
+  state.socket.lastMessage = message;
 
   if (message.subscribe && message.subscribe.indexOf('orderBook') > -1) {
     state.socket.subscribedMarket = message.subscribe.substring(message.subscribe.indexOf(':') + 1);
@@ -535,6 +541,15 @@ function SOCKET_ONMESSAGE(state, message) {
 
 function SOCKET_RECONNECT_ERROR(state) {
   state.socket.reconnectError = true;
+}
+
+function SOCKET_RECONNECT(state) {
+  if (state.currentMarket) {
+    this.dispatch('subscribeToMarket', {
+      market: state.currentMarket,
+      isRequestSilent: true,
+    });
+  }
 }
 
 // Local functions

@@ -1,7 +1,7 @@
 <template>
   <div id="dex--market-mega-selector" :class="{'is-open': isOpen}">
     <div class="toggle" @click="isOpen = !isOpen">
-      <div class="label">{{ $store.state.currentMarket.marketName }}</div>
+      <div class="label">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
       <aph-icon :name="iconName"></aph-icon>
     </div>
     <div class="menu">
@@ -11,7 +11,8 @@
       </div>
       <div class="table">
         <div class="body">
-          <div @click="selectMarket(market)" :class="['row', {selected: market.marketName === $store.state.currentMarket.marketName}]"
+          <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null" 
+            :class="['row', {selected: $store.state.currentMarket && market.marketName === $store.state.currentMarket.marketName }]"
                v-for="market in filteredMarkets" :key="market.marketName">
             <div class="cell">{{ market.marketName }}</div>
           </div>
