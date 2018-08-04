@@ -170,9 +170,9 @@ export default {
 #history--table {
   @extend %tile-light;
 
-  padding: $space $space-lg;
   display: flex;
   flex-direction: column;
+  padding: $space $space-lg;
 
   .header {
     display: flex;
@@ -198,9 +198,9 @@ export default {
     > .zero-state {
       align-items: center;
       display: flex;
+      flex-direction: column;
       height: 100%;
       justify-content: center;
-      flex-direction: column;
 
       .aph-icon {
         svg {
