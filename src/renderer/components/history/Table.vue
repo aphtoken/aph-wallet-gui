@@ -173,7 +173,6 @@ export default {
   padding: $space $space-lg;
   display: flex;
   flex-direction: column;
-  height: 65vh;
 
   .header {
     display: flex;
