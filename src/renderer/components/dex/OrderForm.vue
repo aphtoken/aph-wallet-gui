@@ -1,7 +1,7 @@
 <template>
   <div>
     <section id="dex--order-form">
-      <div class="body">
+      <div class="body" v-if="this.currentMarket">
         <div class="side">
           <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}}</div>
           <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}}</div>
@@ -41,7 +41,7 @@
           {{ orderButtonLabel }}
         </button>
       </div>
-      <div class="footer">
+      <div class="footer" v-if="quoteHolding.symbol && actionableHolding.symbol">
         <div @click="actionableHolding = quoteHolding" :class="['balance', {active: quoteHolding.symbol === actionableHolding.symbol}]" :title="quoteBalanceToolTip">
           <div class="label">{{$t('balance')}} ({{ quoteHolding.symbol }})</div>
           <div class="value">{{ $formatNumber(quoteHolding.totalBalance) }}</div>
@@ -65,12 +65,12 @@
         <!-- Only the contract owner or manager can do this.
             <button @click="setMarket" class="footer-btn">Setup Market</button> -->
       </div>
+      <aph-spinner v-if="!$store.state.holdings.length" identifier="fetchHoldings"></aph-spinner>
     </section>
     <aph-order-confirmation-modal v-if="$store.state.showOrderConfirmationModal"
       :onConfirmed="orderConfirmed" :onCancel="hideOrderConfirmationModal"></aph-order-confirmation-modal>
     <aph-deposit-withdraw-modal v-if="$store.state.depositWithdrawModalModel"
       :onConfirmed="depositWithdrawConfirmed" :onCancel="hideDepositWithdrawModal"></aph-deposit-withdraw-modal>
-    <aph-spinner v-if="!$store.state.holdings.length" identifier="fetchHoldings"></aph-spinner>
   </div>
 </template>
 
@@ -450,6 +450,7 @@ export default {
   height: 100%;
   justify-content: space-between;
   min-width: toRem(280px);
+  overflow: hidden;
   position: relative;
 
   .body {

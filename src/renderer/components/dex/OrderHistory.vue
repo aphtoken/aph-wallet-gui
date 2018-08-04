@@ -136,7 +136,7 @@ export default {
     },
 
     loadOrders() {
-      this.$store.dispatch('fetchOrderHistory');
+      this.$store.dispatch('fetchOrderHistory', { isRequestSilent: false });
     },
     loadOrdersSilently() {
       this.$store.dispatch('fetchOrderHistory', { isRequestSilent: true });

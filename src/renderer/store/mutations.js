@@ -537,7 +537,6 @@ function SOCKET_ONMESSAGE(state, message) {
     // unknown message type
     console.log(message);
   }
-  return false;
 }
 
 function SOCKET_RECONNECT_ERROR(state) {
