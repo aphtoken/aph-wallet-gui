@@ -1,13 +1,13 @@
 <template>
   <modal-wrapper id="commit-info-modal">
-    <div class="body">
+    <div class="body" v-if="$store.state.commitState">
       <div class="icons">
         <aph-icon name="hex"></aph-icon>
         <aph-icon name="commit"></aph-icon>
       </div>
       <h1>{{$t('commitInfoHeader')}}</h1>
       <p>{{$t('commitInfoBody1')}}</p>
-      <p>{{$t('commitInfoBody2', { minClaimBlocks: this.$constants.claiming.CLAIM_BLOCKS})}}</p>
+      <p>{{$t('commitInfoBody2', { minClaimBlocks: $store.state.commitState.minimumClaimBlocks})}}</p>
       <p>{{$t('commitInfoBody3')}}</p>
       <p>{{$t('commitInfoBody4')}}</p>
     </div>
