@@ -112,6 +112,8 @@ export default {
   position: absolute;
   top: 0px;
   left: 0px;
+  background: rgba($dark, 0.8);
+  border-radius: $border-radius;
   .spinner {
     @include loader06($size: 36px, $color: $purple, $align: middle);
   }
