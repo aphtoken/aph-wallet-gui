@@ -61,12 +61,15 @@ export default {
   }
 }
 
-#app.authenticated-dashboard-send {
-  #dashboard {
-    .grid {
-      .grid--column {
-        .grid--cell.top-right {
-          flex: none;
+#app {
+  &.authenticated-dashboard-send,
+  &.authenticated-dashboard-confirming {
+    #dashboard {
+      .grid {
+        .grid--column {
+          .grid--cell.top-right {
+            flex: none;
+          }
         }
       }
     }
