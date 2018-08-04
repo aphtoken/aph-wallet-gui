@@ -1,9 +1,6 @@
 <template>
   <div v-if="messageReceiving" 
-    :style="{
-      'width': `${parentWidth}px`, 
-      'height': `${parentHeight}px`
-    }" class="spinner-container">
+    :style="dimensions" class="spinner-container">
     <div :class="{ 
       'spinner': !size, 
       'spinner-sm': size === 'small' 
@@ -28,11 +25,11 @@ export default {
       return this.$store.state.requests[this.identifier] &&
         this.$store.state.requests[this.identifier].isSilent;
     },
-    parentWidth() {
-      return this.$el.parentElement.clientWidth;
-    },
-    parentHeight() {
-      return this.$el.parentElement.clientHeight;
+    dimensions() {
+      return {
+        width: `${this.$el.parentElement.clientWidth}px`,
+        height: `${this.$el.parentElement.clientHeight}px`,
+      };
     },
   },
 
