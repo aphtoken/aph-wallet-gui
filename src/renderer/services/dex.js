@@ -31,7 +31,7 @@ const WITHDRAW_STEP_MARK = '91';
 const WITHDRAW_STEP_WITHDRAW = '92';
 
 let lastUTXOWithdrawn;
-const cancelledOrders = {};
+let cancelledOrders = {};
 
 export default {
   fetchMarkets() {
@@ -303,10 +303,13 @@ export default {
 
               // if the order comes back from the api as still open or partially filled,
               // but we know we recently cancelled it, still show as cancelling
-              if (_.includes(['Open', 'PartiallyFilled'], order.status)
-                && _.get(cancelledOrders, order.orderId)
-                && moment.utc().diff(_.get(cancelledOrders, order.orderId), 'milliseconds') < timeouts.CANCEL_ORDER) {
-                order.status = 'Cancelling';
+              if (_.has(cancelledOrders, order.orderId)) {
+                if (_.includes(['Open', 'PartiallyFilled'], order.status)
+                  && moment.utc().diff(_.get(cancelledOrders, order.orderId), 'milliseconds') < timeouts.CANCEL_ORDER) {
+                  order.status = 'Cancelling';
+                } else {
+                  cancelledOrders = _.omit(cancelledOrders, order.orderId);
+                }
               }
             });
             resolve(orders);
