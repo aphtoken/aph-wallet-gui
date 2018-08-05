@@ -59,11 +59,12 @@
             <button @click="showDepositWithdrawModal(true)" class="footer-btn">{{$t('deposit')}} {{ actionableHolding.symbol }}</button>
             <button @click="showDepositWithdrawModal(false)" class="footer-btn">{{$t('withdraw')}} {{ actionableHolding.symbol }}</button>
           </div>
-          <!-- Only the contract owner or manager can do this.
-          <button @click="setMarket" class="footer-btn">Setup Market</button>-->
         </div>
+        <div class="footer-buttons">
         <!-- Only the contract owner or manager can do this.
-            <button @click="setMarket" class="footer-btn">Setup Market</button> -->
+            <button @click="setMarket" class="footer-btn">Setup Market</button>
+            <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button> -->
+        </div>
       </div>
       <aph-spinner v-if="!$store.state.holdings.length" identifier="fetchHoldings"></aph-spinner>
     </section>
@@ -430,6 +431,15 @@ export default {
       this.$services.dex.setMarket(this.$constants.assets.APH,
         this.$constants.assets.GAS,
         10, 0.00001, 0.0000, 0.0001)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+    },
+    setMinimumClaimBlocks() {
+      this.$services.dex.setMinimumClaimBlocks(180)
         .then(() => {
           this.$services.alerts.success(this.$t('setMarketRelayed'));
         })

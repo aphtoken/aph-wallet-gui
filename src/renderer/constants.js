@@ -60,8 +60,7 @@ const charts = {
 };
 
 const claiming = {
-  CLAIM_BLOCKS: 180, // TODO: change to reading this from the contract, will be 4800 for MainNet
-  COMPOUND_BLOCKS: 180,
+  DEFAULT_CLAIM_BLOCKS: 180,
 };
 
 const database = {

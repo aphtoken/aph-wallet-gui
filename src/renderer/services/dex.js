@@ -1569,6 +1569,7 @@ export default {
                 commitState.lastAppliedFeeSnapshot = dexState.lastAppliedFeeSnapshot;
                 commitState.totalFeeUnits = dexState.totalFeeUnits;
                 commitState.totalFeesCollected = dexState.totalFeesCollected;
+                commitState.minimumClaimBlocks = dexState.minimumClaimBlocks;
 
                 // Apply the fees not yet applied into the totalFeeUnits to get an accurate calculation.
                 if (commitState.lastAppliedFeeSnapshot < commitState.totalFeesCollected) {
@@ -1579,8 +1580,8 @@ export default {
                 commitState.networkWeight = Math.round(commitState.totalFeeUnits - commitState.feeUnitsSnapshot);
 
                 if (commitState.contributionHeight > 0) {
-                  commitState.ableToClaimHeight = commitState.contributionHeight + claiming.CLAIM_BLOCKS;
-                  commitState.ableToCompoundHeight = commitState.compoundHeight + claiming.COMPOUND_BLOCKS;
+                  commitState.ableToClaimHeight = commitState.contributionHeight + commitState.minimumClaimBlocks;
+                  commitState.ableToCompoundHeight = commitState.compoundHeight + commitState.minimumClaimBlocks;
 
                   commitState.feesCollectedSinceCommit = commitState.totalFeesCollected - commitState.feesCollectedSnapshot;
                   commitState.userWeight = commitState.feesCollectedSinceCommit * commitState.quantityCommitted * 100000000;
@@ -1679,22 +1680,37 @@ export default {
               params: [assets.DEX_SCRIPT_HASH, `${u.reverseHex(assets.APH)}fc`],
             })
               .then((res) => {
-                if (!res || !res.result || res.result.length < 32) {
-                  dexState.totalFeesCollected = 0;
-                  resolve(dexState);
-                  return;
+                dexState.totalFeesCollected = 0;
+
+                if (res.result && res.result.length >= 32) {
+                  dexState.totalFeesCollected = u.fixed82num(res.result.substr(0, 16));
                 }
 
-                dexState.totalFeesCollected = u.fixed82num(res.result.substr(0, 16));
-                // console.log(`dexState.totalFeesCollected: ${dexState.totalFeesCollected}`);
-                resolve(dexState);
+
+                rpcClient.query({
+                  method: 'getstorage',
+                  params: [assets.DEX_SCRIPT_HASH, u.str2hexstring('claimMinimumBlocks')],
+                })
+                  .then((res) => {
+                    dexState.minimumClaimBlocks = claiming.DEFAULT_CLAIM_BLOCKS;
+
+                    if (res.result) {
+                      dexState.minimumClaimBlocks = u.fixed82num(res.result) * 100000000;
+                    }
+
+                    resolve(dexState);
+                  })
+                  .catch(() => {
+                    dexState.minimumClaimBlocks = claiming.DEFAULT_CLAIM_BLOCKS;
+                    resolve(dexState);
+                  });
               })
               .catch((e) => {
-                reject(`Failed to fetch commit state. ${e.message}`);
+                reject(`Failed to fetch DEX commit state, Total Fees Collected. ${e.message}`);
               });
           })
           .catch((e) => {
-            reject(`Failed to fetch commit state. ${e.message}`);
+            reject(`Failed to fetch DEX commit state, Contribution Sums. ${e.message}`);
           });
       } catch (e) {
         reject(`Failed to fetch commit state. ${e.message}`);
@@ -1805,6 +1821,29 @@ export default {
             u.num2fixed8(minimumTickSize),
             u.num2fixed8(buyFee),
             u.num2fixed8(sellFee),
+          ])
+          .then((res) => {
+            if (res.success) {
+              resolve(res.tx);
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(e);
+          });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  },
+
+  setMinimumClaimBlocks(claimMinimumBlocks) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('setClaimMinimumBlocks',
+          [
+            u.num2fixed8(claimMinimumBlocks / 100000000),
           ])
           .then((res) => {
             if (res.success) {
