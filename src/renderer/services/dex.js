@@ -300,7 +300,7 @@ export default {
                 order.assetIdToGive = marketForOrder.quoteAssetId;
                 order.quantityToGive = order.quantity;
               }
-              
+
               // if the order comes back from the api as still open or partially filled,
               // but we know we recently cancelled it, still show as cancelling
               if (_.includes(['Open', 'PartiallyFilled'], order.status)
