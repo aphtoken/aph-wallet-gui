@@ -1701,15 +1701,16 @@ export default {
                     resolve(dexState);
                   })
                   .catch((e) => {
-                    reject(`Failed to fetch commit state. ${e.message}`);
+                    dexState.minimumClaimBlocks = claiming.DEFAULT_CLAIM_BLOCKS;
+                    resolve(dexState);
                   });
               })
               .catch((e) => {
-                reject(`Failed to fetch commit state. ${e.message}`);
+                reject(`Failed to fetch DEX commit state, Total Fees Collected. ${e.message}`);
               });
           })
           .catch((e) => {
-            reject(`Failed to fetch commit state. ${e.message}`);
+            reject(`Failed to fetch DEX commit state, Contribution Sums. ${e.message}`);
           });
       } catch (e) {
         reject(`Failed to fetch commit state. ${e.message}`);
