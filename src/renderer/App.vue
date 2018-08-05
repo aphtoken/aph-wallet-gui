@@ -1,5 +1,5 @@
 <template>
-  <div id="app" v-cloak>
+  <div id="app" :class="routeClass" v-cloak>
     <div class="drag-area"></div>
     <router-view></router-view>
     <flash-message class="vue-flash-container"></flash-message>
@@ -50,6 +50,10 @@ export default {
         return this.$store.state.latestVersion.downloadUrlWin;
       }
       return '';
+    },
+
+    routeClass() {
+      return _.kebabCase(this.$route.path);
     },
 
     shouldShowDexDemoWarning() {

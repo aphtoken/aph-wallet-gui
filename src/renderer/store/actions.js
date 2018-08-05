@@ -150,13 +150,14 @@ async function fetchCommitState({ commit }) {
   }
 }
 
-async function fetchHoldings({ commit }, { done }) {
+async function fetchHoldings({ commit }, { done, isRequestSilent }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let portfolio;
   let holdings;
 
-  commit('startRequest', { identifier: 'fetchHoldings' });
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'fetchHoldings' });
 
   const holdingsStorageKey = `holdings.${currentWallet.address}.${currentNetwork.net}`;
 
@@ -409,9 +410,10 @@ async function fetchMarkets({ commit }, { done }) {
   }
 }
 
-async function fetchTradeHistory({ commit }, { marketName }) {
+async function fetchTradeHistory({ commit }, { marketName, isRequestSilent }) {
   let trades;
-  commit('startRequest', { identifier: 'fetchTradeHistory' });
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'fetchTradeHistory' });
 
   try {
     trades = await dex.fetchTradeHistory(marketName);
@@ -423,9 +425,10 @@ async function fetchTradeHistory({ commit }, { marketName }) {
   }
 }
 
-async function fetchOrderHistory({ commit }) {
+async function fetchOrderHistory({ commit }, { isRequestSilent }) {
   let orders;
-  commit('startRequest', { identifier: 'fetchOrderHistory' });
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'fetchOrderHistory' });
 
   try {
     orders = await dex.fetchOrderHistory();
@@ -481,12 +484,12 @@ async function pingSocket({ state, commit }) {
   }
 }
 
-async function subscribeToMarket({ state, commit }, { market }) {
+async function subscribeToMarket({ state, commit }, { market, isRequestSilent }) {
   if (!market) {
     return;
   }
-
-  commit('startRequest', { identifier: 'subscribeToMarket' });
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'subscribeToMarket' });
 
   try {
     state.socket.client.sendObj({ op: 'subscribe', args: `orderBook:${market.marketName}` });

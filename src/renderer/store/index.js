@@ -63,8 +63,8 @@ const state = {
   showSendWithLedgerModal: false,
   showWalletBackupModal: false,
   socket: {
-    isConnected: false,
     lastMessage: null,
+    isConnected: false,
     client: null,
     reconnectError: false,
   },

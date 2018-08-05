@@ -1,45 +1,43 @@
 <template>
   <section id="token-sale">
-    <div class="token-sale-wrapper">
-      <div class="intro-illustration">
-        <div class="circles">
-          <img class="circle circle-sm" src="~@/assets/img/circle-3.svg" />
-          <img class="circle circle-md" src="~@/assets/img/circle-2.svg" />
-          <img class="circle circle-lg" src="~@/assets/img/circle-1.svg" />
+    <div class="intro-illustration">
+      <div class="circles">
+        <img class="circle circle-sm" src="~@/assets/img/circle-3.svg" />
+        <img class="circle circle-md" src="~@/assets/img/circle-2.svg" />
+        <img class="circle circle-lg" src="~@/assets/img/circle-1.svg" />
+      </div>
+    </div>
+    <div class="header">
+      <h1 class="underlined">{{$t('participateInIco')}}</h1>
+    </div>
+    <div class="body">
+      <aph-form :on-submit="send">
+        <aph-select :options="tokens" :placeholder="$t('selectIco')" v-model="token"></aph-select>
+        <aph-input class="script-hash" :placeholder="$t('enterIcoScriptHash')" v-model="scriptHash" v-if="token && token.symbol === 'Custom'"></aph-input>
+        <aph-select :options="currencies" :placeholder="$t('buyWith')" v-model="currency"></aph-select>
+        <div class="amount">
+          <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
+          <div class="symbol">{{ currency ? currency.value : '' }}</div>
+          <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
         </div>
-      </div>
-      <div class="header">
-        <h1 class="underlined">{{$t('participateInIco')}}</h1>
-      </div>
-      <div class="body">
-        <aph-form :on-submit="send">
-          <aph-select :options="tokens" :placeholder="$t('selectIco')" v-model="token"></aph-select>
-          <aph-input class="script-hash" :placeholder="$t('enterIcoScriptHash')" v-model="scriptHash" v-if="token && token.symbol === 'Custom'"></aph-input>
-          <aph-select :options="currencies" :placeholder="$t('buyWith')" v-model="currency"></aph-select>
-          <div class="amount">
-            <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
-            <div class="symbol">{{ currency ? currency.value : '' }}</div>
-            <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
-          </div>
-          <div class="estimated-value">
-            <div class="label">{{$t('estimatedAmount')}}</div>
-            <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
-          </div>
-        </aph-form>
-      </div>
-      <div class="disclaimer">
-        <h2>{{$t('disclaimerUrgent')}}</h2>
-        <p>{{$t('ensureThatYouAreOnlySendingTokens')}}</p>
-        <p>{{$t('submittingMultipleTimesWarning')}}</p>
-        <p>{{$t('aphelionIsNotResponsible')}}</p>
-        <div class="disclaimer-accept">
-          <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
-          <label for="confirm-disclaimer">{{$t('iAgree')}}</label>
+        <div class="estimated-value">
+          <div class="label">{{$t('estimatedAmount')}}</div>
+          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
         </div>
+      </aph-form>
+    </div>
+    <div class="disclaimer">
+      <h2>{{$t('disclaimerUrgent')}}</h2>
+      <p>{{$t('ensureThatYouAreOnlySendingTokens')}}</p>
+      <p>{{$t('submittingMultipleTimesWarning')}}</p>
+      <p>{{$t('aphelionIsNotResponsible')}}</p>
+      <div class="disclaimer-accept">
+        <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
+        <label for="confirm-disclaimer">{{$t('iAgree')}}</label>
       </div>
-      <div class="footer">
-        <button class="send-btn" @click="send" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
-      </div>
+    </div>
+    <div class="footer">
+      <button class="send-btn" @click="send" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
     </div>
   </section>
 </template>
@@ -252,25 +250,17 @@ export default {
   align-items: center;
   background-color: $dark-purple;
   display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  overflow: hidden;
   position: relative;
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  .token-sale-wrapper {
-    flex: 0 0 auto;
-    padding: $space-xl;
-    display: flex;
-    flex-direction: column;
-    margin: auto;
-  }
 
   .header {
     color: $purple;
     font-family: GilroySemibold;
     text-align: center;
     z-index: 1;
-    flex: 0 0 auto;
 
     h1.underlined {
       @extend %underlined-header;
@@ -292,7 +282,6 @@ export default {
     margin: 0 auto;
     text-align: center;
     width: toRem(400px);
-    flex: 0 0 auto;
 
     .aph-input {
       .placeholder {
@@ -360,11 +349,10 @@ export default {
 
   .disclaimer {
     color: white;
-    margin: $space-lg auto $space-xl;
+    margin: $space-lg 0 $space-xl;
     text-align: center;
     width: toRem(800px);
     font-size: toRem(12px);
-    flex: 0 0 auto;
 
     h2 {
       color: $purple;
@@ -394,10 +382,8 @@ export default {
   .footer {
     display: flex;
     flex-direction: row;
-    flex: 0 0 auto;
+    flex: none;
     width: toRem(400px);
-    margin-left: auto;
-    margin-right: auto;
 
     .send-btn {
       @extend %btn-outline;
@@ -436,3 +422,5 @@ export default {
   }
 }
 </style>
+
+

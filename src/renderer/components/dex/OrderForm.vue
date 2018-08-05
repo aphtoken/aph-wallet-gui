@@ -1,7 +1,7 @@
 <template>
   <div>
     <section id="dex--order-form">
-      <div class="body" v-if="$store.state.currentMarket">
+      <div class="body">
         <div class="side">
           <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}}</div>
           <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}}</div>
@@ -43,11 +43,11 @@
       </div>
       <div class="footer">
         <div @click="actionableHolding = quoteHolding" :class="['balance', {active: quoteHolding.symbol === actionableHolding.symbol}]" :title="quoteBalanceToolTip">
-          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.quoteCurrency }})</div>
+          <div class="label">{{$t('balance')}} ({{ quoteHolding.symbol }})</div>
           <div class="value">{{ $formatNumber(quoteHolding.totalBalance) }}</div>
         </div>
         <div @click="actionableHolding = baseHolding" :class="['balance', {active: baseHolding.symbol === actionableHolding.symbol}]" :title="baseBalanceToolTip">
-          <div class="label">{{$t('balance')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
+          <div class="label">{{$t('balance')}} ({{ baseHolding.symbol }})</div>
           <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
         </div>
         <div @click="actionableHolding = aphHolding" :class="['balance', {active: aphHolding.symbol === actionableHolding.symbol}]" :title="aphBalanceToolTip" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
@@ -65,6 +65,7 @@
         <!-- Only the contract owner or manager can do this.
             <button @click="setMarket" class="footer-btn">Setup Market</button> -->
       </div>
+      <aph-spinner v-if="!$store.state.holdings.length" identifier="fetchHoldings"></aph-spinner>
     </section>
     <aph-order-confirmation-modal v-if="$store.state.showOrderConfirmationModal"
       :onConfirmed="orderConfirmed" :onCancel="hideOrderConfirmationModal"></aph-order-confirmation-modal>
@@ -86,13 +87,13 @@ export default {
     AphDepositWithdrawModal,
   },
 
-  mounted() {
+  created() {
     this.loadHoldings();
 
     this.actionableHolding = this.quoteHolding;
 
     loadHoldingsIntervalId = setInterval(() => {
-      this.loadHoldings();
+      this.loadHoldingsSilently();
     }, this.$constants.intervals.HOLDINGS_POLLING);
   },
 
@@ -206,9 +207,17 @@ export default {
       }
     },
     priceLabel() {
+      if (!this.currentMarket) {
+        return '';
+      }
+
       return this.$t('priceBase', { base: this.currentMarket.baseCurrency });
     },
     amountLabel() {
+      if (!this.currentMarket) {
+        return '';
+      }
+
       return this.$t('amountQuote', { quote: this.currentMarket.quoteCurrency });
     },
     price() {
@@ -300,7 +309,9 @@ export default {
     loadHoldings() {
       this.$store.dispatch('fetchHoldings', { done: null });
     },
-
+    loadHoldingsSilently() {
+      this.$store.dispatch('fetchHoldings', { done: null, isRequestSilent: true });
+    },
     setSide(side) {
       this.side = side;
       this.$store.commit('setOrderQuantity', '');
@@ -441,6 +452,7 @@ export default {
   height: 100%;
   justify-content: space-between;
   min-width: toRem(280px);
+  overflow: hidden;
   position: relative;
 
   .body {

@@ -1,10 +1,10 @@
-<template>
+<template> 
   <section id="dex--order-history">
     <div class="header">
       <h1 :class="[{selected: tab === 'Open'}]" @click="selectTab('Open')">{{$t('openOrders')}} ({{ openOrders.length }})</h1>
       <h1 :class="[{selected: tab === 'Completed'}]" @click="selectTab('Completed')">{{$t('completedOrders')}} ({{ completedOrders.length }})</h1>
     </div>
-    <div class="body" v-if="$store.state.orderHistory">
+    <div class="body">
       <div class="history">
         <table class="order-history-table">
           <thead>
@@ -55,8 +55,9 @@
     </div>
     <div class="footer">
       <div :class="['option', {active: $store.state.ordersToShow === $constants.orders.ALL_SWITCH}]" @click="$store.commit('setOrdersToShow', $constants.orders.ALL_SWITCH)">All</div>
-      <div :class="['option', {active: $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket.marketName }}</div>
+      <div :class="['option', {active: $store.state.currentMarket && $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
     </div>
+    <aph-spinner identifier="fetchOrderHistory"></aph-spinner>
   </section>
 </template>
 
@@ -70,6 +71,10 @@ export default {
 
   computed: {
     openOrders() {
+      if (!this.$store.state.orderHistory) {
+        return [];
+      }
+
       return _.filter(this.$store.state.orderHistory, (order) => {
         return order.status === 'Open' || order.status === 'PartiallyFilled' || order.status === 'Cancelling';
       }).map((order) => {
@@ -78,6 +83,10 @@ export default {
     },
 
     completedOrders() {
+      if (!this.$store.state.orderHistory) {
+        return [];
+      }
+
       return _.filter(this.$store.state.orderHistory, (order) => {
         return order.status !== 'Open' && order.status !== 'PartiallyFilled';
       }).map((order) => {
@@ -111,7 +120,7 @@ export default {
     this.loadOrders();
 
     loadOrdersIntervalId = setInterval(() => {
-      this.loadOrders();
+      this.loadOrdersSilently();
     }, this.$constants.intervals.TRANSACTIONS_POLLING);
   },
 
@@ -127,7 +136,10 @@ export default {
     },
 
     loadOrders() {
-      this.$store.dispatch('fetchOrderHistory');
+      this.$store.dispatch('fetchOrderHistory', { isRequestSilent: false });
+    },
+    loadOrdersSilently() {
+      this.$store.dispatch('fetchOrderHistory', { isRequestSilent: true });
     },
 
     cancelOrder(order) {

@@ -57,14 +57,6 @@ export default {
 
     this.$services.dex.completeSystemAssetWithdrawals();
 
-    this.$store.state.socket.opened = () => {
-      if (this.$store.state.currentMarket) {
-        this.$store.dispatch('subscribeToMarket', {
-          market: this.$store.state.currentMarket,
-        });
-      }
-    };
-
     this.$store.commit('setSocketOrderCreated', (message) => {
       /* eslint-disable max-len */
       this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Created. x${message.data.quantity} @${message.data.price}`);

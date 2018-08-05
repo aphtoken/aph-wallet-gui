@@ -4,7 +4,7 @@
       <h1 class="underlined">{{$t('wallets')}}</h1>
     </div>
     <div class="body">
-      <div class="left" v-if="$store.state.wallets.length">
+      <div class="left">
         <div :class="['wallet', {active: isActive(wallet)}]" v-for="(wallet, index) in $store.state.wallets" :key="index" @click="showLoginToWalletModal(wallet)">
           <div class="name">{{ wallet.label }}</div>
           <!-- <div class="value">{{ $formatMoney(444.444) }} {{ $store.state.currency }}</div> -->
@@ -182,3 +182,5 @@ export default {
   }
 }
 </style>
+
+
