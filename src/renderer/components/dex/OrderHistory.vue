@@ -147,7 +147,6 @@ export default {
         .then((res) => {
           this.$services.alerts.success(res);
           order.status = 'Cancelling';
-          order.cancelledAt = moment.utc();
         })
         .catch((e) => {
           this.$services.alerts.error(e);

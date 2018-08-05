@@ -31,6 +31,7 @@ const WITHDRAW_STEP_MARK = '91';
 const WITHDRAW_STEP_WITHDRAW = '92';
 
 let lastUTXOWithdrawn;
+let cancelledOrders = {};
 
 export default {
   fetchMarkets() {
@@ -300,14 +301,15 @@ export default {
                 order.quantityToGive = order.quantity;
               }
 
-              const localOrder = _.find(store.state.orderHistory, (searchOrder) => {
-                return order.orderId === searchOrder.orderId;
-              });
-
-              if (localOrder && localOrder.status === 'Cancelling'
-                && moment.utc().diff(localOrder.cancelledAt, 'milliseconds') < timeouts.CANCEL_ORDER) {
-                order.status = localOrder.status;
-                order.cancelledAt = localOrder.cancelledAt;
+              // if the order comes back from the api as still open or partially filled,
+              // but we know we recently cancelled it, still show as cancelling
+              if (_.has(cancelledOrders, order.orderId)) {
+                if (_.includes(['Open', 'PartiallyFilled'], order.status)
+                  && moment.utc().diff(_.get(cancelledOrders, order.orderId), 'milliseconds') < timeouts.CANCEL_ORDER) {
+                  order.status = 'Cancelling';
+                } else {
+                  cancelledOrders = _.omit(cancelledOrders, order.orderId);
+                }
               }
             });
             resolve(orders);
@@ -820,6 +822,7 @@ export default {
             axios.delete(`${currentNetwork.aph}/order/${order.marketName}/${order.offerId}/${tx.serializeTransaction(t.tx, true)}`)
               .then((res) => {
                 if (res.data.result) {
+                  _.set(cancelledOrders, order.orderId, moment.utc());
                   resolve('Order Cancelled');
                 } else {
                   reject('Cancel failed');
