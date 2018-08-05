@@ -1695,12 +1695,12 @@ export default {
                     dexState.minimumClaimBlocks = claiming.DEFAULT_CLAIM_BLOCKS;
 
                     if (res.result) {
-                      dexState.minimumClaimBlocks = u.fixed82num(res.result);
+                      dexState.minimumClaimBlocks = u.fixed82num(res.result) * 100000000;
                     }
 
                     resolve(dexState);
                   })
-                  .catch((e) => {
+                  .catch(() => {
                     dexState.minimumClaimBlocks = claiming.DEFAULT_CLAIM_BLOCKS;
                     resolve(dexState);
                   });
@@ -1843,7 +1843,7 @@ export default {
       try {
         this.executeContractTransaction('setClaimMinimumBlocks',
           [
-            u.num2fixed8(claimMinimumBlocks),
+            u.num2fixed8(claimMinimumBlocks / 100000000),
           ])
           .then((res) => {
             if (res.success) {
