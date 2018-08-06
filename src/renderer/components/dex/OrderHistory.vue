@@ -63,6 +63,7 @@
 
 <script>
 let loadOrdersIntervalId;
+let cancelledOrders = {};
 
 export default {
   beforeDestroy() {
@@ -70,27 +71,41 @@ export default {
   },
 
   computed: {
-    openOrders() {
+    allOrders() {
       if (!this.$store.state.orderHistory) {
         return [];
       }
 
-      return _.filter(this.$store.state.orderHistory, (order) => {
-        return order.status === 'Open' || order.status === 'PartiallyFilled' || order.status === 'Cancelling';
-      }).map((order) => {
+      const orders = this.$store.state.orderHistory.map((order) => {
+        // if the order comes back from the api as still open or partially filled,
+        // but we know we recently cancelled it, still show as cancelling
+        if (_.has(cancelledOrders, order.orderId)) {
+          if (_.includes(['Open', 'PartiallyFilled', 'Cancelling'], order.status)
+            && moment.utc().diff(_.get(cancelledOrders, order.orderId), 'milliseconds')
+              < this.$constants.timeouts.CANCEL_ORDER) {
+            order.status = 'Cancelling';
+          } else {
+            cancelledOrders = _.omit(cancelledOrders, order.orderId);
+            console.log(order);
+          }
+        }
+
         return order;
+      });
+
+      console.log(orders);
+      return orders;
+    },
+
+    openOrders() {
+      return _.filter(this.allOrders, (order) => {
+        return order.status === 'Open' || order.status === 'PartiallyFilled' || order.status === 'Cancelling';
       });
     },
 
     completedOrders() {
-      if (!this.$store.state.orderHistory) {
-        return [];
-      }
-
-      return _.filter(this.$store.state.orderHistory, (order) => {
+      return _.filter(this.allOrders, (order) => {
         return order.status !== 'Open' && order.status !== 'PartiallyFilled';
-      }).map((order) => {
-        return order;
       });
     },
 
@@ -147,6 +162,7 @@ export default {
         .then((res) => {
           this.$services.alerts.success(res);
           order.status = 'Cancelling';
+          _.set(cancelledOrders, order.orderId, moment.utc());
         })
         .catch((e) => {
           this.$services.alerts.error(e);
