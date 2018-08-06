@@ -41,7 +41,9 @@
         </div>
       </div>
     </div>
-    <aph-spinner identifier="subscribeToMarket" ws-message-type="bookSnapshot"></aph-spinner>
+    <!-- TODO: This spinner is not listening to 'subscribeToMarket' correctly. See 'requests'  watcher on line 46 of Spinner.vue.
+      It is intercepting more than just the 'subscribeToMarket' request. Seems to be listening to all changes to request -->
+    <!-- <aph-spinner identifier="subscribeToMarket" ws-message-type="bookSnapshot"></aph-spinner> -->
   </section>
 </template>
 
