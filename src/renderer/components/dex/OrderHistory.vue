@@ -86,14 +86,12 @@ export default {
             order.status = 'Cancelling';
           } else {
             cancelledOrders = _.omit(cancelledOrders, order.orderId);
-            console.log(order);
           }
         }
 
         return order;
       });
 
-      console.log(orders);
       return orders;
     },
 
