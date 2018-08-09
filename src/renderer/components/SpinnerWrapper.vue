@@ -2,10 +2,7 @@
   <div class="component-wrapper">
     <slot></slot>
     <div v-if="messageReceiving" class="spinner-container">
-      <div :class="{ 
-        'spinner': !size, 
-        'spinner-sm': size === 'small' 
-        }">
+      <div :class="['spinner', {'spinner-sm': size === 'small'}]">
       </div>
     </div>
   </div>
@@ -143,11 +140,14 @@ export default {
     height: 100%;
     background: rgba($dark, 0.5);
     border-radius: $border-radius;
+    
     .spinner {
-      @include loader06($size: 36px, $color: $purple, $align: middle);
-    }
-    .spinner-sm {
-      @include loader06($size: 25px, $color: $purple, $align: middle, $border-size: 5px);
+        &:not(.spinner-sm) {
+            @include loader06($size: 36px, $color: $purple, $align: middle);
+        }
+        &.spinner-sm {
+            @include loader06($size: 25px, $color: $purple, $align: middle, $border-size: 5px);
+        }
     }
   }
 }
