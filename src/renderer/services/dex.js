@@ -583,6 +583,25 @@ export default {
     });
   },
 
+  // Expects a BigNumber
+  flooredLogBase2(number) {
+    let power = new BigNumber(0);
+    for (; number.isGreaterThan(0); number = number.dividedBy(2).decimalPlaces(0, BigNumber.ROUND_DOWN)) {
+      power = power.plus(1);
+    }
+    return power.minus(1);
+  },
+
+  calculateFeeAmount(quouteQuantity, minimumTradeSize, baseFee) {
+    // Earlier checks guarantee that quoteQuantity > 0
+    return this.flooredLogBase2(
+      quouteQuantity
+        .multipliedBy(2)
+        .dividedBy(minimumTradeSize)
+        .decimalPlaces(0, BigNumber.ROUND_DOWN))
+      .multipliedBy(baseFee);
+  },
+
   formDepositsForOrder(order) {
     let totalQuantityToSell = new BigNumber(0);
     let totalFees = new BigNumber(0);
@@ -611,7 +630,9 @@ export default {
     order.offersToTake.forEach((offer) => {
       if (offer.isBackupOffer !== true) {
         totalQuantityToSell = totalQuantityToSell.plus(order.side === 'Buy' ? offer.quantity.multipliedBy(offer.price) : offer.quantity);
-        totalFees = totalFees.plus(order.side === 'Buy' ? order.market.buyFee : order.market.sellFee);
+        const baseFee = order.side === 'Buy' ? order.market.buyFee : order.market.sellFee;
+        const fee = this.calculateFeeAmount(offer.quantity, order.market.minimumSize, baseFee);
+        totalFees = totalFees.plus(fee);
       }
     });
 
