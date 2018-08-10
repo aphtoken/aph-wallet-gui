@@ -67,7 +67,7 @@ export default {
       const list = this.$services.tokens.getAllAsArray().reduce(
         (result, { symbol, name, assetId, network, sale }) => {
           if (!sale || network !== this.$services.network.getSelectedNetwork().net
-              || moment(sale.endDate) < moment().utc) {
+              || moment(sale.endDate) < moment().utc()) {
             return result;
           }
 
