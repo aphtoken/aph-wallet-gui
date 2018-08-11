@@ -14,9 +14,9 @@
                 <th>{{$t('pairLc')}}</th>
                 <th>{{$t('filled')}}</th>
                 <th>{{$t('unitsTotal')}}</th>
-                <th>{{$t('priceLc')}}</th>
+                <th class="price">{{$t('priceLc')}}</th>
                 <th>{{$t('created')}}</th>
-                <th class="status" width="1">{{$t('status')}}</th>
+                <th class="status">{{$t('status')}}</th>
               </tr>
             </thead>
             <tbody>
@@ -203,16 +203,51 @@ export default {
 
 
   .body {
-    height: calc(100% - 73px);
-    overflow-y: auto;
     padding: $space;
+    height: calc(100% - 73px);
 
     .order-history-table {
       @extend %dex-table;
 
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+
+      thead {
+        display: block;
+      }
+
+      tbody {
+        display: block;
+        height: 6rem;
+        overflow-y: auto;
+
+        .status > div {
+          padding: 1px 0;
+        }
+      }
+
+      tr {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
       th, td {
+        flex-basis: 200px;
+
+
+        &.price {
+          flex-basis: 300px;
+        }
+
         &.status {
           text-align: right;
+
+          p {
+            margin: 0;
+            padding: 0;
+          }
         }
       }
 
