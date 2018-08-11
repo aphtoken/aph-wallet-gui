@@ -16,7 +16,6 @@ export {
   handleNetworkChange,
   orderBookSnapshotReceived,
   orderBookUpdateReceived,
-  putAllNep5Balances,
   putTransactionDetail,
   resetRequests,
   setAcceptCommitInfo,
@@ -119,13 +118,6 @@ function handleNetworkChange(state) {
   state.nep5Balances = {};
   state.currentMarket = null;
   neo.fetchNEP5Tokens();
-}
-
-function putAllNep5Balances(state, nep5balances) {
-  const balances = state.nep5Balances;
-  nep5balances.forEach((nep5balance) => {
-    _.set(balances, nep5balance.asset, nep5balance);
-  });
 }
 
 function putTransactionDetail(state, transactionDetail) {

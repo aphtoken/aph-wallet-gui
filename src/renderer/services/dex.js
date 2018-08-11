@@ -7,7 +7,7 @@ import {
 } from '@cityofzion/neon-js';
 import Vue from 'vue';
 import { BigNumber } from 'bignumber.js';
-import tokens from './tokens';
+import assets from './assets';
 import alerts from './alerts';
 import neo from './neo';
 import network from './network';
@@ -16,7 +16,7 @@ import ledger from './ledger';
 import { store } from '../store';
 import { toBigNumber } from './formatting.js';
 
-import { assets, claiming, intervals } from '../constants';
+import { claiming, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SENDER = 0xfa;
 const TX_ATTR_USAGE_SCRIPT = 0x20;
@@ -1212,7 +1212,7 @@ export default {
           config.account = new wallet.Account(currentWallet.wif);
         }
 
-        const token = tokens.getOne(assetId, currentNetwork.net);
+        const token = assets.getNetworkAsset(assetId);
 
         api.fillKeys(config)
           .then(() => {

@@ -64,10 +64,10 @@ export default {
 
   computed: {
     tokens() {
-      const list = this.$services.tokens.getAllAsArray().reduce(
+      const list = this.$services.assets.getAllAsArray().reduce(
         (result, { symbol, name, assetId, network, sale }) => {
           if (!sale || network !== this.$services.network.getSelectedNetwork().net
-              || moment(sale.endDate) < moment().utc()) {
+              || moment(sale.endDate) < moment().utc) {
             return result;
           }
 
@@ -208,7 +208,7 @@ export default {
       }
 
       this.$services.neo.participateInTokenSale(icoScriptHash,
-        this.currency.asset, this.amount)
+        this.currency.assetId, this.amount)
         .then((res) => {
           this.$services.alerts.success(
             this.$t('tokenSaleSuccessful', { symbol: res.symbol, balance: res.balance }),

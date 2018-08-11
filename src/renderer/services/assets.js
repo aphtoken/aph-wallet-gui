@@ -1,0 +1,147 @@
+import network from './network';
+import storage from './storage';
+import wallets from './wallets';
+
+const ASSETS_STORAGE_KEY = net => `assets_${net}`;
+const ASSETS_ADDED_STORAGE_KEY = (net, wallet) => `assets_${net}_${wallet.address}`;
+
+export default {
+  GAS: '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7',
+  NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
+
+  // TODO: these different per network
+  DEX_SCRIPT_HASH: '2d599f0d575232625841736bb96bd1b3d750a055',
+  APH: '591eedcd379a8981edeefe04ef26207e1391904a',
+  ATI: '155153854ed377549a72cc1643e481bf25b48390',
+
+  // privnet
+  /* DEX_SCRIPT_HASH: 'b102048babc8f1811f854dbc1ccf26183f45adbe',
+  APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac',
+  ATI: '155153854ed377549a72cc1643e481bf25b48390', */
+
+  updateNetworkAssets(assets) {
+    const currentNetwork = network.getSelectedNetwork();
+    if (!currentNetwork) {
+      return;
+    }
+
+    const neo = {
+      symbol: 'NEO',
+      assetId: this.NEO,
+      name: 'NEO',
+    };
+    const gas = {
+      symbol: 'GAS',
+      assetId: this.GAS,
+      name: 'GAS',
+    };
+
+    let aphToken = null;
+    if (currentNetwork.net === 'MainNet') {
+      aphToken = {
+        symbol: 'APH',
+        assetId: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
+        name: 'Aphelion',
+      };
+    } else if (currentNetwork.net === 'TestNet') {
+      aphToken = {
+        symbol: 'APH',
+        assetId: '591eedcd379a8981edeefe04ef26207e1391904a',
+        name: 'Aphelion',
+      };
+    }
+
+    this.addNetworkAsset(neo, true);
+    this.addNetworkAsset(gas, true);
+    this.addNetworkAsset(aphToken, true);
+
+    storage.set(ASSETS_STORAGE_KEY(currentNetwork.net), assets);
+  },
+
+  getNetworkAssets() {
+    const currentNetwork = network.getSelectedNetwork();
+    return storage.get(ASSETS_STORAGE_KEY(currentNetwork.net));
+  },
+
+  getNetworkAssetAsArray() {
+    return _.sortBy(_.values(this.getNetworkAssets()), [token => token.symbol.toLowerCase()], ['symbol']);
+  },
+
+  getNetworkAsset(assetId) {
+    return _.get(this.getNetworkAssets(), assetId);
+  },
+
+  networkAssetExists(assetId) {
+    return _.has(this.getNetworkAssets(), assetId);
+  },
+
+  addNetworkAsset(asset, addToUserAssets) {
+    if (!asset) {
+      return;
+    }
+
+    const currentNetwork = network.getSelectedNetwork();
+    const assets = this.getNetworkAssets();
+    _.set(assets, asset.assetId, asset);
+    storage.set(ASSETS_STORAGE_KEY(currentNetwork.net), assets);
+
+    if (addToUserAssets === true && this.userAssetExists(asset.assetId) === false) {
+      this.addUserAsset(asset.assetId);
+    }
+  },
+
+  addUserAsset(assetId) {
+    if (this.networkAssetExists(assetId) === false) {
+      return;
+    }
+
+    const assets = this.getNetworkAssets();
+    const userAssets = this.getUserAssets();
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
+
+    if (!currentNetwork || !currentWallet) {
+      return;
+    }
+
+    _.set(userAssets, assetId, _.get(assets, assetId));
+    storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);
+  },
+
+  removeUserAsset(assetId) {
+    let userAssets = this.getUserAssets();
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
+
+    if (!currentNetwork || !currentWallet) {
+      return;
+    }
+
+    userAssets = _.omit(userAssets, assetId);
+    storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);
+  },
+
+  getUserAssets() {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
+
+    if (!currentNetwork || !currentWallet) {
+      return {};
+    }
+
+    let userAssets = storage.get(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet));
+    if (!userAssets) {
+      userAssets = {};
+    }
+    return userAssets;
+  },
+
+  getUserAssetsAsArray() {
+    return _.sortBy(_.values(this.getUserAssets()),
+      [token => token.symbol.toLowerCase()], ['symbol']);
+  },
+
+  userAssetExists(assetId) {
+    return _.has(this.getUserAssets(), assetId);
+  },
+};

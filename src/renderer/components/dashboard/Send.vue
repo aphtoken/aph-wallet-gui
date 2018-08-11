@@ -89,7 +89,7 @@ export default {
   computed: {
     currencies() {
       return this.$store.state.holdings.reduce(
-        (result, { name, symbol, asset, isNep5, unitValue, balance, decimals }) => {
+        (result, { name, symbol, assetId, isNep5, unitValue, balance, decimals }) => {
           if (!name || !symbol) {
             return result;
           }
@@ -99,14 +99,14 @@ export default {
             value: {
               symbol,
               name,
-              asset,
+              assetId,
               isNep5,
               label: `${name} (${balance})`,
               unitValue,
               balance,
               decimals,
             },
-            asset,
+            assetId,
             isNep5,
             unitValue,
           });
@@ -201,7 +201,7 @@ export default {
       this.sending = true;
 
       setTimeout(() => {
-        this.$services.neo.sendFunds(this.address, this.currency.asset,
+        this.$services.neo.sendFunds(this.address, this.currency.assetId,
           this.amount, this.currency.isNep5)
           .then(() => {
             this.end();
