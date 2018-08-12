@@ -1,63 +1,64 @@
 <template> 
   <section id="dex--order-history">
-    <div class="header">
-      <h1 :class="[{selected: tab === 'Open'}]" @click="selectTab('Open')">{{$t('openOrders')}} ({{ openOrders.length }})</h1>
-      <h1 :class="[{selected: tab === 'Completed'}]" @click="selectTab('Completed')">{{$t('completedOrders')}} ({{ completedOrders.length }})</h1>
-    </div>
-    <div class="body">
-      <div class="history">
-        <table class="order-history-table">
-          <thead>
-            <tr>
-              <th>{{$t('order')}}</th>
-              <th>{{$t('pairLc')}}</th>
-              <th>{{$t('filled')}}</th>
-              <th>{{$t('unitsTotal')}}</th>
-              <th>{{$t('priceLc')}}</th>
-              <th>{{$t('created')}}</th>
-              <th class="status" width="1">{{$t('status')}}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(order, index) in filteredOrders" :key="index">
-              <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
-              <td class="market">{{ order.marketName }}</td>
-              <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
-              <td class="units-total">{{ $formatNumber(order.quantity) }}</td>
-              <td class="price">{{ $formatNumber(order.price) }}</td>
-              <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
-              <td class="status">
-                <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="open-or-partial">
-                  <div v-if="order.status === 'PartiallyFilled'" class="partial">
-                    <aph-icon name="info"></aph-icon>
-                    <p>{{$t('partial')}}</p>
-                  </div>
-                  <div v-else class="partial">
-                    <p>{{$t('open')}}</p>
-                  </div>
-                  <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"
-                            :title="$t('cancel')"></aph-icon>
-                </div>
-                <div v-else-if="order.status === 'Filled'">
-                  <p>{{$t('filledUc')}}</p>
-                </div>
-                <div v-else-if="order.status === 'Cancelled'">
-                  <p>{{$t('cancelled')}}</p>
-                </div>
-                <div v-else-if="order.status === 'Cancelling'">
-                  <p>{{$t('cancelling')}}</p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <aph-spinner-wrapper identifier="fetchOrderHistory">
+      <div class="header">
+        <h1 :class="[{selected: tab === 'Open'}]" @click="selectTab('Open')">{{$t('openOrders')}} ({{ openOrders.length }})</h1>
+        <h1 :class="[{selected: tab === 'Completed'}]" @click="selectTab('Completed')">{{$t('completedOrders')}} ({{ completedOrders.length }})</h1>
       </div>
-    </div>
-    <div class="footer">
-      <div :class="['option', {active: $store.state.ordersToShow === $constants.orders.ALL_SWITCH}]" @click="$store.commit('setOrdersToShow', $constants.orders.ALL_SWITCH)">All</div>
-      <div :class="['option', {active: $store.state.currentMarket && $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
-    </div>
-    <aph-spinner identifier="fetchOrderHistory"></aph-spinner>
+      <div class="body">
+        <div class="history">
+          <table class="order-history-table">
+            <thead>
+              <tr>
+                <th>{{$t('order')}}</th>
+                <th>{{$t('pairLc')}}</th>
+                <th>{{$t('filled')}}</th>
+                <th>{{$t('unitsTotal')}}</th>
+                <th>{{$t('priceLc')}}</th>
+                <th>{{$t('created')}}</th>
+                <th class="status" width="1">{{$t('status')}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(order, index) in filteredOrders" :key="index">
+                <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
+                <td class="market">{{ order.marketName }}</td>
+                <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
+                <td class="units-total">{{ $formatNumber(order.quantity) }}</td>
+                <td class="price">{{ $formatNumber(order.price) }}</td>
+                <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
+                <td class="status">
+                  <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="open-or-partial">
+                    <div v-if="order.status === 'PartiallyFilled'" class="partial">
+                      <aph-icon name="info"></aph-icon>
+                      <p>{{$t('partial')}}</p>
+                    </div>
+                    <div v-else class="partial">
+                      <p>{{$t('open')}}</p>
+                    </div>
+                    <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"
+                              :title="$t('cancel')"></aph-icon>
+                  </div>
+                  <div v-else-if="order.status === 'Filled'">
+                    <p>{{$t('filledUc')}}</p>
+                  </div>
+                  <div v-else-if="order.status === 'Cancelled'">
+                    <p>{{$t('cancelled')}}</p>
+                  </div>
+                  <div v-else-if="order.status === 'Cancelling'">
+                    <p>{{$t('cancelling')}}</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="footer">
+        <div :class="['option', {active: $store.state.ordersToShow === $constants.orders.ALL_SWITCH}]" @click="$store.commit('setOrdersToShow', $constants.orders.ALL_SWITCH)">All</div>
+        <div :class="['option', {active: $store.state.currentMarket && $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
+      </div>
+    </aph-spinner-wrapper>
   </section>
 </template>
 

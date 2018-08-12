@@ -1,25 +1,26 @@
 <template>
   <section id="dex--trade-history">
-    <div class="header">
-      <h1 class="underlined">{{$t('tradeHistory')}}</h1>
-    </div>
-    <div class="body">
-      <div class="trade-history-table">
-        <div class="header">
-          <div class="cell">{{$t('PRICE')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.baseCurrency : '' }})</div>
-          <div class="cell">{{$t('VOLUME')}}</div>
-          <div class="cell time">{{$t('TIME')}}</div>
-        </div>
-        <div class="body">
-          <div class="row" v-for="(trade, index) in trades" :key="index">
-            <div :class="['cell', {green: trade.side === 'Buy', red: trade.side === 'Sell'}]">{{ $formatNumber(trade.price) }}</div>
-            <div class="cell">{{ $formatNumber(trade.quantity) }}</div>
-            <div class="cell time">{{ $formatDateShort(trade.tradeTime) }} {{ $formatTime(trade.tradeTime) }}</div>
+    <aph-spinner-wrapper identifier="fetchTradeHistory">
+      <div class="header">
+        <h1 class="underlined">{{$t('tradeHistory')}}</h1>
+      </div>
+      <div class="body">
+        <div class="trade-history-table">
+          <div class="header">
+            <div class="cell">{{$t('PRICE')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.baseCurrency : '' }})</div>
+            <div class="cell">{{$t('VOLUME')}}</div>
+            <div class="cell time">{{$t('TIME')}}</div>
+          </div>
+          <div class="body">
+            <div class="row" v-for="(trade, index) in trades" :key="index">
+              <div :class="['cell', {green: trade.side === 'Buy', red: trade.side === 'Sell'}]">{{ $formatNumber(trade.price) }}</div>
+              <div class="cell">{{ $formatNumber(trade.quantity) }}</div>
+              <div class="cell time">{{ $formatDateShort(trade.tradeTime) }} {{ $formatTime(trade.tradeTime) }}</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <aph-spinner identifier="fetchTradeHistory"></aph-spinner>
+    </aph-spinner-wrapper>
   </section>
 </template>
 
