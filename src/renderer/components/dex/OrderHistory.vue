@@ -243,6 +243,10 @@ export default {
         &.status {
           text-align: right;
 
+          > div {
+            height: 1.2rem;
+          }
+
           p {
             margin: 0;
             padding: 0;
