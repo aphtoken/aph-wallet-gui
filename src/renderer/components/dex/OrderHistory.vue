@@ -10,13 +10,13 @@
           <table class="order-history-table">
             <thead>
               <tr>
-                <th>{{$t('order')}}</th>
-                <th>{{$t('pairLc')}}</th>
-                <th>{{$t('filled')}}</th>
-                <th>{{$t('unitsTotal')}}</th>
-                <th class="price">{{$t('priceLc')}}</th>
-                <th>{{$t('created')}}</th>
-                <th class="status">{{$t('status')}}</th>
+                <th>{{ $t('order') }}</th>
+                <th>{{ $t('pairLc') }}</th>
+                <th>{{ $t('filled') }}</th>
+                <th>{{ $t('unitsTotal') }}</th>
+                <th class="price">{{ $t('priceLc') }}</th>
+                <th>{{ $t('created')}}</th>
+                <th class="status">{{ $t('status') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -40,13 +40,13 @@
                               :title="$t('cancel')"></aph-icon>
                   </div>
                   <div v-else-if="order.status === 'Filled'">
-                    <p>{{$t('filledUc')}}</p>
+                    <p>{{ $t('filledUc') }}</p>
                   </div>
                   <div v-else-if="order.status === 'Cancelled'">
-                    <p>{{$t('cancelled')}}</p>
+                    <p>{{ $t('cancelled') }}</p>
                   </div>
                   <div v-else-if="order.status === 'Cancelling'">
-                    <p>{{$t('cancelling')}}</p>
+                    <p>{{ $t('cancelling') }}</p>
                   </div>
                 </td>
               </tr>
@@ -234,11 +234,10 @@ export default {
       }
 
       th, td {
-        flex-basis: 200px;
-
+        flex-basis: toRem(200px);
 
         &.price {
-          flex-basis: 300px;
+          flex-basis: toRem(300px);
         }
 
         &.status {
