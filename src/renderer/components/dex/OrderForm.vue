@@ -269,21 +269,30 @@ export default {
       }
       return !this.$store.state.orderQuantity || !this.$store.state.orderPrice || this.$isPending('placeOrder');
     },
+    orderTypes() {
+      const list = [{
+        label: 'Limit',
+        value: 'Limit',
+      },
+      ];
+      if (this.canPlaceMarketOrder === true) {
+        list.push({
+          label: 'Market',
+          value: 'Market',
+        });
+      }
+      return list;
+    },
+    canPlaceMarketOrder() {
+      const currentWallet = this.$services.wallets.getCurrentWallet();
+      return currentWallet && currentWallet.isLedger !== true;
+    },
   },
 
   data() {
     return {
       actionableHolding: '',
       side: 'Buy',
-      orderTypes: [{
-        label: 'Market',
-        value: 'Market',
-      },
-      {
-        label: 'Limit',
-        value: 'Limit',
-      },
-      ],
       orderType: 'Limit',
       postOnly: false,
       selectedPercent: null,
@@ -375,6 +384,11 @@ export default {
     confirmOrder() {
       if (this.orderType === 'Market') {
         this.$store.commit('setOrderPrice', '');
+        if (this.canPlaceMarketOrder !== true) {
+          this.orderType = 'Limit';
+          this.$services.alerts.error('Unable to place Market order using a Ledger');
+          return;
+        }
       }
 
       this.$store.dispatch('formOrder', {
