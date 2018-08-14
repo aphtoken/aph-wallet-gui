@@ -1,4 +1,4 @@
-<template> 
+<template>
   <section id="dex--order-history">
     <aph-spinner-wrapper identifier="fetchOrderHistory">
       <div class="header">
@@ -120,13 +120,18 @@ export default {
     },
 
     filteredOrders() {
-      if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
-        return this.ordersForTable;
-      }
+      return [
+        {},
+        {},
+        {},
+      ];
+      // if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
+      //   return this.ordersForTable;
+      // }
 
-      return this.ordersForTable.filter((order) => {
-        return order.marketName === this.$store.state.currentMarket.marketName;
-      });
+      // return this.ordersForTable.filter((order) => {
+      //   return order.marketName === this.$store.state.currentMarket.marketName;
+      // });
     },
   },
 

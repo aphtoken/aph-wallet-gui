@@ -67,10 +67,6 @@ export default {
 </script>
 
 <style lang="scss">
-h1.underlined {
-  @extend %underlined-header;
-}
-
 #portfolio-header {
   display: flex;
   flex-direction: row;
@@ -101,6 +97,10 @@ h1.underlined {
 
   .ticker {
     flex: 1;
+
+    h1.underlined {
+      @extend %underlined-header;
+    }
 
     .balance {
       .amount {
