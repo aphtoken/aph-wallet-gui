@@ -120,18 +120,13 @@ export default {
     },
 
     filteredOrders() {
-      return [
-        {},
-        {},
-        {},
-      ];
-      // if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
-      //   return this.ordersForTable;
-      // }
+      if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
+        return this.ordersForTable;
+      }
 
-      // return this.ordersForTable.filter((order) => {
-      //   return order.marketName === this.$store.state.currentMarket.marketName;
-      // });
+      return this.ordersForTable.filter((order) => {
+        return order.marketName === this.$store.state.currentMarket.marketName;
+      });
     },
   },
 
