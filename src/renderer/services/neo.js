@@ -7,9 +7,9 @@ import { BigNumber } from 'bignumber.js';
 import Async from 'async';
 
 import alerts from './alerts';
+import assets from './assets';
 import network from './network';
 import settings from './settings';
-import tokens from './tokens';
 import valuation from './valuation';
 import wallets from './wallets';
 import ledger from './ledger';
@@ -22,6 +22,7 @@ const GAS_ASSET_ID = '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969
 const NEO_ASSET_ID = 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 
 let lastClaimSent;
+let lastVerifiedTokenBalances;
 
 export default {
   createWallet(name, passphrase, passphraseConfirm) {
@@ -383,45 +384,134 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
+        const networkAssets = assets.getNetworkAssets();
+        const userAssets = assets.getUserAssets();
+        const holdingsToQueryBalance = {};
+        const holdings = [];
+        const promises = [];
+
         return rpcClient.query({ method: 'getaccountstate', params: [address] })
           .then((res) => {
-            const localNep5Balances = [];
-            const holdings = [];
-            const promises = [];
-
-            if (!_.find(res.result.balances, (o) => {
-              return o.asset.replace('0x', '') === NEO_ASSET_ID;
-            })) {
-              res.result.balances.push({
-                asset: NEO_ASSET_ID,
-                value: 0,
-              });
-            }
-
-            if (!_.find(res.result.balances, (o) => {
-              return o.asset.replace('0x', '') === GAS_ASSET_ID;
-            })) {
-              res.result.balances.push({
-                asset: GAS_ASSET_ID,
-                value: 0,
-              });
-            }
-
             res.result.balances.forEach((fetchedBalance) => {
-              const holdingBalance = {
-                asset: fetchedBalance.asset.replace('0x', ''),
-                balance: fetchedBalance.value,
-                symbol: fetchedBalance.asset.replace('0x', '') === NEO_ASSET_ID ? 'NEO' : 'GAS',
-                name: fetchedBalance.asset.replace('0x', '') === NEO_ASSET_ID ? 'NEO' : 'GAS',
+              fetchedBalance.assetId = fetchedBalance.asset.replace('0x', '');
+              fetchedBalance.symbol = fetchedBalance.assetId === NEO_ASSET_ID ? 'NEO' : 'GAS';
+
+              if (restrictToSymbol && fetchedBalance.symbol !== restrictToSymbol) {
+                return;
+              }
+
+              const systemAssetHolding = {
+                assetId: fetchedBalance.assetId,
+                balance: new BigNumber(fetchedBalance.value),
+                symbol: fetchedBalance.symbol,
+                name: fetchedBalance.symbol,
                 isNep5: false,
                 contractBalance: new BigNumber(0),
                 totalBalance: new BigNumber(0),
-                decimals: fetchedBalance.asset.replace('0x', '') === NEO_ASSET_ID ? 0 : 8,
+                decimals: fetchedBalance.assetId === NEO_ASSET_ID ? 0 : 8,
+                isUserAsset: true,
               };
-              if (restrictToSymbol && holdingBalance.symbol !== restrictToSymbol) {
-                return;
+              _.set(holdingsToQueryBalance, systemAssetHolding.assetId, systemAssetHolding);
+            });
+
+            const assetToHolding = (asset, isUserAsset) => {
+              const assetId = asset.assetId.replace('0x', '');
+              return {
+                assetId,
+                balance: new BigNumber(0),
+                symbol: asset.symbol,
+                name: asset.name,
+                isNep5: assetId.length === 40,
+                contractBalance: new BigNumber(0),
+                totalBalance: new BigNumber(0),
+                canPull: asset.canPull,
+                isUserAsset,
+              };
+            };
+
+            store.state.assetsThatNeedRefresh.forEach((assetId) => {
+              if (_.has(networkAssets, assetId)) {
+                const asset = assetToHolding(_.get(networkAssets, assetId), false);
+                _.set(holdingsToQueryBalance, asset.assetId, asset);
               }
-              if (holdingBalance.symbol === 'NEO') {
+            });
+
+            if (!lastVerifiedTokenBalances
+              || moment().utc().diff(moment.unix(lastVerifiedTokenBalances), 'milliseconds')
+                > intervals.TOKENS_BALANCES_POLL_ALL) {
+              _.values(networkAssets).forEach((nep5Asset) => {
+                _.set(holdingsToQueryBalance, nep5Asset.assetId, assetToHolding(nep5Asset, false));
+              });
+              lastVerifiedTokenBalances = moment.utc();
+            }
+
+            _.values(userAssets).forEach((nep5Asset) => {
+              const asset = assetToHolding(nep5Asset, true);
+              if (_.has(holdingsToQueryBalance, asset.assetId) === false) {
+                _.set(holdingsToQueryBalance, nep5Asset.assetId, asset);
+              }
+            });
+
+            _.values(holdingsToQueryBalance).forEach((holding) => {
+              if (holding.isNep5 === true) {
+                promises.push(this.fetchNEP5Balance(address, holding.assetId)
+                  .then((val) => {
+                    if (!val.symbol) {
+                      return; // token not found on this network
+                    }
+
+                    holding.balance = new BigNumber(val.balance);
+                    holding.symbol = val.symbol;
+                    holding.name = val.name;
+                    holding.totalBalance = holding.balance;
+                    holding.decimals = val.decimals;
+
+                    store.commit('removeAssetHoldingsNeedRefresh', [holding.assetId]);
+
+                    if (val.balance > 0 || holding.isUserAsset === true) {
+                      if (holding.isUserAsset !== true && holding.totalBalance.isGreaterThan(0)) {
+                        // saw a balance > 0 on this token but we haven't explicitly added to our tokens we hold,
+                        // add to user's assets so it will stay there until explicitly removed
+                        holding.isUserAsset = true;
+                        assets.addUserAsset(holding.assetId);
+                      }
+
+                      holdings.push(holding);
+                    }
+                  })
+                  .catch((e) => {
+                    if (e.message.indexOf('Expected a hexstring but got') > -1) {
+                      // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
+                      assets.removeUserAsset(holding.assetId);
+                    } else if (e.message.indexOf('Invalid results length!') > -1) {
+                      // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
+                    }
+                    reject(e);
+                  }));
+              } else {
+                holdings.push(holding);
+              }
+
+              promises.push(dex.fetchContractBalance(holding.assetId)
+                .then((res) => {
+                  holding.contractBalance = toBigNumber(res);
+                  holding.totalBalance = toBigNumber(holding.balance)
+                    .plus(holding.contractBalance).plus(holding.openOrdersBalance);
+                })
+                .catch((e) => {
+                  alerts.networkException(e);
+                }));
+              promises.push(dex.fetchOpenOrderBalance(holding.assetId)
+                .then((res) => {
+                  holding.openOrdersBalance = toBigNumber(res);
+                  holding.totalBalance = toBigNumber(holding.balance)
+                    .plus(holding.contractBalance).plus(holding.openOrdersBalance);
+                })
+                .catch((e) => {
+                  alerts.networkException(e);
+                }));
+
+              if (holding.symbol === 'NEO') {
                 promises.push(api.getMaxClaimAmountFrom({
                   net: currentNetwork.net,
                   url: currentNetwork.rpc,
@@ -429,140 +519,18 @@ export default {
                   privateKey: currentWallet.privateKey,
                 }, api.neoscan)
                   .then((res) => {
-                    holdingBalance.availableToClaim = toBigNumber(res);
+                    holding.availableToClaim = toBigNumber(res);
                   })
                   .catch((e) => {
                     alerts.networkException(e);
                   }));
               }
-
-              promises.push(dex.fetchContractBalance(holdingBalance.asset)
-                .then((res) => {
-                  holdingBalance.contractBalance = toBigNumber(res);
-                  holdingBalance.totalBalance = toBigNumber(holdingBalance.balance)
-                    .plus(holdingBalance.contractBalance).plus(holdingBalance.openOrdersBalance);
-                })
-                .catch((e) => {
-                  alerts.networkException(e);
-                }));
-              promises.push(dex.fetchOpenOrderBalance(holdingBalance.asset)
-                .then((res) => {
-                  holdingBalance.openOrdersBalance = toBigNumber(res);
-                  holdingBalance.totalBalance = toBigNumber(holdingBalance.balance)
-                    .plus(holdingBalance.contractBalance).plus(holdingBalance.openOrdersBalance);
-                })
-                .catch((e) => {
-                  alerts.networkException(e);
-                }));
-              holdings.push(holdingBalance);
-            });
-
-            tokens.getAllAsArray().forEach((nep5) => {
-              if (nep5.network !== currentNetwork.net) {
-                return;
-              }
-
-              const inMemory = _.get(store.state.nep5Balances, nep5.assetId);
-
-              if (restrictToSymbol && nep5.symbol !== restrictToSymbol) {
-                return;
-              }
-
-              if (inMemory && inMemory.balance === 0 && inMemory.needsRefresh === false) {
-                if (nep5.isCustom === true) {
-                  // We skip looking for balances that are 0 unless it has been determined that they need to be
-                  // refreshed. Seeing a recent transaction for a token will cause the needsRefresh flag to be set.
-                  holdings.push(inMemory);
-                }
-                return;
-              }
-
-              const nep5balance = {
-                asset: nep5.assetId.replace('0x', ''),
-                balance: 0,
-                symbol: '',
-                name: '',
-                isNep5: true,
-                isCustom: nep5.isCustom,
-                contractBalance: new BigNumber(0),
-                totalBalance: new BigNumber(0),
-                decimals: nep5.decimals,
-                needsRefresh: true,
-              };
-              localNep5Balances.push(nep5balance);
-
-              promises.push(this.fetchNEP5Balance(address, nep5.assetId)
-                .then((val) => {
-                  if (!val.symbol) {
-                    // If we can't get a token symbol for the token
-                    // console.log(`Token not found on this network: ${nep5.assetId} ${val.name}`);
-                    nep5balance.needsRefresh = false;
-                    return; // token not found on this network
-                  }
-
-                  nep5balance.balance = val.balance;
-                  nep5balance.symbol = val.symbol;
-                  nep5balance.name = val.name;
-                  nep5balance.totalBalance = toBigNumber(nep5balance.balance).plus(nep5balance.contractBalance);
-                  nep5balance.decimals = val.decimals;
-                  nep5balance.canPull = nep5.canPull;
-                  nep5balance.needsRefresh = false;
-
-                  if (val.balance > 0 || nep5.isCustom === true) {
-                    if (nep5.isCustom !== true && nep5balance.totalBalance.isGreaterThan(0)) {
-                      // saw a balance > 0 on this token but we haven't explicitly added to our tokens we hold,
-                      // mark isCustom = true so it will stay there until explicitly removed
-                      nep5.isCustom = true;
-                      tokens.add(nep5);
-                    }
-
-                    holdings.push(nep5balance);
-                  }
-                })
-                .catch((e) => {
-                  if (e.message.indexOf('Expected a hexstring but got') > -1) {
-                    // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
-                    tokens.remove(nep5.assetId, currentNetwork.net);
-                    nep5balance.needsRefresh = false;
-                  } else if (e.message.indexOf('Invalid results length!') > -1) {
-                    // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
-                    nep5balance.needsRefresh = false;
-                  } /* else {
-                     console.log(`couldn't fetch token: ${nep5.assetId} ${e}`);
-                  } // else mep5balance.needsRefresh will stay true, causing retry getting balance next time */
-
-                  // We don't want to surface these errors to the user.
-                  // alerts.networkException(e);
-                  reject(e);
-                }));
-
-              promises.push(dex.fetchContractBalance(nep5balance.asset)
-                .then((res) => {
-                  nep5balance.contractBalance = toBigNumber(res);
-                  nep5balance.totalBalance = toBigNumber(nep5balance.balance)
-                    .plus(nep5balance.contractBalance).plus(nep5balance.openOrdersBalance);
-                })
-                .catch((e) => {
-                  alerts.networkException(e);
-                }));
-              promises.push(dex.fetchOpenOrderBalance(nep5balance.asset)
-                .then((res) => {
-                  nep5balance.openOrdersBalance = toBigNumber(res);
-                  nep5balance.totalBalance = toBigNumber(nep5balance.balance)
-                    .plus(nep5balance.contractBalance).plus(nep5balance.openOrdersBalance);
-                })
-                .catch((e) => {
-                  alerts.networkException(e);
-                }));
             });
 
             return Promise.all(promises)
               .then(() => {
                 const valuationsPromises = [];
                 const lowercaseCurrency = settings.getCurrency().toLowerCase();
-
-                // It's safe to do this even when restrictToSymbol is set since this only adds or replaces balances.
-                store.commit('putAllNep5Balances', localNep5Balances);
 
                 holdings.forEach((holdingBalance) => {
                   valuationsPromises.push((done) => {
@@ -618,7 +586,7 @@ export default {
 
   getHolding(assetId) {
     const holding = _.find(store.state.holdings, (o) => {
-      return o.asset === assetId;
+      return o.assetId === assetId;
     });
 
     if (holding) {
@@ -644,25 +612,7 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        const defaultList = [{
-          symbol: 'APH',
-          assetId: '591eedcd379a8981edeefe04ef26207e1391904a',
-          isCustom: true, // always show even if 0 balance
-          name: 'Aphelion',
-          network: 'TestNet',
-        }, {
-          symbol: 'APH',
-          assetId: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
-          isCustom: true, // always show even if 0 balance,
-          name: 'Aphelion',
-          network: 'MainNet',
-        },
-        ];
-        const localTokens = [];
-
-        defaultList.forEach((token) => {
-          localTokens.push(token);
-        });
+        const assetsMap = {};
         try {
           return axios.get(`${currentNetwork.aph}/tokens`)
             .then((res) => {
@@ -670,27 +620,15 @@ export default {
                 const token = {
                   symbol: fetchedToken.symbol,
                   assetId: fetchedToken.scriptHash.replace('0x', ''),
-                  isCustom: false,
                   name: fetchedToken.name,
-                  network: currentNetwork.net,
                   decimals: fetchedToken.decimals,
                   canPull: fetchedToken.canPull,
+                  sale: fetchedToken.sale,
                 };
-                let isDefaultToken = false;
-                defaultList.forEach((defaultToken) => {
-                  if (defaultToken.assetId === token.assetId && defaultToken.network === token.network) {
-                    isDefaultToken = true;
-                  }
-                });
-                if (fetchedToken.sale) {
-                  token.sale = fetchedToken.sale;
-                }
-                if (!isDefaultToken) {
-                  localTokens.push(token);
-                }
+                _.set(assetsMap, token.assetId, token);
               });
 
-              tokens.putAll(localTokens);
+              assets.updateNetworkAssets(assetsMap);
               if (done) {
                 done();
               }
@@ -1137,11 +1075,10 @@ export default {
 
             return api.nep5.getToken(currentNetwork.rpc, scriptHash, currentWallet.address)
               .then((token) => {
-                if (tokens.tokenExists(scriptHash.replace('0x', ''), currentNetwork.net) !== true) {
-                  tokens.add({
+                if (assets.tokenExists(scriptHash.replace('0x', ''), currentNetwork.net) !== true) {
+                  assets.addNetworkAsset.add({
                     symbol: token.symbol,
                     assetId: scriptHash.replace('0x', ''),
-                    isCustom: true,
                     name: token.name,
                     network: currentNetwork.net,
                   });

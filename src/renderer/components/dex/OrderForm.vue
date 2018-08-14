@@ -111,13 +111,13 @@ export default {
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
-          !== this.$constants.assets.DEX_SCRIPT_HASH;
+          !== this.$services.assets.DEX_SCRIPT_HASH;
     },
 
     quoteHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.currentMarket.quoteAssetId;
+          return o.assetId === this.currentMarket.quoteAssetId;
         });
 
         if (holding) {
@@ -135,7 +135,7 @@ export default {
     baseHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.currentMarket.baseAssetId;
+          return o.assetId === this.currentMarket.baseAssetId;
         });
 
         if (holding) {
@@ -153,7 +153,7 @@ export default {
     aphHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.$constants.assets.APH;
+          return o.assetId === this.$services.assets.APH;
         });
 
         if (holding) {
@@ -410,7 +410,7 @@ export default {
       this.$store.commit('setDepositWithdrawModalModel', null);
     },
     depositWithdrawConfirmed(isDeposit, holding, amount) {
-      this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.asset, Number(amount))
+      this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.assetId, Number(amount))
         .then(() => {
           const message = this.$t('relayedToNetwork', {
             amount,
@@ -429,8 +429,8 @@ export default {
       this.$store.commit('setOrderToConfirm', null);
     },
     setMarket() {
-      this.$services.dex.setMarket(this.$constants.assets.APH,
-        this.$constants.assets.GAS,
+      this.$services.dex.setMarket(this.$services.assets.APH,
+        this.$services.assets.GAS,
         10, 0.00001, 0.0000, 0.0001)
         .then(() => {
           this.$services.alerts.success(this.$t('setMarketRelayed'));

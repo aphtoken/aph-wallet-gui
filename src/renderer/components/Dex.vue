@@ -100,7 +100,7 @@ export default {
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
-          !== this.$constants.assets.DEX_SCRIPT_HASH;
+          !== this.$services.assets.DEX_SCRIPT_HASH;
     },
   },
 
