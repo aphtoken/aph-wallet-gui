@@ -81,6 +81,13 @@ import { BigNumber } from 'bignumber.js';
 import AphOrderConfirmationModal from '../modals/OrderConfirmationModal';
 import AphDepositWithdrawModal from '../modals/DepositWithdrawModal';
 
+const ORDER_TYPES_LIST = [
+  {
+    label: 'Limit',
+    value: 'Limit',
+  },
+];
+
 let loadHoldingsIntervalId;
 
 export default {
@@ -269,21 +276,27 @@ export default {
       }
       return !this.$store.state.orderQuantity || !this.$store.state.orderPrice || this.$isPending('placeOrder');
     },
+    orderTypes() {
+      if (this.canPlaceMarketOrder) {
+        return _.concat(ORDER_TYPES_LIST, [
+          {
+            label: 'Market',
+            value: 'Market',
+          },
+        ]);
+      }
+      return ORDER_TYPES_LIST;
+    },
+    canPlaceMarketOrder() {
+      const currentWallet = this.$services.wallets.getCurrentWallet();
+      return currentWallet && currentWallet.isLedger !== true;
+    },
   },
 
   data() {
     return {
       actionableHolding: '',
       side: 'Buy',
-      orderTypes: [{
-        label: 'Market',
-        value: 'Market',
-      },
-      {
-        label: 'Limit',
-        value: 'Limit',
-      },
-      ],
       orderType: 'Limit',
       postOnly: false,
       selectedPercent: null,
@@ -375,6 +388,11 @@ export default {
     confirmOrder() {
       if (this.orderType === 'Market') {
         this.$store.commit('setOrderPrice', '');
+        if (this.canPlaceMarketOrder !== true) {
+          this.orderType = 'Limit';
+          this.$services.alerts.error('Unable to place Market order using a Ledger');
+          return;
+        }
       }
 
       this.$store.dispatch('formOrder', {

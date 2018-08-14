@@ -18,15 +18,14 @@ import { toBigNumber } from './formatting.js';
 
 import { claiming, intervals } from '../constants';
 
-const TX_ATTR_USAGE_SENDER = 0xfa;
 const TX_ATTR_USAGE_SCRIPT = 0x20;
 const TX_ATTR_USAGE_HEIGHT = 0xf0;
-
 const TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE = 0xA1;
 const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xA2;
-const TX_ATTR_USAGE_WITHDRAW_ASSET_ID = 0xA3;
-const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xA4;
-const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xA5;
+const TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID = 0xA3;
+const TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID = 0xA4;
+const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xA5;
+const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xA6;
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
 const SIGNATUREREQUESTTYPE_CLAIM_GAS_MOVE_NEO = '94';
@@ -44,7 +43,7 @@ export default {
             resolve(res.data.markets);
           })
           .catch((e) => {
-            alerts.exception(new Error(`APH API Error: ${e.message}`));
+            alerts.exception(`APH API Error: ${e.message}`);
           });
       } catch (e) {
         reject(e);
@@ -194,7 +193,7 @@ export default {
             resolve(history);
           })
           .catch((e) => {
-            alerts.exception(new Error(`APH API Error: ${e.message}`));
+            alerts.exception(`APH API Error: ${e.message}`);
           });
       } catch (e) {
         reject(e);
@@ -305,7 +304,7 @@ export default {
             resolve(orders);
           })
           .catch((e) => {
-            alerts.exception(new Error(`APH API Error: ${e.message}`));
+            alerts.exception(`APH API Error: ${e.message}`);
           });
       } catch (e) {
         reject(e);
@@ -396,12 +395,19 @@ export default {
         }
 
         const currentNetwork = network.getSelectedNetwork();
+        const currentWallet = wallets.getCurrentWallet();
         // call API to get offers to take
         /* eslint-disable max-len */
         axios.get(`${currentNetwork.aph}/book/match/${order.market.marketName}?side=${order.side}&quantity=${order.quantity.toString()}&limit=${order.price ? order.price.toString() : ''}`)
           .then((res) => {
             if (!res.data) {
-              reject(new Error('APH API Invalid Response'));
+              reject('APH API Invalid Response');
+              return;
+            }
+
+            if (res.data.offersToTake.length > 0
+              && currentWallet.isLedger === true) {
+              reject('Unable to place taker orders with a Ledger');
               return;
             }
 
@@ -474,7 +480,7 @@ export default {
             resolve(order);
           })
           .catch((e) => {
-            reject(new Error(`APH API Error: ${e.message}`));
+            reject(`APH API Error: ${e.message}`);
           });
       } catch (e) {
         reject(e);
@@ -505,8 +511,8 @@ export default {
             .then((o) => {
               this.placeOrder(o, true);
             })
-            .catch(() => {
-              reject('Failed to make automatic deposits');
+            .catch((error) => {
+              reject(`Failed to make automatic deposits. Error: ${error}`);
             });
 
           Vue.set(order, 'status', 'Depositing');
@@ -575,7 +581,7 @@ export default {
               })
               .catch((e) => {
                 // console.log(e);
-                reject(new Error(`APH API Error: ${e.message}`));
+                reject(`APH API Error: ${e.message}`);
               });
           })
           .catch(e => reject(e));
@@ -841,7 +847,7 @@ export default {
                 store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
               })
               .catch((e) => {
-                reject(new Error(`APH API Error: ${e.message}`));
+                reject(`APH API Error: ${e.message}`);
               });
           })
           .catch((e) => {
@@ -1051,16 +1057,16 @@ export default {
               this.calculateWithdrawInputsAndOutputs(c, assetId, quantity)
                 .then(() => {
                   const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK);
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()));
+                  c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0));
+                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
 
                   c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
                   c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
                   resolveTx(c);
                 })
                 .catch(() => {
@@ -1252,14 +1258,13 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW);
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
+            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0));
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
 
-            c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
 
             if (token.canPull !== false) {
@@ -1267,7 +1272,7 @@ export default {
             }
 
             c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
             return api.signTx(c);
           })
           .then((c) => {
@@ -1408,17 +1413,16 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW);
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
+            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0));
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
 
-            c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
             return api.signTx(c);
           })
           .then((c) => {
@@ -1954,10 +1958,9 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_SENDER, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
             return api.signTx(c);
           })
           .then((c) => {
@@ -2066,7 +2069,7 @@ export default {
         })
         .then((c) => {
           const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-          c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_CLAIM_GAS_MOVE_NEO);
+          c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS_MOVE_NEO);
           c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
           c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
             u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
@@ -2149,7 +2152,7 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_CLAIM_GAS);
+            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS);
             c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
