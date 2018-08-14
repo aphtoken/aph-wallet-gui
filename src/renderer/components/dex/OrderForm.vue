@@ -275,7 +275,7 @@ export default {
         value: 'Limit',
       },
       ];
-      if (this.canPlaceMarketOrder === true) {
+      if (this.canPlaceMarketOrder) {
         list.push({
           label: 'Market',
           value: 'Market',

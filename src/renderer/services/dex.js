@@ -42,7 +42,7 @@ export default {
             resolve(res.data.markets);
           })
           .catch((e) => {
-            alerts.exception(new Error(`APH API Error: ${e.message}`));
+            alerts.exception(`APH API Error: ${e.message}`);
           });
       } catch (e) {
         reject(e);
@@ -192,7 +192,7 @@ export default {
             resolve(history);
           })
           .catch((e) => {
-            alerts.exception(new Error(`APH API Error: ${e.message}`));
+            alerts.exception(`APH API Error: ${e.message}`);
           });
       } catch (e) {
         reject(e);
@@ -303,7 +303,7 @@ export default {
             resolve(orders);
           })
           .catch((e) => {
-            alerts.exception(new Error(`APH API Error: ${e.message}`));
+            alerts.exception(`APH API Error: ${e.message}`);
           });
       } catch (e) {
         reject(e);
@@ -400,13 +400,13 @@ export default {
         axios.get(`${currentNetwork.aph}/book/match/${order.market.marketName}?side=${order.side}&quantity=${order.quantity.toString()}&limit=${order.price ? order.price.toString() : ''}`)
           .then((res) => {
             if (!res.data) {
-              reject(new Error('APH API Invalid Response'));
+              reject('APH API Invalid Response');
               return;
             }
 
             if (res.data.offersToTake.length > 0
               && currentWallet.isLedger === true) {
-              reject(new Error('Unable to place taker orders with a Ledger'));
+              reject('Unable to place taker orders with a Ledger');
               return;
             }
 
@@ -479,7 +479,7 @@ export default {
             resolve(order);
           })
           .catch((e) => {
-            reject(new Error(`APH API Error: ${e.message}`));
+            reject(`APH API Error: ${e.message}`);
           });
       } catch (e) {
         reject(e);
@@ -580,7 +580,7 @@ export default {
               })
               .catch((e) => {
                 // console.log(e);
-                reject(new Error(`APH API Error: ${e.message}`));
+                reject(`APH API Error: ${e.message}`);
               });
           })
           .catch(e => reject(e));
@@ -825,7 +825,7 @@ export default {
                 store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
               })
               .catch((e) => {
-                reject(new Error(`APH API Error: ${e.message}`));
+                reject(`APH API Error: ${e.message}`);
               });
           })
           .catch((e) => {
