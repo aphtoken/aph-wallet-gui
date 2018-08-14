@@ -22,13 +22,15 @@ const TX_ATTR_USAGE_SENDER = 0xfa;
 const TX_ATTR_USAGE_SCRIPT = 0x20;
 const TX_ATTR_USAGE_HEIGHT = 0xf0;
 
-const TX_ATTR_USAGE_WITHDRAW_STEP = 0xF1;
-const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xF2;
-const TX_ATTR_USAGE_WITHDRAW_ASSET_ID = 0xF3;
-const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xF4;
-const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xF5;
-const WITHDRAW_STEP_MARK = '91';
-const WITHDRAW_STEP_WITHDRAW = '92';
+const TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE = 0xA1;
+const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xA2;
+const TX_ATTR_USAGE_WITHDRAW_ASSET_ID = 0xA3;
+const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xA4;
+const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xA5;
+const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
+const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
+const SIGNATUREREQUESTTYPE_CLAIM_GAS_MOVE_NEO = '94';
+const SIGNATUREREQUESTTYPE_CLAIM_GAS = '95';
 
 let lastUTXOWithdrawn;
 
@@ -1049,7 +1051,7 @@ export default {
               this.calculateWithdrawInputsAndOutputs(c, assetId, quantity)
                 .then(() => {
                   const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_MARK);
+                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK);
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()));
@@ -1250,7 +1252,7 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_WITHDRAW);
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
@@ -1406,7 +1408,7 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_WITHDRAW);
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash);
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ASSET_ID, u.reverseHex(assetId));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity));
@@ -2000,6 +2002,216 @@ export default {
         reject(e);
       }
     });
+  },
+
+
+  claimGasForDexContract() {
+    const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+    return this.fetchHoldings(dexAddress, 'NEO')
+      .then((h) => {
+        const neoAmount = h.holdings[0].balance;
+
+        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
+          this.sendClaimGasForDexContract();
+        } else {
+          // send neo to ourself to make all gas available for claim
+          this.clearDexContractNeo(neoAmount)
+            .then(() => {
+              setTimeout(() => {
+                // send the claim gas
+                this.sendClaimGasForDexContract();
+              }, 30 * 1000);
+            })
+            .catch((e) => {
+              alerts.exception(e);
+            });
+        }
+      })
+      .catch((e) => {
+        alerts.networkException(e);
+      });
+  },
+
+  clearDexContractNeo(neoAmount) {
+    return new Promise((resolve, reject) => {
+      const currentWallet = wallets.getCurrentWallet();
+      const currentNetwork = network.getSelectedNetwork();
+      const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+      const intentAmounts = { NEO: neoAmount };
+
+      const config = {
+        net: currentNetwork.net,
+        url: currentNetwork.rpc,
+        address: dexAddress,
+        intents: api.makeIntent(intentAmounts, dexAddress),
+        fees: currentNetwork.fee,
+        account: new wallet.Account(currentWallet.wif),
+      };
+
+      api.fillKeys(config)
+        .then((c) => {
+          return new Promise((resolveBalance) => {
+            api.neoscan.getBalance(c.net, dexAddress)
+              .then((balance) => {
+                c.balance = balance;
+                resolveBalance(c);
+              })
+              .catch((e) => {
+                reject(e);
+              });
+          });
+        })
+        .then((c) => {
+          return api.createTx(c, 'contract');
+        })
+        .then((c) => {
+          const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+          c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_CLAIM_GAS_MOVE_NEO);
+          c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+          c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+            u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+          return api.signTx(c);
+        })
+        .then((c) => {
+          const attachInvokedContract = {
+            invocationScript: ('00').repeat(2),
+            verificationScript: '',
+          };
+
+          // We need to order this for the VM.
+          const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
+          if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+            c.tx.scripts.push(attachInvokedContract);
+          } else {
+            c.tx.scripts.unshift(attachInvokedContract);
+          }
+
+          return c;
+        })
+        .then((c) => {
+          return api.sendTx(c);
+        })
+        .then((c) => {
+          resolve({
+            success: c.response.result,
+            tx: c.tx,
+          });
+        })
+        .catch((e) => {
+          const dump = {
+            net: config.net,
+            address: config.address,
+            intents: config.intents,
+            balance: config.balance,
+            script: config.script,
+            gas: config.gas,
+            tx: config.tx,
+          };
+          console.log(dump);
+          reject(e);
+        });
+    });
+  },
+
+  sendClaimGasForDexContract() {
+    const currentWallet = wallets.getCurrentWallet();
+    const currentNetwork = network.getSelectedNetwork();
+    const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+
+    const config = {
+      net: currentNetwork.net,
+      url: currentNetwork.rpc,
+      address: dexAddress,
+      account: new wallet.Account(currentWallet.wif),
+    };
+
+    api.getMaxClaimAmountFrom({
+      net: network.getSelectedNetwork().net,
+      url: currentNetwork.rpc,
+      address: dexAddress,
+    }, api.neoscan)
+      .then((res) => {
+        api.fillKeys(config)
+          .then((c) => {
+            return new Promise((resolveBalance) => {
+              api.neoscan.getBalance(c.net, dexAddress)
+                .then((balance) => {
+                  c.balance = balance;
+                  resolveBalance(c);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            });
+          })
+          .then((c) => {
+            return api.createTx(c, 'claim');
+          })
+          .then((c) => {
+            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, SIGNATUREREQUESTTYPE_CLAIM_GAS);
+            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+            c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+            return api.signTx(c);
+          })
+          .then((c) => {
+            const attachInvokedContract = {
+              invocationScript: ('00').repeat(2),
+              verificationScript: '',
+            };
+
+            // We need to order this for the VM.
+            const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
+            if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+              c.tx.scripts.push(attachInvokedContract);
+            } else {
+              c.tx.scripts.unshift(attachInvokedContract);
+            }
+
+            return c;
+          })
+          .then((c) => {
+            return api.sendTx(c);
+          })
+          .then((c) => {
+            resolve({
+              success: c.response.result,
+              tx: c.tx,
+            });
+          })
+          .catch((e) => {
+            const dump = {
+              net: config.net,
+              address: config.address,
+              intents: config.intents,
+              balance: config.balance,
+              script: config.script,
+              gas: config.gas,
+              tx: config.tx,
+            };
+            console.log(dump);
+            reject(e);
+          });
+
+        api.claimGas(config)
+          .then((res) => {
+            res.tx.lastBroadcasted = moment().utc();
+            this.monitorTransactionConfirmation(res.tx)
+              .then(() => {
+                store.dispatch('fetchRecentTransactions');
+              })
+              .catch((e) => {
+                alerts.error(e);
+              });
+          })
+          .catch((e) => {
+            alerts.exception(e);
+          });
+      })
+      .catch((e) => {
+        alerts.exception(e);
+      });
   },
 
 };

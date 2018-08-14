@@ -854,7 +854,6 @@ export default {
       url: currentNetwork.rpc,
       address: currentWallet.address,
     }, api.neoscan)
-    // maybe we should stand up our own version ?
       .then((balance) => {
         if (balance.net !== currentNetwork.net) {
           alerts.error('Unable to read address balance from neonDB or neoscan api. Please try again later.');
