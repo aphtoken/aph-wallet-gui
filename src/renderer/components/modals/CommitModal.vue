@@ -41,7 +41,7 @@ export default {
     aphHolding() {
       if (this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.$constants.assets.APH;
+          return o.assetId === this.$services.assets.APH;
         });
 
         if (holding) {
