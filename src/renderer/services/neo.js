@@ -384,8 +384,8 @@ export default {
 
     return new Promise((resolve, reject) => {
       try {
-        const networkAssets = assets.getNetworkAssetAsArray();
-        const userAssets = assets.getUserAssetsAsArray();
+        const networkAssets = assets.getNetworkAssets();
+        const userAssets = assets.getUserAssets();
         const holdingsToQueryBalance = {};
         const holdings = [];
         const promises = [];
@@ -429,17 +429,23 @@ export default {
               };
             };
 
+            store.state.assetsThatNeedRefresh.forEach((assetId) => {
+              if (_.has(networkAssets, assetId)) {
+                const asset = assetToHolding(_.get(networkAssets, assetId), false);
+                _.set(holdingsToQueryBalance, asset.assetId, asset);
+              }
+            });
 
             if (!lastVerifiedTokenBalances
               || moment().utc().diff(moment.unix(lastVerifiedTokenBalances), 'milliseconds')
                 > intervals.TOKENS_BALANCES_POLL_ALL) {
-              networkAssets.forEach((nep5Asset) => {
+              _.values(networkAssets).forEach((nep5Asset) => {
                 _.set(holdingsToQueryBalance, nep5Asset.assetId, assetToHolding(nep5Asset, false));
               });
               lastVerifiedTokenBalances = moment.utc();
             }
 
-            userAssets.forEach((nep5Asset) => {
+            _.values(userAssets).forEach((nep5Asset) => {
               const asset = assetToHolding(nep5Asset, true);
               if (_.has(holdingsToQueryBalance, asset.assetId) === false) {
                 _.set(holdingsToQueryBalance, nep5Asset.assetId, asset);
@@ -460,6 +466,8 @@ export default {
                     holding.totalBalance = holding.balance;
                     holding.decimals = val.decimals;
 
+                    store.commit('removeAssetHoldingsNeedRefresh', [holding.assetId]);
+
                     if (val.balance > 0 || holding.isUserAsset === true) {
                       if (holding.isUserAsset !== true && holding.totalBalance.isGreaterThan(0)) {
                         // saw a balance > 0 on this token but we haven't explicitly added to our tokens we hold,
@@ -477,12 +485,7 @@ export default {
                       assets.removeUserAsset(holding.assetId);
                     } else if (e.message.indexOf('Invalid results length!') > -1) {
                       // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
-                    } /* else {
-                     console.log(`couldn't fetch token: ${nep5.assetId} ${e}`);
-                  } // else mep5balance.needsRefresh will stay true, causing retry getting balance next time */
-
-                    // We don't want to surface these errors to the user.
-                    // alerts.networkException(e);
+                    }
                     reject(e);
                   }));
               } else {

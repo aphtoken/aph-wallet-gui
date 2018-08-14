@@ -4,7 +4,6 @@ import moment from 'moment';
 
 import { requests } from '../constants';
 import { alerts, db, neo, dex } from '../services';
-import { store } from './index';
 
 export {
   clearActiveTransaction,
@@ -17,6 +16,7 @@ export {
   orderBookSnapshotReceived,
   orderBookUpdateReceived,
   putTransactionDetail,
+  removeAssetHoldingsNeedRefresh,
   resetRequests,
   setAcceptCommitInfo,
   setAcceptDexDemoVersion,
@@ -125,6 +125,14 @@ function putTransactionDetail(state, transactionDetail) {
   _.set(details, transactionDetail.txid, transactionDetail);
 }
 
+function removeAssetHoldingsNeedRefresh(state, assetIds) {
+  if (state.assetsThatNeedRefresh.length > 0) {
+    assetIds.forEach((assetId) => {
+      _.remove(state.assetsThatNeedRefresh, refreshId => assetId === refreshId);
+    });
+  }
+}
+
 function resetRequests(state) {
   state.requests = {};
 }
@@ -224,9 +232,8 @@ async function setHoldings(state, holdings) {
 
 function setAssetHoldingsNeedRefresh(state, assetIds) {
   assetIds.forEach((assetId) => {
-    const holding = _.get(store.state.nep5Balances, assetId);
-    if (holding) {
-      holding.needsRefresh = true;
+    if (assetId) {
+      state.assetsThatNeedRefresh.push(assetId);
     }
   });
 }

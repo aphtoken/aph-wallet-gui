@@ -858,7 +858,7 @@ export default {
             reject(`Insufficient balance of asset '${holdingAsset}'.`);
             return;
           }
-          if (holding.needsRefresh === true) {
+          if (_.includes(store.state.assetsThatNeedRefresh, holding.assetId)) {
             reject(`Balance of asset '${holdingAsset}' is currently refreshing. Please try again.`);
             return;
           }

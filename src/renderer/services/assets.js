@@ -63,7 +63,7 @@ export default {
     return storage.get(ASSETS_STORAGE_KEY(currentNetwork.net));
   },
 
-  getNetworkAssetAsArray() {
+  getNetworkAssetsAsArray() {
     return _.sortBy(_.values(this.getNetworkAssets()), [token => token.symbol.toLowerCase()], ['symbol']);
   },
 
