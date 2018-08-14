@@ -81,6 +81,13 @@ import { BigNumber } from 'bignumber.js';
 import AphOrderConfirmationModal from '../modals/OrderConfirmationModal';
 import AphDepositWithdrawModal from '../modals/DepositWithdrawModal';
 
+const ORDER_TYPES_LIST = [
+  {
+    label: 'Limit',
+    value: 'Limit',
+  },
+];
+
 let loadHoldingsIntervalId;
 
 export default {
@@ -270,18 +277,15 @@ export default {
       return !this.$store.state.orderQuantity || !this.$store.state.orderPrice || this.$isPending('placeOrder');
     },
     orderTypes() {
-      const list = [{
-        label: 'Limit',
-        value: 'Limit',
-      },
-      ];
       if (this.canPlaceMarketOrder) {
-        list.push({
-          label: 'Market',
-          value: 'Market',
-        });
+        return _.concat(ORDER_TYPES_LIST, [
+          {
+            label: 'Market',
+            value: 'Market',
+          },
+        ]);
       }
-      return list;
+      return ORDER_TYPES_LIST;
     },
     canPlaceMarketOrder() {
       const currentWallet = this.$services.wallets.getCurrentWallet();
