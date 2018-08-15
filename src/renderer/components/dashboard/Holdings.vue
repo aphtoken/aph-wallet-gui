@@ -32,8 +32,8 @@ export default {
   },
 
   methods: {
-    isActive({ asset }) {
-      return _.get(this.$store.state.statsToken, 'asset') === asset;
+    isActive({ assetId }) {
+      return _.get(this.$store.state.statsToken, 'assetId') === assetId;
     },
 
     viewHoldingDetail(holding) {
