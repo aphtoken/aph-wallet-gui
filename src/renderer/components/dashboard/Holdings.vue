@@ -11,6 +11,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+
 export default {
   computed: {
     holdings() {
