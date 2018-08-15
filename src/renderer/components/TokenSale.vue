@@ -66,7 +66,7 @@ export default {
 
   computed: {
     tokens() {
-      const list = this.$services.assets.getAllAsArray().reduce(
+      const list = this.$services.assets.getNetworkAssetsAsArray().reduce(
         (result, { symbol, name, assetId, network, sale }) => {
           if (!sale || network !== this.$services.network.getSelectedNetwork().net
               || moment(sale.endDate) < moment().utc()) {
