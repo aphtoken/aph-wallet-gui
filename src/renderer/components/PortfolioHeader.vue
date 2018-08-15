@@ -68,10 +68,11 @@ export default {
 
 <style lang="scss">
 #portfolio-header {
+  align-items: center;
   display: flex;
   flex-direction: row;
-  padding: $space-lg $space-lg 0;
-  align-items: center;
+  flex: none;
+  padding: $space-lg $space-lg $space;
 
   .simple-donut {
     margin: 0 $space-xl 0 0;
