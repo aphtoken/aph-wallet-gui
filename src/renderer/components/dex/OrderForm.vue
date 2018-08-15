@@ -81,6 +81,13 @@ import { BigNumber } from 'bignumber.js';
 import AphOrderConfirmationModal from '../modals/OrderConfirmationModal';
 import AphDepositWithdrawModal from '../modals/DepositWithdrawModal';
 
+const ORDER_TYPES_LIST = [
+  {
+    label: 'Limit',
+    value: 'Limit',
+  },
+];
+
 let loadHoldingsIntervalId;
 
 export default {
@@ -111,13 +118,13 @@ export default {
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
-          !== this.$constants.assets.DEX_SCRIPT_HASH;
+          !== this.$services.assets.DEX_SCRIPT_HASH;
     },
 
     quoteHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.currentMarket.quoteAssetId;
+          return o.assetId === this.currentMarket.quoteAssetId;
         });
 
         if (holding) {
@@ -135,7 +142,7 @@ export default {
     baseHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.currentMarket.baseAssetId;
+          return o.assetId === this.currentMarket.baseAssetId;
         });
 
         if (holding) {
@@ -153,7 +160,7 @@ export default {
     aphHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
         const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.asset === this.$constants.assets.APH;
+          return o.assetId === this.$services.assets.APH;
         });
 
         if (holding) {
@@ -269,21 +276,27 @@ export default {
       }
       return !this.$store.state.orderQuantity || !this.$store.state.orderPrice || this.$isPending('placeOrder');
     },
+    orderTypes() {
+      if (this.canPlaceMarketOrder) {
+        return _.concat(ORDER_TYPES_LIST, [
+          {
+            label: 'Market',
+            value: 'Market',
+          },
+        ]);
+      }
+      return ORDER_TYPES_LIST;
+    },
+    canPlaceMarketOrder() {
+      const currentWallet = this.$services.wallets.getCurrentWallet();
+      return currentWallet && currentWallet.isLedger !== true;
+    },
   },
 
   data() {
     return {
       actionableHolding: '',
       side: 'Buy',
-      orderTypes: [{
-        label: 'Market',
-        value: 'Market',
-      },
-      {
-        label: 'Limit',
-        value: 'Limit',
-      },
-      ],
       orderType: 'Limit',
       postOnly: false,
       selectedPercent: null,
@@ -375,6 +388,11 @@ export default {
     confirmOrder() {
       if (this.orderType === 'Market') {
         this.$store.commit('setOrderPrice', '');
+        if (this.canPlaceMarketOrder !== true) {
+          this.orderType = 'Limit';
+          this.$services.alerts.error('Unable to place Market order using a Ledger');
+          return;
+        }
       }
 
       this.$store.dispatch('formOrder', {
@@ -410,7 +428,7 @@ export default {
       this.$store.commit('setDepositWithdrawModalModel', null);
     },
     depositWithdrawConfirmed(isDeposit, holding, amount) {
-      this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.asset, Number(amount))
+      this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.assetId, Number(amount))
         .then(() => {
           const message = this.$t('relayedToNetwork', {
             amount,
@@ -429,8 +447,8 @@ export default {
       this.$store.commit('setOrderToConfirm', null);
     },
     setMarket() {
-      this.$services.dex.setMarket(this.$constants.assets.APH,
-        this.$constants.assets.GAS,
+      this.$services.dex.setMarket(this.$services.assets.APH,
+        this.$services.assets.GAS,
         10, 0.00001, 0.0000, 0.0001)
         .then(() => {
           this.$services.alerts.success(this.$t('setMarketRelayed'));

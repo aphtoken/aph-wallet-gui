@@ -2,7 +2,7 @@
 import moment from 'moment';
 import { BigNumber } from 'bignumber.js';
 
-import { alerts, db, neo, network, tokens, wallets, ledger, dex } from '../services';
+import { alerts, assets, db, neo, network, wallets, ledger, dex } from '../services';
 import { timeouts } from '../constants';
 import router from '../router';
 
@@ -34,7 +34,8 @@ export {
 };
 
 function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
-  const allTokens = tokens.getAllAsArray();
+  const networkAssets = assets.getNetworkAssets();
+  const userAssets = assets.getUserAssets();
   const currentNetwork = network.getSelectedNetwork();
   let token;
 
@@ -42,14 +43,12 @@ function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
 
   hashOrSymbol = hashOrSymbol.replace('0x', '');
 
-  token = _.find(allTokens, (o) => {
-    return o.symbol === hashOrSymbol && o.network === currentNetwork.net;
+  token = _.find(_.values(networkAssets), (o) => {
+    return o.symbol === hashOrSymbol;
   });
 
   if (!token) {
-    token = _.find(allTokens, (o) => {
-      return o.assetId === hashOrSymbol && o.network === currentNetwork.net;
-    });
+    token = _.get(networkAssets, hashOrSymbol);
   }
 
   if (!token) {
@@ -58,18 +57,13 @@ function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
     /* eslint-enable max-len */
   }
 
-  if (token.isCustom) {
+  if (_.has(userAssets, token.assetId)) {
     /* eslint-disable max-len */
     return commit('failRequest', { identifier: 'addToken', message: `'${hashOrSymbol}' is already in your token list ${currentNetwork.net}` });
     /* eslint-enable max-len */
   }
 
-  tokens.add({
-    symbol: token.symbol,
-    assetId: token.assetId.replace('0x', ''),
-    isCustom: true,
-    network: network.getSelectedNetwork().net,
-  });
+  assets.addUserAsset(token.assetId);
 
   dispatch('fetchHoldings', { done });
 
