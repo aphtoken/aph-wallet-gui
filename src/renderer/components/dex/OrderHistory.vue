@@ -5,10 +5,10 @@
         <h1 :class="[{selected: tab === 'Open'}]" @click="selectTab('Open')">{{$t('openOrders')}} ({{ openOrders.length }})</h1>
         <h1 :class="[{selected: tab === 'Completed'}]" @click="selectTab('Completed')">{{$t('completedOrders')}} ({{ completedOrders.length }})</h1>
       </div>
-      <div class="body">
+      <div class="body" ref="scroll">
         <div class="history">
           <table class="order-history-table">
-            <thead>
+            <thead ref="thead">
               <tr>
                 <th>{{ $t('order') }}</th>
                 <th>{{ $t('pairLc') }}</th>
@@ -69,6 +69,7 @@ let cancelledOrders = {};
 export default {
   beforeDestroy() {
     clearInterval(loadOrdersIntervalId);
+    this.$refs.scroll.removeEventListener('scroll', this.fixHeader);
   },
 
   computed: {
@@ -131,6 +132,7 @@ export default {
   },
 
   mounted() {
+    this.$refs.scroll.addEventListener('scroll', this.fixHeader);
     this.loadOrders();
 
     loadOrdersIntervalId = setInterval(() => {
@@ -145,6 +147,12 @@ export default {
   },
 
   methods: {
+    fixHeader() {
+      this.$refs.thead.style.transform = `translate(0, ${
+        this.$refs.scroll.scrollTop
+      }px)`;
+    },
+
     selectTab(tab) {
       this.tab = tab;
     },
@@ -205,6 +213,7 @@ export default {
   .body {
     padding: $space;
     height: calc(100% - 73px);
+    overflow-y: auto;
 
     .order-history-table {
       @extend %dex-table;
@@ -218,10 +227,6 @@ export default {
       }
 
       tbody {
-        display: block;
-        height: 6rem;
-        overflow-y: auto;
-
         .status > div {
           padding: 1px 0;
         }
