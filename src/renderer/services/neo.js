@@ -827,6 +827,12 @@ export default {
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
+    const token = assets.getNetworkAsset(assetId);
+    if (token.decimals >= 0 && token.decimals < 8) {
+      // Adjust for the token's number of decimals.
+      amount = toBigNumber(amount).dividedBy(10 ** (8 - token.decimals));
+    }
+
     const config = {
       net: currentNetwork.net,
       url: currentNetwork.rpc,
