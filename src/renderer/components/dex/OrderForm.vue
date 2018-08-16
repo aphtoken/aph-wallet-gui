@@ -715,7 +715,7 @@ export default {
   #dex--order-form {
     .body {
       .percentages {
-        background: $background-night;
+        background: $background-night-light;
 
         .percent-btn {
           @extend %small-uppercase-grey-label;

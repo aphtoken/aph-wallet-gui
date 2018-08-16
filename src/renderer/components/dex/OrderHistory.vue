@@ -7,51 +7,53 @@
       </div>
       <div class="body">
         <div class="history">
-          <table class="order-history-table">
-            <thead>
-              <tr>
-                <th>{{$t('order')}}</th>
-                <th>{{$t('pairLc')}}</th>
-                <th>{{$t('filled')}}</th>
-                <th>{{$t('unitsTotal')}}</th>
-                <th>{{$t('priceLc')}}</th>
-                <th>{{$t('created')}}</th>
-                <th class="status" width="1">{{$t('status')}}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(order, index) in filteredOrders" :key="index">
-                <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
-                <td class="market">{{ order.marketName }}</td>
-                <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
-                <td class="units-total">{{ $formatNumber(order.quantity) }}</td>
-                <td class="price">{{ $formatNumber(order.price) }}</td>
-                <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
-                <td class="status">
-                  <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="open-or-partial">
-                    <div v-if="order.status === 'PartiallyFilled'" class="partial">
-                      <aph-icon name="info"></aph-icon>
-                      <p>{{$t('partial')}}</p>
+          <div class="order-history-table-wrapper" ref="scroll">
+            <table class="order-history-table">
+              <thead ref="thead">
+                <tr>
+                  <th>{{ $t('order') }}</th>
+                  <th>{{ $t('pairLc') }}</th>
+                  <th>{{ $t('filled') }}</th>
+                  <th>{{ $t('unitsTotal') }}</th>
+                  <th class="price">{{ $t('priceLc') }}</th>
+                  <th>{{ $t('created')}}</th>
+                  <th class="status">{{ $t('status') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(order, index) in filteredOrders" :key="index">
+                  <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
+                  <td class="market">{{ order.marketName }}</td>
+                  <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
+                  <td class="units-total">{{ $formatNumber(order.quantity) }}</td>
+                  <td class="price">{{ $formatNumber(order.price) }}</td>
+                  <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
+                  <td class="status">
+                    <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="open-or-partial">
+                      <div v-if="order.status === 'PartiallyFilled'" class="partial">
+                        <aph-icon name="info"></aph-icon>
+                        <span>{{$t('partial')}}</span>
+                      </div>
+                      <div v-else class="partial">
+                        <span>{{$t('open')}}</span>
+                      </div>
+                      <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"
+                                :title="$t('cancel')"></aph-icon>
                     </div>
-                    <div v-else class="partial">
-                      <p>{{$t('open')}}</p>
+                    <div v-else-if="order.status === 'Filled'">
+                      <span>{{ $t('filledUc') }}</span>
                     </div>
-                    <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"
-                              :title="$t('cancel')"></aph-icon>
-                  </div>
-                  <div v-else-if="order.status === 'Filled'">
-                    <p>{{$t('filledUc')}}</p>
-                  </div>
-                  <div v-else-if="order.status === 'Cancelled'">
-                    <p>{{$t('cancelled')}}</p>
-                  </div>
-                  <div v-else-if="order.status === 'Cancelling'">
-                    <p>{{$t('cancelling')}}</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    <div v-else-if="order.status === 'Cancelled'">
+                      <span>{{ $t('cancelled') }}</span>
+                    </div>
+                    <div v-else-if="order.status === 'Cancelling'">
+                      <span>{{ $t('cancelling') }}</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       <div class="footer">
@@ -69,6 +71,7 @@ let cancelledOrders = {};
 export default {
   beforeDestroy() {
     clearInterval(loadOrdersIntervalId);
+    this.$refs.scroll.removeEventListener('scroll', this.fixHeader);
   },
 
   computed: {
@@ -96,15 +99,25 @@ export default {
       return orders;
     },
 
-    openOrders() {
-      return _.filter(this.allOrders, (order) => {
-        return order.status === 'Open' || order.status === 'PartiallyFilled' || order.status === 'Cancelling';
-      });
-    },
-
     completedOrders() {
       return _.filter(this.allOrders, (order) => {
         return order.status !== 'Open' && order.status !== 'PartiallyFilled';
+      });
+    },
+
+    filteredOrders() {
+      if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
+        return this.ordersForTable;
+      }
+
+      return this.ordersForTable.filter((order) => {
+        return order.marketName === this.$store.state.currentMarket.marketName;
+      });
+    },
+
+    openOrders() {
+      return _.filter(this.allOrders, (order) => {
+        return order.status === 'Open' || order.status === 'PartiallyFilled' || order.status === 'Cancelling';
       });
     },
 
@@ -118,19 +131,10 @@ export default {
           return this.openOrders;
       }
     },
-
-    filteredOrders() {
-      if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
-        return this.ordersForTable;
-      }
-
-      return this.ordersForTable.filter((order) => {
-        return order.marketName === this.$store.state.currentMarket.marketName;
-      });
-    },
   },
 
   mounted() {
+    this.$refs.scroll.addEventListener('scroll', this.fixHeader);
     this.loadOrders();
 
     loadOrdersIntervalId = setInterval(() => {
@@ -145,6 +149,12 @@ export default {
   },
 
   methods: {
+    fixHeader() {
+      this.$refs.thead.style.transform = `translate(0, ${
+        this.$refs.scroll.scrollTop
+      }px)`;
+    },
+
     selectTab(tab) {
       this.tab = tab;
     },
@@ -175,10 +185,13 @@ export default {
 #dex--order-history {
   @extend %tile-light;
 
+  display: flex;
+  flex-direction: column;
   height: 100%;
 
   .header {
     display: flex;
+    flex: none;
     padding: $space $space 0;
 
     h1 {
@@ -203,53 +216,78 @@ export default {
 
 
   .body {
-    height: calc(100% - 73px);
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
     padding: $space;
 
-    .order-history-table {
-      @extend %dex-table;
+    .history {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
 
-      th, td {
-        &.status {
-          text-align: right;
-        }
-      }
+      .order-history-table-wrapper {
+        flex: 1;
+        overflow: auto;
 
-      td.status {
-        @extend %small-uppercase-grey-label-dark;
+        .order-history-table {
+          @extend %dex-table;
 
-        .open-or-partial {
-          align-items: center;
-          display: flex;
-          flex-direction: row;
-          justify-content: flex-end;
+          thead {
+            background: white;
+          }
 
-          .partial {
-            color: $purple;
-            margin: 0 $space;
-            align-items: center;
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-end;
+          th, td {
+            &.status {
+              text-align: right;
 
-            .aph-icon {
-              .fill {
-                fill: $purple !important;
+              p {
+                margin: 0;
+                padding: 0;
               }
             }
           }
-          .aph-icon {
-            margin-right: $space-sm;
-            svg {
-              height: toRem(20px);
-            }
-          }
 
-          .btn-cancel {
-            cursor: pointer;
-            .fill {
-              fill: $dark-grey;
+          td.status {
+            @extend %small-uppercase-grey-label-dark;
+
+            .open-or-partial {
+              align-items: center;
+              display: flex;
+              flex-direction: row;
+              justify-content: flex-end;
+
+              .partial {
+                align-items: center;
+                color: $purple;
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-end;
+                margin: 0 $space;
+
+                .aph-icon {
+                  .fill {
+                    fill: $purple !important;
+                  }
+                }
+              }
+              .aph-icon {
+                margin-right: $space-sm;
+
+                svg {
+                  height: toRem(20px);
+                }
+              }
+
+              .btn-cancel {
+                cursor: pointer;
+
+                .fill {
+                  fill: $dark-grey;
+                }
+              }
             }
           }
         }
@@ -259,6 +297,7 @@ export default {
 
   .footer {
     display: flex;
+    flex: none;
     justify-content: space-evenly;
 
     .option {
@@ -274,6 +313,22 @@ export default {
 
       &:hover, &.active {
         border-color: $purple;
+      }
+    }
+  }
+}
+
+.Night {
+  #dex--order-history {
+    .body {
+      .history {
+        .order-history-table-wrapper {
+          .order-history-table {
+            thead {
+              background: $background-night;
+            }
+          }
+        }
       }
     }
   }

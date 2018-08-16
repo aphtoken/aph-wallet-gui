@@ -7,8 +7,8 @@
         <div class="currency">{{ holding.symbol }}</div>
       </div>
     </div>
-    <div class="center">
-      <div class="remove" v-if="canBeRemoved" @click="handleOnRemove">{{$t('remove')}}</div>
+    <div class="center" v-if="canBeRemoved">
+      <div class="remove" @click="handleOnRemove">{{$t('remove')}}</div>
     </div>
     <div class="right">
       <div class="balance">
@@ -85,14 +85,16 @@ export default {
   display: flex;
   padding: 1.5rem;
 
-  .left, .right {
-    flex: 1;
+  .left, .right, .center {
     display: flex;
+  }
+
+  .left , .right {
+    flex: 1;
   }
 
   .center {
     flex: none;
-    display: flex;
   }
 
   .aph-token-icon {
@@ -107,6 +109,7 @@ export default {
       font-family: GilroyMedium;
       font-size: toRem(19px);
       margin-bottom: $space-sm;
+      white-space: nowrap;
     }
 
     .currency {
