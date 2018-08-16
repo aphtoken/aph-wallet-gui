@@ -54,7 +54,7 @@
             <aph-input :placeholder="$t('enterSendToAddress')" v-model="address"></aph-input>
           </div>
           <div class="amount">
-            <aph-input :placeholder="$t('enterAmount')" v-model="amount"></aph-input>
+            <aph-input @blur="cleanAmount" :placeholder="$t('enterAmount')" v-model="amount"></aph-input>
             <div class="symbol">{{ currency ? currency.value : '' }}</div>
             <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
           </div>
@@ -190,10 +190,7 @@ export default {
       }
 
       if (this.amount !== cleanAmount) {
-        setTimeout(() => {
-          // come off of the watch thread to set it
-          this.amount = cleanAmount;
-        }, 10);
+        this.amount = cleanAmount;
       }
     },
 
@@ -251,10 +248,6 @@ export default {
     },
 
     currency() {
-      this.cleanAmount();
-    },
-
-    amount() {
       this.cleanAmount();
     },
   },
