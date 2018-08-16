@@ -32,22 +32,22 @@
                     <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="open-or-partial">
                       <div v-if="order.status === 'PartiallyFilled'" class="partial">
                         <aph-icon name="info"></aph-icon>
-                        <p>{{$t('partial')}}</p>
+                        <span>{{$t('partial')}}</span>
                       </div>
                       <div v-else class="partial">
-                        <p>{{$t('open')}}</p>
+                        <span>{{$t('open')}}</span>
                       </div>
                       <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"
                                 :title="$t('cancel')"></aph-icon>
                     </div>
                     <div v-else-if="order.status === 'Filled'">
-                      <p>{{ $t('filledUc') }}</p>
+                      <span>{{ $t('filledUc') }}</span>
                     </div>
                     <div v-else-if="order.status === 'Cancelled'">
-                      <p>{{ $t('cancelled') }}</p>
+                      <span>{{ $t('cancelled') }}</span>
                     </div>
                     <div v-else-if="order.status === 'Cancelling'">
-                      <p>{{ $t('cancelling') }}</p>
+                      <span>{{ $t('cancelling') }}</span>
                     </div>
                   </td>
                 </tr>
@@ -106,105 +106,13 @@ export default {
     },
 
     filteredOrders() {
-      return [
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Buy',
-          status: 'Filled',
-        },
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Sell',
-          status: 'Filled',
-        },
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Buy',
-          status: 'Filled',
-        },
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Buy',
-          status: 'Filled',
-        },
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Buy',
-          status: 'Filled',
-        },
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Buy',
-          status: 'Filled',
-        },
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Sell',
-          status: 'Filled',
-        },
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Buy',
-          status: 'Filled',
-        },
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Buy',
-          status: 'Filled',
-        },
-        {
-          created: 1534436220,
-          marketName: 'NEO-ATI',
-          price: 1.02,
-          quantity: 10,
-          quantityRemaining: 10,
-          side: 'Buy',
-          status: 'Filled',
-        },
-      ];
-      // if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
-      //   return this.ordersForTable;
-      // }
+      if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
+        return this.ordersForTable;
+      }
 
-      // return this.ordersForTable.filter((order) => {
-      //   return order.marketName === this.$store.state.currentMarket.marketName;
-      // });
+      return this.ordersForTable.filter((order) => {
+        return order.marketName === this.$store.state.currentMarket.marketName;
+      });
     },
 
     openOrders() {
@@ -331,19 +239,9 @@ export default {
             background: white;
           }
 
-          tbody {
-            .status > div {
-              padding: 1px 0;
-            }
-          }
-
           th, td {
             &.status {
               text-align: right;
-
-              > div {
-                height: 1.2rem;
-              }
 
               p {
                 margin: 0;
