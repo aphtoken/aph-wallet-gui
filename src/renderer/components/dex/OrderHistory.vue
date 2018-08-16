@@ -5,53 +5,55 @@
         <h1 :class="[{selected: tab === 'Open'}]" @click="selectTab('Open')">{{$t('openOrders')}} ({{ openOrders.length }})</h1>
         <h1 :class="[{selected: tab === 'Completed'}]" @click="selectTab('Completed')">{{$t('completedOrders')}} ({{ completedOrders.length }})</h1>
       </div>
-      <div class="body" ref="scroll">
+      <div class="body">
         <div class="history">
-          <table class="order-history-table">
-            <thead ref="thead">
-              <tr>
-                <th>{{ $t('order') }}</th>
-                <th>{{ $t('pairLc') }}</th>
-                <th>{{ $t('filled') }}</th>
-                <th>{{ $t('unitsTotal') }}</th>
-                <th class="price">{{ $t('priceLc') }}</th>
-                <th>{{ $t('created')}}</th>
-                <th class="status">{{ $t('status') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(order, index) in filteredOrders" :key="index">
-                <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
-                <td class="market">{{ order.marketName }}</td>
-                <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
-                <td class="units-total">{{ $formatNumber(order.quantity) }}</td>
-                <td class="price">{{ $formatNumber(order.price) }}</td>
-                <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
-                <td class="status">
-                  <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="open-or-partial">
-                    <div v-if="order.status === 'PartiallyFilled'" class="partial">
-                      <aph-icon name="info"></aph-icon>
-                      <p>{{$t('partial')}}</p>
+          <div class="order-history-table-wrapper" ref="scroll">
+            <table class="order-history-table">
+              <thead ref="thead">
+                <tr>
+                  <th>{{ $t('order') }}</th>
+                  <th>{{ $t('pairLc') }}</th>
+                  <th>{{ $t('filled') }}</th>
+                  <th>{{ $t('unitsTotal') }}</th>
+                  <th class="price">{{ $t('priceLc') }}</th>
+                  <th>{{ $t('created')}}</th>
+                  <th class="status">{{ $t('status') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(order, index) in filteredOrders" :key="index">
+                  <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
+                  <td class="market">{{ order.marketName }}</td>
+                  <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
+                  <td class="units-total">{{ $formatNumber(order.quantity) }}</td>
+                  <td class="price">{{ $formatNumber(order.price) }}</td>
+                  <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
+                  <td class="status">
+                    <div v-if="order.status === 'Open' || order.status === 'PartiallyFilled'" class="open-or-partial">
+                      <div v-if="order.status === 'PartiallyFilled'" class="partial">
+                        <aph-icon name="info"></aph-icon>
+                        <p>{{$t('partial')}}</p>
+                      </div>
+                      <div v-else class="partial">
+                        <p>{{$t('open')}}</p>
+                      </div>
+                      <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"
+                                :title="$t('cancel')"></aph-icon>
                     </div>
-                    <div v-else class="partial">
-                      <p>{{$t('open')}}</p>
+                    <div v-else-if="order.status === 'Filled'">
+                      <p>{{ $t('filledUc') }}</p>
                     </div>
-                    <aph-icon name="cancel" class="btn-cancel" @click="cancelOrder(order)"
-                              :title="$t('cancel')"></aph-icon>
-                  </div>
-                  <div v-else-if="order.status === 'Filled'">
-                    <p>{{ $t('filledUc') }}</p>
-                  </div>
-                  <div v-else-if="order.status === 'Cancelled'">
-                    <p>{{ $t('cancelled') }}</p>
-                  </div>
-                  <div v-else-if="order.status === 'Cancelling'">
-                    <p>{{ $t('cancelling') }}</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    <div v-else-if="order.status === 'Cancelled'">
+                      <p>{{ $t('cancelled') }}</p>
+                    </div>
+                    <div v-else-if="order.status === 'Cancelling'">
+                      <p>{{ $t('cancelling') }}</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       <div class="footer">
@@ -97,15 +99,117 @@ export default {
       return orders;
     },
 
-    openOrders() {
-      return _.filter(this.allOrders, (order) => {
-        return order.status === 'Open' || order.status === 'PartiallyFilled' || order.status === 'Cancelling';
-      });
-    },
-
     completedOrders() {
       return _.filter(this.allOrders, (order) => {
         return order.status !== 'Open' && order.status !== 'PartiallyFilled';
+      });
+    },
+
+    filteredOrders() {
+      return [
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Buy',
+          status: 'Filled',
+        },
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Sell',
+          status: 'Filled',
+        },
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Buy',
+          status: 'Filled',
+        },
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Buy',
+          status: 'Filled',
+        },
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Buy',
+          status: 'Filled',
+        },
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Buy',
+          status: 'Filled',
+        },
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Sell',
+          status: 'Filled',
+        },
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Buy',
+          status: 'Filled',
+        },
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Buy',
+          status: 'Filled',
+        },
+        {
+          created: 1534436220,
+          marketName: 'NEO-ATI',
+          price: 1.02,
+          quantity: 10,
+          quantityRemaining: 10,
+          side: 'Buy',
+          status: 'Filled',
+        },
+      ];
+      // if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
+      //   return this.ordersForTable;
+      // }
+
+      // return this.ordersForTable.filter((order) => {
+      //   return order.marketName === this.$store.state.currentMarket.marketName;
+      // });
+    },
+
+    openOrders() {
+      return _.filter(this.allOrders, (order) => {
+        return order.status === 'Open' || order.status === 'PartiallyFilled' || order.status === 'Cancelling';
       });
     },
 
@@ -118,16 +222,6 @@ export default {
         default:
           return this.openOrders;
       }
-    },
-
-    filteredOrders() {
-      if (this.$store.state.ordersToShow === this.$constants.orders.ALL_SWITCH) {
-        return this.ordersForTable;
-      }
-
-      return this.ordersForTable.filter((order) => {
-        return order.marketName === this.$store.state.currentMarket.marketName;
-      });
     },
   },
 
@@ -183,10 +277,13 @@ export default {
 #dex--order-history {
   @extend %tile-light;
 
+  display: flex;
+  flex-direction: column;
   height: 100%;
 
   .header {
     display: flex;
+    flex: none;
     padding: $space $space 0;
 
     h1 {
@@ -211,88 +308,86 @@ export default {
 
 
   .body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
     padding: $space;
-    height: calc(100% - 73px);
-    overflow-y: auto;
 
-    .order-history-table {
-      @extend %dex-table;
-
+    .history {
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
+      flex: 1;
+      overflow: hidden;
 
-      thead {
-        display: block;
-      }
+      .order-history-table-wrapper {
+        flex: 1;
+        overflow: auto;
 
-      tbody {
-        .status > div {
-          padding: 1px 0;
-        }
-      }
+        .order-history-table {
+          @extend %dex-table;
 
-      tr {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      th, td {
-        flex-basis: toRem(200px);
-
-        &.price {
-          flex-basis: toRem(300px);
-        }
-
-        &.status {
-          text-align: right;
-
-          > div {
-            height: 1.2rem;
+          thead {
+            background: white;
           }
 
-          p {
-            margin: 0;
-            padding: 0;
+          tbody {
+            .status > div {
+              padding: 1px 0;
+            }
           }
-        }
-      }
 
-      td.status {
-        @extend %small-uppercase-grey-label-dark;
+          th, td {
+            &.status {
+              text-align: right;
 
-        .open-or-partial {
-          align-items: center;
-          display: flex;
-          flex-direction: row;
-          justify-content: flex-end;
+              > div {
+                height: 1.2rem;
+              }
 
-          .partial {
-            color: $purple;
-            margin: 0 $space;
-            align-items: center;
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-end;
-
-            .aph-icon {
-              .fill {
-                fill: $purple !important;
+              p {
+                margin: 0;
+                padding: 0;
               }
             }
           }
-          .aph-icon {
-            margin-right: $space-sm;
-            svg {
-              height: toRem(20px);
-            }
-          }
 
-          .btn-cancel {
-            cursor: pointer;
-            .fill {
-              fill: $dark-grey;
+          td.status {
+            @extend %small-uppercase-grey-label-dark;
+
+            .open-or-partial {
+              align-items: center;
+              display: flex;
+              flex-direction: row;
+              justify-content: flex-end;
+
+              .partial {
+                color: $purple;
+                margin: 0 $space;
+                align-items: center;
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-end;
+
+                .aph-icon {
+                  .fill {
+                    fill: $purple !important;
+                  }
+                }
+              }
+              .aph-icon {
+                margin-right: $space-sm;
+                svg {
+                  height: toRem(20px);
+                }
+              }
+
+              .btn-cancel {
+                cursor: pointer;
+                .fill {
+                  fill: $dark-grey;
+                }
+              }
             }
           }
         }
@@ -302,6 +397,7 @@ export default {
 
   .footer {
     display: flex;
+    flex: none;
     justify-content: space-evenly;
 
     .option {
@@ -317,6 +413,22 @@ export default {
 
       &:hover, &.active {
         border-color: $purple;
+      }
+    }
+  }
+}
+
+.Night {
+  #dex--order-history {
+    .body {
+      .history {
+        .order-history-table-wrapper {
+          .order-history-table {
+            thead {
+              background: $background-night;
+            }
+          }
+        }
       }
     }
   }

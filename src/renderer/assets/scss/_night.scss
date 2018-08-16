@@ -2,7 +2,7 @@
   &.Night {
     #dex {
       color: $copy-night;
-      background-color: $background-night;
+      background-color: $background-night-light;
 
       .aph-dex-input input, .aph-input input {
         color: white;
@@ -10,7 +10,7 @@
 
       .aph-select {
         .aph-select--dropdown {
-          background: $background-night;
+          background: $background-night-light;
           color: $copy-night;
 
           > li {
@@ -24,7 +24,7 @@
 
       .aph-select.is-light {
         .aph-select--label {
-          background: $background-night;
+          background: $background-night-light;
           color: white;
         }
 
@@ -96,12 +96,12 @@
       }
 
       %light-background {
-        background: #18162b;
-        border-color: #18162b;
+        background: $background-night;
+        border-color: $background-night;
       }
 
       %tile-light {
-        background: #18162b;
+        background: $background-night;
       }
     }
   }
