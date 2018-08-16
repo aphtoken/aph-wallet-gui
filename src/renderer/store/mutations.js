@@ -4,7 +4,6 @@ import moment from 'moment';
 
 import { requests } from '../constants';
 import { alerts, db, neo, dex } from '../services';
-import { store } from './index';
 
 export {
   clearActiveTransaction,
@@ -16,8 +15,8 @@ export {
   handleNetworkChange,
   orderBookSnapshotReceived,
   orderBookUpdateReceived,
-  putAllNep5Balances,
   putTransactionDetail,
+  removeAssetHoldingsNeedRefresh,
   resetRequests,
   setAcceptCommitInfo,
   setAcceptDexDemoVersion,
@@ -121,16 +120,17 @@ function handleNetworkChange(state) {
   neo.fetchNEP5Tokens();
 }
 
-function putAllNep5Balances(state, nep5balances) {
-  const balances = state.nep5Balances;
-  nep5balances.forEach((nep5balance) => {
-    _.set(balances, nep5balance.asset, nep5balance);
-  });
-}
-
 function putTransactionDetail(state, transactionDetail) {
   const details = state.transactionDetails;
   _.set(details, transactionDetail.txid, transactionDetail);
+}
+
+function removeAssetHoldingsNeedRefresh(state, assetIds) {
+  if (state.assetsThatNeedRefresh.length > 0) {
+    assetIds.forEach((assetId) => {
+      _.remove(state.assetsThatNeedRefresh, refreshId => assetId === refreshId);
+    });
+  }
 }
 
 function resetRequests(state) {
@@ -232,9 +232,8 @@ async function setHoldings(state, holdings) {
 
 function setAssetHoldingsNeedRefresh(state, assetIds) {
   assetIds.forEach((assetId) => {
-    const holding = _.get(store.state.nep5Balances, assetId);
-    if (holding) {
-      holding.needsRefresh = true;
+    if (assetId) {
+      state.assetsThatNeedRefresh.push(assetId);
     }
   });
 }

@@ -31,12 +31,14 @@ export default {
   display: flex;
   flex-direction: row;
   flex: 1;
+  overflow-y: auto;
 
   .grid {
     display: flex;
     flex-direction: row;
     flex: 1;
-    padding: $space;
+    min-height: $dashboard-min-height;
+    padding: 0 $space $space;
   }
 
   .grid--column {

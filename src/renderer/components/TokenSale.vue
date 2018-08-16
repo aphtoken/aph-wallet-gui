@@ -7,37 +7,39 @@
         <img class="circle circle-lg" src="~@/assets/img/circle-1.svg" />
       </div>
     </div>
-    <div class="header">
-      <h1 class="underlined">{{$t('participateInIco')}}</h1>
-    </div>
-    <div class="body">
-      <aph-form :on-submit="send">
-        <aph-select :options="tokens" :placeholder="$t('selectIco')" v-model="token"></aph-select>
-        <aph-input class="script-hash" :placeholder="$t('enterIcoScriptHash')" v-model="scriptHash" v-if="token && token.symbol === 'Custom'"></aph-input>
-        <aph-select :options="currencies" :placeholder="$t('buyWith')" v-model="currency"></aph-select>
-        <div class="amount">
-          <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
-          <div class="symbol">{{ currency ? currency.value : '' }}</div>
-          <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
-        </div>
-        <div class="estimated-value">
-          <div class="label">{{$t('estimatedAmount')}}</div>
-          <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
-        </div>
-      </aph-form>
-    </div>
-    <div class="disclaimer">
-      <h2>{{$t('disclaimerUrgent')}}</h2>
-      <p>{{$t('ensureThatYouAreOnlySendingTokens')}}</p>
-      <p>{{$t('submittingMultipleTimesWarning')}}</p>
-      <p>{{$t('aphelionIsNotResponsible')}}</p>
-      <div class="disclaimer-accept">
-        <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
-        <label for="confirm-disclaimer">{{$t('iAgree')}}</label>
+    <div id="token-sale--scrollable">
+      <div class="header">
+        <h1 class="underlined">{{ $t('participateInIco') }}</h1>
       </div>
-    </div>
-    <div class="footer">
-      <button class="send-btn" @click="send" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
+      <div class="body">
+        <aph-form :on-submit="send">
+          <aph-select :options="tokens" :placeholder="$t('selectIco')" v-model="token"></aph-select>
+          <aph-input class="script-hash" :placeholder="$t('enterIcoScriptHash')" v-model="scriptHash" v-if="token && token.symbol === 'Custom'"></aph-input>
+          <aph-select :options="currencies" :placeholder="$t('buyWith')" v-model="currency"></aph-select>
+          <div class="amount">
+            <aph-input placeholder="Enter Amount" v-model="amount"></aph-input>
+            <div class="symbol">{{ currency ? currency.value : '' }}</div>
+            <div class="max" v-if="currency" @click="setAmountToMax">{{ $t('max') }}</div>
+          </div>
+          <div class="estimated-value">
+            <div class="label">{{ $t('estimatedAmount') }}</div>
+            <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
+          </div>
+        </aph-form>
+      </div>
+      <div class="disclaimer">
+        <h2>{{ $t('disclaimerUrgent') }}</h2>
+        <p>{{ $t('ensureThatYouAreOnlySendingTokens') }}</p>
+        <p>{{ $t('submittingMultipleTimesWarning') }}</p>
+        <p>{{ $t('aphelionIsNotResponsible') }}</p>
+        <div class="disclaimer-accept">
+          <input type="checkbox" id="confirm-disclaimer" v-model="agreed" />
+          <label for="confirm-disclaimer">{{ $t('iAgree') }}</label>
+        </div>
+      </div>
+      <div class="footer">
+        <button class="send-btn" @click="send" :disabled="shouldDisableSendButton">{{ sendButtonLabel }}</button>
+      </div>
     </div>
   </section>
 </template>
@@ -64,7 +66,7 @@ export default {
 
   computed: {
     tokens() {
-      const list = this.$services.tokens.getAllAsArray().reduce(
+      const list = this.$services.assets.getNetworkAssetsAsArray().reduce(
         (result, { symbol, name, assetId, network, sale }) => {
           if (!sale || network !== this.$services.network.getSelectedNetwork().net
               || moment(sale.endDate) < moment().utc()) {
@@ -208,7 +210,7 @@ export default {
       }
 
       this.$services.neo.participateInTokenSale(icoScriptHash,
-        this.currency.asset, this.amount)
+        this.currency.assetId, this.amount)
         .then((res) => {
           this.$services.alerts.success(
             this.$t('tokenSaleSuccessful', { symbol: res.symbol, balance: res.balance }),
@@ -247,146 +249,157 @@ export default {
 
 <style lang="scss">
 #token-sale {
-  align-items: center;
+  align-items: flex-start;
   background-color: $dark-purple;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex: 1;
-  justify-content: center;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
 
-  .header {
-    color: $purple;
-    font-family: GilroySemibold;
-    text-align: center;
-    z-index: 1;
+  #token-sale--scrollable {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: auto 0;
+    padding: $space-lg 0;
 
-    h1.underlined {
-      @extend %underlined-header;
+    .header {
+      color: $purple;
+      flex: none;
+      font-family: GilroySemibold;
+      text-align: center;
+      z-index: 1;
 
-      flex: 1;
-      font-size: toRem(30px);
-      margin: 0;
+      h1.underlined {
+        @extend %underlined-header;
 
-      &:after {
-        background: white;
-        margin: $space-xl auto;
-        width: toRem(200px);
-      }
-    }
-  }
+        flex: 1;
+        font-size: toRem(30px);
+        margin: 0;
 
-
-  .body {
-    margin: 0 auto;
-    text-align: center;
-    width: toRem(400px);
-
-    .aph-input {
-      .placeholder {
-        color: white;
-        font-family: GilroyMedium;
-      }
-    }
-
-    .aph-select, .script-hash {
-      margin-bottom: $space-lg;
-    }
-
-    .amount {
-      position: relative;
-
-      input {
-        box-sizing: border-box;
-        padding-right: $space-lg;
-      }
-
-      .symbol {
-        @extend %small-uppercase-grey-label;
-
-        position: absolute;
-        right: 0;
-        top: toRem(18px);
-      }
-
-      .max {
-        @include transition(color);
-
-        bottom: toRem(16px);
-        color: $grey;
-        cursor: pointer;
-        font-size: toRem(10px);
-        position: absolute;
-        right: 0;
-        text-transform: uppercase;
-        z-index: 0;
-
-        &:hover {
-          color: $purple;
+        &:after {
+          background: white;
+          margin: $space-xl auto;
+          width: toRem(200px);
         }
       }
     }
 
-    .estimated-value {
-      display: flex;
-      margin-top: $space;
 
-      .label {
-        @extend %small-uppercase-grey-label;
+    .body {
+      flex: none;
+      margin: 0 auto;
+      text-align: center;
+      width: toRem(400px);
 
-        color: $purple;
+      .aph-input {
+        .placeholder {
+          color: white;
+          font-family: GilroyMedium;
+        }
       }
 
-      .value {
-        color: white;
-        font-family: GilroySemibold;
-        font-size: toRem(12px);
-        margin-left: $space-sm;
+      .aph-select, .script-hash {
+        margin-bottom: $space-lg;
+      }
+
+      .amount {
+        position: relative;
+
+        input {
+          box-sizing: border-box;
+          padding-right: $space-lg;
+        }
+
+        .symbol {
+          @extend %small-uppercase-grey-label;
+
+          position: absolute;
+          right: 0;
+          top: toRem(18px);
+        }
+
+        .max {
+          @include transition(color);
+
+          bottom: toRem(16px);
+          color: $grey;
+          cursor: pointer;
+          font-size: toRem(10px);
+          position: absolute;
+          right: 0;
+          text-transform: uppercase;
+          z-index: 0;
+
+          &:hover {
+            color: $purple;
+          }
+        }
+      }
+
+      .estimated-value {
+        display: flex;
+        margin-top: $space;
+
+        .label {
+          @extend %small-uppercase-grey-label;
+
+          color: $purple;
+        }
+
+        .value {
+          color: white;
+          font-family: GilroySemibold;
+          font-size: toRem(12px);
+          margin-left: $space-sm;
+        }
       }
     }
-  }
 
-  .disclaimer {
-    color: white;
-    margin: $space-lg 0 $space-xl;
-    text-align: center;
-    width: toRem(800px);
-    font-size: toRem(12px);
-
-    h2 {
-      color: $purple;
-      font-size: toRem(14px);
-    }
-
-    p {
+    .disclaimer {
       color: white;
-      margin: 0;
+      flex: none;
+      margin: $space-lg 0 $space-xl;
+      text-align: center;
+      width: toRem(800px);
+      font-size: toRem(12px);
 
-       & + p {
-         margin-top: $space-sm;
-       }
-    }
+      h2 {
+        color: $purple;
+        font-size: toRem(14px);
+      }
 
-    .disclaimer-accept {
-      cursor: pointer;
-      margin-top: $space;
+      p {
+        color: white;
+        margin: 0;
 
-      > label {
+        & + p {
+          margin-top: $space-sm;
+        }
+      }
+
+      .disclaimer-accept {
         cursor: pointer;
-        margin-left: $space-sm;
+        margin-top: $space;
+
+        > label {
+          cursor: pointer;
+          margin-left: $space-sm;
+        }
       }
     }
-  }
 
-  .footer {
-    display: flex;
-    flex-direction: row;
-    flex: none;
-    width: toRem(400px);
+    .footer {
+      display: flex;
+      flex-direction: row;
+      flex: none;
+      width: toRem(400px);
 
-    .send-btn {
-      @extend %btn-outline;
+      .send-btn {
+        @extend %btn-outline;
+      }
     }
   }
 

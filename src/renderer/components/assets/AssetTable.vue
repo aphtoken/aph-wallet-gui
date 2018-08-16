@@ -27,8 +27,8 @@ export default {
         return name.toLowerCase().indexOf(searchBy) > -1
           || symbol.toLowerCase().indexOf(searchBy) > -1;
       }).map((holding) => {
-        const canRemove = holding.isCustom === true && holding.symbol !== 'APH'
-          && (holding.balance === 0);
+        const canRemove = holding.isNep5 === true && holding.isUserAsset === true
+          && holding.symbol !== 'APH' && (holding.balance === 0);
 
         // Note: this must clone the holding or it will modify the holding without using store mutations and cause
         //       side effects.
@@ -59,7 +59,7 @@ export default {
     },
 
     remove(holding) {
-      this.$services.tokens.remove(holding.asset, this.$store.state.currentNetwork.net);
+      this.$services.assets.removeUserAsset(holding.assetId);
       this.$services.alerts.success(`Removed ${holding.symbol}`);
       this.loadHoldings();
     },

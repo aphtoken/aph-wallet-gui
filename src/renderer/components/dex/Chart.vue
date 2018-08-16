@@ -319,7 +319,7 @@ export default {
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
-          !== this.$constants.assets.DEX_SCRIPT_HASH;
+          !== this.$services.assets.DEX_SCRIPT_HASH;
     },
 
     bidGroups() {
@@ -417,14 +417,15 @@ export default {
       const bids = this.$store.state.orderBook.bids;
       const asks = this.$store.state.orderBook.asks;
 
+      // TODO: Re-visit math used here for determining the groupSize.
       let bidRange = 0;
       if (bids.length > 1 && asks.length > 0) {
-        bidRange = this.middle - bids[bids.length - 1].price;
+        bidRange = Math.abs(this.middle - bids[bids.length - 1].price);
       }
 
       let askRange = 0;
       if (asks.length > 1 && bids.length > 0) {
-        askRange = asks[asks.length - 1].price - this.middle;
+        askRange = Math.abs(asks[asks.length - 1].price - this.middle);
       }
 
       let groupSize = bidRange;

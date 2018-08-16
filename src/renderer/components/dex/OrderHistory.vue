@@ -1,4 +1,4 @@
-<template> 
+<template>
   <section id="dex--order-history">
     <aph-spinner-wrapper identifier="fetchOrderHistory">
       <div class="header">
