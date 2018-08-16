@@ -260,12 +260,12 @@ export default {
               justify-content: flex-end;
 
               .partial {
-                color: $purple;
-                margin: 0 $space;
                 align-items: center;
+                color: $purple;
                 display: flex;
                 flex-direction: row;
                 justify-content: flex-end;
+                margin: 0 $space;
 
                 .aph-icon {
                   .fill {
@@ -275,6 +275,7 @@ export default {
               }
               .aph-icon {
                 margin-right: $space-sm;
+
                 svg {
                   height: toRem(20px);
                 }
@@ -282,6 +283,7 @@ export default {
 
               .btn-cancel {
                 cursor: pointer;
+
                 .fill {
                   fill: $dark-grey;
                 }
