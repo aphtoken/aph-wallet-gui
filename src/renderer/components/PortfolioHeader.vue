@@ -67,15 +67,12 @@ export default {
 </script>
 
 <style lang="scss">
-h1.underlined {
-  @extend %underlined-header;
-}
-
 #portfolio-header {
+  align-items: center;
   display: flex;
   flex-direction: row;
-  padding: $space-lg $space-lg 0;
-  align-items: center;
+  flex: none;
+  padding: $space-lg $space-lg $space;
 
   .simple-donut {
     margin: 0 $space-xl 0 0;
@@ -101,6 +98,10 @@ h1.underlined {
 
   .ticker {
     flex: 1;
+
+    h1.underlined {
+      @extend %underlined-header;
+    }
 
     .balance {
       .amount {
