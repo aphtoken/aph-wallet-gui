@@ -64,17 +64,15 @@ export default {
 #transactions-sidebar {
   @extend %tile-light;
 
-  position: fixed;
-  right: 0;
-  top: 0;
+  box-shadow: $box-shadow;
   display: flex;
   flex-direction: row;
   height: 100%;
-  box-shadow: $box-shadow;
+  position: fixed;
+  right: 0;
+  top: 0;
 
   > .toggle {
-    @include transition(background);
-
     align-items: center;
     cursor: pointer;
     display: flex;
@@ -83,7 +81,6 @@ export default {
     height: 100%;
     justify-content: center;
     width: $right-sidebar-width-collapsed;
-    border-right: $border-table-header;
 
     .aph-icon {
       svg {
@@ -107,18 +104,16 @@ export default {
   }
 
   > .content {
-    @extend %tile-light;
-
     display:none;
-    width: $right-sidebar-width;
     flex-direction: column;
+    width: $right-sidebar-width;
 
     > .header {
-      flex: none;
-      padding: $space;
+      align-items: center;
       display: flex;
       flex-direction: row;
-      align-items: center;
+      flex: none;
+      padding: $space;
 
       h1.underlined {
         @extend %underlined-header;
@@ -135,8 +130,44 @@ export default {
   }
 
   &.open {
+    > .toggle {
+      border-right: solid $border-width-thin $light-grey;
+    }
+
     > .content {
       display: flex;
+
+      > .header {
+        h1.underlined {
+          color: $copy-night;
+        }
+      }
+    }
+  }
+}
+
+.Night {
+  #transactions-sidebar {
+    background: $background-night;
+
+    > .toggle {
+      border-right-color: lighten($background-night, 2%);
+
+      &:hover {
+        background: lighten($background-night, 2%);
+      }
+    }
+
+    > .content {
+      > .body {
+        .transactions-table {
+          tr {
+            td {
+              color: $grey;
+            }
+          }
+        }
+      }
     }
   }
 }
