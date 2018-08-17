@@ -313,6 +313,7 @@ export default {
         this.$store.commit('setOrderPrice', '');
       }
     },
+
     quantity() {
       if (this.selectedPercent && this.percent(this.selectedPercent) !== this.$store.state.orderQuantity) {
         this.selectedPercent = null;

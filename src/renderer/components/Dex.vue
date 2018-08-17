@@ -2,27 +2,30 @@
   <section id="dex">
     <div class="grid" v-if="connected">
       <div class="grid--column column-left">
-        <div class="grid--cell top-left">
-          <router-view name="top-left"></router-view>
+        <div class="grid--cell left-top">
+          <router-view name="left-top"></router-view>
         </div>
-        <div class="grid--cell bottom-left">
-          <router-view name="bottom-left"></router-view>
+        <div class="grid--cell left-bottom">
+          <router-view name="left-bottom"></router-view>
         </div>
       </div>
       <div class="grid--column column-middle">
-        <div class="grid--cell top-middle">
-          <router-view name="top-middle"></router-view>
+        <div class="grid--cell middle-top">
+          <router-view name="middle-top"></router-view>
         </div>
-        <div class="grid--cell bottom-middle">
-          <router-view name="bottom-middle"></router-view>
+        <div class="grid--cell middle-bottom">
+          <router-view name="middle-bottom"></router-view>
         </div>
       </div>
       <div class="grid--column column-right">
-        <div class="grid--cell top-right">
-          <router-view name="top-right"></router-view>
+        <div class="grid--cell right-top">
+          <router-view name="right-top"></router-view>
         </div>
-        <div class="grid--cell bottom-right">
-          <router-view name="bottom-right"></router-view>
+        <div class="grid--cell right-middle">
+          <router-view name="right-middle"></router-view>
+        </div>
+        <div class="grid--cell right-bottom">
+          <router-view name="right-bottom"></router-view>
         </div>
       </div>
     </div>
@@ -175,27 +178,32 @@ export default {
         flex: 1;
       }
 
-      &.top-right {
-        flex: 2;
-      }
-
-      &.bottom-right {
-        flex: 1;
-      }
-
-      &.top-left {
+      &.right-top {
         flex: none;
       }
 
-      &.bottom-left {
+      &.right-middle {
+        flex: 2;
+        margin-top: 0 !important;
+      }
+
+      &.right-bottom {
         flex: 1;
       }
 
-      &.bottom-middle {
+      &.left-top {
+        flex: none;
+      }
+
+      &.left-bottom {
         flex: 1;
       }
 
-      &.top-middle {
+      &.middle-bottom {
+        flex: 1;
+      }
+
+      &.middle-top {
         flex: none;
       }
 

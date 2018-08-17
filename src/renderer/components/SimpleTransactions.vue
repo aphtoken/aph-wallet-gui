@@ -7,6 +7,10 @@
       <td class="currency">{{ transaction.symbol }}</td>
       <td v-if="transaction.block_time" :class="['amount', {sent: transaction.value < 0, received: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</td>
       <td width="25%" class="amount" v-else>{{ $formatNumber(transaction.value) }}</td>
+      <td v-if="showStatus && transaction.details" class="status">
+        <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
+        <aph-icon name="unconfirmed" v-else></aph-icon>
+      </td>
     </tr>
   </table>
 </template>
@@ -34,6 +38,11 @@ export default {
 
     showBlockTime: {
       default: true,
+      type: Boolean,
+    },
+
+    showStatus: {
+      default: false,
       type: Boolean,
     },
 
@@ -89,6 +98,28 @@ export default {
 
       &.sent {
         color: $red;
+      }
+    }
+
+    &.status {
+      text-align: right;
+
+      .aph-icon {
+        svg {
+          height: toRem(14px);
+
+          &.confirmed {
+            .fill {
+              fill: $green !important;
+            }
+          }
+
+          &.unconfirmed {
+            .fill {
+              fill: $red !important;
+            }
+          }
+        }
       }
     }
   }
