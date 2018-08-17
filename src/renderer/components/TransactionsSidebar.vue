@@ -68,6 +68,7 @@ export default {
   display: flex;
   flex-direction: row;
   height: 100%;
+  overflow: hidden;
   position: fixed;
   right: 0;
   top: 0;
@@ -106,6 +107,7 @@ export default {
   > .content {
     display:none;
     flex-direction: column;
+    overflow: hidden;
     width: $right-sidebar-width;
 
     > .header {
@@ -125,6 +127,7 @@ export default {
 
     .body {
       flex: 1;
+      overflow: auto;
       padding: $space;
     }
   }
