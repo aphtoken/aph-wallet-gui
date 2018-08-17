@@ -25,9 +25,9 @@ let lastClaimSent;
 let lastVerifiedTokenBalances;
 
 const calculateHoldingTotalBalance = (holding) => {
-  return toBigNumber(holding.balance)
-    .plus(holding.contractBalance)
-    .plus(holding.openOrdersBalance);
+  return toBigNumber(_.get(holding, 'balance', toBigNumber(0)))
+    .plus(_.get(holding, 'contractBalance', toBigNumber(0)))
+    .plus(_.get(holding, 'openOrdersBalance', toBigNumber(0)));
 };
 
 export default {
