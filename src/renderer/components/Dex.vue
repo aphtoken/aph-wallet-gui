@@ -21,9 +21,6 @@
         <div class="grid--cell right-top">
           <router-view name="right-top"></router-view>
         </div>
-        <div class="grid--cell right-middle">
-          <router-view name="right-middle"></router-view>
-        </div>
         <div class="grid--cell right-bottom">
           <router-view name="right-bottom"></router-view>
         </div>
@@ -136,8 +133,7 @@ export default {
 #dex {
   align-items: center;
   display: flex;
-  flex-direction: column;
-  flex-direction: column;
+  flex-direction: row;
   flex: 1;
   justify-content: center;
   padding-top: toRem(30px);
@@ -179,10 +175,6 @@ export default {
       }
 
       &.right-top {
-        flex: none;
-      }
-
-      &.right-middle {
         flex: 2;
         margin-top: 0 !important;
       }

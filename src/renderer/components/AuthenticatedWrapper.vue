@@ -1,5 +1,5 @@
 <template>
-  <section id="authenticated-wrapper" :class="[$store.state.styleMode]">
+  <section id="authenticated-wrapper" :class="[$store.state.styleMode, {'show-transactions-sidebar': showTransactionsSidebar}]">
     <sidebar></sidebar>
     <div @click="menuToggleable && !menuCollapsed ? $store.commit('setMenuCollapsed', true) : null" :class="{'filler': menuToggleable && !menuCollapsed}" class="content">
       <portfolio-header v-if="$store.state.showPortfolioHeader"></portfolio-header>
@@ -7,15 +7,18 @@
       <aph-claim-gas-modal v-if="$store.state.showClaimGasModal"></aph-claim-gas-modal>
       <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal"></aph-send-with-ledger-modal>
     </div>
+    <transactions-sidebar v-if="showTransactionsSidebar"></transactions-sidebar>
   </section>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+
+import AphClaimGasModal from './modals/ClaimGasModal';
+import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
 import PortfolioHeader from './PortfolioHeader';
 import Sidebar from './Sidebar';
-import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
-import AphClaimGasModal from './modals/ClaimGasModal';
+import TransactionsSidebar from './TransactionsSidebar';
 
 let loadTokensIntervalId;
 let loadHoldingsIntervalId;
@@ -47,16 +50,18 @@ export default {
   },
 
   components: {
+    AphClaimGasModal,
+    AphSendWithLedgerModal,
     PortfolioHeader,
     Sidebar,
-    AphSendWithLedgerModal,
-    AphClaimGasModal,
+    TransactionsSidebar,
   },
 
   data() {
     return {
-      outOfDate: false,
       latestWalletVersion: '',
+      outOfDate: false,
+      showTransactionsSidebar: false,
     };
   },
 
@@ -65,6 +70,12 @@ export default {
       'menuCollapsed',
       'menuToggleable',
     ]),
+  },
+
+  watch: {
+    $route(to) {
+      this.showTransactionsSidebar = to.matched.some(record => record.meta.showTransactionsSidebar);
+    },
   },
 };
 </script>
@@ -89,6 +100,16 @@ export default {
     display: flex;
     flex-direction: column;
     flex: 1;
+  }
+
+  > #transactions-sidebar {
+    flex: none;
+  }
+
+  &.show-transactions-sidebar {
+    > .content {
+      margin-right: $right-sidebar-width-collapsed;
+    }
   }
 }
 </style>

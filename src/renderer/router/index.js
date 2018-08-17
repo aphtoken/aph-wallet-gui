@@ -125,6 +125,7 @@ export default new Router({
           component: require('@/components/Dex').default,
           meta: {
             isMenuToggleable: true,
+            showTransactionsSidebar: true,
           },
           children: [
             {
@@ -134,8 +135,7 @@ export default new Router({
                 'left-bottom': require('@/components/dex/OrderForm').default,
                 'middle-top': require('@/components/dex/Chart').default,
                 'middle-bottom': require('@/components/dex/OrderHistory').default,
-                'right-top': require('@/components/dex/Transactions').default,
-                'right-middle': require('@/components/dex/OrderBook').default,
+                'right-top': require('@/components/dex/OrderBook').default,
                 'right-bottom': require('@/components/dex/TradeHistory').default,
               },
             },

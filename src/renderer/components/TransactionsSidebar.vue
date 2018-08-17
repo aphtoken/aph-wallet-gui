@@ -1,13 +1,11 @@
 <template>
-  <section id="dex--transactions" :class="[{open}]">
-    <div class="toggle" @click="open = true">
-      <span>{{ $t('recentTransactions') }}</span>
-      <aph-icon name="arrow-left"></aph-icon>
+  <section id="transactions-sidebar" :class="[{open}]">
+    <div class="toggle" @click="open = !open">
+      <aph-icon :name="open ? 'double-arrow-right': 'history'"></aph-icon>
     </div>
-    <div class="sidebar">
+    <div class="content">
       <div class="header">
         <h1 class="underlined">{{ $t('recentTransactions') }}</h1>
-        <aph-icon name="arrow-right" @click="open = false"></aph-icon>
       </div>
       <div class="body">
         <aph-simple-transactions :transactions="transactions" :showStatus="true"></aph-simple-transactions>
@@ -63,60 +61,56 @@ export default {
 </script>
 
 <style lang="scss">
-#dex--transactions {
+#transactions-sidebar {
+  @extend %tile-light;
+
+  position: fixed;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  box-shadow: $box-shadow;
+
   > .toggle {
+    @include transition(background);
+
     align-items: center;
     cursor: pointer;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex: none;
-    justify-content: flex-end;
-    padding: $space 0;
-
-    > * {
-      flex: none;
-    }
-
-    > span {
-      @include transition(color);
-
-      color: $grey;
-      font-family: GilroySemibold;
-    }
+    height: 100%;
+    justify-content: center;
+    width: $right-sidebar-width-collapsed;
+    border-right: $border-table-header;
 
     .aph-icon {
-      margin: 0 $space;
-
       svg {
-        height: toRem(17px);
+        height: toRem(20px);
+        width: toRem(20px);
+
+        .fill {
+          fill: $purple;
+        }
+
+        &.history {
+          height: toRem(24px);
+          width: toRem(24px);
+        }
       }
     }
 
     &:hover {
-      > span {
-        color: $purple;
-      }
-
-      > .aph-icon {
-        .fill {
-          fill: $purple !important;
-        }
-      }
+      background: $light-grey;
     }
   }
 
-  > .sidebar {
+  > .content {
     @extend %tile-light;
 
-    background: $background-night;
-    border-radius: 0;
-    position: fixed;
-    right: 0;
-    width: 40vw;
-    height: 100%;
-    top: 0;
-    z-index: 100;
-    display: none;
+    display:none;
+    width: $right-sidebar-width;
     flex-direction: column;
 
     > .header {
@@ -132,22 +126,6 @@ export default {
         flex: 1;
         margin-bottom: 0;
       }
-
-      .aph-icon {
-        flex: none;
-        cursor: pointer;
-        padding: 0 $space;
-
-        svg {
-          height: toRem(17px);
-        }
-      }
-
-      &:hover {
-        .fill {
-          fill: $purple !important;
-        }
-      }
     }
 
     .body {
@@ -157,7 +135,7 @@ export default {
   }
 
   &.open {
-    > .sidebar {
+    > .content {
       display: flex;
     }
   }

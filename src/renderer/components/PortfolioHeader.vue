@@ -88,7 +88,7 @@ export default {
     display: flex;
     flex-direction: row;
     flex: none;
-    width: $right-sidebar-width;
+    width: $right-column-width;
 
     > * {
       width: auto;
