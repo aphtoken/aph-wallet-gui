@@ -28,8 +28,7 @@ const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xA5;
 const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xA6;
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
-const SIGNATUREREQUESTTYPE_CLAIM_GAS_MOVE_NEO = '94';
-const SIGNATUREREQUESTTYPE_CLAIM_GAS = '95';
+const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
 let lastUTXOWithdrawn;
 
@@ -2007,214 +2006,98 @@ export default {
     });
   },
 
-
   claimGasForDexContract() {
-    const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-    return this.fetchHoldings(dexAddress, 'NEO')
-      .then((h) => {
-        const neoAmount = h.holdings[0].balance;
-
-        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
-          this.sendClaimGasForDexContract();
-        } else {
-          // send neo to ourself to make all gas available for claim
-          this.clearDexContractNeo(neoAmount)
-            .then(() => {
-              setTimeout(() => {
-                // send the claim gas
-                this.sendClaimGasForDexContract();
-              }, 30 * 1000);
-            })
-            .catch((e) => {
-              alerts.exception(e);
-            });
-        }
-      })
-      .catch((e) => {
-        alerts.networkException(e);
-      });
-  },
-
-  clearDexContractNeo(neoAmount) {
     return new Promise((resolve, reject) => {
       const currentWallet = wallets.getCurrentWallet();
       const currentNetwork = network.getSelectedNetwork();
       const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-      const intentAmounts = { NEO: neoAmount };
 
       const config = {
         net: currentNetwork.net,
         url: currentNetwork.rpc,
-        address: dexAddress,
-        intents: api.makeIntent(intentAmounts, dexAddress),
-        fees: currentNetwork.fee,
+        address: currentWallet.address,
         account: new wallet.Account(currentWallet.wif),
       };
 
-      api.fillKeys(config)
-        .then((c) => {
-          return new Promise((resolveBalance) => {
-            api.neoscan.getBalance(c.net, dexAddress)
-              .then((balance) => {
-                c.balance = balance;
-                resolveBalance(c);
-              })
-              .catch((e) => {
-                reject(e);
+      api.getClaimsFrom({
+        net: network.getSelectedNetwork().net,
+        url: currentNetwork.rpc,
+        address: dexAddress,
+      }, api.neoscan)
+        .then((claimsResponse) => {
+          api.fillKeys(config)
+            .then((c) => {
+              return new Promise((resolveBalance) => {
+                api.neoscan.getBalance(c.net, currentWallet.address)
+                  .then((balance) => {
+                    c.balance = balance;
+                    resolveBalance(c);
+                  })
+                  .catch((e) => {
+                    reject(e);
+                  });
               });
-          });
-        })
-        .then((c) => {
-          return api.createTx(c, 'contract');
-        })
-        .then((c) => {
-          const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-          c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS_MOVE_NEO);
-          c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-          c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-            u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
-          return api.signTx(c);
-        })
-        .then((c) => {
-          const attachInvokedContract = {
-            invocationScript: ('00').repeat(2),
-            verificationScript: '',
-          };
+            })
+            .then((c) => {
+              c.claims = claimsResponse.claims;
+              return api.createTx(c, 'claim');
+            })
+            .then((c) => {
+              const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+              c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
+              c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+              c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+                u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
 
-          // We need to order this for the VM.
-          const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
-          if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
-            c.tx.scripts.push(attachInvokedContract);
-          } else {
-            c.tx.scripts.unshift(attachInvokedContract);
-          }
+              c.tx.outputs.forEach((o) => {
+                o.scriptHash = assets.DEX_SCRIPT_HASH;
+              });
 
-          return c;
-        })
-        .then((c) => {
-          return api.sendTx(c);
-        })
-        .then((c) => {
-          resolve({
-            success: c.response.result,
-            tx: c.tx,
-          });
+              return api.signTx(c);
+            })
+            .then((c) => {
+              const attachInvokedContract = {
+                invocationScript: ('00').repeat(2),
+                verificationScript: '',
+              };
+
+              // We need to order this for the VM.
+              const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
+              if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+                c.tx.scripts.push(attachInvokedContract);
+              } else {
+                c.tx.scripts.unshift(attachInvokedContract);
+              }
+
+              return c;
+            })
+            .then((c) => {
+              return api.sendTx(c);
+            })
+            .then((c) => {
+              resolve({
+                success: c.response.result,
+                tx: c.tx,
+              });
+            })
+            .catch((e) => {
+              const dump = {
+                net: config.net,
+                address: config.address,
+                intents: config.intents,
+                balance: config.balance,
+                script: config.script,
+                gas: config.gas,
+                tx: config.tx,
+              };
+              console.log(dump);
+              reject(e);
+            });
         })
         .catch((e) => {
-          const dump = {
-            net: config.net,
-            address: config.address,
-            intents: config.intents,
-            balance: config.balance,
-            script: config.script,
-            gas: config.gas,
-            tx: config.tx,
-          };
-          console.log(dump);
-          reject(e);
+          alerts.exception(e);
         });
     });
-  },
-
-  sendClaimGasForDexContract() {
-    const currentWallet = wallets.getCurrentWallet();
-    const currentNetwork = network.getSelectedNetwork();
-    const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-
-    const config = {
-      net: currentNetwork.net,
-      url: currentNetwork.rpc,
-      address: dexAddress,
-      account: new wallet.Account(currentWallet.wif),
-    };
-
-    api.getMaxClaimAmountFrom({
-      net: network.getSelectedNetwork().net,
-      url: currentNetwork.rpc,
-      address: dexAddress,
-    }, api.neoscan)
-      .then((res) => {
-        api.fillKeys(config)
-          .then((c) => {
-            return new Promise((resolveBalance) => {
-              api.neoscan.getBalance(c.net, dexAddress)
-                .then((balance) => {
-                  c.balance = balance;
-                  resolveBalance(c);
-                })
-                .catch((e) => {
-                  reject(e);
-                });
-            });
-          })
-          .then((c) => {
-            return api.createTx(c, 'claim');
-          })
-          .then((c) => {
-            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS);
-            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
-            return api.signTx(c);
-          })
-          .then((c) => {
-            const attachInvokedContract = {
-              invocationScript: ('00').repeat(2),
-              verificationScript: '',
-            };
-
-            // We need to order this for the VM.
-            const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
-            if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
-              c.tx.scripts.push(attachInvokedContract);
-            } else {
-              c.tx.scripts.unshift(attachInvokedContract);
-            }
-
-            return c;
-          })
-          .then((c) => {
-            return api.sendTx(c);
-          })
-          .then((c) => {
-            resolve({
-              success: c.response.result,
-              tx: c.tx,
-            });
-          })
-          .catch((e) => {
-            const dump = {
-              net: config.net,
-              address: config.address,
-              intents: config.intents,
-              balance: config.balance,
-              script: config.script,
-              gas: config.gas,
-              tx: config.tx,
-            };
-            console.log(dump);
-            reject(e);
-          });
-
-        api.claimGas(config)
-          .then((res) => {
-            res.tx.lastBroadcasted = moment().utc();
-            this.monitorTransactionConfirmation(res.tx)
-              .then(() => {
-                store.dispatch('fetchRecentTransactions');
-              })
-              .catch((e) => {
-                alerts.error(e);
-              });
-          })
-          .catch((e) => {
-            alerts.exception(e);
-          });
-      })
-      .catch((e) => {
-        alerts.exception(e);
-      });
   },
 
 };

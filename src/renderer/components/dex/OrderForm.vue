@@ -63,8 +63,9 @@
           </div>
           <div class="footer-buttons">
           <!-- Only the contract owner or manager can do this.
+              <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button>
               <button @click="setMarket" class="footer-btn">Setup Market</button>
-              <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button> -->
+              <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button> -->
           </div>
         </div>
       </aph-spinner-wrapper>
@@ -448,7 +449,7 @@ export default {
     },
     setMarket() {
       this.$services.dex.setMarket(this.$services.assets.APH,
-        this.$services.assets.GAS,
+        this.$services.assets.NEO,
         10, 0.00001, 0.0000, 0.0001)
         .then(() => {
           this.$services.alerts.success(this.$t('setMarketRelayed'));
@@ -460,7 +461,16 @@ export default {
     setMinimumClaimBlocks() {
       this.$services.dex.setMinimumClaimBlocks(180)
         .then(() => {
-          this.$services.alerts.success(this.$t('setMarketRelayed'));
+          this.$services.alerts.success(this.$t('setMinimumClaimBlocks'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+    },
+    claimGasForDexContract() {
+      this.$services.dex.claimGasForDexContract()
+        .then(() => {
+          this.$services.alerts.success(this.$t('claimGasForDexContract'));
         })
         .catch((e) => {
           this.$services.alerts.exception(e);
