@@ -24,6 +24,12 @@ const NEO_ASSET_ID = 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6da
 let lastClaimSent;
 let lastVerifiedTokenBalances;
 
+const calculateHoldingTotalBalance = (holding) => {
+  return toBigNumber(holding.balance)
+    .plus(holding.contractBalance)
+    .plus(holding.openOrdersBalance);
+};
+
 export default {
   createWallet(name, passphrase, passphraseConfirm) {
     return new Promise((resolve, reject) => {
@@ -463,7 +469,7 @@ export default {
                     holding.balance = new BigNumber(val.balance);
                     holding.symbol = val.symbol;
                     holding.name = val.name;
-                    holding.totalBalance = holding.balance;
+                    holding.totalBalance = calculateHoldingTotalBalance(holding);
                     holding.decimals = val.decimals;
 
                     store.commit('removeAssetHoldingsNeedRefresh', [holding.assetId]);
@@ -495,17 +501,16 @@ export default {
               promises.push(dex.fetchContractBalance(holding.assetId)
                 .then((res) => {
                   holding.contractBalance = toBigNumber(res);
-                  holding.totalBalance = toBigNumber(holding.balance)
-                    .plus(holding.contractBalance).plus(holding.openOrdersBalance);
+                  holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {
                   alerts.networkException(e);
                 }));
+
               promises.push(dex.fetchOpenOrderBalance(holding.assetId)
                 .then((res) => {
                   holding.openOrdersBalance = toBigNumber(res);
-                  holding.totalBalance = toBigNumber(holding.balance)
-                    .plus(holding.contractBalance).plus(holding.openOrdersBalance);
+                  holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {
                   alerts.networkException(e);
@@ -597,7 +602,7 @@ export default {
         holding.contractBalance = toBigNumber(holding.contractBalance);
       }
       if (!holding.totalBalance) {
-        holding.totalBalance = holding.balance.plus(holding.contractBalance);
+        holding.totalBalance = calculateHoldingTotalBalance(holding);
       }
       if (holding.totalBalance !== null) {
         holding.totalBalance = toBigNumber(holding.totalBalance);
