@@ -2026,58 +2026,58 @@ export default {
       }, api.neoscan)
         .then((claimsResponse) => {
           api.fillKeys(config)
-            .then((c) => {
+            .then((configResponse) => {
               return new Promise((resolveBalance) => {
-                api.neoscan.getBalance(c.net, currentWallet.address)
+                api.neoscan.getBalance(configResponse.net, currentWallet.address)
                   .then((balance) => {
-                    c.balance = balance;
-                    resolveBalance(c);
+                    configResponse.balance = balance;
+                    resolveBalance(configResponse);
                   })
                   .catch((e) => {
-                    reject(e);
+                    reject(`Failed to get address balance. Error: ${e.message}`);
                   });
               });
             })
-            .then((c) => {
-              c.claims = claimsResponse.claims;
-              return api.createTx(c, 'claim');
+            .then((configResponse) => {
+              configResponse.claims = claimsResponse.claims;
+              return api.createTx(configResponse, 'claim');
             })
-            .then((c) => {
+            .then((configResponse) => {
               const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-              c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
-              c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-              c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
                 u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
 
-              c.tx.outputs.forEach((o) => {
+              configResponse.tx.outputs.forEach((o) => {
                 o.scriptHash = assets.DEX_SCRIPT_HASH;
               });
 
-              return api.signTx(c);
+              return api.signTx(configResponse);
             })
-            .then((c) => {
+            .then((configResponse) => {
               const attachInvokedContract = {
                 invocationScript: ('00').repeat(2),
                 verificationScript: '',
               };
 
               // We need to order this for the VM.
-              const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
+              const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
               if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
-                c.tx.scripts.push(attachInvokedContract);
+                configResponse.tx.scripts.push(attachInvokedContract);
               } else {
-                c.tx.scripts.unshift(attachInvokedContract);
+                configResponse.tx.scripts.unshift(attachInvokedContract);
               }
 
-              return c;
+              return configResponse;
             })
-            .then((c) => {
-              return api.sendTx(c);
+            .then((configResponse) => {
+              return api.sendTx(configResponse);
             })
-            .then((c) => {
+            .then((configResponse) => {
               resolve({
-                success: c.response.result,
-                tx: c.tx,
+                success: configResponse.response.result,
+                tx: configResponse.tx,
               });
             })
             .catch((e) => {
@@ -2091,7 +2091,7 @@ export default {
                 tx: config.tx,
               };
               console.log(dump);
-              reject(e);
+              reject(`Failed to Claim Contract GAS. Error: ${e.message}`);
             });
         })
         .catch((e) => {
