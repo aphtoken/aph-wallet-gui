@@ -275,14 +275,23 @@ export default {
     return bars;
   },
 
-  fetchOrderHistory() {
+  fetchOrderHistory(after) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
-        axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
+        const ordersPageSize = 100;
+
+        if (!after) after = 0;
+
+        axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}
+?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&after=${after}`)
           .then((res) => {
             const orders = res.data.orders;
+
+            // backwards compatible api support
+            const totalOrders = res.data.totalCount ? res.data.totalCount : orders.length;
+
             orders.forEach((order) => {
               const marketForOrder = _.find(store.state.markets, (market) => {
                 return market.marketName === order.marketName;
@@ -300,7 +309,22 @@ export default {
                 order.quantityToGive = order.quantity;
               }
             });
-            resolve(orders);
+
+            // are we at the last page or we got all of the orders in the first page?
+            if (orders.length < ordersPageSize
+                || orders.length >= totalOrders) {
+              resolve(orders);
+            } else {
+              // get the next page
+              this.fetchOrderHistory(orders[orders.length - 1].created)
+                .then((nextOrders) => {
+                  orders.push(...nextOrders);
+                  resolve(orders);
+                })
+                .catch((e) => {
+                  alerts.exception(`APH API Error: ${e.message}`);
+                });
+            }
           })
           .catch((e) => {
             alerts.exception(`APH API Error: ${e.message}`);
