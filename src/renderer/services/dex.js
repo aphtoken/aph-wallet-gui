@@ -275,14 +275,12 @@ export default {
     return bars;
   },
 
-  fetchOrderHistory(after) {
+  fetchOrderHistory(after = 0) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
         const ordersPageSize = 100;
-
-        if (!after) after = 0;
 
         axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}
 ?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&after=${after}`)
