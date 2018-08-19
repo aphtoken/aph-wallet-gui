@@ -20,15 +20,15 @@ import { claiming, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SCRIPT = 0x20;
 const TX_ATTR_USAGE_HEIGHT = 0xf0;
-
-const TX_ATTR_USAGE_WITHDRAW_STEP = 0xA1;
+const TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE = 0xA1;
 const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xA2;
 const TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID = 0xA3;
 const TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID = 0xA4;
 const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xA5;
 const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xA6;
-const WITHDRAW_STEP_MARK = '91';
-const WITHDRAW_STEP_WITHDRAW = '92';
+const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
+const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
+const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
 let lastUTXOWithdrawn;
 
@@ -1078,7 +1078,7 @@ export default {
               this.calculateWithdrawInputsAndOutputs(c, assetId, quantity)
                 .then(() => {
                   const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_MARK.padEnd(64, '0'));
+                  c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
@@ -1279,7 +1279,7 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_WITHDRAW.padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
@@ -1434,7 +1434,7 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_WITHDRAW.padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
@@ -2025,6 +2025,100 @@ export default {
       } catch (e) {
         reject(e);
       }
+    });
+  },
+
+  claimGasForDexContract() {
+    return new Promise((resolve, reject) => {
+      const currentWallet = wallets.getCurrentWallet();
+      const currentNetwork = network.getSelectedNetwork();
+      const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+
+      const config = {
+        net: currentNetwork.net,
+        url: currentNetwork.rpc,
+        address: currentWallet.address,
+        account: new wallet.Account(currentWallet.wif),
+      };
+
+      api.getClaimsFrom({
+        net: network.getSelectedNetwork().net,
+        url: currentNetwork.rpc,
+        address: dexAddress,
+      }, api.neoscan)
+        .then((claimsResponse) => {
+          api.fillKeys(config)
+            .then((configResponse) => {
+              return new Promise((resolveBalance) => {
+                api.neoscan.getBalance(configResponse.net, currentWallet.address)
+                  .then((balance) => {
+                    configResponse.balance = balance;
+                    resolveBalance(configResponse);
+                  })
+                  .catch((e) => {
+                    reject(`Failed to get address balance. Error: ${e.message}`);
+                  });
+              });
+            })
+            .then((configResponse) => {
+              configResponse.claims = claimsResponse.claims;
+              return api.createTx(configResponse, 'claim');
+            })
+            .then((configResponse) => {
+              const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+                u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+
+              configResponse.tx.outputs.forEach((o) => {
+                o.scriptHash = assets.DEX_SCRIPT_HASH;
+              });
+
+              return api.signTx(configResponse);
+            })
+            .then((configResponse) => {
+              const attachInvokedContract = {
+                invocationScript: ('00').repeat(2),
+                verificationScript: '',
+              };
+
+              // We need to order this for the VM.
+              const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
+              if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+                configResponse.tx.scripts.push(attachInvokedContract);
+              } else {
+                configResponse.tx.scripts.unshift(attachInvokedContract);
+              }
+
+              return configResponse;
+            })
+            .then((configResponse) => {
+              return api.sendTx(configResponse);
+            })
+            .then((configResponse) => {
+              resolve({
+                success: configResponse.response.result,
+                tx: configResponse.tx,
+              });
+            })
+            .catch((e) => {
+              const dump = {
+                net: config.net,
+                address: config.address,
+                intents: config.intents,
+                balance: config.balance,
+                script: config.script,
+                gas: config.gas,
+                tx: config.tx,
+              };
+              console.log(dump);
+              reject(`Failed to Claim Contract GAS. Error: ${e.message}`);
+            });
+        })
+        .catch((e) => {
+          alerts.exception(e);
+        });
     });
   },
 
