@@ -22,7 +22,7 @@
       </div>
     </div>
     <zoom></zoom>
-    <address-modal v-if="this.$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></address-modal>
+    <address-modal v-if="$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></address-modal>
   </section>
   <section v-else></section>
 </template>
