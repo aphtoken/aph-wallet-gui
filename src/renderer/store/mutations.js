@@ -544,7 +544,6 @@ function SOCKET_RECONNECT_ERROR(state) {
   state.socket.reconnectError = true;
 }
 
-<<<<<<< HEAD
 function SOCKET_RECONNECT(state) {
   if (state.currentMarket) {
     this.dispatch('subscribeToMarket', {
@@ -552,7 +551,8 @@ function SOCKET_RECONNECT(state) {
       isRequestSilent: true,
     });
   }
-=======
+}
+
 function tradeUpdateReceived(state, tradeUpdateMsg) {
   if (!state.tradeHistory || !state.tradeHistory.trades) {
     return;
@@ -570,7 +570,6 @@ function tradeUpdateReceived(state, tradeUpdateMsg) {
       tradeTime: moment(t[2]).unix(),
     });
   });
->>>>>>> 602f383... Update 'Trade History' Component to use 'trades' msg. for trade updates (instead of REST polling)
 }
 
 // Local functions
