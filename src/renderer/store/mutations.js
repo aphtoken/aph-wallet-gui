@@ -532,6 +532,8 @@ function SOCKET_ONMESSAGE(state, message) {
     if (state.socket.orderMatchFailed) {
       state.socket.orderMatchFailed(message);
     }
+  } else if (message.type === 'trades') {
+    tradeUpdateReceived(state, message);
   } else if (message.type) {
     // unknown message type
     console.log(message);
@@ -542,6 +544,7 @@ function SOCKET_RECONNECT_ERROR(state) {
   state.socket.reconnectError = true;
 }
 
+<<<<<<< HEAD
 function SOCKET_RECONNECT(state) {
   if (state.currentMarket) {
     this.dispatch('subscribeToMarket', {
@@ -549,6 +552,25 @@ function SOCKET_RECONNECT(state) {
       isRequestSilent: true,
     });
   }
+=======
+function tradeUpdateReceived(state, tradeUpdateMsg) {
+  if (!state.tradeHistory || !state.tradeHistory.trades) {
+    return;
+  }
+
+  tradeUpdateMsg.trades.forEach((t) => {
+    if (t.length !== 3) {
+      return;
+    }
+
+    state.tradeHistory.trades.unshift({
+      side: tradeUpdateMsg.side === 'ask' ? 'Buy' : 'Sell',
+      price: t[0],
+      quantity: t[1],
+      tradeTime: moment(t[2]).unix(),
+    });
+  });
+>>>>>>> 602f383... Update 'Trade History' Component to use 'trades' msg. for trade updates (instead of REST polling)
 }
 
 // Local functions
