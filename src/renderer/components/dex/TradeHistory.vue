@@ -23,20 +23,15 @@
 </template>
 
 <script>
-let loadTradesIntervalId;
 let storeUnwatch;
 export default {
 
   beforeDestroy() {
-    clearInterval(loadTradesIntervalId);
     storeUnwatch();
   },
 
   mounted() {
     this.loadTrades();
-    loadTradesIntervalId = setInterval(() => {
-      this.loadTrades();
-    }, this.$constants.intervals.TRANSACTIONS_POLLING);
 
     storeUnwatch = this.$store.watch(
       () => {
