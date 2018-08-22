@@ -80,6 +80,9 @@ export {
   SOCKET_RECONNECT_ERROR,
 };
 
+// local constants
+const TRADE_MSG_LENGTH = 3;
+
 function clearActiveTransaction(state) {
   state.showPriceTile = true;
 }
@@ -565,9 +568,7 @@ function tradeUpdateReceived(state, tradeUpdateMsg) {
   }
 
   tradeUpdateMsg.trades.forEach((trade) => {
-    const tradeMsgLength = 3;
-
-    if (trade.length !== tradeMsgLength) {
+    if (trade.length !== TRADE_MSG_LENGTH) {
       return;
     }
 
