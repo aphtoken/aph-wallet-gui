@@ -80,6 +80,9 @@ export {
   SOCKET_RECONNECT_ERROR,
 };
 
+// local constants
+const TRADE_MSG_LENGTH = 3;
+
 function clearActiveTransaction(state) {
   state.showPriceTile = true;
 }
@@ -532,9 +535,11 @@ function SOCKET_ONMESSAGE(state, message) {
     if (state.socket.orderMatchFailed) {
       state.socket.orderMatchFailed(message);
     }
+  } else if (message.type === 'trades') {
+    tradeUpdateReceived(state, message);
   } else if (message.type) {
     // unknown message type
-    console.log(message);
+    // console.log(message);
   }
 }
 
@@ -548,7 +553,32 @@ function SOCKET_RECONNECT(state) {
       market: state.currentMarket,
       isRequestSilent: true,
     });
+
+    // Ensure trade history is up-to-date on reconnect. (may have dropped some trades during disconnect)
+    this.dispatch('fetchTradeHistory', {
+      marketName: state.currentMarket.marketName,
+      isRequestSilent: true,
+    });
   }
+}
+
+function tradeUpdateReceived(state, tradeUpdateMsg) {
+  if (!state.tradeHistory || !state.tradeHistory.trades) {
+    return;
+  }
+
+  tradeUpdateMsg.trades.forEach((trade) => {
+    if (trade.length !== TRADE_MSG_LENGTH) {
+      return;
+    }
+
+    state.tradeHistory.trades.unshift({
+      side: tradeUpdateMsg.side === 'ask' ? 'Sell' : 'Buy',
+      price: trade[0],
+      quantity: trade[1],
+      tradeTime: moment(trade[2]).unix(),
+    });
+  });
 }
 
 // Local functions
