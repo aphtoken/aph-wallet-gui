@@ -536,7 +536,7 @@ function SOCKET_ONMESSAGE(state, message) {
     tradeUpdateReceived(state, message);
   } else if (message.type) {
     // unknown message type
-    console.log(message);
+    // console.log(message);
   }
 }
 
@@ -550,6 +550,12 @@ function SOCKET_RECONNECT(state) {
       market: state.currentMarket,
       isRequestSilent: true,
     });
+
+    // Ensure trade history is up-to-date on reconnect. (may have dropped some trades during disconnect)
+    this.dispatch('fetchTradeHistory', {
+      marketName: this.$store.state.currentMarket.marketName,
+      isRequestSilent: true,
+    });
   }
 }
 
@@ -558,16 +564,18 @@ function tradeUpdateReceived(state, tradeUpdateMsg) {
     return;
   }
 
-  tradeUpdateMsg.trades.forEach((t) => {
-    if (t.length !== 3) {
+  tradeUpdateMsg.trades.forEach((trade) => {
+    const tradeMsgLength = 3;
+
+    if (trade.length !== tradeMsgLength) {
       return;
     }
 
     state.tradeHistory.trades.unshift({
       side: tradeUpdateMsg.side === 'ask' ? 'Buy' : 'Sell',
-      price: t[0],
-      quantity: t[1],
-      tradeTime: moment(t[2]).unix(),
+      price: trade[0],
+      quantity: trade[1],
+      tradeTime: moment(trade[2]).unix(),
     });
   });
 }
