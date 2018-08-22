@@ -573,7 +573,7 @@ function tradeUpdateReceived(state, tradeUpdateMsg) {
     }
 
     state.tradeHistory.trades.unshift({
-      side: tradeUpdateMsg.side === 'ask' ? 'Buy' : 'Sell',
+      side: tradeUpdateMsg.side === 'ask' ? 'Sell' : 'Buy',
       price: trade[0],
       quantity: trade[1],
       tradeTime: moment(trade[2]).unix(),
