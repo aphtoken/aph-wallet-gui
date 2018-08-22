@@ -556,7 +556,7 @@ function SOCKET_RECONNECT(state) {
 
     // Ensure trade history is up-to-date on reconnect. (may have dropped some trades during disconnect)
     this.dispatch('fetchTradeHistory', {
-      marketName: this.$store.state.currentMarket.marketName,
+      marketName: state.currentMarket.marketName,
       isRequestSilent: true,
     });
   }
