@@ -573,7 +573,8 @@ function tradeUpdateReceived(state, tradeUpdateMsg) {
     }
 
     state.tradeHistory.trades.unshift({
-      side: tradeUpdateMsg.side === 'ask' ? 'Sell' : 'Buy',
+      // Trade executing in ask side means a Buy executed.
+      side: tradeUpdateMsg.side === 'ask' ? 'Buy' : 'Sell',
       price: trade[0],
       quantity: trade[1],
       tradeTime: moment(trade[2]).unix(),
