@@ -62,12 +62,12 @@
             </div>
           </div>
           <div class="footer-buttons">
-          <!-- Only the contract owner or manager can do this.
+          <!-- Only the contract owner or manager can do this. -->
               <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button>
               <button @click="setMarket" class="footer-btn">Setup Market</button>
-              <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button> -->
+              <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button>
           </div>
-        </div>
+       </div>
       </aph-spinner-wrapper>
     </section>
     <aph-order-confirmation-modal v-if="$store.state.showOrderConfirmationModal"
@@ -449,14 +449,70 @@ export default {
     },
     setMarket() {
       this.$services.dex.setMarket(this.$services.assets.APH,
-        this.$services.assets.NEO,
-        10, 0.00001, 0.0000, 0.0001)
+        this.$services.assets.GAS,
+        100, 0.00001, 0.0000, 0.25)
         .then(() => {
           this.$services.alerts.success(this.$t('setMarketRelayed'));
         })
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
+      this.$services.dex.setMarket(this.$services.assets.ATI,
+        this.$services.assets.APH,
+        200, 0.00001, 0.25, 0)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      this.$services.dex.setMarket(this.$services.assets.NEO,
+        this.$services.assets.GAS,
+        0.5, 0.000001, 0.30946428, 0.30946428)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      this.$services.dex.setMarket(this.$services.assets.ATI,
+        this.$services.assets.NEO,
+        200, 0.00001, 0.25, 0.25)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      this.$services.dex.setMarket(this.$services.assets.ATI,
+        this.$services.assets.GAS,
+        200, 0.00001, 0.25, 0.25)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      this.$services.dex.setMarket(this.$services.assets.APH,
+        this.$services.assets.NEO,
+        100, 0.0000001, 0, 0.25)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      /*
+      this.$services.dex.setMarket('9aff1e08aea2048a26a3d2ddbb3df495b932b1e7',
+        this.$constants.assets.APH,
+        1, 0.00001, 0.01, 0.01)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      */
     },
     setMinimumClaimBlocks() {
       this.$services.dex.setMinimumClaimBlocks(180)
