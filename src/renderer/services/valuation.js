@@ -42,7 +42,7 @@ export default {
           axios.get(`${CMC_BASE_URL}ticker/?limit=1000&convert=${settings.getCurrency()}`)
             .then((res) => {
               lastCheckedTicker = moment.utc();
-              coinTickerList = _.values(res.data.data);
+              coinTickerList = _.values(res.data);
               resolve(_.find(coinTickerList, { symbol }));
             });
           return;
