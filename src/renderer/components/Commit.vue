@@ -114,6 +114,7 @@
 </template>
 
 <script>
+
 import { BigNumber } from 'bignumber.js';
 import { mapGetters } from 'vuex';
 import CommitInfo from './modals/CommitInfo';
