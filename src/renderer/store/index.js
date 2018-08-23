@@ -36,6 +36,7 @@ const state = {
   markets: [],
   menuToggleable: false,
   menuCollapsed: true,
+  needsWsReconnectHandling: false,
   nep5Balances: {},
   orderBook: null,
   orderHistory: null,
