@@ -62,10 +62,10 @@
             </div>
           </div>
           <div class="footer-buttons">
-          <!-- Only the contract owner or manager can do this. -->
+          <!-- Only the contract owner or manager can do this.
               <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button>
               <button @click="setMarket" class="footer-btn">Setup Market</button>
-              <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button>
+              <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button> -->
           </div>
        </div>
       </aph-spinner-wrapper>
