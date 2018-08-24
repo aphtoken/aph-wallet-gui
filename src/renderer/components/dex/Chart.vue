@@ -190,7 +190,7 @@ export default {
           },
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            const bars = this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory.trades, resolution, from, to);
+            const bars = this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to);
             if (bars.length === 0) {
               onDataCallback(bars, { noData: true })
             } else {
