@@ -10,12 +10,12 @@ export default {
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
 
   // TODO: these different per network
-  DEX_SCRIPT_HASH: '301155e583c7553955902891a994ff085747cf04',
+  DEX_SCRIPT_HASH: '10fd55cb061322ca27c18592f377495df48bf9d8',
   APH: '591eedcd379a8981edeefe04ef26207e1391904a',
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
 
   // privnet
-  // DEX_SCRIPT_HASH: 'c6ed80578072e0d1c0b52335f81013dd0df982b3',
+  // DEX_SCRIPT_HASH: '829ad03f7ae0ddfcb7c4127981dc7fc076317870',
   // APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac', // james
   // ATI: '155153854ed377549a72cc1643e481bf25b48390', // james
   // APH: 'fe8ad8a261b171fb313cbfb0d4a974e269d11061', // jeff
