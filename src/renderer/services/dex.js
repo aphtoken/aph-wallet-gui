@@ -521,7 +521,7 @@ export default {
 
         if (order.deposits.length > 0) {
           if (waitForDeposits) {
-            // we have deposits pending, wait for our balance to reflect
+            // We have deposits pending, wait for our balance to reflect
             setTimeout(() => {
               this.placeOrder(order, true);
             }, 5000);
@@ -621,10 +621,13 @@ export default {
     return power.minus(1);
   },
 
-  calculateFeeAmount(quouteQuantity, minimumTradeSize, baseFee) {
+  calculateFeeAmount(quoteQuantity, minimumTradeSize, baseFee) {
+    if (quoteQuantity < minimumTradeSize) {
+      return baseFee;
+    }
     // Earlier checks guarantee that quoteQuantity > 0
     return this.flooredLogBase2(
-      quouteQuantity
+      quoteQuantity
         .multipliedBy(2)
         .dividedBy(minimumTradeSize)
         .decimalPlaces(0, BigNumber.ROUND_DOWN))
