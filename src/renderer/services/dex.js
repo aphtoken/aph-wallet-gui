@@ -601,7 +601,7 @@ export default {
         // build all the order transactions
         const buildPromises = [];
         order.offersToTake.forEach((o) => {
-          buildPromises.push(this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.market, o));
+          buildPromises.push(this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.orderType, order.market, o));
         });
 
         if (order.quantityToTake < order.quantity) {
@@ -864,7 +864,7 @@ export default {
     });
   },
 
-  buildAcceptOffer(side, market, offer) {
+  buildAcceptOffer(side, orderType, market, offer) {
     return new Promise((resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
@@ -890,7 +890,7 @@ export default {
             u.num2fixed8(quantityToGive.toNumber()),
             u.reverseHex(assetIdToReceive),
             u.num2fixed8(quantityToReceive.toNumber()),
-            1,
+            orderType === 'Market' ? 0 : 1, // whether or not to create a taker offer if this is no longer available
             u.num2fixed8(new Date().getTime() * 0.00000001),
           ])
           .then((t) => {
