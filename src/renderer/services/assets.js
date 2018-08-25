@@ -15,7 +15,7 @@ export default {
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
 
   // privnet
-  // DEX_SCRIPT_HASH: 'c6ed80578072e0d1c0b52335f81013dd0df982b3',
+  // DEX_SCRIPT_HASH: '829ad03f7ae0ddfcb7c4127981dc7fc076317870',
   // APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac', // james
   // ATI: '155153854ed377549a72cc1643e481bf25b48390', // james
   // APH: 'fe8ad8a261b171fb313cbfb0d4a974e269d11061', // jeff

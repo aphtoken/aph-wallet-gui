@@ -579,7 +579,7 @@ export default {
 
         if (order.deposits.length > 0) {
           if (waitForDeposits) {
-            // we have deposits pending, wait for our balance to reflect
+            // We have deposits pending, wait for our balance to reflect
             setTimeout(() => {
               this.placeOrder(order, true);
             }, 5000);
@@ -603,7 +603,7 @@ export default {
         // build all the order transactions
         const buildPromises = [];
         order.offersToTake.forEach((o) => {
-          buildPromises.push(this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.market, o));
+          buildPromises.push(this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.orderType, order.market, o));
         });
 
         if (order.quantityToTake < order.quantity) {
@@ -679,10 +679,13 @@ export default {
     return power.minus(1);
   },
 
-  calculateFeeAmount(quouteQuantity, minimumTradeSize, baseFee) {
+  calculateFeeAmount(quoteQuantity, minimumTradeSize, baseFee) {
+    if (quoteQuantity < minimumTradeSize) {
+      return baseFee;
+    }
     // Earlier checks guarantee that quoteQuantity > 0
     return this.flooredLogBase2(
-      quouteQuantity
+      quoteQuantity
         .multipliedBy(2)
         .dividedBy(minimumTradeSize)
         .decimalPlaces(0, BigNumber.ROUND_DOWN))
@@ -863,7 +866,7 @@ export default {
     });
   },
 
-  buildAcceptOffer(side, market, offer) {
+  buildAcceptOffer(side, orderType, market, offer) {
     return new Promise((resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
@@ -889,7 +892,7 @@ export default {
             u.num2fixed8(quantityToGive.toNumber()),
             u.reverseHex(assetIdToReceive),
             u.num2fixed8(quantityToReceive.toNumber()),
-            1,
+            orderType === 'Market' ? 0 : 1, // whether or not to create a taker offer if this is no longer available
             u.num2fixed8(new Date().getTime() * 0.00000001),
           ])
           .then((t) => {

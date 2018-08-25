@@ -38,7 +38,9 @@ export default {
           ? this.$formatNumber(this.holding.balance) : '0';
         const contractBalance = this.holding.contractBalance
           ? this.$formatNumber(this.holding.contractBalance) : '0';
-        return this.$t('walletBalanceContractBalance', { walletBalance, contractBalance });
+        const openOrdersBalance = this.holding.openOrdersBalance
+          ? this.$formatNumber(this.holding.openOrdersBalance) : '0';
+        return this.$t('walletBalanceContractBalance', { walletBalance, contractBalance, openOrdersBalance });
       } catch (e) {
         return '';
       }
