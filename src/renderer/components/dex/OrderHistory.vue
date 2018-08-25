@@ -174,7 +174,7 @@ export default {
           _.set(cancelledOrders, order.orderId, moment.utc());
         })
         .catch((e) => {
-          this.$services.alerts.error(e);
+          this.$services.alerts.exception(e);
         });
     },
   },

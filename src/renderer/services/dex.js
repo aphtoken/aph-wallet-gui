@@ -224,7 +224,7 @@ export default {
       time: (to * 1000) - resolution,
     };
 
-    let apiBucketsIndex = tradeHistory.apiBuckets.length - 1;
+    let apiBucketsIndex = tradeHistory.apiBuckets ? tradeHistory.apiBuckets.length - 1 : 0;
 
     for (let i = 0; i < trades.length; i += 1) {
       const t = trades[i];
@@ -258,7 +258,8 @@ export default {
             time: currentBar.time - resolution,
           };
 
-          if (apiBucketsIndex >= 0 && currentBar.time === tradeHistory.apiBuckets[apiBucketsIndex].time * 1000) {
+          if (apiBucketsIndex >= 0 && tradeHistory.apiBuckets
+              && currentBar.time === tradeHistory.apiBuckets[apiBucketsIndex].time * 1000) {
             currentBar = {
               open: tradeHistory.apiBuckets[apiBucketsIndex].open,
               close: tradeHistory.apiBuckets[apiBucketsIndex].close,
@@ -296,7 +297,8 @@ export default {
             time: currentBar.time - resolution,
           };
 
-          if (apiBucketsIndex >= 0 && currentBar.time === tradeHistory.apiBuckets[apiBucketsIndex].time * 1000) {
+          if (apiBucketsIndex >= 0 && tradeHistory.apiBuckets
+              && currentBar.time === tradeHistory.apiBuckets[apiBucketsIndex].time * 1000) {
             currentBar = {
               open: tradeHistory.apiBuckets[apiBucketsIndex].open,
               close: tradeHistory.apiBuckets[apiBucketsIndex].close,
@@ -322,8 +324,8 @@ export default {
           .then((res) => {
             resolve(res.data.buckets);
           })
-          .catch((e) => {
-            alerts.exception(`APH API Error: ${e.message}`);
+          .catch(() => {
+            resolve([]);
           });
       } catch (e) {
         reject(e);
