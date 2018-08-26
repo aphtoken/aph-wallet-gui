@@ -60,7 +60,7 @@ export default {
     },
 
     showSendView() {
-      this.$router.push(`/authenticated/dashboard/${this.sendInProgress ? 'confirming' : 'send'}`);
+      this.$router.push(`/authenticated/dashboard/${this.$store.state.sendInProgress ? 'confirming' : 'send'}`);
     },
   },
 };

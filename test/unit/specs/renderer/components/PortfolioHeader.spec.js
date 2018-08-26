@@ -7,6 +7,12 @@ import utils from './utils';
 let actions;
 let store;
 
+const i18n = utils.getI18n({
+  en: {
+    myPortfolio: 'My Portfolio',
+  },
+});
+
 describe('PortfolioHeader.vue', () => {
   beforeEach(() => {
     actions = {
@@ -26,7 +32,7 @@ describe('PortfolioHeader.vue', () => {
   });
 
   it('should render correct contents', () => {
-    const wrapper = utils.shallow(PortfolioHeader, { store });
+    const wrapper = utils.shallow(PortfolioHeader, { i18n, store });
 
     expect(wrapper.find('h1.underlined').text()).contains('My Portfolio');
     expect(wrapper.find('.balance .amount').text()).contains('$200.00');
