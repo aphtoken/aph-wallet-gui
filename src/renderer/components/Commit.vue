@@ -114,7 +114,6 @@
 </template>
 
 <script>
-
 import { BigNumber } from 'bignumber.js';
 import { mapGetters } from 'vuex';
 import CommitInfo from './modals/CommitInfo';
@@ -249,14 +248,15 @@ export default {
 
 <style lang="scss">
 #commit-aph {
-  align-items: center;
-  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   margin: $space-xl;
 
   .header {
     color: $purple;
-    font-family: GilroySemibold;
-    margin: 0 $space $space $space;
+    font-family: 'GilroySemibold';
+    padding: 0 0 $space-xxl $space-lg;
 
     h1 {
       display: inline-block;
@@ -265,11 +265,12 @@ export default {
 
     .learn-more {
       @extend %btn;
+
       display: inline-block;
-      width: auto;
-      padding: 0 $space-lg;
       margin: 0 $space;
+      padding: 0 $space-lg;
       transform: translate(0%, toRem(-10px));
+      width: auto;
 
       &:hover {
         box-shadow: $box-shadow-sm;
@@ -278,58 +279,34 @@ export default {
   }
 
   .body {
-    margin: 0 auto;
     display: flex;
-    flex-direction: column;
     flex: 1;
-
-    p {
-      line-height: $copy-line-height;
-      margin: 0;
-
-      & + P {
-        margin-top: $space;
-      }
-    }
-    
-
-    .icon {
-      flex: 1;
-      text-align: center;
-
-      svg {
-        height: toRem(42px);
-      }
-    }
+    flex-direction: column;
     
     .exchange-values {
       display: flex;
-      flex-direction: row;
-      justify-content: center;
-        
-      &> div {
-        display:flex;
-        flex-direction: row;
-        flex: 1;
-        max-width: toRem(500px);
-        margin-right: $space;
+      padding-left: $space-xl;
 
-        &> .exchange-val {
-          display: flex;
-          flex-direction: column;
-        }
+      .total {
+        display: flex;
+        padding-right: $space-xl;
       }
-      
+
+      .since-commit {
+        display: flex;
+      }
+
       .label {
+        font-family: 'Gilroy';
         font-size: toRem(22px);
-        font-family: 'GilroySemibold';
+        max-width: toRem(250px);
       }
       
       .highlight {
         color: $purple;
+        font-family: 'GilroySemibold';
         font-size: toRem(28px);
         padding: $space-sm 0;
-        font-family: 'GilroySemibold';
       }
       
       .estimate {
@@ -337,20 +314,20 @@ export default {
       }
         
       .icons {
-        position: relative;
-        margin: $space toRem(5px) 0 0;
-        width: toRem(80px);
         height: toRem(80px);
+        margin: $space-lg toRem(5px) 0 0;
+        position: relative;
+        width: toRem(80px);
           
         .aph-icon {
+          height: toRem(40px);
           position: absolute;
           width: toRem(40px);
-          height: toRem(40px);
 
           .icon {
             svg {
-              position: relative;
               margin-top: 10%;
+              position: relative;
             }
             
             &.star {
@@ -372,15 +349,16 @@ export default {
       background-color: white;
       display: flex;
       flex-direction: row;
-      padding: $space-lg;
       margin: $space 0;
+      padding: $space-lg;
     
       &> div {
         flex: 1;
       }
       
-      h2.underlined {
+      .underlined {
         @extend %underlined-header-sm;
+
         font-size: toRem(24px);
       }
       
@@ -393,36 +371,49 @@ export default {
       
       .lower {
         text-transform: uppercase;
-      }
-      
-      span {
-        color: $grey;
-        margin: 0 $space 0 0;
+
+        &> span {
+          color: $grey;
+          margin: 0 $space 0 0;
+        }
       }
     }
     
     .actions {
       display: flex;
+      flex: 1;
       flex-direction: row;
       
       &> div {
-        flex: 1;
+        flex: 1 1 50%;
       }
       
       .btn-square {
         @extend %btn-square;
 
+        flex-direction: row;
+        font-size: toRem(55px);
         height: toRem(225px);
         padding: 3rem 0;
         width: toRem(250px);
-        flex-direction: row;
         
-        &>div {
+        &> div {
           width: 100%;
+
+          &> p {
+            font-size: toRem(22px);
+            padding-top: $space-lg;
+          }
         }
             
         &:disabled {
           background-color: $grey;
+          color: $dark;
+        }
+
+        &:enabled {
+          background-color: $purple;
+          color: white;
         }
 
         .aph-icon {
@@ -432,7 +423,7 @@ export default {
         }
 
         &:hover {
-          background: $purple;
+          background: $purple-hover;
           color: white;
 
           .aph-icon {
@@ -443,24 +434,21 @@ export default {
         }
       }
       
-      
       .claim-info {
-        background-color: white;
         padding: $space-lg;
-        max-height: toRem(300px);
         
         &> div {
-         text-align: center;
-         text-transform: uppercase;
-         font-size: toRem(18px);
+          text-align: center;
+          text-transform: uppercase;
+          font-size: toRem(18px);
          
-         &> div {
-          margin: $space;
-           span {
-            color: $dark-grey;
-            display: block;
-           }
-         }
+          &> div {
+            margin: $space;
+            span {
+              color: $dark-grey;
+              display: block;
+            }
+          }
         }
         
         h2 {
