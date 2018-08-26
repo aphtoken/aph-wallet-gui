@@ -251,12 +251,13 @@ export default {
   display: flex;
   flex-direction: column;
   flex: 1;
-  margin: $space-xl;
+  margin: $space-lg;
 
   .header {
+    flex-basis: 15%;
     color: $purple;
     font-family: 'GilroySemibold';
-    padding: 0 0 $space-xxl $space-lg;
+    padding-left: $space-lg;
 
     h1 {
       display: inline-block;
@@ -280,7 +281,7 @@ export default {
 
   .body {
     display: flex;
-    flex: 1;
+    flex: 1 0 85%;
     flex-direction: column;
     
     .exchange-values {
@@ -393,7 +394,6 @@ export default {
 
         flex-direction: row;
         font-size: toRem(55px);
-        height: toRem(225px);
         padding: 3rem 0;
         width: toRem(250px);
         
@@ -469,7 +469,7 @@ export default {
           flex-basis: 20%;
           flex-direction: row;
           position: relative;
-          top: toRem(-150px);
+          top: toRem(-125px);
           
           .btn-square {
             flex: 1;
