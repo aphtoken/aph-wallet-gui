@@ -498,6 +498,21 @@ function SOCKET_ONOPEN(state, event) {
   if (state.socket.opened) {
     state.socket.opened();
   }
+  if (state.needsWsReconnectHandling) {
+    state.needsWsReconnectHandling = false;
+    if (state.currentMarket) {
+      this.dispatch('subscribeToMarket', {
+        market: state.currentMarket,
+        isRequestSilent: true,
+      });
+
+      // Ensure trade history is up-to-date on reconnect. (may have dropped some trades during disconnect)
+      this.dispatch('fetchTradeHistory', {
+        marketName: state.currentMarket.marketName,
+        isRequestSilent: true,
+      });
+    }
+  }
 }
 
 function SOCKET_ONCLOSE(state) {
@@ -548,18 +563,10 @@ function SOCKET_RECONNECT_ERROR(state) {
 }
 
 function SOCKET_RECONNECT(state) {
-  if (state.currentMarket) {
-    this.dispatch('subscribeToMarket', {
-      market: state.currentMarket,
-      isRequestSilent: true,
-    });
-
-    // Ensure trade history is up-to-date on reconnect. (may have dropped some trades during disconnect)
-    this.dispatch('fetchTradeHistory', {
-      marketName: state.currentMarket.marketName,
-      isRequestSilent: true,
-    });
-  }
+  // Note: at this point SOCKET_ONOPEN will not have been called yet, state.socket.client will still be null
+  // So we cannot actually send any messages out the websocket here. We can set a flag so that SOCKET_ONOPEN will know
+  // that has opened as a result of a RECONNECT.
+  state.needsWsReconnectHandling = true;
 }
 
 function tradeUpdateReceived(state, tradeUpdateMsg) {

@@ -162,6 +162,7 @@ export default {
 
             const history = {
               date: res.data.timestamp,
+              marketName,
               trades: res.data.trades,
               getBars: this.getTradeHistoryBars,
             };
@@ -200,9 +201,20 @@ export default {
     });
   },
 
-  getTradeHistoryBars(trades, resolution, from, to) {
+  getTradeHistoryBars(tradeHistory, resolution, from, to) {
     const bars = [];
-    resolution = parseFloat(resolution) * 60 * 1000;
+    const trades = tradeHistory.trades;
+
+    // convert resolution to seconds
+    resolution = parseFloat(resolution) * 60;
+
+    // round to even interval
+    from = Math.round(from / resolution) * resolution;
+    to = Math.round(to / resolution) * resolution;
+
+    // convert resolution to milliseconds
+    resolution *= 1000;
+
     let currentBar = {
       open: 0,
       close: trades.length > 0 ? trades[0].price : 0,
@@ -211,6 +223,8 @@ export default {
       volume: 0,
       time: (to * 1000) - resolution,
     };
+
+    let apiBucketsIndex = tradeHistory.apiBuckets ? tradeHistory.apiBuckets.length - 1 : 0;
 
     for (let i = 0; i < trades.length; i += 1) {
       const t = trades[i];
@@ -243,6 +257,19 @@ export default {
             volume: 0,
             time: currentBar.time - resolution,
           };
+
+          if (apiBucketsIndex >= 0 && tradeHistory.apiBuckets
+              && currentBar.time === tradeHistory.apiBuckets[apiBucketsIndex].time * 1000) {
+            currentBar = {
+              open: tradeHistory.apiBuckets[apiBucketsIndex].open,
+              close: tradeHistory.apiBuckets[apiBucketsIndex].close,
+              high: tradeHistory.apiBuckets[apiBucketsIndex].high,
+              low: tradeHistory.apiBuckets[apiBucketsIndex].low,
+              volume: tradeHistory.apiBuckets[apiBucketsIndex].volume,
+              time: tradeHistory.apiBuckets[apiBucketsIndex].time * 1000,
+            };
+            apiBucketsIndex -= 1;
+          }
         }
 
         currentBar.volume += t.quantity;
@@ -269,10 +296,41 @@ export default {
             volume: 0,
             time: currentBar.time - resolution,
           };
+
+          if (apiBucketsIndex >= 0 && tradeHistory.apiBuckets
+              && currentBar.time === tradeHistory.apiBuckets[apiBucketsIndex].time * 1000) {
+            currentBar = {
+              open: tradeHistory.apiBuckets[apiBucketsIndex].open,
+              close: tradeHistory.apiBuckets[apiBucketsIndex].close,
+              high: tradeHistory.apiBuckets[apiBucketsIndex].high,
+              low: tradeHistory.apiBuckets[apiBucketsIndex].low,
+              volume: tradeHistory.apiBuckets[apiBucketsIndex].volume,
+              time: tradeHistory.apiBuckets[apiBucketsIndex].time * 1000,
+            };
+            apiBucketsIndex -= 1;
+          }
         }
       }
     }
     return bars;
+  },
+
+  fetchTradesBucketed(marketName, binSize = 1) {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+        axios.get(`${currentNetwork.aph}/trades/bucketed/${marketName}
+?binSize=${binSize}`)
+          .then((res) => {
+            resolve(res.data.buckets);
+          })
+          .catch(() => {
+            resolve([]);
+          });
+      } catch (e) {
+        reject(e);
+      }
+    });
   },
 
   fetchOrderHistory(after = 0) {
@@ -521,7 +579,7 @@ export default {
 
         if (order.deposits.length > 0) {
           if (waitForDeposits) {
-            // we have deposits pending, wait for our balance to reflect
+            // We have deposits pending, wait for our balance to reflect
             setTimeout(() => {
               this.placeOrder(order, true);
             }, 5000);
@@ -545,7 +603,7 @@ export default {
         // build all the order transactions
         const buildPromises = [];
         order.offersToTake.forEach((o) => {
-          buildPromises.push(this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.market, o));
+          buildPromises.push(this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.orderType, order.market, o));
         });
 
         if (order.quantityToTake < order.quantity) {
@@ -621,10 +679,13 @@ export default {
     return power.minus(1);
   },
 
-  calculateFeeAmount(quouteQuantity, minimumTradeSize, baseFee) {
+  calculateFeeAmount(quoteQuantity, minimumTradeSize, baseFee) {
+    if (quoteQuantity < minimumTradeSize) {
+      return baseFee;
+    }
     // Earlier checks guarantee that quoteQuantity > 0
     return this.flooredLogBase2(
-      quouteQuantity
+      quoteQuantity
         .multipliedBy(2)
         .dividedBy(minimumTradeSize)
         .decimalPlaces(0, BigNumber.ROUND_DOWN))
@@ -805,7 +866,7 @@ export default {
     });
   },
 
-  buildAcceptOffer(side, market, offer) {
+  buildAcceptOffer(side, orderType, market, offer) {
     return new Promise((resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
@@ -831,7 +892,7 @@ export default {
             u.num2fixed8(quantityToGive.toNumber()),
             u.reverseHex(assetIdToReceive),
             u.num2fixed8(quantityToReceive.toNumber()),
-            1,
+            orderType === 'Market' ? 0 : 1, // whether or not to create a taker offer if this is no longer available
             u.num2fixed8(new Date().getTime() * 0.00000001),
           ])
           .then((t) => {
