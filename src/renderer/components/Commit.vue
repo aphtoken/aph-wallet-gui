@@ -435,20 +435,28 @@ export default {
       }
       
       .claim-info {
-        padding: $space-lg;
+        display: flex;
+        flex-direction: column;
         
         &> div {
+          font-size: toRem(18px);
           text-align: center;
           text-transform: uppercase;
-          font-size: toRem(18px);
          
           &> div {
             margin: $space;
+            
             span {
               color: $dark-grey;
               display: block;
             }
           }
+        }
+
+        .value {
+          background-color: white;
+          flex-basis: 90%;
+          padding: $space-lg;
         }
         
         h2 {
@@ -458,8 +466,10 @@ export default {
         
         .buttons {
           display: flex;
+          flex-basis: 10%;
           flex-direction: row;
-          
+          position: relative;
+          top: toRem(-150px);
           
           .btn-square {
             flex: 1;
@@ -469,17 +479,5 @@ export default {
       }
     }
   }
-
-  .footer {
-    display: flex;
-    flex-direction: row;
-    flex: none;
-    width: toRem(500px);
-
-    .link-btn {
-      @extend %btn-outline;
-    }
-  }
-
 }
 </style>
