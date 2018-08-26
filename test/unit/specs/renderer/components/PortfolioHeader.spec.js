@@ -4,10 +4,6 @@ import _ from 'lodash';
 import PortfolioHeader from '@/components/PortfolioHeader';
 import utils from './utils';
 
-let actions;
-let getters;
-let store;
-let wrapper;
 
 const address = 'address';
 const i18n = utils.getI18n({
@@ -16,9 +12,11 @@ const i18n = utils.getI18n({
   },
 });
 
+let wrapper;
+
 describe('PortfolioHeader.vue', () => {
   beforeEach(() => {
-    store = new Vuex.Store({
+    const store = new Vuex.Store({
       actions: {
         fetchPortfolio: _.noop,
       },
