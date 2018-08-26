@@ -298,7 +298,7 @@ export default {
 
       .label {
         font-family: 'Gilroy';
-        font-size: toRem(22px);
+        font-size: toRem(18px);
         max-width: toRem(250px);
       }
       
@@ -401,7 +401,7 @@ export default {
           width: 100%;
 
           &> p {
-            font-size: toRem(22px);
+            font-size: toRem(18px);
             padding-top: $space-lg;
           }
         }
@@ -455,7 +455,7 @@ export default {
 
         .value {
           background-color: white;
-          flex-basis: 90%;
+          flex-basis: 80%;
           padding: $space-lg;
         }
         
@@ -466,7 +466,7 @@ export default {
         
         .buttons {
           display: flex;
-          flex-basis: 10%;
+          flex-basis: 20%;
           flex-direction: row;
           position: relative;
           top: toRem(-150px);
