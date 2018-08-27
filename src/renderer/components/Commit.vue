@@ -456,7 +456,8 @@ export default {
         .value {
           background-color: white;
           flex-basis: 80%;
-          padding: $space-lg;
+          margin-bottom: $space;
+          padding: $space;
         }
         
         h2 {
