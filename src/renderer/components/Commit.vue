@@ -435,7 +435,8 @@ export default {
       }
 
       .commit {
-        padding-left: $space-lg;
+        margin-left: $space-lg;
+        margin-right: $space-lg;
       }
       
       .claim-info {
@@ -473,11 +474,11 @@ export default {
           display: flex;
           flex-basis: 20%;
           flex-direction: row;
+          justify-content: center;
           position: relative;
           top: toRem(-125px);
           
           .btn-square {
-            flex: 1;
             margin: $space-lg;
           }
         }
