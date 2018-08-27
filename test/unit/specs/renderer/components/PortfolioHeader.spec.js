@@ -1,58 +1,57 @@
-import Vuex from 'vuex';
-import _ from 'lodash';
+import sinon from 'sinon';
 
 import PortfolioHeader from '@/components/PortfolioHeader';
 import utils from './utils';
 
-
-const address = 'address';
-const i18n = utils.getI18n({
-  en: {
-    myPortfolio: 'My Portfolio',
-  },
-});
-
+let push;
 let wrapper;
 
 describe('PortfolioHeader.vue', () => {
   beforeEach(() => {
-    const store = new Vuex.Store({
-      actions: {
-        fetchPortfolio: _.noop,
+    const customState = {
+      portfolio: {
+        balance: 200,
+        changePercent: 50,
+        changeValue: 100,
       },
-      getters: {
-        showSendAddressModal(state) {
-          return state.showSendAddressModal;
-        },
-      },
-      mutations: {
-        setShowSendAddressModal(state, value) {
-          return state.showSendAddressModal = value;
-        },
-      },
-      state: {
-        portfolio: {
-          balance: 200,
-          changePercent: 50,
-          changeValue: 100,
-        },
-        showSendAddressModal: false,
-      },
-    });
+    };
 
-    wrapper = utils.mount(PortfolioHeader, { i18n, store });
-    wrapper.vm.$services.wallets.setCurrentWallet({ address });
+    const opts = {
+      stubs: {
+        'address-modal': '<div id="aph-address-modal" />',
+        'aph-icon': '<div />',
+        zoom: '<div />',
+      },
+    };
+
+    wrapper = utils.mount(PortfolioHeader, opts, customState);
   });
 
-  it('should render correct contents', () => {
+  it('should render with correctly formatted data', () => {
     expect(wrapper.find('h1.underlined').text()).contains('My Portfolio');
     expect(wrapper.find('.balance .amount').text()).contains('$200.00');
     expect(wrapper.find('.change .amount').text()).contains('$100.00');
   });
 
-  it('should show show address modal', () => {
-    wrapper.find('.receive-btn').trigger('click');
+  context('when a user clicks the receive button', () => {
+    beforeEach(() => {
+      wrapper.vm.$services.wallets.setCurrentWallet({ address: 'address' });
+      wrapper.find('.receive-btn').trigger('click');
+    });
 
-    expect(wrapper.contains('#aph-address-modal')).to.be.true;
+    it('should show the address modal component', () => {
+      expect(wrapper.contains('#aph-address-modal')).to.be.true();
+    });
+  });
+
+  context('when a user clicks the send button', () => {
+    beforeEach(() => {
+      push = wrapper.vm.$router.push = sinon.spy();
+      wrapper.find('.send-btn').trigger('click');
+    });
+
+    it('should update the route', () => {
+      expect(push).to.have.been.calledWith('/authenticated/dashboard/send');
+    });
   });
 });
