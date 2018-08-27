@@ -2026,7 +2026,7 @@ export default {
 
         api.fillKeys(config)
           .then((c) => {
-            if (!c.intents) {
+            if (!c.intents && currentNetwork.fee === 0) {
               return new Promise((balanceResolve) => {
                 c.balance = new wallet.Balance({ address: c.address, net: c.net });
                 balanceResolve(c);
