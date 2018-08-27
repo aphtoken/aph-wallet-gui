@@ -433,6 +433,10 @@ export default {
           }
         }
       }
+
+      .commit {
+        padding-left: $space-lg;
+      }
       
       .claim-info {
         display: flex;
