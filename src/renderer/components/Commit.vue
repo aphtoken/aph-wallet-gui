@@ -286,6 +286,7 @@ export default {
     
     .exchange-values {
       display: flex;
+      margin: auto;
       padding-left: $space-xl;
 
       .total {
