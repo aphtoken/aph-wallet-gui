@@ -286,7 +286,7 @@ export default {
     
     .exchange-values {
       display: flex;
-      margin: auto;
+      justify-content: space-around;
       padding-left: $space-xl;
 
       .total {
@@ -316,15 +316,13 @@ export default {
       }
         
       .icons {
-        height: toRem(80px);
-        margin: $space-lg toRem(5px) 0 0;
+        margin: toRem(18px) $space-lg 0 0;
         position: relative;
         width: toRem(80px);
           
         .aph-icon {
-          height: toRem(40px);
           position: absolute;
-          width: toRem(40px);
+          width: toRem(60px);
 
           .icon {
             svg {
@@ -473,14 +471,15 @@ export default {
         
         .buttons {
           display: flex;
+          justify-content: space-around;
           flex-basis: 20%;
-          flex-direction: row;
-          justify-content: center;
           position: relative;
           top: toRem(-125px);
           
           .btn-square {
-            margin: $space-lg;
+            flex: 1;
+            margin-top: $space-lg;
+            max-width: toRem(250px);
           }
         }
       }
