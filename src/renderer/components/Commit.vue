@@ -86,23 +86,23 @@
             <div>{{$t('commitAphelionToBeEligible')}}</div>
             <div><span>{{$t('currentBlock')}}</span>{{ currentBlock }}</div>
           </div>
-          <div class="buttons">
-            <button class="btn-square" @click="showClaimModal()"
-              :disabled="shouldDisableClaimButton">
-              <div>
-                <aph-icon name="claim"></aph-icon>
-                <p>{{$t('claim')}}</p>
-              </div>
-            </button>
-            <button class="btn-square" @click="compound()"
-              :disabled="shouldDisableCompoundButton">
-              <div>
-                <aph-icon name="compound"></aph-icon>
-                <p>{{$t('compound')}}</p>
-              </div>
-            </button>
-          </div>
         </div>
+      </div>
+      <div class="buttons">
+        <button class="btn-square" @click="showClaimModal()"
+          :disabled="shouldDisableClaimButton">
+          <div>
+            <aph-icon name="claim"></aph-icon>
+            <p>{{$t('claim')}}</p>
+          </div>
+        </button>
+        <button class="btn-square" @click="compound()"
+          :disabled="shouldDisableCompoundButton">
+          <div>
+            <aph-icon name="compound"></aph-icon>
+            <p>{{$t('compound')}}</p>
+          </div>
+        </button>
       </div>
     </div>
     <commit-info v-if="!$store.state.acceptCommitInfo"></commit-info>
@@ -254,8 +254,8 @@ export default {
   margin: $space-lg;
 
   .header {
-    flex-basis: 15%;
     color: $purple;
+    flex-basis: 15%;
     font-family: 'GilroySemibold';
     padding-left: $space-lg;
 
@@ -287,7 +287,7 @@ export default {
     .exchange-values {
       display: flex;
       justify-content: space-around;
-      padding-left: $space-xl;
+      margin-bottom: $space-lg;
 
       .total {
         display: flex;
@@ -316,13 +316,13 @@ export default {
       }
         
       .icons {
-        margin: toRem(18px) $space-lg 0 0;
+        margin: toRem(23px) $space-lg 0 0;
         position: relative;
         width: toRem(80px);
           
         .aph-icon {
           position: absolute;
-          width: toRem(60px);
+          width: toRem(55px);
 
           .icon {
             svg {
@@ -349,7 +349,7 @@ export default {
       background-color: white;
       display: flex;
       flex-direction: row;
-      margin: $space 0;
+      margin-bottom: $space-lg;
       padding: $space-lg;
     
       &> div {
@@ -394,7 +394,7 @@ export default {
         flex-direction: row;
         font-size: toRem(55px);
         padding: 3rem 0;
-        width: toRem(250px);
+        width: toRem(200px);
         
         &> div {
           width: 100%;
@@ -439,14 +439,16 @@ export default {
       }
       
       .claim-info {
+        background-color: white;
         display: flex;
-        flex-direction: column;
+        justify-content: center;
+        margin-bottom: $space;
         
         &> div {
-          font-size: toRem(18px);
+          font-size: toRem(14px);
           text-align: center;
           text-transform: uppercase;
-         
+
           &> div {
             margin: $space;
             
@@ -456,30 +458,66 @@ export default {
             }
           }
         }
-
-        .value {
-          background-color: white;
-          flex-basis: 80%;
-          margin-bottom: $space;
-          padding: $space;
-        }
         
         h2 {
           color: $purple;
           font-size: 30px;
+          margin: toRem(17px);
         }
+      }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-left: auto;
+      max-height: toRem(50px);
+      padding-left: $space-lg;
+      width: 50%;
+      
+      .btn-square {
+        @extend %btn-square;
+
+        flex-direction: row;
+        font-size: toRem(55px);
+        padding: 3rem 0;
+        position: relative;
+        top: -100px; 
+        width: toRem(200px);
         
-        .buttons {
-          display: flex;
-          justify-content: space-around;
-          flex-basis: 20%;
-          position: relative;
-          top: toRem(-125px);
-          
-          .btn-square {
-            flex: 1;
-            margin-top: $space-lg;
-            max-width: toRem(250px);
+        &> div {
+          width: 100%;
+
+          &> p {
+            font-size: toRem(18px);
+            padding-top: $space-lg;
+          }
+        }
+            
+        &:disabled {
+          background-color: $grey;
+          color: $dark;
+        }
+
+        &:enabled {
+          background-color: $purple;
+          color: white;
+        }
+
+        .aph-icon {
+          .fill {
+            fill: $dark;
+          }
+        }
+
+        &:hover {
+          background: $purple-hover;
+          color: white;
+
+          .aph-icon {
+            .fill {
+              fill: white;
+            }
           }
         }
       }
