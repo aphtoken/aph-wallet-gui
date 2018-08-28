@@ -4,7 +4,7 @@
       <h1>{{$t('commit')}}.</h1>
       <button class="learn-more" @click="showInfo">{{$t('learnMore')}}</button>
     </div>
-    <div class="body" v-if="$store.state.commitState">
+    <div class="body" id="commit-body" v-if="$store.state.commitState">
       <div class="exchange-values">
         <div class="total">
           <div class="icons">
@@ -282,7 +282,7 @@ export default {
     }
   }
 
-  .body {
+  #commit-body {
     display: flex;
     flex-direction: column;
     flex: 1 0 85%;
