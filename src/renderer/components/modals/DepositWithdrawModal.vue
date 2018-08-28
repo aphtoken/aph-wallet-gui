@@ -51,7 +51,9 @@ export default {
   mounted() {
     if (this.$store.state.depositWithdrawModalModel) {
       this.isDeposit = this.$store.state.depositWithdrawModalModel.isDeposit;
-      this.holding = this.$store.state.depositWithdrawModalModel.holding;
+      this.holding = _.find(this.$store.state.holdings, (o) => {
+        return o.assetId === this.$store.state.depositWithdrawModalModel.holdingAssetId;
+      });
     }
   },
 
