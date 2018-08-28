@@ -248,6 +248,7 @@ export default {
 
 <style lang="scss">
 #commit-aph {
+  align-items: center;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -257,6 +258,8 @@ export default {
     color: $purple;
     flex-basis: 15%;
     font-family: 'GilroySemibold';
+    max-width: toRem(1105px);
+    min-width: toRem(1150px);
     padding-left: $space-lg;
 
     h1 {
@@ -281,8 +284,10 @@ export default {
 
   .body {
     display: flex;
-    flex: 1 0 85%;
     flex-direction: column;
+    flex: 1 0 85%;
+    max-width: toRem(1105px);
+    min-width: toRem(1150px);
     
     .exchange-values {
       display: flex;
@@ -381,8 +386,9 @@ export default {
     
     .actions {
       display: flex;
-      flex: 1;
       flex-direction: row;
+      flex: 1;
+      max-height: toRem(339px);
       
       &> div {
         flex: 1 1 50%;
