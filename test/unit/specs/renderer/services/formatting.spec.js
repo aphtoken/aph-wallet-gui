@@ -5,6 +5,8 @@ import { formatting } from '@/services';
 
 const toBigNumber = value => new BigNumber(String(value));
 
+// TODO: Need a test for abbreviateNumber service.
+
 describe('services/formatting', () => {
   describe('formatDate', () => {
     it('should properly format', () => {
