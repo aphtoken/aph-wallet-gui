@@ -37,7 +37,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
-        axios.get(`${currentNetwork.aph}/markets`)
+        axios.get(`${currentNetwork.aph}/markets?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
           .then((res) => {
             resolve(res.data.markets);
           })
