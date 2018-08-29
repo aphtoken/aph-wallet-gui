@@ -11,7 +11,7 @@
         </div>
         <div class="balance"> 
           <span class="label">{{$t('walletBalance')}}</span>
-          <span class="value">{{ $formatNumber(holding.totalBalance) }}</span> 
+          <span class="value">{{ $formatNumber(holding.balance) }}</span> 
         </div>
       </div>
       <aph-input type="number" placeholder="Amount" :light="true" v-model="amount"></aph-input>
@@ -36,24 +36,23 @@ export default {
     shouldDisableDepositWithdrawButton() {
       return !this.amount.length || this.amount <= 0;
     },
+    holding() {
+      return _.find(this.$store.state.holdings, (holding) => {
+        return holding.assetId === this.$store.state.depositWithdrawModalModel.holdingAssetId;
+      });
+    },
   },
 
   data() {
     return {
       isDeposit: false,
       amount: '',
-      holding: {
-        symbol: '',
-      },
     };
   },
 
   mounted() {
     if (this.$store.state.depositWithdrawModalModel) {
       this.isDeposit = this.$store.state.depositWithdrawModalModel.isDeposit;
-      this.holding = _.find(this.$store.state.holdings, (o) => {
-        return o.assetId === this.$store.state.depositWithdrawModalModel.holdingAssetId;
-      });
     }
   },
 
