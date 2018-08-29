@@ -567,35 +567,12 @@ export default {
     .side {
       display: flex;
 
-      .buy-btn, .sell-btn {
-        @extend %btn-outline;
-        @extend %selected-text;
-
-        flex: 1;
-        font-family: GilroySemibold;
-
-        &:disabled {
-          background: transparent !important;
-          border-color: $grey;
-        }
-      }
-
-      .buy-btn {
-        border-color: $green;
+      .buy-btn { 
         margin-right: $space-sm;
-
-        &:hover, &.selected {
-          background-color: $green;
-        }
       }
 
-      .sell-btn {
-        border-color: $red;
+      .sell-btn { 
         margin-left: $space-sm;
-
-        &:hover, &.selected {
-          background-color: $red;
-        }
       }
     }
 
@@ -640,25 +617,6 @@ export default {
       }
     }
 
-    .aph-dex-input {
-      border-color: $background;
-
-      &.focused {
-        .border {
-          border-color: $purple;
-        }
-      }
-
-      input {
-        color: $dark;
-      }
-
-      .placeholder {
-        color: $grey;
-        font-family: GilroyMedium;
-      }
-    }
-
     .options {
       color: $grey;
       margin: $space 0 $space;
@@ -684,6 +642,35 @@ export default {
             fill: $dark-grey;
           }
         }
+      }
+    }
+
+    .buy-btn, .sell-btn {
+      @extend %btn-outline;
+      @extend %selected-text;
+
+      flex: 1;
+      font-family: GilroySemibold;
+
+      &:disabled {
+        background: transparent !important;
+        border-color: $grey;
+      }
+    }
+
+    .buy-btn {
+      border-color: $green;
+
+      &:hover, &.selected {
+        background-color: $green;
+      }
+    }
+
+    .sell-btn {
+      border-color: $red;
+
+      &:hover, &.selected {
+        background-color: $red;
       }
     }
 
