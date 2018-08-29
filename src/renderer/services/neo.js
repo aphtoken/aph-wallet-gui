@@ -459,14 +459,20 @@ export default {
               }
             });
 
-            _.values(tokensToRetryBalances).forEach((holding) => {
-              if (_.has(holdingsToQueryBalance, holding.assetId) === false) {
-                _.set(holdingsToQueryBalance, holding.assetId, holding);
-              }
-              tokensToRetryBalances = _.omit(tokensToRetryBalances, holding.assetId);
-            });
+            if (!restrictToSymbol) {
+              _.values(tokensToRetryBalances).forEach((holding) => {
+                if (_.has(holdingsToQueryBalance, holding.assetId) === false) {
+                  _.set(holdingsToQueryBalance, holding.assetId, holding);
+                }
+                tokensToRetryBalances = _.omit(tokensToRetryBalances, holding.assetId);
+              });
+            }
 
             _.values(holdingsToQueryBalance).forEach((holding) => {
+              if (restrictToSymbol && holding.symbol !== restrictToSymbol) {
+                return;
+              }
+
               if (holding.isNep5 === true) {
                 promises.push(this.fetchNEP5Balance(address, holding.assetId)
                   .then((val) => {
@@ -478,7 +484,7 @@ export default {
                       return; // token not found or other failure
                     }
 
-                    holding.balance = new BigNumber(val.balance);
+                    holding.balance = new BigNumber(val.balance.toString());
                     holding.symbol = val.symbol;
                     holding.name = val.name;
                     holding.totalBalance = calculateHoldingTotalBalance(holding);
