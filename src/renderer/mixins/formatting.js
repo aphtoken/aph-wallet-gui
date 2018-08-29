@@ -2,6 +2,10 @@ import { formatting } from '../services';
 
 export default {
   methods: {
+    $abbreviateNumber(...args) {
+      return formatting.abbreviateNumber.apply(null, args);
+    },
+
     $formatDate(...args) {
       return formatting.formatDate.apply(null, args);
     },

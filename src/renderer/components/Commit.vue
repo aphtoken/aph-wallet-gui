@@ -47,7 +47,7 @@
           <h2 class="underlined">{{$t('myWeight')}}</h2>
           <div class="highlight">{{$formatNumber($store.state.commitState.weightPercentage)}}%</div>
           <div class="lower"><span>{{$t('myWeight')}}</span>{{$formatNumber($store.state.commitState.userWeight)}}</div>
-          <div class="lower"><span>{{$t('networkWeight')}}</span>{{$formatNumber($store.state.commitState.networkWeight)}}</div>
+          <div class="lower"><span>{{$t('networkWeight')}}</span>{{$abbreviateNumber($store.state.commitState.networkWeight)}}</div>
         </div>
         <div class="earned">
           <h2 class="underlined">{{$t('feesEarned')}}</h2>
