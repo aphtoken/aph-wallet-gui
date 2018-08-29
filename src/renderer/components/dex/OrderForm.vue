@@ -616,6 +616,24 @@ export default {
         color: $grey;
       }
     }
+    .aph-input {
+      border-color: $background;
+
+      &.focused {
+        .border {
+          border-color: $purple;
+        }
+      }
+
+      input {
+        color: $dark;
+      }
+
+      .placeholder {
+        color: $grey;
+        font-family: GilroyMedium;
+      }
+    }
 
     .options {
       color: $grey;
