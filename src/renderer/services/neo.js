@@ -658,11 +658,14 @@ export default {
 
     return new Promise((resolve) => {
       return api.nep5.getToken(currentNetwork.rpc, assetId, address)
-        .then(() => {
+        .then((token) => {
           resolve({
-            valid: false,
-            retry: true,
-            error: 'Error fetching NEP5 balance. Error: temp',
+            valid: !!token.symbol,
+            name: token.name,
+            symbol: token.symbol,
+            decimals: token.decimals,
+            totalSupply: token.totalSupply,
+            balance: token.balance,
           });
         })
         .catch((ex) => {
