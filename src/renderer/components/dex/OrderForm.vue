@@ -11,10 +11,10 @@
             <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
           </div>
           <div class="price" v-if="orderType === 'Limit'">
-            <aph-dex-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-dex-input>
+            <aph-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-input>
           </div>
           <div class="quantity">
-            <aph-dex-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-dex-input>
+            <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
           </div>
           <div class="percentages">
             <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
@@ -566,6 +566,37 @@ export default {
 
     .side {
       display: flex;
+
+      .buy-btn, .sell-btn {
+        @extend %btn-outline;
+        @extend %selected-text;
+
+        flex: 1;
+        font-family: GilroySemibold;
+
+        &:disabled {
+          background: transparent !important;
+          border-color: $grey;
+        }
+      }
+
+      .buy-btn {
+        border-color: $green;
+        margin-right: $space-sm;
+
+        &:hover, &.selected {
+          background-color: $green;
+        }
+      }
+
+      .sell-btn {
+        border-color: $red;
+        margin-left: $space-sm;
+
+        &:hover, &.selected {
+          background-color: $red;
+        }
+      }
     }
 
     .order-type {
@@ -656,35 +687,8 @@ export default {
       }
     }
 
-    .buy-btn, .sell-btn {
-      @extend %btn-outline;
-      @extend %selected-text;
-
-      flex: 1;
-      font-family: GilroySemibold;
-
-      &:disabled {
-        background: transparent !important;
-        border-color: $grey;
-      }
-    }
-
-    .buy-btn {
-      border-color: $green;
-      margin-right: $space-sm;
-
-      &:hover, &.selected {
-        background-color: $green;
-      }
-    }
-
-    .sell-btn {
-      border-color: $red;
-      margin-left: $space-sm;
-
-      &:hover, &.selected {
-        background-color: $red;
-      }
+    .quantity {
+      margin-top: $space-sm
     }
   }
 
