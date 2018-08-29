@@ -688,7 +688,7 @@ export default {
     }
 
     .quantity {
-      margin-top: $space-sm
+      margin-top: $space-sm;
     }
   }
 
