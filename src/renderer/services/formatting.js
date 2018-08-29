@@ -37,8 +37,7 @@ export default {
       return defaultValue;
     }
 
-    const formattedNumber = formatNumberBase(value, wholeNumberFormat);
-    return numeral(formattedNumber).format('0.0a');
+    return numeral(formatNumberBase(value, wholeNumberFormat)).format('0.0a');
   },
 
   formatDate(timestamp, defaultValue = '--') {
