@@ -73,6 +73,7 @@ let storeUnwatch;
 let storeMarketUnwatch;
 let tradingView;
 let barsSubscription;
+let lastPrice = 0;
 
 export default {
   data() {
@@ -192,10 +193,11 @@ export default {
           },
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            const bars = this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to);
+            const bars = this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, lastPrice);
             if (bars.length === 0) {
               onDataCallback(bars, { noData: true })
             } else {
+              lastPrice = bars[bars.length - 1].close;
               onDataCallback(bars, { noData: false })
             }
           },

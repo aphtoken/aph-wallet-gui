@@ -201,9 +201,10 @@ export default {
     });
   },
 
-  getTradeHistoryBars(tradeHistory, resolution, from, to) {
+  getTradeHistoryBars(tradeHistory, resolution, from, to, last) {
     const bars = [];
-    const trades = tradeHistory.trades;
+    const trades = tradeHistory.trades.slice(0);
+    trades.reverse();
 
     // convert resolution to seconds
     resolution = parseFloat(resolution) * 60;
@@ -216,101 +217,68 @@ export default {
     resolution *= 1000;
 
     let currentBar = {
-      open: 0,
-      close: trades.length > 0 ? trades[0].price : 0,
-      high: 0,
-      low: trades.length > 0 ? 99999999 : 0,
+      open: last,
+      close: last,
+      high: last,
+      low: last,
       volume: 0,
-      time: (to * 1000) - resolution,
     };
 
     let apiBucketsIndex = tradeHistory.apiBuckets ? tradeHistory.apiBuckets.length - 1 : 0;
+    let tradesIndex = 0;
+    const barFrom = (from * 1000) + resolution;
+    const barTo = (to * 1000);
+    let barPointer = barFrom;
+    let bucket = null;
+    let trade = null;
 
-    for (let i = 0; i < trades.length; i += 1) {
-      const t = trades[i];
 
-      if (t.tradeTime >= from && t.tradeTime <= to) {
-        if ((t.tradeTime * 1000) < currentBar.time) {
-          bars.unshift(currentBar);
-          currentBar = {
-            open: 0,
-            close: t.price,
-            high: 0,
-            low: 99999999,
-            volume: 0,
-            time: currentBar.time - resolution,
-          };
-        }
+    while (barPointer < barTo) {
+      currentBar = {
+        open: currentBar.close,
+        close: currentBar.close,
+        high: currentBar.close,
+        low: currentBar.close,
+        volume: 0,
+        time: barPointer,
+      };
 
-        while ((t.tradeTime * 1000) < currentBar.time) {
-          currentBar.open = t.price;
-          currentBar.close = t.price;
-          currentBar.high = t.price;
-          currentBar.low = t.price;
-          bars.unshift(currentBar);
-
-          currentBar = {
-            open: 0,
-            close: t.price,
-            high: 0,
-            low: 99999999,
-            volume: 0,
-            time: currentBar.time - resolution,
-          };
-
-          if (apiBucketsIndex >= 0 && tradeHistory.apiBuckets
-              && currentBar.time === tradeHistory.apiBuckets[apiBucketsIndex].time * 1000) {
-            currentBar = {
-              open: tradeHistory.apiBuckets[apiBucketsIndex].open,
-              close: tradeHistory.apiBuckets[apiBucketsIndex].close,
-              high: tradeHistory.apiBuckets[apiBucketsIndex].high,
-              low: tradeHistory.apiBuckets[apiBucketsIndex].low,
-              volume: tradeHistory.apiBuckets[apiBucketsIndex].volume,
-              time: tradeHistory.apiBuckets[apiBucketsIndex].time * 1000,
-            };
-            apiBucketsIndex -= 1;
-          }
-        }
-
-        currentBar.volume += t.quantity;
-        currentBar.open = t.price;
-        if (t.price > currentBar.high) {
-          currentBar.high = t.price;
-        }
-        if (t.price < currentBar.low) {
-          currentBar.low = t.price;
-        }
-      } else {
-        while ((t.tradeTime * 1000) < currentBar.time) {
-          currentBar.open = t.price;
-          currentBar.close = t.price;
-          currentBar.high = t.price;
-          currentBar.low = t.price;
-          bars.unshift(currentBar);
-
-          currentBar = {
-            open: 0,
-            close: t.price,
-            high: 0,
-            low: 99999999,
-            volume: 0,
-            time: currentBar.time - resolution,
-          };
-
-          if (apiBucketsIndex >= 0 && tradeHistory.apiBuckets
-              && currentBar.time === tradeHistory.apiBuckets[apiBucketsIndex].time * 1000) {
-            currentBar = {
-              open: tradeHistory.apiBuckets[apiBucketsIndex].open,
-              close: tradeHistory.apiBuckets[apiBucketsIndex].close,
-              high: tradeHistory.apiBuckets[apiBucketsIndex].high,
-              low: tradeHistory.apiBuckets[apiBucketsIndex].low,
-              volume: tradeHistory.apiBuckets[apiBucketsIndex].volume,
-              time: tradeHistory.apiBuckets[apiBucketsIndex].time * 1000,
-            };
-            apiBucketsIndex -= 1;
-          }
-        }
+      bucket = apiBucketsIndex < tradeHistory.apiBuckets.length ? tradeHistory.apiBuckets[apiBucketsIndex] : null;
+      trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
+      while (trade && trade.tradeTime < from) {
+        tradesIndex += 1;
+        trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
       }
+
+      if (bucket && bucket.time * 1000 === barPointer) {
+        currentBar = {
+          open: bucket.open,
+          close: bucket.close,
+          high: bucket.high,
+          low: bucket.low,
+          volume: bucket.volume,
+          time: barPointer,
+        };
+        bars.push(bucket);
+        apiBucketsIndex += 1;
+      } else {
+        while (trade
+          && trade.tradeTime * 1000 >= barPointer
+          && trade.tradeTime * 1000 < barPointer + resolution) {
+          currentBar.volume += trade.quantity;
+          currentBar.close = trade.price;
+
+          if (currentBar.open === 0) currentBar.open = trade.price;
+          if (currentBar.low === 0 || currentBar.low > trade.price) currentBar.low = trade.price;
+          if (currentBar.high < trade.price) currentBar.high = trade.price;
+          tradesIndex += 1;
+          trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
+        }
+
+        bars.push(currentBar);
+      }
+
+      barPointer += resolution;
     }
     return bars;
   },
