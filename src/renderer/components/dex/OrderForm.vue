@@ -116,10 +116,18 @@ export default {
       return this.$store.state.currentMarket;
     },
 
+    isTradingDisabled() {
+      return this.isOutOfDate || this.isMarketClosed;
+    },
+
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
           !== this.$services.assets.DEX_SCRIPT_HASH;
+    },
+
+    isMarketClosed() {
+      return this.$store.state.currentMarket && this.$store.state.currentMarket.isOpen === false;
     },
 
     quoteHolding() {
@@ -269,7 +277,7 @@ export default {
         this.$t('placingOrder');
     },
     shouldDisableOrderButton() {
-      if (this.isOutOfDate) {
+      if (this.isTradingDisabled) {
         return true;
       }
       if (this.orderType === 'Market') {

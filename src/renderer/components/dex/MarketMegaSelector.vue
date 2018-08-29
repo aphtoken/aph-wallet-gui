@@ -2,6 +2,7 @@
   <div id="dex--market-mega-selector" :class="{'is-open': isOpen}">
     <div class="toggle" @click="isOpen = !isOpen">
       <div class="label">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
+      <div class="label disabled" v-if="$store.state.currentMarket.isOpen === false">[{{$t('tradingDisabled')}}]</div>
       <aph-icon :name="iconName"></aph-icon>
     </div>
     <div class="menu">
@@ -15,6 +16,7 @@
             :class="['row', {selected: $store.state.currentMarket && market.marketName === $store.state.currentMarket.marketName }]"
                v-for="market in filteredMarkets" :key="market.marketName">
             <div class="cell">{{ market.marketName }}</div>
+            <div class="cell disabled" v-if="market.isOpen === false">[{{$t('tradingDisabled')}}]</div>
           </div>
         </div>
       </div>
@@ -105,6 +107,10 @@ export default {
       white-space: nowrap;
       font-size: toRem(20px);
     }
+    
+    .disabled {
+      font-size: toRem(12px);
+    }
 
     .aph-icon {
       flex: none;
@@ -174,6 +180,11 @@ export default {
 
           .cell {
             font-size: toRem(16px);
+            
+            &.disabled {
+              font-size: toRem(11px);
+              text-align: right;
+            }
           }
 
           & + .row {
