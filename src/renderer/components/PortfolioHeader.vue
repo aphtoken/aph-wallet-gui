@@ -28,7 +28,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import AddressModal from './modals/AddressModal';
 import SimpleDonut from './charts/SimpleDonut';
 import Zoom from './Zoom';
@@ -38,12 +37,6 @@ export default {
     AddressModal,
     SimpleDonut,
     Zoom,
-  },
-
-  computed: {
-    ...mapGetters([
-      'sendInProgress',
-    ]),
   },
 
   methods: {
@@ -60,7 +53,7 @@ export default {
     },
 
     showSendView() {
-      this.$router.push(`/authenticated/dashboard/${this.sendInProgress ? 'confirming' : 'send'}`);
+      this.$router.push(`/authenticated/dashboard/${this.$store.state.sendInProgress ? 'confirming' : 'send'}`);
     },
   },
 };
