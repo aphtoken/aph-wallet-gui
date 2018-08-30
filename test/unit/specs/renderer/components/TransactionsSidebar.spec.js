@@ -1,3 +1,5 @@
+import sinon from 'sinon';
+
 import TransactionsSidebar from '@/components/TransactionsSidebar';
 import utils from './utils';
 
@@ -32,6 +34,8 @@ let wrapper;
 
 describe('TransactionsSidebar.vue', () => {
   beforeEach(() => {
+    TransactionsSidebar.methods.loadTransactions = sinon.spy();
+
     const customState = {
       recentTransactions: RECENT_TRANSACTIONS,
     };
@@ -55,6 +59,10 @@ describe('TransactionsSidebar.vue', () => {
     expect(wrapper.vm.transactions).to.eql(COMPUTED_TRANSACTIONS);
   });
 
+  it('should fetch transactions', () => {
+    expect(TransactionsSidebar.methods.loadTransactions).to.have.been.calledOnce();
+  });
+
   context('the user clicks the toggle to open', () => {
     beforeEach(() => {
       wrapper.find('.toggle').trigger('click');
@@ -73,6 +81,17 @@ describe('TransactionsSidebar.vue', () => {
 
     it('should show the correct icon', () => {
       expect(wrapper.contains('.icon.history')).to.be.true();
+    });
+  });
+
+  context('the component is destroyed', () => {
+    beforeEach(() => {
+      window.clearInterval = sinon.spy();
+      wrapper.destroy();
+    });
+
+    it('should clear the interval', () => {
+      expect(window.clearInterval).to.have.been.calledOnce();
     });
   });
 });
