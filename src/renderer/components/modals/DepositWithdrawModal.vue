@@ -15,7 +15,7 @@
         </div>
       </div>
       <div class="amount">
-        <aph-input placeholder="Amount" :light="true" v-model="amount"></aph-input>
+        <aph-input @blur="cleanAmount" placeholder="Amount" :light="true" v-model="amount"></aph-input>
         <div class="max" v-if="hasAsset" @click="setAmountToMax">{{$t('max')}}</div>
       </div>
     </div>
@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 import ModalWrapper from './ModalWrapper';
 
 export default {
@@ -37,7 +38,9 @@ export default {
 
   computed: {
     shouldDisableDepositWithdrawButton() {
-      return !this.amount.length || this.amount <= 0;
+      return isNaN(this.amount) ||
+        !this.amount.length ||
+        this.amount <= 0;
     },
     holding() {
       return _.find(this.$store.state.holdings, (holding) => {
@@ -65,6 +68,43 @@ export default {
       this.amount = this.isDeposit ?
         this.holding.balance.toString() :
         this.holding.contractBalance.toString();
+    },
+
+    cleanAmount() {
+      if (!this.amount) {
+        return;
+      }
+
+      let cleanAmount = this.amount.replace(/[^\d.]/g, '');
+
+      const cleanSplit = _.split(cleanAmount, '.');
+      if (cleanSplit.length > 2) {
+        cleanAmount = `${cleanSplit[0]}.${cleanSplit[1]}`;
+      }
+
+      if (cleanAmount && cleanAmount.length > 0) {
+        if (this.holding) {
+          cleanAmount = new BigNumber(cleanAmount).toFixed(this.holding.decimals != null ? this.holding.decimals : 8);
+        } else if (cleanAmount[cleanAmount.length - 1] !== '.'
+          && cleanAmount[cleanAmount.length - 1] !== '0') {
+          const n = new BigNumber(cleanAmount);
+          cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
+        }
+      }
+
+      // remove trailing zeros if there is a decimal
+      if (cleanAmount.indexOf('.') > -1) {
+        cleanAmount = _.trimEnd(cleanAmount, '0');
+      }
+
+      // remove decimal point if it is the last character
+      if (this.amount && this.amount.length > 0 && this.amount[this.amount.length - 1] !== '.') {
+        cleanAmount = _.trimEnd(cleanAmount, '.');
+      }
+
+      if (this.amount !== cleanAmount) {
+        this.amount = cleanAmount;
+      }
     },
   },
 
