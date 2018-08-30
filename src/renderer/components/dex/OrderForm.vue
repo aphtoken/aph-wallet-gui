@@ -4,17 +4,17 @@
       <aph-spinner-wrapper :hideCondition="!!$store.state.holdings.length" identifier="fetchHoldings">
         <div class="body">
           <div class="side">
-            <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}}</div>
-            <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}}</div>
+            <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}} {{ quoteHolding.symbol }}</div>
+            <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}} {{ quoteHolding.symbol }}</div>
           </div>
           <div class="order-type">
             <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
           </div>
           <div class="price" v-if="orderType === 'Limit'">
-            <aph-dex-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-dex-input>
+            <aph-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-input>
           </div>
           <div class="quantity">
-            <aph-dex-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-dex-input>
+            <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
           </div>
           <div class="percentages">
             <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
@@ -63,10 +63,11 @@
           </div>
           <div class="footer-buttons">
           <!-- Only the contract owner or manager can do this.
+              <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button>
               <button @click="setMarket" class="footer-btn">Setup Market</button>
-              <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button> -->
+              <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button> -->
           </div>
-        </div>
+       </div>
       </aph-spinner-wrapper>
     </section>
     <aph-order-confirmation-modal v-if="$store.state.showOrderConfirmationModal"
@@ -115,10 +116,18 @@ export default {
       return this.$store.state.currentMarket;
     },
 
+    isTradingDisabled() {
+      return this.isOutOfDate || this.isMarketClosed;
+    },
+
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
           !== this.$services.assets.DEX_SCRIPT_HASH;
+    },
+
+    isMarketClosed() {
+      return this.$store.state.currentMarket && this.$store.state.currentMarket.isOpen === false;
     },
 
     quoteHolding() {
@@ -268,7 +277,7 @@ export default {
         this.$t('placingOrder');
     },
     shouldDisableOrderButton() {
-      if (this.isOutOfDate) {
+      if (this.isTradingDisabled) {
         return true;
       }
       if (this.orderType === 'Market') {
@@ -422,7 +431,7 @@ export default {
     },
     showDepositWithdrawModal(isDeposit) {
       this.$store.commit('setDepositWithdrawModalModel', {
-        isDeposit, holding: this.actionableHolding,
+        isDeposit, holdingAssetId: this.actionableHolding.assetId,
       });
     },
     hideDepositWithdrawModal() {
@@ -450,18 +459,83 @@ export default {
     setMarket() {
       this.$services.dex.setMarket(this.$services.assets.APH,
         this.$services.assets.GAS,
-        10, 0.00001, 0.0000, 0.0001)
+        100, 0.00001, 0.0000, 0.25)
         .then(() => {
           this.$services.alerts.success(this.$t('setMarketRelayed'));
         })
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
+      this.$services.dex.setMarket(this.$services.assets.ATI,
+        this.$services.assets.APH,
+        200, 0.00001, 0.25, 0)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      this.$services.dex.setMarket(this.$services.assets.NEO,
+        this.$services.assets.GAS,
+        0.5, 0.000001, 0.30946428, 0.30946428)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      this.$services.dex.setMarket(this.$services.assets.ATI,
+        this.$services.assets.NEO,
+        200, 0.00001, 0.25, 0.25)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      this.$services.dex.setMarket(this.$services.assets.ATI,
+        this.$services.assets.GAS,
+        200, 0.00001, 0.25, 0.25)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      this.$services.dex.setMarket(this.$services.assets.APH,
+        this.$services.assets.NEO,
+        100, 0.0000001, 0, 0.25)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      /*
+      this.$services.dex.setMarket('9aff1e08aea2048a26a3d2ddbb3df495b932b1e7',
+        this.$constants.assets.APH,
+        1, 0.00001, 0.01, 0.01)
+        .then(() => {
+          this.$services.alerts.success(this.$t('setMarketRelayed'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+      */
     },
     setMinimumClaimBlocks() {
       this.$services.dex.setMinimumClaimBlocks(180)
         .then(() => {
-          this.$services.alerts.success(this.$t('setMarketRelayed'));
+          this.$services.alerts.success(this.$t('setMinimumClaimBlocks'));
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+    },
+    claimGasForDexContract() {
+      this.$services.dex.claimGasForDexContract()
+        .then(() => {
+          this.$services.alerts.success(this.$t('claimGasForDexContract'));
         })
         .catch((e) => {
           this.$services.alerts.exception(e);
@@ -493,6 +567,14 @@ export default {
 
     .side {
       display: flex;
+
+      .buy-btn { 
+        margin-right: $space-sm;
+      }
+
+      .sell-btn { 
+        margin-left: $space-sm;
+      }
     }
 
     .order-type {
@@ -535,8 +617,7 @@ export default {
         color: $grey;
       }
     }
-
-    .aph-dex-input {
+    .aph-input {
       border-color: $background;
 
       &.focused {
@@ -598,7 +679,6 @@ export default {
 
     .buy-btn {
       border-color: $green;
-      margin-right: $space-sm;
 
       &:hover, &.selected {
         background-color: $green;
@@ -607,11 +687,14 @@ export default {
 
     .sell-btn {
       border-color: $red;
-      margin-left: $space-sm;
 
       &:hover, &.selected {
         background-color: $red;
       }
+    }
+
+    .quantity {
+      margin-top: $space-sm;
     }
   }
 

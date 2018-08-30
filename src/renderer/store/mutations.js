@@ -80,6 +80,9 @@ export {
   SOCKET_RECONNECT_ERROR,
 };
 
+// local constants
+const TRADE_MSG_LENGTH = 3;
+
 function clearActiveTransaction(state) {
   state.showPriceTile = true;
 }
@@ -495,6 +498,21 @@ function SOCKET_ONOPEN(state, event) {
   if (state.socket.opened) {
     state.socket.opened();
   }
+  if (state.needsWsReconnectHandling) {
+    state.needsWsReconnectHandling = false;
+    if (state.currentMarket) {
+      this.dispatch('subscribeToMarket', {
+        market: state.currentMarket,
+        isRequestSilent: true,
+      });
+
+      // Ensure trade history is up-to-date on reconnect. (may have dropped some trades during disconnect)
+      this.dispatch('fetchTradeHistory', {
+        marketName: state.currentMarket.marketName,
+        isRequestSilent: true,
+      });
+    }
+  }
 }
 
 function SOCKET_ONCLOSE(state) {
@@ -532,9 +550,11 @@ function SOCKET_ONMESSAGE(state, message) {
     if (state.socket.orderMatchFailed) {
       state.socket.orderMatchFailed(message);
     }
+  } else if (message.type === 'trades') {
+    tradeUpdateReceived(state, message);
   } else if (message.type) {
     // unknown message type
-    console.log(message);
+    // console.log(message);
   }
 }
 
@@ -543,12 +563,30 @@ function SOCKET_RECONNECT_ERROR(state) {
 }
 
 function SOCKET_RECONNECT(state) {
-  if (state.currentMarket) {
-    this.dispatch('subscribeToMarket', {
-      market: state.currentMarket,
-      isRequestSilent: true,
-    });
+  // Note: at this point SOCKET_ONOPEN will not have been called yet, state.socket.client will still be null
+  // So we cannot actually send any messages out the websocket here. We can set a flag so that SOCKET_ONOPEN will know
+  // that has opened as a result of a RECONNECT.
+  state.needsWsReconnectHandling = true;
+}
+
+function tradeUpdateReceived(state, tradeUpdateMsg) {
+  if (!state.tradeHistory || !state.tradeHistory.trades) {
+    return;
   }
+
+  tradeUpdateMsg.trades.forEach((trade) => {
+    if (trade.length !== TRADE_MSG_LENGTH) {
+      return;
+    }
+
+    state.tradeHistory.trades.unshift({
+      // Trade executing in ask side means a Buy executed.
+      side: tradeUpdateMsg.side === 'ask' ? 'Buy' : 'Sell',
+      price: trade[0],
+      quantity: trade[1],
+      tradeTime: moment(trade[2]).unix(),
+    });
+  });
 }
 
 // Local functions

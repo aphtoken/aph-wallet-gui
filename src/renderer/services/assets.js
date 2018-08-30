@@ -10,14 +10,16 @@ export default {
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
 
   // TODO: these different per network
-  DEX_SCRIPT_HASH: '2d599f0d575232625841736bb96bd1b3d750a055',
+  DEX_SCRIPT_HASH: '953548bb4b3cfbc7c63a9481d288106a4bfb10cf',
   APH: '591eedcd379a8981edeefe04ef26207e1391904a',
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
 
   // privnet
-  /* DEX_SCRIPT_HASH: 'b102048babc8f1811f854dbc1ccf26183f45adbe',
-  APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac',
-  ATI: '155153854ed377549a72cc1643e481bf25b48390', */
+  // DEX_SCRIPT_HASH: '829ad03f7ae0ddfcb7c4127981dc7fc076317870',
+  // APH: 'aa636616119944d32ccc69a754ae6030fef8b1ac', // james
+  // ATI: '155153854ed377549a72cc1643e481bf25b48390', // james
+  // APH: 'fe8ad8a261b171fb313cbfb0d4a974e269d11061', // jeff
+  // ATI: 'a9ffe1c85f55d0545898a9e749cde53c05151760', // jeff
 
   updateNetworkAssets(assets) {
     const currentNetwork = network.getSelectedNetwork();

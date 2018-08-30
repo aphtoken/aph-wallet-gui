@@ -404,14 +404,19 @@ async function fetchMarkets({ commit }, { done }) {
   }
 }
 
-async function fetchTradeHistory({ commit }, { marketName, isRequestSilent }) {
-  let trades;
+async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilent }) {
+  let history;
   commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
     { identifier: 'fetchTradeHistory' });
 
   try {
-    trades = await dex.fetchTradeHistory(marketName);
-    commit('setTradeHistory', trades);
+    history = await dex.fetchTradeHistory(marketName);
+    if (state.tradeHistory && state.tradeHistory.apiBuckets && state.tradeHistory.marketName === marketName) {
+      history.apiBuckets = state.tradeHistory.apiBuckets;
+    } else {
+      history.apiBuckets = await dex.fetchTradesBucketed(marketName);
+    }
+    commit('setTradeHistory', history);
     commit('endRequest', { identifier: 'fetchTradeHistory' });
   } catch (message) {
     alerts.networkException(message);

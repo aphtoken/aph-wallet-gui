@@ -20,15 +20,15 @@ import { claiming, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SCRIPT = 0x20;
 const TX_ATTR_USAGE_HEIGHT = 0xf0;
-
-const TX_ATTR_USAGE_WITHDRAW_STEP = 0xA1;
+const TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE = 0xA1;
 const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xA2;
 const TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID = 0xA3;
 const TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID = 0xA4;
 const TX_ATTR_USAGE_WITHDRAW_AMOUNT = 0xA5;
 const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xA6;
-const WITHDRAW_STEP_MARK = '91';
-const WITHDRAW_STEP_WITHDRAW = '92';
+const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
+const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
+const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
 let lastUTXOWithdrawn;
 
@@ -37,7 +37,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
-        axios.get(`${currentNetwork.aph}/markets`)
+        axios.get(`${currentNetwork.aph}/markets?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
           .then((res) => {
             resolve(res.data.markets);
           })
@@ -162,6 +162,7 @@ export default {
 
             const history = {
               date: res.data.timestamp,
+              marketName,
               trades: res.data.trades,
               getBars: this.getTradeHistoryBars,
             };
@@ -200,89 +201,121 @@ export default {
     });
   },
 
-  getTradeHistoryBars(trades, resolution, from, to) {
+  getTradeHistoryBars(tradeHistory, resolution, from, to, last) {
     const bars = [];
-    resolution = parseFloat(resolution) * 60 * 1000;
+    const trades = tradeHistory.trades.slice(0);
+    trades.reverse();
+
+    // convert resolution to seconds
+    resolution = parseFloat(resolution) * 60;
+
+    // round to even interval
+    from = Math.round(from / resolution) * resolution;
+    to = Math.round(to / resolution) * resolution;
+
+    // convert resolution to milliseconds
+    resolution *= 1000;
+
     let currentBar = {
-      open: 0,
-      close: trades.length > 0 ? trades[0].price : 0,
-      high: 0,
-      low: trades.length > 0 ? 99999999 : 0,
+      open: last,
+      close: last,
+      high: last,
+      low: last,
       volume: 0,
-      time: (to * 1000) - resolution,
     };
 
-    for (let i = 0; i < trades.length; i += 1) {
-      const t = trades[i];
+    let apiBucketsIndex = tradeHistory.apiBuckets ? tradeHistory.apiBuckets.length - 1 : 0;
+    let tradesIndex = 0;
+    const barFrom = (from * 1000) + resolution;
+    const barTo = (to * 1000);
+    let barPointer = barFrom;
+    let bucket = null;
+    let trade = null;
 
-      if (t.tradeTime >= from && t.tradeTime <= to) {
-        if ((t.tradeTime * 1000) < currentBar.time) {
-          bars.unshift(currentBar);
-          currentBar = {
-            open: 0,
-            close: t.price,
-            high: 0,
-            low: 99999999,
-            volume: 0,
-            time: currentBar.time - resolution,
-          };
-        }
 
-        while ((t.tradeTime * 1000) < currentBar.time) {
-          currentBar.open = t.price;
-          currentBar.close = t.price;
-          currentBar.high = t.price;
-          currentBar.low = t.price;
-          bars.unshift(currentBar);
+    while (barPointer < barTo) {
+      currentBar = {
+        open: currentBar.close,
+        close: currentBar.close,
+        high: currentBar.close,
+        low: currentBar.close,
+        volume: 0,
+        time: barPointer,
+      };
 
-          currentBar = {
-            open: 0,
-            close: t.price,
-            high: 0,
-            low: 99999999,
-            volume: 0,
-            time: currentBar.time - resolution,
-          };
-        }
-
-        currentBar.volume += t.quantity;
-        currentBar.open = t.price;
-        if (t.price > currentBar.high) {
-          currentBar.high = t.price;
-        }
-        if (t.price < currentBar.low) {
-          currentBar.low = t.price;
-        }
-      } else {
-        while ((t.tradeTime * 1000) < currentBar.time) {
-          currentBar.open = t.price;
-          currentBar.close = t.price;
-          currentBar.high = t.price;
-          currentBar.low = t.price;
-          bars.unshift(currentBar);
-
-          currentBar = {
-            open: 0,
-            close: t.price,
-            high: 0,
-            low: 99999999,
-            volume: 0,
-            time: currentBar.time - resolution,
-          };
-        }
+      bucket = apiBucketsIndex < tradeHistory.apiBuckets.length ? tradeHistory.apiBuckets[apiBucketsIndex] : null;
+      trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
+      while (trade && trade.tradeTime < from) {
+        tradesIndex += 1;
+        trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
       }
+
+      if (bucket && bucket.time * 1000 === barPointer) {
+        currentBar = {
+          open: bucket.open,
+          close: bucket.close,
+          high: bucket.high,
+          low: bucket.low,
+          volume: bucket.volume,
+          time: barPointer,
+        };
+        bars.push(bucket);
+        apiBucketsIndex += 1;
+      } else {
+        while (trade
+          && trade.tradeTime * 1000 >= barPointer
+          && trade.tradeTime * 1000 < barPointer + resolution) {
+          currentBar.volume += trade.quantity;
+          currentBar.close = trade.price;
+
+          if (currentBar.open === 0) currentBar.open = trade.price;
+          if (currentBar.low === 0 || currentBar.low > trade.price) currentBar.low = trade.price;
+          if (currentBar.high < trade.price) currentBar.high = trade.price;
+          tradesIndex += 1;
+          trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
+        }
+
+        bars.push(currentBar);
+      }
+
+      barPointer += resolution;
     }
     return bars;
   },
 
-  fetchOrderHistory() {
+  fetchTradesBucketed(marketName, binSize = 1) {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+        axios.get(`${currentNetwork.aph}/trades/bucketed/${marketName}
+?binSize=${binSize}`)
+          .then((res) => {
+            resolve(res.data.buckets);
+          })
+          .catch(() => {
+            resolve([]);
+          });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  },
+
+  fetchOrderHistory(after = 0) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
-        axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
+        const ordersPageSize = 100;
+
+        axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}
+?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&after=${after}`)
           .then((res) => {
             const orders = res.data.orders;
+
+            // backwards compatible api support
+            const totalOrders = res.data.totalCount ? res.data.totalCount : orders.length;
+
             orders.forEach((order) => {
               const marketForOrder = _.find(store.state.markets, (market) => {
                 return market.marketName === order.marketName;
@@ -300,7 +333,22 @@ export default {
                 order.quantityToGive = order.quantity;
               }
             });
-            resolve(orders);
+
+            // are we at the last page or we got all of the orders in the first page?
+            if (orders.length < ordersPageSize
+                || orders.length >= totalOrders) {
+              resolve(orders);
+            } else {
+              // get the next page
+              this.fetchOrderHistory(orders[orders.length - 1].created)
+                .then((nextOrders) => {
+                  orders.push(...nextOrders);
+                  resolve(orders);
+                })
+                .catch((e) => {
+                  alerts.exception(`APH API Error: ${e.message}`);
+                });
+            }
           })
           .catch((e) => {
             alerts.exception(`APH API Error: ${e.message}`);
@@ -499,7 +547,7 @@ export default {
 
         if (order.deposits.length > 0) {
           if (waitForDeposits) {
-            // we have deposits pending, wait for our balance to reflect
+            // We have deposits pending, wait for our balance to reflect
             setTimeout(() => {
               this.placeOrder(order, true);
             }, 5000);
@@ -523,7 +571,7 @@ export default {
         // build all the order transactions
         const buildPromises = [];
         order.offersToTake.forEach((o) => {
-          buildPromises.push(this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.market, o));
+          buildPromises.push(this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.orderType, order.market, o));
         });
 
         if (order.quantityToTake < order.quantity) {
@@ -599,10 +647,13 @@ export default {
     return power.minus(1);
   },
 
-  calculateFeeAmount(quouteQuantity, minimumTradeSize, baseFee) {
+  calculateFeeAmount(quoteQuantity, minimumTradeSize, baseFee) {
+    if (quoteQuantity < minimumTradeSize) {
+      return baseFee;
+    }
     // Earlier checks guarantee that quoteQuantity > 0
     return this.flooredLogBase2(
-      quouteQuantity
+      quoteQuantity
         .multipliedBy(2)
         .dividedBy(minimumTradeSize)
         .decimalPlaces(0, BigNumber.ROUND_DOWN))
@@ -783,7 +834,7 @@ export default {
     });
   },
 
-  buildAcceptOffer(side, market, offer) {
+  buildAcceptOffer(side, orderType, market, offer) {
     return new Promise((resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
@@ -809,7 +860,7 @@ export default {
             u.num2fixed8(quantityToGive.toNumber()),
             u.reverseHex(assetIdToReceive),
             u.num2fixed8(quantityToReceive.toNumber()),
-            1,
+            orderType === 'Market' ? 0 : 1, // whether or not to create a taker offer if this is no longer available
             u.num2fixed8(new Date().getTime() * 0.00000001),
           ])
           .then((t) => {
@@ -1056,7 +1107,7 @@ export default {
               this.calculateWithdrawInputsAndOutputs(c, assetId, quantity)
                 .then(() => {
                   const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_MARK.padEnd(64, '0'));
+                  c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
                   c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
@@ -1257,7 +1308,7 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_WITHDRAW.padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
@@ -1412,7 +1463,7 @@ export default {
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_STEP, WITHDRAW_STEP_WITHDRAW.padEnd(64, '0'));
+            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
             c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
@@ -1943,7 +1994,7 @@ export default {
 
         api.fillKeys(config)
           .then((c) => {
-            if (!c.intents) {
+            if (!c.intents && currentNetwork.fee === 0) {
               return new Promise((balanceResolve) => {
                 c.balance = new wallet.Balance({ address: c.address, net: c.net });
                 balanceResolve(c);
@@ -2003,6 +2054,100 @@ export default {
       } catch (e) {
         reject(e);
       }
+    });
+  },
+
+  claimGasForDexContract() {
+    return new Promise((resolve, reject) => {
+      const currentWallet = wallets.getCurrentWallet();
+      const currentNetwork = network.getSelectedNetwork();
+      const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+
+      const config = {
+        net: currentNetwork.net,
+        url: currentNetwork.rpc,
+        address: currentWallet.address,
+        account: new wallet.Account(currentWallet.wif),
+      };
+
+      api.getClaimsFrom({
+        net: network.getSelectedNetwork().net,
+        url: currentNetwork.rpc,
+        address: dexAddress,
+      }, api.neoscan)
+        .then((claimsResponse) => {
+          api.fillKeys(config)
+            .then((configResponse) => {
+              return new Promise((resolveBalance) => {
+                api.neoscan.getBalance(configResponse.net, currentWallet.address)
+                  .then((balance) => {
+                    configResponse.balance = balance;
+                    resolveBalance(configResponse);
+                  })
+                  .catch((e) => {
+                    reject(`Failed to get address balance. Error: ${e.message}`);
+                  });
+              });
+            })
+            .then((configResponse) => {
+              configResponse.claims = claimsResponse.claims;
+              return api.createTx(configResponse, 'claim');
+            })
+            .then((configResponse) => {
+              const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+                u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
+
+              configResponse.tx.outputs.forEach((o) => {
+                o.scriptHash = assets.DEX_SCRIPT_HASH;
+              });
+
+              return api.signTx(configResponse);
+            })
+            .then((configResponse) => {
+              const attachInvokedContract = {
+                invocationScript: ('00').repeat(2),
+                verificationScript: '',
+              };
+
+              // We need to order this for the VM.
+              const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
+              if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+                configResponse.tx.scripts.push(attachInvokedContract);
+              } else {
+                configResponse.tx.scripts.unshift(attachInvokedContract);
+              }
+
+              return configResponse;
+            })
+            .then((configResponse) => {
+              return api.sendTx(configResponse);
+            })
+            .then((configResponse) => {
+              resolve({
+                success: configResponse.response.result,
+                tx: configResponse.tx,
+              });
+            })
+            .catch((e) => {
+              const dump = {
+                net: config.net,
+                address: config.address,
+                intents: config.intents,
+                balance: config.balance,
+                script: config.script,
+                gas: config.gas,
+                tx: config.tx,
+              };
+              console.log(dump);
+              reject(`Failed to Claim Contract GAS. Error: ${e.message}`);
+            });
+        })
+        .catch((e) => {
+          alerts.exception(e);
+        });
     });
   },
 

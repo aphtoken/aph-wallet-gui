@@ -4,10 +4,12 @@
       <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
       <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
     </div>
-    <div class="body" v-if="isOutOfDate">
-      <p>
-        The DEX contract has been updated. A corresponding wallet upgrade is required to continue to use the DEX.
-        Please use the controls below to cancel your orders and withdraw your funds from the contract back to your wallet and then download the latest version.
+    <div class="body" v-if="isTradingDisabled">
+      <p v-if="isOutOfDate">
+        {{$t('outOfDateMessage')}}        
+      </p>
+      <p v-if="isMarketClosed">
+        {{$t('marketClosedMessage')}}
       </p>
     </div>
     <div class="body" v-else>
@@ -71,6 +73,7 @@ let storeUnwatch;
 let storeMarketUnwatch;
 let tradingView;
 let barsSubscription;
+let lastPrice = 0;
 
 export default {
   data() {
@@ -190,10 +193,11 @@ export default {
           },
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            const bars = this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory.trades, resolution, from, to);
+            const bars = this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, lastPrice);
             if (bars.length === 0) {
               onDataCallback(bars, { noData: true })
             } else {
+              lastPrice = bars[bars.length - 1].close;
               onDataCallback(bars, { noData: false })
             }
           },
@@ -316,10 +320,18 @@ export default {
   },
 
   computed: {
+    isTradingDisabled() {
+      return this.isOutOfDate || this.isMarketClosed;
+    },
+
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
           !== this.$services.assets.DEX_SCRIPT_HASH;
+    },
+
+    isMarketClosed() {
+      return this.$store.state.currentMarket && this.$store.state.currentMarket.isOpen === false;
     },
 
     bidGroups() {

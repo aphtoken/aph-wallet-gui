@@ -42,18 +42,13 @@ import DexOutOfDate from './modals/DexOutOfDate';
 export default {
   beforeDestroy() {
     this.$store.state.showPortfolioHeader = true;
-    clearInterval(this.interval);
+    clearInterval(this.connectionStatusInterval);
+    clearInterval(this.marketsRefreshInterval);
   },
 
   mounted() {
     this.$store.state.showPortfolioHeader = false;
-    this.$store.dispatch('fetchMarkets', {
-      done: () => {
-        if (!this.$store.state.currentMarket) {
-          this.$store.commit('setCurrentMarket', this.$store.state.markets[0]);
-        }
-      },
-    });
+    this.loadMarkets();
 
     this.$services.dex.completeSystemAssetWithdrawals();
 
@@ -70,7 +65,7 @@ export default {
     });
 
     this.$store.commit('setSocketOrderCreationFailed', (message) => {
-      this.$services.alerts.error(`Failed to Create Order ${(message.side === 'bid' ? 'Buy' : 'Sell')}. ${message.errorMessage}`);
+      this.$services.alerts.error(`Failed to Create ${(message.side === 'bid' ? 'Buy' : 'Sell')} Order. ${message.data.errorMessage}`);
     });
 
     this.$store.commit('setSocketOrderMatchFailed', (message) => {
@@ -85,9 +80,12 @@ export default {
 
   created() {
     this.setConnected();
-    this.interval = setInterval(() => {
+    this.connectionStatusInterval = setInterval(() => {
       this.setConnected();
     }, 1000);
+    this.marketsRefreshInterval = setInterval(() => {
+      this.loadMarkets();
+    }, this.$constants.intervals.MARKETS_POLLING);
   },
 
   data() {
@@ -124,6 +122,15 @@ export default {
       }
 
       this.connected = true;
+    },
+    loadMarkets() {
+      this.$store.dispatch('fetchMarkets', {
+        done: () => {
+          if (!this.$store.state.currentMarket) {
+            this.$store.commit('setCurrentMarket', this.$store.state.markets[0]);
+          }
+        },
+      });
     },
   },
 };

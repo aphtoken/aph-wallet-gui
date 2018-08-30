@@ -23,6 +23,13 @@ const NEO_ASSET_ID = 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6da
 
 let lastClaimSent;
 let lastVerifiedTokenBalances;
+let tokensToRetryBalances = {};
+
+const calculateHoldingTotalBalance = (holding) => {
+  return toBigNumber(_.get(holding, 'balance', toBigNumber(0)))
+    .plus(_.get(holding, 'contractBalance', toBigNumber(0)))
+    .plus(_.get(holding, 'openOrdersBalance', toBigNumber(0)));
+};
 
 export default {
   createWallet(name, passphrase, passphraseConfirm) {
@@ -452,18 +459,35 @@ export default {
               }
             });
 
+            if (!restrictToSymbol) {
+              _.values(tokensToRetryBalances).forEach((holding) => {
+                if (_.has(holdingsToQueryBalance, holding.assetId) === false) {
+                  _.set(holdingsToQueryBalance, holding.assetId, holding);
+                }
+                tokensToRetryBalances = _.omit(tokensToRetryBalances, holding.assetId);
+              });
+            }
+
             _.values(holdingsToQueryBalance).forEach((holding) => {
+              if (restrictToSymbol && holding.symbol !== restrictToSymbol) {
+                return;
+              }
+
               if (holding.isNep5 === true) {
                 promises.push(this.fetchNEP5Balance(address, holding.assetId)
                   .then((val) => {
-                    if (!val.symbol) {
-                      return; // token not found on this network
+                    if (!val.valid) {
+                      if (val.retry) {
+                        _.set(tokensToRetryBalances, holding.assetId, holding);
+                      }
+
+                      return; // token not found or other failure
                     }
 
-                    holding.balance = new BigNumber(val.balance);
+                    holding.balance = new BigNumber(val.balance.toString());
                     holding.symbol = val.symbol;
                     holding.name = val.name;
-                    holding.totalBalance = holding.balance;
+                    holding.totalBalance = calculateHoldingTotalBalance(holding);
                     holding.decimals = val.decimals;
 
                     store.commit('removeAssetHoldingsNeedRefresh', [holding.assetId]);
@@ -478,15 +502,6 @@ export default {
 
                       holdings.push(holding);
                     }
-                  })
-                  .catch((e) => {
-                    if (e.message.indexOf('Expected a hexstring but got') > -1) {
-                      // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
-                      assets.removeUserAsset(holding.assetId);
-                    } else if (e.message.indexOf('Invalid results length!') > -1) {
-                      // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
-                    }
-                    reject(e);
                   }));
               } else {
                 holdings.push(holding);
@@ -495,17 +510,16 @@ export default {
               promises.push(dex.fetchContractBalance(holding.assetId)
                 .then((res) => {
                   holding.contractBalance = toBigNumber(res);
-                  holding.totalBalance = toBigNumber(holding.balance)
-                    .plus(holding.contractBalance).plus(holding.openOrdersBalance);
+                  holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {
                   alerts.networkException(e);
                 }));
+
               promises.push(dex.fetchOpenOrderBalance(holding.assetId)
                 .then((res) => {
                   holding.openOrdersBalance = toBigNumber(res);
-                  holding.totalBalance = toBigNumber(holding.balance)
-                    .plus(holding.contractBalance).plus(holding.openOrdersBalance);
+                  holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {
                   alerts.networkException(e);
@@ -597,7 +611,7 @@ export default {
         holding.contractBalance = toBigNumber(holding.contractBalance);
       }
       if (!holding.totalBalance) {
-        holding.totalBalance = holding.balance.plus(holding.contractBalance);
+        holding.totalBalance = calculateHoldingTotalBalance(holding);
       }
       if (holding.totalBalance !== null) {
         holding.totalBalance = toBigNumber(holding.totalBalance);
@@ -648,10 +662,11 @@ export default {
   fetchNEP5Balance(address, assetId) {
     const currentNetwork = network.getSelectedNetwork();
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       return api.nep5.getToken(currentNetwork.rpc, assetId, address)
         .then((token) => {
           resolve({
+            valid: !!token.symbol,
             name: token.name,
             symbol: token.symbol,
             decimals: token.decimals,
@@ -660,7 +675,21 @@ export default {
           });
         })
         .catch((ex) => {
-          reject(ex);
+          let retry = true;
+          if (ex.message.indexOf('Expected a hexstring but got') > -1) {
+            // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
+            assets.removeUserAsset(assetId);
+            retry = false;
+          } else if (ex.message.indexOf('Invalid results length!') > -1) {
+            // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
+            retry = false;
+          }
+
+          resolve({
+            valid: false,
+            retry,
+            error: `Error fetching NEP5 balance. Error: ${ex.message}`,
+          });
         });
     });
   },
@@ -792,7 +821,6 @@ export default {
       url: currentNetwork.rpc,
       address: currentWallet.address,
     }, api.neoscan)
-    // maybe we should stand up our own version ?
       .then((balance) => {
         if (balance.net !== currentNetwork.net) {
           alerts.error('Unable to read address balance from neonDB or neoscan api. Please try again later.');
