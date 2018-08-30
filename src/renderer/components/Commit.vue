@@ -1,6 +1,6 @@
 <template>
   <section id="commit-aph">
-    <div class="header">
+    <div class="commit-header">
       <h1>{{ $t('commit') }}.</h1>
       <button class="learn-more" @click="showInfo">{{ $t('learnMore') }}</button>
     </div>
@@ -254,7 +254,7 @@ export default {
   flex: 1;
   margin: $space-lg;
 
-  .header {
+  .commit-header {
     color: $purple;
     flex-basis: 15%;
     font-family: 'GilroySemibold';
