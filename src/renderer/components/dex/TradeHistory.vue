@@ -60,16 +60,6 @@ export default {
         marketName: this.$store.state.currentMarket.marketName,
       });
     },
-    loadTradesSilently() {
-      if (!this.$store.state.currentMarket) {
-        return;
-      }
-
-      this.$store.dispatch('fetchTradeHistory', {
-        marketName: this.$store.state.currentMarket.marketName,
-        isRequestSilent: true,
-      });
-    },
   },
 };
 </script>

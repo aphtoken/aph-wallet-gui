@@ -14,7 +14,10 @@
           <span class="value">{{ $formatNumber(holding.balance) }}</span> 
         </div>
       </div>
-      <aph-input type="number" placeholder="Amount" :light="true" v-model="amount"></aph-input>
+      <div class="amount">
+        <aph-input @blur="cleanAmount" placeholder="Amount" :light="true" v-model="amount"></aph-input>
+        <div class="max" v-if="hasAsset" @click="setAmountToMax">{{$t('max')}}</div>
+      </div>
     </div>
     <div class="footer">
       <button class="cancel-btn" @click="onCancel">{{$t('cancel')}}</button>
@@ -25,6 +28,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 import ModalWrapper from './ModalWrapper';
 
 export default {
@@ -34,12 +38,21 @@ export default {
 
   computed: {
     shouldDisableDepositWithdrawButton() {
-      return !this.amount.length || this.amount <= 0;
+      return isNaN(this.amount) ||
+        !this.amount.length ||
+        this.amount <= 0;
     },
     holding() {
       return _.find(this.$store.state.holdings, (holding) => {
         return holding.assetId === this.$store.state.depositWithdrawModalModel.holdingAssetId;
       });
+    },
+    hasAsset() {
+      const balance = this.isDeposit ?
+        this.holding.balance :
+        this.holding.contractBalance;
+
+      return balance > 0;
     },
   },
 
@@ -48,6 +61,51 @@ export default {
       isDeposit: false,
       amount: '',
     };
+  },
+
+  methods: {
+    setAmountToMax() {
+      this.amount = this.isDeposit ?
+        this.holding.balance.toString() :
+        this.holding.contractBalance.toString();
+    },
+
+    cleanAmount() {
+      if (!this.amount) {
+        return;
+      }
+
+      let cleanAmount = this.amount.replace(/[^\d.]/g, '');
+
+      const cleanSplit = _.split(cleanAmount, '.');
+      if (cleanSplit.length > 2) {
+        cleanAmount = `${cleanSplit[0]}.${cleanSplit[1]}`;
+      }
+
+      if (cleanAmount && cleanAmount.length > 0) {
+        if (this.holding) {
+          cleanAmount = new BigNumber(cleanAmount).toFixed(this.holding.decimals != null ? this.holding.decimals : 8);
+        } else if (cleanAmount[cleanAmount.length - 1] !== '.'
+          && cleanAmount[cleanAmount.length - 1] !== '0') {
+          const n = new BigNumber(cleanAmount);
+          cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
+        }
+      }
+
+      // remove trailing zeros if there is a decimal
+      if (cleanAmount.indexOf('.') > -1) {
+        cleanAmount = _.trimEnd(cleanAmount, '0');
+      }
+
+      // remove decimal point if it is the last character
+      if (this.amount && this.amount.length > 0 && this.amount[this.amount.length - 1] !== '.') {
+        cleanAmount = _.trimEnd(cleanAmount, '.');
+      }
+
+      if (this.amount !== cleanAmount) {
+        this.amount = cleanAmount;
+      }
+    },
   },
 
   mounted() {
@@ -96,24 +154,46 @@ export default {
         }
       }
     }
-    .aph-input {
-      border-color: $grey;
 
-      &.focused {
-        border-color: $purple;
+    .amount {
+      position: relative;
+
+      .aph-input { 
+        border-color: $grey;
+
+        &.focused {
+          border-color: $purple;
+        }
+
+        input {
+          color: $dark;
+        }
+
+        .placeholder {
+          color: $grey;
+          font-family: GilroyMedium;
+        }
+
+        & + .aph-input {
+          margin-top: $space;
+        }
       }
 
-      input {
-        color: $dark;
-      }
+      .max {
+        @include transition(color);
 
-      .placeholder {
+        bottom: toRem(16px);
         color: $grey;
-        font-family: GilroyMedium;
-      }
+        cursor: pointer;
+        font-size: toRem(10px);
+        position: absolute;
+        right: 0;
+        text-transform: uppercase;
+        z-index: 0;
 
-      & + .aph-input {
-        margin-top: $space;
+        &:hover {
+          color: $purple;
+        }
       }
     }
   }
