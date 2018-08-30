@@ -285,6 +285,11 @@ export default {
     }
   }
 
+  .body {
+    display: flex;
+    flex-direction: column;
+  }
+
   #commit-body {
     display: flex;
     flex-direction: column;
