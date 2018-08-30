@@ -65,7 +65,7 @@ export default {
     });
 
     this.$store.commit('setSocketOrderCreationFailed', (message) => {
-      this.$services.alerts.error(`Failed to Create Order ${(message.side === 'bid' ? 'Buy' : 'Sell')}. ${message.errorMessage}`);
+      this.$services.alerts.error(`Failed to Create ${(message.side === 'bid' ? 'Buy' : 'Sell')} Order. ${message.data.errorMessage}`);
     });
 
     this.$store.commit('setSocketOrderMatchFailed', (message) => {
