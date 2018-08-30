@@ -15,7 +15,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 let loadTransactionsIntervalId;
 
 export default {
@@ -40,10 +39,6 @@ export default {
           });
         });
     },
-
-    ...mapGetters([
-      'sendInProgress',
-    ]),
   },
 
   data() {
