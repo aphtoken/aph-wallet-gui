@@ -1,6 +1,6 @@
 <template>
   <section id="commit-aph">
-    <div class="header">
+    <div class="header commit-header">
       <h1>{{ $t('commit') }}.</h1>
       <button class="learn-more" @click="showInfo">{{ $t('learnMore') }}</button>
     </div>
@@ -254,13 +254,16 @@ export default {
   flex: 1;
   margin: $space-lg;
 
+  .header.commit-header {
+    max-width: toRem(1105px);
+    min-width: toRem(1150px);
+    padding-left: $space-lg;
+  }
+
   .header {
     color: $purple;
     flex-basis: 15%;
     font-family: 'GilroySemibold';
-    max-width: toRem(1105px);
-    min-width: toRem(1150px);
-    padding-left: $space-lg;
 
     h1 {
       display: inline-block;
@@ -280,6 +283,11 @@ export default {
         box-shadow: $box-shadow-sm;
       }
     }
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
   }
 
   #commit-body {
