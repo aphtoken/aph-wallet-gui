@@ -11,6 +11,7 @@
       .aph-select {
         .aph-select--dropdown {
           background: $background-night-light;
+          border-color: $select-border-night;
           color: $copy-night;
 
           > li {
