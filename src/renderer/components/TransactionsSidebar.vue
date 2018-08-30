@@ -105,7 +105,7 @@ export default {
   }
 
   > .content {
-    display:none;
+    display: none;
     flex-direction: column;
     overflow: hidden;
     width: $right-sidebar-width;
