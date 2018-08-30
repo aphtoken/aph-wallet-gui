@@ -315,6 +315,8 @@ export default {
   watch: {
     currentMarket() {
       this.actionableHolding = this.quoteHolding;
+      this.$store.commit('setOrderQuantity', '');
+      this.$store.commit('setOrderPrice', '');
     },
 
     orderType() {
