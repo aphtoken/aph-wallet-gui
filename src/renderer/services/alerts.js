@@ -16,6 +16,7 @@ function calculateTimeout(str) {
 }
 
 function errorAlreadyExists(content) {
+  console.log(Vue.prototype.$flashStorage.storage);
   return !!_.find(Vue.prototype.$flashStorage.storage, (item) => {
     return item.type === 'error' && item.content === content;
   });

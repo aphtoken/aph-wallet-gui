@@ -104,7 +104,7 @@ export default {
       return defaultValue;
     }
 
-    return value > threshold ?
-      accounting.formatMoney(toBigNumber(value), ' ', 0) : formatNumberBase(value);
+    return toBigNumber(value).isGreaterThan(threshold) ?
+      accounting.formatMoney(toBigNumber(value), '', 0) : formatNumberBase(value);
   },
 };

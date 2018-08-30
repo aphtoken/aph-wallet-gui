@@ -1,12 +1,13 @@
 /** eslint-disable no-unused-expressions */
 import { BigNumber } from 'bignumber.js';
 
+import { formats } from '@/constants';
 import { formatting } from '@/services';
 
 const toBigNumber = value => new BigNumber(String(value));
 
 describe('services/formatting', () => {
-  describe('formatDate', () => {
+  describe('abbreviateNumber', () => {
     it('should properly format', () => {
       expect(formatting.abbreviateNumber(12)).to.eql('12.0');
       expect(formatting.abbreviateNumber('12')).to.eql('12.0');
@@ -19,6 +20,9 @@ describe('services/formatting', () => {
       expect(formatting.abbreviateNumber(1524752757.000001)).to.eql('1.5b');
       expect(formatting.abbreviateNumber('1524752757.000001')).to.eql('1.5b');
       expect(formatting.abbreviateNumber(toBigNumber(1524752757.000001))).to.eql('1.5b');
+      expect(formatting.abbreviateNumber(undefined)).to.be.eql('N/A');
+      expect(formatting.abbreviateNumber(null, formats.WHOLE_NUMBER, 'default')).to.eql('default');
+      expect(formatting.abbreviateNumber(undefined, formats.WHOLE_NUMBER, 'default')).to.be.eql('default');
     });
   });
 
@@ -115,6 +119,32 @@ describe('services/formatting', () => {
       expect(formatting.formatTime(undefined)).to.be.eql('--');
       expect(formatting.formatTime(null, 'default')).to.eql('default');
       expect(formatting.formatTime(undefined, 'default')).to.be.eql('default');
+    });
+  });
+
+  describe('formatWeekdayAndTime', () => {
+    it('should properly format', () => {
+      expect(formatting.formatWeekdayAndTime(1524752757)).to.be.eql('Th 8:57');
+      expect(formatting.formatWeekdayAndTime('1524752757')).to.be.eql('Th 8:57');
+      expect(formatting.formatWeekdayAndTime(null)).to.eql('--');
+      expect(formatting.formatWeekdayAndTime(undefined)).to.be.eql('--');
+      expect(formatting.formatWeekdayAndTime(null, 'default')).to.eql('default');
+      expect(formatting.formatWeekdayAndTime(undefined, 'default')).to.be.eql('default');
+    });
+  });
+
+  describe('formatTokenAmount', () => {
+    it('should properly format', () => {
+      expect(formatting.formatTokenAmount(0.000001)).to.be.eql('0.000001');
+      expect(formatting.formatTokenAmount('0.000001')).to.be.eql('0.000001');
+      expect(formatting.formatTokenAmount(100.000001)).to.be.eql('100.000001');
+      expect(formatting.formatTokenAmount('100.000001')).to.be.eql('100.000001');
+      expect(formatting.formatTokenAmount(1000.000001)).to.be.eql('1,000');
+      expect(formatting.formatTokenAmount('1000.000001')).to.be.eql('1,000');
+      expect(formatting.formatTokenAmount(toBigNumber(1000.000001))).to.be.eql('1,000');
+      expect(formatting.formatTokenAmount(undefined)).to.be.eql('N/A');
+      expect(formatting.formatTokenAmount(null, 1000, 'default')).to.eql('default');
+      expect(formatting.formatTokenAmount(undefined, 1000, 'default')).to.be.eql('default');
     });
   });
 });
