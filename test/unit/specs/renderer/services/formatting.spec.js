@@ -5,9 +5,23 @@ import { formatting } from '@/services';
 
 const toBigNumber = value => new BigNumber(String(value));
 
-// TODO: Need a test for abbreviateNumber service.
+describe.only('services/formatting', () => {
+  describe('formatDate', () => {
+    it('should properly format', () => {
+      expect(formatting.abbreviateNumber(12)).to.eql('12.0');
+      expect(formatting.abbreviateNumber('12')).to.eql('12.0');
+      expect(formatting.abbreviateNumber(1000)).to.eql('1.0k');
+      expect(formatting.abbreviateNumber('1000')).to.eql('1.0k');
+      expect(formatting.abbreviateNumber(1248215)).to.eql('1.2m');
+      expect(formatting.abbreviateNumber('1248215')).to.eql('1.2m');
+      expect(formatting.abbreviateNumber(1524752757)).to.eql('1.5b');
+      expect(formatting.abbreviateNumber('1524752757')).to.eql('1.5b');
+      expect(formatting.abbreviateNumber(1524752757.000001)).to.eql('1.5b');
+      expect(formatting.abbreviateNumber('1524752757.000001')).to.eql('1.5b');
+      expect(formatting.abbreviateNumber(toBigNumber(1524752757.000001))).to.eql('1.5b');
+    });
+  });
 
-describe('services/formatting', () => {
   describe('formatDate', () => {
     it('should properly format', () => {
       expect(formatting.formatDate(1524752757)).to.eql('26-04-2018');
