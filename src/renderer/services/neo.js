@@ -479,6 +479,12 @@ export default {
                     if (!val.valid) {
                       if (val.retry) {
                         _.set(tokensToRetryBalances, holding.assetId, holding);
+                        // if we currently have a holding value for this ensure it doesn't vanish for a retriable error
+                        const existingHolding = this.getHolding(holding.assetId);
+                        if (existingHolding) {
+                          // TODO: May need some way in the UI to show that the balance of this asset may be out of date
+                          holdings.push(existingHolding);
+                        }
                       }
 
                       return; // token not found or other failure
