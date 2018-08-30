@@ -5,7 +5,7 @@ import { formatting } from '@/services';
 
 const toBigNumber = value => new BigNumber(String(value));
 
-describe.only('services/formatting', () => {
+describe('services/formatting', () => {
   describe('formatDate', () => {
     it('should properly format', () => {
       expect(formatting.abbreviateNumber(12)).to.eql('12.0');
