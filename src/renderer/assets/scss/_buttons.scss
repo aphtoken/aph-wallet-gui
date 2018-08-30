@@ -59,6 +59,7 @@ button, input, optgroup, select, textarea {
     background-color: rgba($purple-hover, 0.5);
     color: white;
     cursor: not-allowed;
+    border-color: rgba($purple-hover, 0.1);
   }
 }
 

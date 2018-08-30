@@ -23,11 +23,14 @@ const formatNumberBase = (value, wholeNumberFormat) => {
   bigNumber = bigNumber.abs();
   let wholeNumber = bigNumber.integerValue(BigNumber.ROUND_FLOOR);
   const fractionalNumber = bigNumber.minus(wholeNumber);
+
   if (!wholeNumber.isZero()) {
     wholeNumber = isNegative ? wholeNumber.multipliedBy(-1) : wholeNumber;
+
     return `${numeral(wholeNumber).format(wholeNumberFormat)}`
       + `${numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER)}`;
   }
+
   return (isNegative ? '-0' : '0') + numeral(fractionalNumber).format(formats.FRACTIONAL_NUMBER);
 };
 
@@ -101,7 +104,7 @@ export default {
       return defaultValue;
     }
 
-    return value > threshold ?
-      accounting.formatMoney(toBigNumber(value), ' ', 0) : formatNumberBase(value);
+    return toBigNumber(value).isGreaterThan(threshold) ?
+      accounting.formatMoney(toBigNumber(value), '', 0) : formatNumberBase(value);
   },
 };

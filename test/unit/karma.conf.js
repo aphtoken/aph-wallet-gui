@@ -46,7 +46,7 @@ module.exports = config => {
         base: 'Electron'
       }
     },
-    frameworks: ['mocha', 'chai'],
+    frameworks: ['mocha', 'dirty-chai', 'chai-sinon'],
     files: ['./index.js'],
     preprocessors: {
       './index.js': ['webpack', 'sourcemap']
