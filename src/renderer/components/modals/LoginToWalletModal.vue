@@ -4,8 +4,9 @@
       <div class="body">
         <aph-icon name="wallet"></aph-icon>
         <div class="wallet-name">{{ $store.state.currentLoginToWallet.label }}</div>
+        <div class="wallet-address">{{ $store.state.currentLoginToWallet.address }}</div>
         <p>{{$t('confirmRemove')}} <span>{{$store.state.currentLoginToWallet.label}}</span>?</p>
-        <p><span class="warning">{{$t('lossOfFunds')}}</span>{{$t('properlyBackedUpWallet')}}</p>
+        <p><span class="warning">{{$t('lossOfFunds')}}</span> {{$t('properlyBackedUpWallet')}}</p>
         <aph-input :placeholder="$t('enterNameOfWalletToDelete')" :light="true" v-model="confirmWalletName"></aph-input>
       </div>
       <div class="footer">
@@ -21,6 +22,7 @@
         <aph-form :on-submit="login">
           <aph-icon name="wallet"></aph-icon>
           <div class="wallet-name">{{ $store.state.currentLoginToWallet.label }}</div>
+          <div class="wallet-address">{{ $store.state.currentLoginToWallet.address }}</div>
           <aph-input v-if="isNotCurrentWallet" :placeholder="loginMessage" :light="true" v-model="passphrase" type="password"></aph-input>
         </aph-form>
       </div>
@@ -165,7 +167,12 @@ export default {
       color: $purple;
       font-family: GilroyMedium;
       font-size: toRem(18px);
-      padding: $space-lg 0;
+      padding: $space-lg 0 0;
+    }
+
+    .wallet-address {
+      padding-top: $space-sm;
+      padding-bottom: $space-lg;
     }
 
     p {
@@ -253,4 +260,3 @@ export default {
   }
 }
 </style>
-

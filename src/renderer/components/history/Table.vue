@@ -172,10 +172,11 @@ export default {
 
   display: flex;
   flex-direction: column;
-  padding: $space $space-lg;
+  padding: $space 0 0;
 
   .header {
     display: flex;
+    flex: 0 0 auto;
     padding: 0;
 
     .cell {
@@ -183,6 +184,15 @@ export default {
 
       flex: 1;
       padding: $space;
+      border-bottom: toRem(1px) solid $background;
+
+      &:first-child {
+        padding-left: $space-lg;
+      }
+
+      &:last-child {
+        padding-right: $space-lg;
+      }
 
       &.status {
         flex: none;
@@ -201,6 +211,7 @@ export default {
       flex-direction: column;
       height: 100%;
       justify-content: center;
+      padding: $space-lg;
 
       .aph-icon {
         svg {
@@ -225,6 +236,10 @@ export default {
       background-color: transparent;
       border-top: toRem(1px) solid $background;
 
+      &:first-child {
+        border-top-width: 0;
+      }
+
       .summary {
         align-items: center;
         cursor: pointer;
@@ -236,6 +251,14 @@ export default {
         flex: 1;
         font-family: GilroyMedium;
         padding: $space;
+
+        &:first-child {
+          padding-left: $space-lg;
+        }
+
+        &:last-child {
+          padding-right: $space-lg;
+        }
 
         .aph-icon {
           svg {
@@ -389,4 +412,3 @@ export default {
   }
 }
 </style>
-

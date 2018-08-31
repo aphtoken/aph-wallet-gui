@@ -6,7 +6,7 @@
     </div>
     <div class="body" v-if="isTradingDisabled">
       <p v-if="isOutOfDate">
-        {{$t('outOfDateMessage')}}        
+        {{$t('outOfDateMessage')}}
       </p>
       <p v-if="isMarketClosed">
         {{$t('marketClosedMessage')}}
@@ -551,9 +551,10 @@ export default {
                   border: 1px solid $green;
                   border-radius: 4px;
                   position: absolute;
+                  z-index: 2;
                   top: -45px;
-                  left: -10px;
-                  right: -10px;
+                  left: 50%;
+                  transform: translateX(-50%);
                   text-align: center;
 
                   &:before {
@@ -653,5 +654,3 @@ export default {
   }
 }
 </style>
-
-

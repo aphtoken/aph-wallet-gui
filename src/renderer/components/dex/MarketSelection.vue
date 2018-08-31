@@ -18,9 +18,23 @@
     </div>
     <aph-spinner-wrapper size="small" identifier="fetchTradeHistory">
       <div class="market">
-        <div class="day-values">
+        <div class="token-details">
+          <aph-token-icon v-if="$store.state.currentMarket && $store.state.currentMarket.quoteCurrency" :symbol="$store.state.currentMarket.quoteCurrency"></aph-token-icon>
+          <div class="base-price">
+            {{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.close24Hour : 0) }} ({{ $store.state.currentMarket ? $store.state.currentMarket.baseCurrency : '' }})
+          </div>
+          <div class="base-price-converted">
+            {{ $formatMoney($store.state.tradeHistory ? $store.state.tradeHistory.close24Hour * baseCurrencyUnitPrice : 0) }}
+          </div>
           <div class="row">
-            <div class="label">{{$t('vol')}}</div>
+            <div class="label">{{ $t('change24H') }} ({{ $store.state.currentMarket ? $store.state.currentMarket.quoteCurrency : '' }})</div>
+            <div :class="['value change', {decrease: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour < 0 : false, increase: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour > 0 : false}]">
+              {{ $formatNumber($store.state.tradeHistory ? $store.state.tradeHistory.change24Hour : 0) }}
+              ({{ $formatNumber(percentChangeAbsolute) }}%)
+            </div>
+          </div>
+          <div class="row">
+            <div class="label">{{$t('volume')}}</div>
             <div class="value">{{ $formatNumber($store.state.tradeHistory ? $store.state.tradeHistory.volume24Hour : 0) }}</div>
           </div>
           <div class="row">
@@ -34,20 +48,6 @@
           <div class="row">
             <div class="label">{{$t('LOW')}}</div>
             <div class="value">{{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.low24Hour : 0) }}</div>
-          </div>
-        </div>
-        <div class="token-details">
-          <aph-token-icon v-if="$store.state.currentMarket && $store.state.currentMarket.quoteCurrency" :symbol="$store.state.currentMarket.quoteCurrency"></aph-token-icon>
-          <div class="base-price">
-            {{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.close24Hour : 0) }}
-          </div>
-          <div class="base-price-converted">
-            {{ $formatMoney($store.state.tradeHistory ? $store.state.tradeHistory.close24Hour * baseCurrencyUnitPrice : 0) }}
-          </div>
-          <span class="label">{{ $t('change24H') }} ({{ $store.state.currentMarket ? $store.state.currentMarket.quoteCurrency : '' }})</span>
-          <div :class="['change', {decrease: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour < 0 : false, increase: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour > 0 : false}]">
-            {{ $formatNumber($store.state.tradeHistory ? $store.state.tradeHistory.change24Hour : 0) }}
-            ({{ $formatNumber(percentChangeAbsolute) }}%)
           </div>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default {
 #dex--marketselection {
   .header {
     @extend %tile-light;
-    
+
     flex: none;
     padding: $space $space 0;
 
@@ -154,7 +154,7 @@ export default {
     }
 
     .token-details {
-      flex: none
+      flex: 1 1 auto;
     }
 
     .row {
@@ -164,13 +164,15 @@ export default {
       .label {
         @extend %small-uppercase-grey-label-dark;
 
-        flex: 2;
+        // flex: 2;
+        margin-right: $space-sm;
       }
 
       .value {
         flex: 3;
         font-family: GilroySemibold;
         font-size: toRem(12px);
+        text-align: right;
       }
 
       &.row {
@@ -179,7 +181,7 @@ export default {
     }
 
     .token-details {
-      align-items: flex-end;
+      // align-items: flex-end;
       display: flex;
       flex-direction: column;
 

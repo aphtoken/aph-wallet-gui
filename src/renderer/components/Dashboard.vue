@@ -54,7 +54,7 @@ export default {
   .grid--cell {
     display: flex;
     flex-direction: row;
-    flex: 1;
+    flex: 0 0 auto;
     padding: $space;
 
     > * {
@@ -78,4 +78,3 @@ export default {
   }
 }
 </style>
-

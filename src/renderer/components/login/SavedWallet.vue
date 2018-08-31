@@ -3,7 +3,7 @@
     <login-form-wrapper identifier="openSavedWallet" :on-submit="login">
       <div v-if="wallets.length > 0">
         <aph-select v-model="wallet" :options="wallets" :placeholder="$t('selectAWallet')"></aph-select>
-        <aph-input :hasError="$isFailed('openSavedWallet')" v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password"></aph-input>
+        <aph-input :hasError="$isFailed('openSavedWallet')" v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password" :disabled="shouldDisableInput"></aph-input>
         <button class="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
       </div>
       <div v-else>
@@ -29,6 +29,10 @@ export default {
 
     shouldDisableLoginButton() {
       return this.$isPending('openSavedWallet') || !this.wallet || this.passphrase.length === 0;
+    },
+
+    shouldDisableInput() {
+      return this.$isPending('openSavedWallet') || !this.wallet;
     },
 
     showButton() {
@@ -93,5 +97,3 @@ export default {
   }
 }
 </style>
-
-

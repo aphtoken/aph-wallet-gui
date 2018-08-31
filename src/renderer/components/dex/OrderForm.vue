@@ -554,7 +554,6 @@ export default {
 #dex--order-form {
   display: flex;
   flex-direction: column;
-  height: 100%;
   justify-content: space-between;
   min-width: toRem(280px);
   overflow: hidden;
@@ -569,11 +568,11 @@ export default {
     .side {
       display: flex;
 
-      .buy-btn { 
+      .buy-btn {
         margin-right: $space-sm;
       }
 
-      .sell-btn { 
+      .sell-btn {
         margin-left: $space-sm;
       }
     }
@@ -824,5 +823,3 @@ export default {
   }
 }
 </style>
-
-

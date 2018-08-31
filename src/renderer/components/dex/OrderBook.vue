@@ -8,14 +8,14 @@
         <div class="book" v-if="$store.state.orderBook">
           <div class="order-book-table asks">
             <div class="header">
-              <div class="cell">price ({{ $store.state.currentMarket.baseCurrency }})</div>
-              <div class="cell">{{$t('size')}}</div>
+              <div class="cell">{{$t('price')}} ({{ $store.state.currentMarket.baseCurrency }})</div>
+              <div class="cell text-right">{{$t('size')}}</div>
               <div class="cell">&nbsp;</div>
             </div>
             <div class="body">
               <div class="row" v-for="(ask, index) in $store.state.orderBook.asks" :key="index">
                 <div class="cell price red" @click="setPrice(ask.price)">{{ $formatNumber(ask.price) }}</div>
-                <div class="cell quantity" @click="setQuantity(ask.quantity)">{{ $formatNumber(ask.quantity) }}</div>
+                <div class="cell text-right quantity" @click="setQuantity(ask.quantity)">{{ $formatNumber(ask.quantity) }}</div>
                 <div class="cell graph">
                   <span class="size-bar size-total red" :style="{ width: (ask.quantityTotalRatio * 100) + '%' }"></span>
                   <span class="size-bar red" :style="{ width: (ask.quantityRatio * 100) + '%' }"></span>
@@ -25,14 +25,14 @@
           </div>
           <div class="spread-divider">
             <div class="label">{{$t('spread')}}</div>
-            <div class="value">{{ $formatNumber($store.state.orderBook.spread) }}</div>
             <div>&nbsp;</div>
+            <div class="value text-right">{{ $formatNumber($store.state.orderBook.spread) }}</div>
           </div>
           <div class="order-book-table bids">
             <div class="body">
               <div class="row" v-for="(bid, index) in $store.state.orderBook.bids" :key="index">
                 <div class="cell price green" @click="setPrice(bid.price)">{{ $formatNumber(bid.price) }}</div>
-                <div class="cell quantity" @click="setQuantity(bid.quantity)">{{ $formatNumber(bid.quantity) }}</div>
+                <div class="cell text-right quantity" @click="setQuantity(bid.quantity)">{{ $formatNumber(bid.quantity) }}</div>
                 <div class="cell graph" >
                   <span class="size-bar size-total green" :style="{ width: (bid.quantityTotalRatio * 100) + '%' }"></span>
                   <span class="size-bar green" :style="{ width: (bid.quantityRatio * 100) + '%', 'border-right-width': (bid.quantityTotalRatio * 100) + '%' }"></span>
@@ -171,6 +171,7 @@ export default {
               display: inline-block;
               position: absolute;
               right: 0px;
+              top: 1px;
 
               &.green {
                 background-color: $green;
@@ -179,7 +180,7 @@ export default {
               &.red {
                 background-color: $red;
               }
-              
+
               &.size-total {
                 &.green {
                   background-color: $light-green;
@@ -203,5 +204,3 @@ export default {
   }
 }
 </style>
-
-

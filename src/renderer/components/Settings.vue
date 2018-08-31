@@ -33,13 +33,14 @@ export default {
 #settings {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 auto;
   padding: $space-lg;
+  overflow: auto;
 
   .grid {
     display: flex;
     flex-direction: row;
-    flex: 1;
+    flex: 0 0 auto;
   }
 
   .grid--column {
@@ -57,8 +58,7 @@ export default {
   }
 
   #settings--address-book {
-    flex: 1;
+    flex: 0 0 auto;
   }
 }
 </style>
-

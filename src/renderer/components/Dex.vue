@@ -138,20 +138,17 @@ export default {
 
 <style lang="scss">
 #dex {
-  align-items: center;
   display: flex;
   flex-direction: column;
-  flex-direction: column;
-  flex: 1;
-  justify-content: center;
+  flex: 1 1 auto;
   padding-top: toRem(30px);
   width: 100%;
+  overflow: auto;
 
   .grid {
     display: flex;
     flex-direction: row;
-    flex: 1;
-    height: 100%;
+    flex: 0 0 auto;
     padding: $space;
     width: 100%;
   }
@@ -161,7 +158,7 @@ export default {
     flex-direction: column;
 
     &.column-left {
-      flex: 1;
+      flex: 0 0 auto;
     }
 
     &.column-middle {
@@ -169,26 +166,27 @@ export default {
     }
 
     &.column-right {
-      flex: 1;
+      flex: 0 0 auto;
+      min-width: 300px;
     }
 
     .grid--cell {
       flex-direction: row;
-      flex: 1;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
 
-      > * {
-        flex: 1;
-      }
+      // > * {
+      //   flex: 1;
+      // }
 
-      &.top-right {
-        flex: 2;
-      }
-
-      &.bottom-right {
-        flex: 1;
-      }
+      // &.top-right {
+      //   flex: 2;
+      // }
+      //
+      // &.bottom-right {
+      //   flex: 1;
+      // }
 
       &.top-left {
         flex: none;

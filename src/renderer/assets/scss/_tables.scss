@@ -52,6 +52,16 @@
     .cell {
       flex: 1;
       font-family: GilroyMedium;
+      padding-left: $space-sm;
+      padding-right: $space-sm;
+
+      &:first-child {
+        padding-left: 0;
+      }
+
+      &:last-child {
+        padding-right: 0;
+      }
     }
   }
 
@@ -59,6 +69,7 @@
     padding: 0;
     flex: 1;
     overflow: auto;
+    max-height: toRem(300px);
 
     .row {
       display: flex;
@@ -69,6 +80,16 @@
         flex: 1;
         font-family: GilroyMedium;
         font-size: toRem(12px);
+        padding-left: $space-sm;
+        padding-right: $space-sm;
+
+        &:first-child {
+          padding-left: 0;
+        }
+
+        &:last-child {
+          padding-right: 0;
+        }
 
         &.green {
           color: $green;

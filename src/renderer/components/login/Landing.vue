@@ -27,6 +27,8 @@ export default {
   align-items: center;
   display: flex;
   flex-direction: column;
+  margin: auto;
+  padding: $space-xl;
 
   .icon.logo {
     height: 20rem;
@@ -66,5 +68,3 @@ export default {
   }
 }
 </style>
-
-

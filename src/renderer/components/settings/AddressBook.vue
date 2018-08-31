@@ -4,7 +4,7 @@
       <div class="header">
         <h1 class="underlined">{{$t('addressBook')}}</h1>
       </div>
-      <div class="search-field">
+      <div class="search-field" v-if="this.$store.state.contacts.length">
         <aph-icon name="search"></aph-icon>
         <input :placeholder="$t('search')" v-model="searchBy">
       </div>
@@ -153,7 +153,7 @@ export default {
 
       .aph-icon {
         flex: none;
-        margin: 0 $space;
+        margin: 0 $space 0 0;
 
         svg {
           height: toRem(22px);
@@ -183,7 +183,6 @@ export default {
 
     .contacts {
       flex: 1;
-      margin: 0 $space-lg;
       height: 95%;
       overflow-y: auto;
 
@@ -208,6 +207,14 @@ export default {
             flex: 1;
             font-family: GilroySemibold;
             padding: $space;
+
+            &:first-child {
+              padding-left: $space-lg;
+            }
+
+            &:last-child {
+              padding-right: $space-lg;
+            }
           }
 
           &:hover, &.active {

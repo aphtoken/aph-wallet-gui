@@ -6,8 +6,8 @@
     <div class="body">
       <aph-form :on-submit="addOrSave">
         <aph-icon name="user"></aph-icon>
-        <aph-input placeholder="Name" :light="true" v-model="name"></aph-input>
-        <aph-input placeholder="Address" v-model="address"></aph-input>
+        <aph-input :placeholder="$t('name')" :light="true" v-model="name"></aph-input>
+        <aph-input :placeholder="$t('address')" v-model="address"></aph-input>
       </aph-form>
     </div>
     <div class="footer">
@@ -177,4 +177,3 @@ export default {
   }
 }
 </style>
-
