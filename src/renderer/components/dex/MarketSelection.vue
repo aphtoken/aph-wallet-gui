@@ -11,7 +11,7 @@
       </template>
     </div>
     <div class="header">
-        <h1 class="underlined">Market Pairs</h1>
+        <h1 class="underlined">{{ $t('marketPairs') }}</h1>
     </div>
     <div class="selection">
       <market-mega-selector></market-mega-selector>

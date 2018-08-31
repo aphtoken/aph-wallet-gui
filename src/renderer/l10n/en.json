@@ -148,6 +148,7 @@
   "market": "Market",
   "marketCap": "Market Cap",
   "marketClosedMessage": "The market is currently closed for trading. Please use the controls below to cancel your orders and withdraw your funds from the contract back to your wallet.",
+  "marketPairs": "Market Pairs",
   "max": "max",
   "myHoldings": "My holdings",
   "myPortfolio": "My Portfolio",
