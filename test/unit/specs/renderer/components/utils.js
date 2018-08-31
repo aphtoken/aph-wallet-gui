@@ -13,9 +13,6 @@ import { messages } from '@/constants';
 
 Vue.use(VueI18n);
 
-
-console.log(Vue.$constants);
-
 _.each(mixins, (mixin) => {
   Vue.mixin(mixin);
 });
