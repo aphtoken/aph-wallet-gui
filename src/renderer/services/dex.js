@@ -616,14 +616,14 @@ export default {
                     // didn't match enough quantity, try to form a new order and place it again
                     order.quantity = responseQuantityToTake.minus(responseQuantityTaken);
                     this.formOrder(order)
-                      .then((f) => {
-                        this.placeOrder(f)
-                          .then((o2) => {
-                            resolve(o2);
+                      .then((secondaryFormedOrder) => {
+                        this.placeOrder(secondaryFormedOrder)
+                          .then((secondaryOrder) => {
+                            resolve(secondaryOrder);
                           });
                       })
                       .catch((e) => {
-                        reject(e);
+                        reject(`Error sending order retry. Error: ${e.message}`);
                       });
                     return;
                   }
