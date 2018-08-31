@@ -171,7 +171,9 @@ export default {
 
       if (cleanAmount && cleanAmount.length > 0) {
         if (this.currency) {
-          cleanAmount = new BigNumber(cleanAmount).toFixed(this.currency.decimals != null ? this.currency.decimals : 8);
+          const fixed = 10 ** this.currency.decimals;
+          const cleanNumber = Math.floor(new BigNumber(cleanAmount).toNumber() * fixed) / fixed;
+          cleanAmount = new BigNumber(cleanNumber).toFixed(this.currency.decimals);
         } else if (cleanAmount[cleanAmount.length - 1] !== '.'
           && cleanAmount[cleanAmount.length - 1] !== '0') {
           const n = new BigNumber(cleanAmount);
