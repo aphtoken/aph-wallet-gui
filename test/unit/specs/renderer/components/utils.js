@@ -4,12 +4,17 @@ import Vuex from 'vuex';
 import _ from 'lodash';
 import { mount, shallowMount } from '@vue/test-utils';
 
+// Initial vue libraries
+import '@/decorators';
 import * as mixins from '@/mixins';
 import router from '@/router';
 import { actions, getters, mutations, state } from '@/store';
 import { messages } from '@/constants';
 
 Vue.use(VueI18n);
+
+
+console.log(Vue.$constants);
 
 _.each(mixins, (mixin) => {
   Vue.mixin(mixin);

@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import sinon from 'sinon';
 
 import TransactionsSidebar from '@/components/TransactionsSidebar';
@@ -30,17 +31,20 @@ const COMPUTED_TRANSACTIONS = [
   },
 ];
 
+let loadTransactions;
 let wrapper;
 
 describe('TransactionsSidebar.vue', () => {
   beforeEach(() => {
-    TransactionsSidebar.methods.loadTransactions = sinon.spy();
+    loadTransactions = sinon.spy();
+    Vue.prototype.$constants.intervals.TRANSACTIONS_POLLING = 5;
 
     const customState = {
       recentTransactions: RECENT_TRANSACTIONS,
     };
 
     const opts = {
+      methods: { loadTransactions },
       stubs: {
         'aph-icon': require('@/components/Icon.vue').default,
         'aph-simple-transactions': '<div />',
@@ -50,17 +54,23 @@ describe('TransactionsSidebar.vue', () => {
     wrapper = utils.mount(TransactionsSidebar, opts, customState);
   });
 
-  it('should render with correctly formatted data', () => {
-    expect(wrapper.find('h1.underlined').text()).contains('Recent transactions');
-    expect(wrapper.contains('#transactions-sidebar')).to.be.true();
-  });
+  context('always', () => {
+    beforeEach((done) => {
+      setTimeout(done, 10);
+    });
 
-  it('should properly compute computed properties', () => {
-    expect(wrapper.vm.transactions).to.eql(COMPUTED_TRANSACTIONS);
-  });
+    it('should render with correctly formatted data', () => {
+      expect(wrapper.find('h1.underlined').text()).contains('Recent transactions');
+      expect(wrapper.contains('#transactions-sidebar')).to.be.true();
+    });
 
-  it('should fetch transactions', () => {
-    expect(TransactionsSidebar.methods.loadTransactions).to.have.been.calledOnce();
+    it('should properly compute computed properties', () => {
+      expect(wrapper.vm.transactions).to.eql(COMPUTED_TRANSACTIONS);
+    });
+
+    it('should fetch transactions', () => {
+      expect(loadTransactions).to.have.been.calledThrice();
+    });
   });
 
   context('the user clicks the toggle to open', () => {

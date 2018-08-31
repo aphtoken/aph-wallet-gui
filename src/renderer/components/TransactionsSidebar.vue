@@ -25,6 +25,8 @@ export default {
   beforeMount() {
     this.loadTransactions();
 
+    console.log(this.$constants.intervals.TRANSACTIONS_POLLING);
+
     loadTransactionsIntervalId = setInterval(() => {
       this.loadTransactions();
     }, this.$constants.intervals.TRANSACTIONS_POLLING);
