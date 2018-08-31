@@ -433,6 +433,10 @@ export default {
                 totalBalance: new BigNumber(0),
                 canPull: asset.canPull,
                 isUserAsset,
+                /* eslint-disable no-nested-ternary */
+                decimals: asset.decimals ?
+                  asset.decimals : (asset.symbol === 'NEO' ? 0 : 8),
+                /* eslint-enable no-nested-ternary */
               };
             };
 
