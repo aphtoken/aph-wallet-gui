@@ -20,7 +20,10 @@ export default {
 
 <style lang="scss">
 #login--logo {
+  flex: 0 0 auto;
   text-align: center;
+  margin: auto;
+  padding: $space-xl;
 
   .icon.logo {
     height: 20rem;
@@ -36,8 +39,8 @@ export default {
     bottom: 15%;
     left: 50%;
     position: absolute;
-    transform: translate(-50%, -50%);
     z-index: 100;
+    margin-left: toRem(-65px / 2);
 
     &:hover {
       box-shadow: $box-shadow-sm;
@@ -45,4 +48,3 @@ export default {
   }
 }
 </style>
-

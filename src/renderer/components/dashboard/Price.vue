@@ -285,6 +285,7 @@ export default {
     padding: $space-lg;
 
     > div {
+      max-height: toRem(300px);
       height: 100%;
     }
   }
@@ -316,4 +317,3 @@ export default {
   }
 }
 </style>
-

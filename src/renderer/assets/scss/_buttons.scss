@@ -33,7 +33,7 @@ button, input, optgroup, select, textarea {
 }
 
 %btn {
-  @include transition(background-color, border, box-shadow, color);
+  @include transition(background-color, border, box-shadow, color, opacity);
 
   background-color: $purple;
   border-radius: $border-radius;
@@ -82,6 +82,7 @@ button, input, optgroup, select, textarea {
     border-color: white;
     color: white;
     cursor: not-allowed;
+    opacity: .8;
   }
 }
 

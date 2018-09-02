@@ -21,7 +21,10 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(order, index) in filteredOrders" :key="index">
+                <tr v-if="!filteredOrders.length">
+                  <td colspan="7">{{ $t('noDataAvailable')}}</td>
+                </tr>
+                <tr v-if="filteredOrders.length" v-for="(order, index) in filteredOrders" :key="index">
                   <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
                   <td class="market">{{ order.marketName }}</td>
                   <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
@@ -187,7 +190,6 @@ export default {
 
   display: flex;
   flex-direction: column;
-  height: 100%;
 
   .header {
     display: flex;
@@ -334,5 +336,3 @@ export default {
   }
 }
 </style>
-
-

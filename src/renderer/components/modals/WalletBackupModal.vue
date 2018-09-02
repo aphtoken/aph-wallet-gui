@@ -21,7 +21,7 @@
             <aph-copy-text :text="$store.state.currentWallet.address"></aph-copy-text>
           </div>
         </div>
-        <div class="wallet-data encrypted-key">
+        <div class="wallet-data encrypted-key" v-if="$store.state.currentWallet.encryptedWIF">
           <div class="label">{{$t('encryptedKey')}}</div>
           <div class="value">
             <p>{{ $store.state.currentWallet.encryptedWIF }}</p>
@@ -190,5 +190,3 @@ export default {
   }
 }
 </style>
-
-

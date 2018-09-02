@@ -7,6 +7,7 @@
       <div class="left">
         <div :class="['wallet', {active: isActive(wallet)}]" v-for="(wallet, index) in $store.state.wallets" :key="index" @click="showLoginToWalletModal(wallet)">
           <div class="name">{{ wallet.label }}</div>
+          <div class="address">{{ wallet.address }}</div>
           <!-- <div class="value">{{ $formatMoney(444.444) }} {{ $store.state.currency }}</div> -->
         </div>
       </div>
@@ -151,17 +152,23 @@ export default {
       .wallet {
         @include transition(border-color);
 
-        align-items: center;
         background: white;
         border-left: $border-width-thick solid transparent;
         border-radius: $border-radius;
         cursor: pointer;
         display: flex;
+        flex-direction: column;
         padding: $space-lg;
 
         .name {
           font-family: GilroyMedium;
           font-size: toRem(18px);
+        }
+
+        .address {
+          margin-top: $space-sm;
+          font-size: toRem(12px);
+
         }
 
         .value {
@@ -182,5 +189,3 @@ export default {
   }
 }
 </style>
-
-

@@ -1,12 +1,12 @@
 <template>
   <table class="transactions-table" :class="{'is-clickable': isClickable}">
     <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)" :class="[{active: transaction.active}]">
-      <td width="50%" class="address truncate" v-if="showBlockTime">{{ transaction.address }}</td>
-      <td width="50%" class="address" v-else>{{ transaction.address }}</td>
+      <td width="50%" class="address truncate" v-if="showBlockTime" :title="transaction.address">{{ transaction.address }}</td>
+      <td width="50%" class="address" v-else :title="transaction.address">{{ transaction.address }}</td>
       <td v-if="showBlockTime">{{ $formatDate(transaction.block_time) }}</td>
       <td class="currency">{{ transaction.symbol }}</td>
-      <td v-if="transaction.block_time" :class="['amount', {sent: transaction.value < 0, received: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</td>
-      <td width="25%" class="amount" v-else>{{ $formatNumber(transaction.value) }}</td>
+      <td v-if="transaction.block_time" :class="['amount truncate', {sent: transaction.value < 0, received: transaction.value > 0}]" :title="transaction.value">{{ $formatNumber(transaction.value) }}</td>
+      <td width="25%" class="amount truncate" :title="transaction.value" v-else>{{ $formatNumber(transaction.value) }}</td>
     </tr>
   </table>
 </template>
@@ -124,5 +124,3 @@ export default {
   }
 }
 </style>
-
-

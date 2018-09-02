@@ -50,13 +50,11 @@ export default {
     border-radius: $border-radius;
     flex: none;
     overflow: hidden;
-    width: toRem(400px);
+    width: toRem(500px);
   }
 
   > .aph-request-status-message {
-    width: toRem(400px);
+    width: toRem(500px);
   }
 }
 </style>
-
-

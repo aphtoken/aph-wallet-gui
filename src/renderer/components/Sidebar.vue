@@ -147,6 +147,10 @@ export default {
   overflow: auto;
   position: relative;
 
+  &::-webkit-scrollbar-thumb:vertical {
+    background: #fff;
+  }
+
   .header {
     flex: none;
     padding: toRem($space-xl);
@@ -244,6 +248,7 @@ export default {
     display: flex;
     flex: none;
     justify-content: center;
+    margin-top: $space-lg;
     margin-bottom: $space-lg;
 
     svg {
@@ -357,5 +362,3 @@ export default {
   }
 }
 </style>
-
-

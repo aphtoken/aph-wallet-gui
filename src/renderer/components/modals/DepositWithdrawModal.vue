@@ -5,23 +5,23 @@
     </div>
     <div class="body">
       <div class="balance-container">
-        <div class="balance"> 
+        <div class="balance">
           <span class="label">{{$t('contractBalance')}}</span>
-          <span class="value">{{ $formatNumber(holding.contractBalance) }}</span> 
+          <span class="value">{{ $formatNumber(holding.contractBalance) }}</span>
         </div>
-        <div class="balance"> 
+        <div class="balance">
           <span class="label">{{$t('walletBalance')}}</span>
-          <span class="value">{{ $formatNumber(holding.balance) }}</span> 
+          <span class="value">{{ $formatNumber(holding.balance) }}</span>
         </div>
       </div>
       <div class="amount">
-        <aph-input @blur="cleanAmount" placeholder="Amount" :light="true" v-model="amount"></aph-input>
+        <aph-input @blur="cleanAmount" :placeholder="$t('amount')" :light="true" v-model="amount"></aph-input>
         <div class="max" v-if="hasAsset" @click="setAmountToMax">{{$t('max')}}</div>
       </div>
     </div>
     <div class="footer">
       <button class="cancel-btn" @click="onCancel">{{$t('cancel')}}</button>
-      <button class="deposit-withdraw-btn" @click="onConfirmed(isDeposit, holding, amount)" 
+      <button class="deposit-withdraw-btn" @click="onConfirmed(isDeposit, holding, amount)"
         :disabled="shouldDisableDepositWithdrawButton">{{isDeposit ? $t('deposit') : $t('withdraw')}}</button>
     </div>
   </modal-wrapper>
@@ -134,7 +134,7 @@ export default {
 #aph-deposit-withdraw-modal {
   .header {
     font-size: toRem(20px);
-    padding: $space-lg $space-lg 0;   
+    padding: $space-lg $space-lg 0;
   }
 
   .body {
@@ -162,7 +162,7 @@ export default {
     .amount {
       position: relative;
 
-      .aph-input { 
+      .aph-input {
         border-color: $grey;
 
         &.focused {
@@ -224,4 +224,3 @@ export default {
   }
 }
 </style>
-

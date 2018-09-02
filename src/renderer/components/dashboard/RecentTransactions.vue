@@ -72,7 +72,6 @@ export default {
 
   display: flex;
   flex-direction: column;
-  padding-bottom: $space-lg;
 
   .header {
     flex: none;
@@ -89,7 +88,8 @@ export default {
   .body {
     flex: 1;
     overflow: auto;
-    padding: 0 $space-lg;
+    max-height: toRem(300px);
+    padding: 0;
 
     > .zero-state {
       align-items: center;
@@ -97,6 +97,7 @@ export default {
       height: 100%;
       justify-content: center;
       flex-direction: column;
+      padding: $space-lg;
 
       .aph-icon {
         svg {
@@ -114,7 +115,19 @@ export default {
         margin-top: $space-lg;
       }
     }
+
+    .transactions-table {
+      margin-bottom: $space;
+
+      &.is-clickable tr {
+        td:first-child {
+          padding-left: $space-lg;
+        }
+        td:last-child {
+          padding-right: $space-lg;
+        }
+      }
+    }
   }
 }
 </style>
-

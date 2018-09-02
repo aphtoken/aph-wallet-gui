@@ -8,14 +8,14 @@
         <div class="trade-history-table">
           <div class="header">
             <div class="cell">{{$t('PRICE')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.baseCurrency : '' }})</div>
-            <div class="cell">{{$t('VOLUME')}}</div>
-            <div class="cell time">{{$t('TIME')}}</div>
+            <div class="cell text-right">{{$t('size')}}</div>
+            <div class="cell text-right time">{{$t('TIME')}}</div>
           </div>
           <div class="body">
             <div class="row" v-for="(trade, index) in trades" :key="index">
               <div :class="['cell', {green: trade.side === 'Buy', red: trade.side === 'Sell'}]">{{ $formatNumber(trade.price) }}</div>
-              <div class="cell">{{ $formatNumber(trade.quantity) }}</div>
-              <div class="cell time">{{ $formatDateShort(trade.tradeTime) }} {{ $formatTime(trade.tradeTime) }}</div>
+              <div class="cell text-right">{{ $formatNumber(trade.quantity) }}</div>
+              <div class="cell text-right time">{{ $formatDateShort(trade.tradeTime) }} {{ $formatTime(trade.tradeTime) }}</div>
             </div>
           </div>
         </div>
@@ -86,12 +86,20 @@ export default {
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: $space;
 
     .trade-history-table {
       @extend %dex-table-flex;
 
       flex: 1;
+
+      > .header {
+        padding: $space $space $space-sm;
+      }
+
+      > .body {
+        max-height: toRem(268px);;
+        padding: 0 $space $space;
+      }
 
       .cell {
         &.time {
@@ -103,5 +111,3 @@ export default {
   }
 }
 </style>
-
-
