@@ -207,7 +207,7 @@ export default {
           })
           .catch((e) => {
             this.sending = false;
-            this.$services.alerts.error(e);
+            this.$services.alerts.exception(e);
             this.$store.commit('setSendInProgress', false);
           });
       }, this.$constants.timeouts.NEO_API_CALL);
