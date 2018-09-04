@@ -10,32 +10,33 @@ import axios from 'axios';
 import moment from 'moment';
 
 // Services, etc.
-import { contacts, network, settings, storage, wallets } from './services';
+import { contacts, network, settings, storage, wallets } from '@/services';
 
 // constants
-import { messages } from './constants';
+import { messages } from '@/constants';
 
 // Initial Vue Libraries.
-import './libraries';
-import './error-handler';
-import * as mixins from './mixins';
-import App from './App';
-import router from './router';
-import { store } from './store';
+import '@/error-handler';
+import '@/libraries';
+import '@/decorators';
+import * as mixins from '@/mixins';
+import App from '@/App';
+import router from '@/router';
+import { store } from '@/store';
 
 // Global Vue Components.
-import CopyText from './components/CopyText';
-import DatePicker from './components/DatePicker';
-import DexInput from './components/DexInput';
-import Form from './components/Form';
-import Holding from './components/Holding';
-import Icon from './components/Icon';
-import Input from './components/Input';
-import Select from './components/Select';
-import SimpleTransactions from './components/SimpleTransactions';
-import TimestampFromNow from './components/TimestampFromNow';
-import TokenIcon from './components/TokenIcon';
-import SpinnerWrapper from './components/SpinnerWrapper';
+import CopyText from '@/components/CopyText';
+import DatePicker from '@/components/DatePicker';
+import DexInput from '@/components/DexInput';
+import Form from '@/components/Form';
+import Holding from '@/components/Holding';
+import Icon from '@/components/Icon';
+import Input from '@/components/Input';
+import Select from '@/components/Select';
+import SimpleTransactions from '@/components/SimpleTransactions';
+import TimestampFromNow from '@/components/TimestampFromNow';
+import TokenIcon from '@/components/TokenIcon';
+import SpinnerWrapper from '@/components/SpinnerWrapper';
 
 // Global Libraries.
 window._ = _;

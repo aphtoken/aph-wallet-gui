@@ -174,8 +174,9 @@ export default {
   flex-direction: column;
   padding: $space $space-lg;
 
-  .header {
+  > .header {
     display: flex;
+    flex: none;
     padding: 0;
 
     .cell {

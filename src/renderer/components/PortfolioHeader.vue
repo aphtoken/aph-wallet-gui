@@ -22,7 +22,7 @@
       </div>
     </div>
     <zoom></zoom>
-    <address-modal v-if="this.$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></address-modal>
+    <address-modal v-if="$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></address-modal>
   </section>
   <section v-else></section>
 </template>
@@ -88,7 +88,7 @@ export default {
     display: flex;
     flex-direction: row;
     flex: none;
-    width: $right-sidebar-width;
+    width: $right-column-width;
 
     > * {
       width: auto;

@@ -337,6 +337,12 @@ export default {
         this.$store.commit('setOrderPrice', '');
       }
     },
+
+    quantity() {
+      if (this.selectedPercent && this.percent(this.selectedPercent) !== this.$store.state.orderQuantity) {
+        this.selectedPercent = null;
+      }
+    },
   },
 
   methods: {
@@ -601,11 +607,11 @@ export default {
     .side {
       display: flex;
 
-      .buy-btn { 
+      .buy-btn {
         margin-right: $space-sm;
       }
 
-      .sell-btn { 
+      .sell-btn {
         margin-left: $space-sm;
       }
     }

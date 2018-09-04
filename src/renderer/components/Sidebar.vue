@@ -129,6 +129,7 @@ export default {
   watch: {
     $route(to) {
       const isToggleable = to.matched.some(record => record.meta.isMenuToggleable);
+
       this.$store.commit('setMenuToggleable', isToggleable);
 
       if (isToggleable) {
