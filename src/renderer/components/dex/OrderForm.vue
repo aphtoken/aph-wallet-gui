@@ -90,6 +90,7 @@ const ORDER_TYPES_LIST = [
 ];
 
 let loadHoldingsIntervalId;
+let storeUnwatch;
 
 export default {
   components: {
@@ -105,10 +106,22 @@ export default {
     loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldingsSilently();
     }, this.$constants.intervals.HOLDINGS_POLLING);
+
+    storeUnwatch = this.$store.watch(
+      () => {
+        return this.$store.state.orderQuantity;
+      }, () => {
+        if (this.selectedPercent && this.percent(this.selectedPercent) !== this.$store.state.orderQuantity) {
+          this.selectedPercent = null;
+        }
+
+        this.validateQuantity();
+      });
   },
 
   beforeDestroy() {
     clearInterval(loadHoldingsIntervalId);
+    storeUnwatch();
   },
 
   computed: {
@@ -324,11 +337,6 @@ export default {
         this.$store.commit('setOrderPrice', '');
       }
     },
-    quantity() {
-      if (this.selectedPercent && this.percent(this.selectedPercent) !== this.$store.state.orderQuantity) {
-        this.selectedPercent = null;
-      }
-    },
   },
 
   methods: {
@@ -396,7 +404,18 @@ export default {
       return (totalMultiple / quantity).toString();
     },
 
+    validateQuantity() {
+      const floored = Math.floor(this.total.multipliedBy(10 ** 8).toNumber());
+      const roundedTotal = new BigNumber(floored).multipliedBy(this.$services.assets.SATOSHI);
+      const roundedQuantity = roundedTotal.dividedBy(new BigNumber(this.$store.state.orderPrice));
+      if (roundedQuantity !== this.$store.state.orderQuantity) {
+        this.$store.commit('setOrderQuantity', roundedQuantity.toString());
+      }
+    },
+
     confirmOrder() {
+      this.validateQuantity();
+
       if (this.orderType === 'Market') {
         this.$store.commit('setOrderPrice', '');
         if (this.canPlaceMarketOrder !== true) {
