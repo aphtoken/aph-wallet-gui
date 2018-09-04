@@ -357,10 +357,17 @@ function setShowSendRequestLedgerSignature(state, value) {
 }
 
 function setSendInProgress(state, value) {
+  if (!state.sendInProgress || typeof state.sendInProgress !== 'object') {
+    // an invalid or undefined value here is preventing the setting of the variable here
+    state.sendInProgress = {};
+  }
   Vue.set(state.sendInProgress, state.currentNetwork.net, value);
 }
 
 function setSendModel(state, value) {
+  if (!state.sendModel || typeof state.sendModel !== 'object') {
+    state.sendModel = {};
+  }
   Vue.set(state.sendModel, state.currentNetwork.net, value);
 }
 
