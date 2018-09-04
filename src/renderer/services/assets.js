@@ -8,7 +8,6 @@ const ASSETS_ADDED_STORAGE_KEY = (net, wallet) => `assets_${net}_${wallet.addres
 export default {
   GAS: '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7',
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
-  SATOSHI: 0.00000001,
 
   // TODO: these different per network
   DEX_SCRIPT_HASH: '953548bb4b3cfbc7c63a9481d288106a4bfb10cf',
