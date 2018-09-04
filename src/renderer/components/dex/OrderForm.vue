@@ -90,6 +90,7 @@ const ORDER_TYPES_LIST = [
 ];
 
 let loadHoldingsIntervalId;
+let storeUnwatch;
 
 export default {
   components: {
@@ -105,10 +106,22 @@ export default {
     loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldingsSilently();
     }, this.$constants.intervals.HOLDINGS_POLLING);
+
+    storeUnwatch = this.$store.watch(
+      () => {
+        return this.$store.state.orderQuantity;
+      }, () => {
+        if (this.selectedPercent && this.percent(this.selectedPercent) !== this.$store.state.orderQuantity) {
+          this.selectedPercent = null;
+        }
+
+        this.validateQuantity();
+      });
   },
 
   beforeDestroy() {
     clearInterval(loadHoldingsIntervalId);
+    storeUnwatch();
   },
 
   computed: {
@@ -324,11 +337,6 @@ export default {
         this.$store.commit('setOrderPrice', '');
       }
     },
-    quantity() {
-      if (this.selectedPercent && this.percent(this.selectedPercent) !== this.$store.state.orderQuantity) {
-        this.selectedPercent = null;
-      }
-    },
   },
 
   methods: {
@@ -396,7 +404,31 @@ export default {
       return (totalMultiple / quantity).toString();
     },
 
+    validateQuantity() {
+      if (!this.$store.state.orderQuantity
+        || this.$store.state.orderQuantity === ''
+        || this.$store.state.orderQuantity[this.$store.state.orderQuantity - 1] === '.') {
+        return;
+      }
+
+      const marketTickSizeDecimals = this.currentMarket.minimumTickSize.toString().split('.')[1].length;
+      const allowedQuantityDecimals = 8 - marketTickSizeDecimals;
+      const decimalFactor = 10 ** allowedQuantityDecimals;
+      const beforeRounded = new BigNumber(this.$store.state.orderQuantity);
+      const floored = Math.floor(beforeRounded.multipliedBy(decimalFactor).toNumber());
+      const roundedQuantity = new BigNumber(floored).dividedBy(decimalFactor);
+      if (roundedQuantity.isEqualTo(beforeRounded) === false) {
+        this.$store.commit('setOrderQuantity', roundedQuantity);
+        this.$services.alerts.error(this.$t('orderQuantityLimited', {
+          marketName: this.currentMarket.marketName,
+          allowedQuantityDecimals,
+        }));
+      }
+    },
+
     confirmOrder() {
+      this.validateQuantity();
+
       if (this.orderType === 'Market') {
         this.$store.commit('setOrderPrice', '');
         if (this.canPlaceMarketOrder !== true) {
