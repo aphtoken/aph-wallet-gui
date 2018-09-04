@@ -405,11 +405,24 @@ export default {
     },
 
     validateQuantity() {
-      const floored = Math.floor(this.total.multipliedBy(10 ** 8).toNumber());
-      const roundedTotal = new BigNumber(floored).multipliedBy(this.$services.assets.SATOSHI);
-      const roundedQuantity = roundedTotal.dividedBy(new BigNumber(this.$store.state.orderPrice));
-      if (roundedQuantity !== this.$store.state.orderQuantity) {
-        this.$store.commit('setOrderQuantity', roundedQuantity.toString());
+      if (!this.$store.state.orderQuantity
+        || this.$store.state.orderQuantity === ''
+        || this.$store.state.orderQuantity[this.$store.state.orderQuantity - 1] === '.') {
+        return;
+      }
+
+      const marketTickSizeDecimals = this.currentMarket.minimumTickSize.toString().split('.')[1].length;
+      const allowedQuantityDecimals = 8 - marketTickSizeDecimals;
+      const decimalFactor = 10 ** allowedQuantityDecimals;
+      const beforeRounded = new BigNumber(this.$store.state.orderQuantity);
+      const floored = Math.floor(beforeRounded.multipliedBy(decimalFactor).toNumber());
+      const roundedQuantity = new BigNumber(floored).dividedBy(decimalFactor);
+      if (roundedQuantity.isEqualTo(beforeRounded) === false) {
+        this.$store.commit('setOrderQuantity', roundedQuantity);
+        this.$services.alerts.error(this.$t('orderQuantityLimited', {
+          marketName: this.currentMarket.marketName,
+          allowedQuantityDecimals,
+        }));
       }
     },
 
