@@ -301,7 +301,7 @@ export default {
     });
   },
 
-  fetchOrderHistory(after = 0) {
+  fetchOrderHistory(before = 0) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -309,7 +309,7 @@ export default {
         const ordersPageSize = 100;
 
         axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}
-?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&after=${after}`)
+?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&before=${before}`)
           .then((res) => {
             const orders = res.data.orders;
 
@@ -598,30 +598,35 @@ export default {
               },
             })
               .then((res) => {
-                if (res.data.result && res.data.quantityToTake === res.data.quantityTaken) {
-                  resolve(res.data.transactionsSent.length);
-                  // for some reason this resolve isn't getting sent back to actions, temp fix here
-                  alerts.success(`${res.data.transactionsSent.length} orders relayed.`);
-                  store.commit('setOrderToConfirm', null);
-                  store.commit('endRequest', { identifier: 'placeOrder' });
-                } else if (res.data.result && res.data.quantityTaken > 0) {
-                  // didn't match enough quantity, try to form a new order and place it again
-                  order.quantity = new BigNumber(res.data.quantityToTake - res.data.quantityTaken);
-                  this.formOrder(order)
-                    .then((f) => {
-                      this.placeOrder(f)
-                        .then((o2) => {
-                          resolve(o2);
-                        });
-                    })
-                    .catch((e) => {
-                      reject(e);
-                    });
-                  return;
+                if (!res.data || !res.data.result) {
+                  reject('Order failed.');
                 } else if (res.data.result.error) {
                   reject(`Order failed. Error: ${res.data.result.error}`);
                 } else {
-                  reject('Order failed.');
+                  const responseQuantityToTake = new BigNumber(res.data.quantityToTake);
+                  const responseQuantityTaken = new BigNumber(res.data.quantityTaken);
+
+                  if (responseQuantityToTake.isEqualTo(res.data.quantityTaken)) {
+                    resolve(res.data.transactionsSent.length);
+                    // for some reason this resolve isn't getting sent back to actions, temp fix here
+                    alerts.success(`${res.data.transactionsSent.length} orders relayed.`);
+                    store.commit('setOrderToConfirm', null);
+                    store.commit('endRequest', { identifier: 'placeOrder' });
+                  } else if (responseQuantityToTake.isGreaterThan(0)) {
+                    // didn't match enough quantity, try to form a new order and place it again
+                    order.quantity = responseQuantityToTake.minus(responseQuantityTaken);
+                    this.formOrder(order)
+                      .then((secondaryFormedOrder) => {
+                        this.placeOrder(secondaryFormedOrder)
+                          .then((secondaryOrder) => {
+                            resolve(secondaryOrder);
+                          });
+                      })
+                      .catch((e) => {
+                        reject(`Error sending order retry. Error: ${e.message}`);
+                      });
+                    return;
+                  }
                 }
 
                 store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);

@@ -31,11 +31,13 @@ export default {
       symbol: 'NEO',
       assetId: this.NEO,
       name: 'NEO',
+      decimals: 0,
     };
     const gas = {
       symbol: 'GAS',
       assetId: this.GAS,
       name: 'GAS',
+      decimals: 8,
     };
 
     let aphToken = null;
@@ -44,12 +46,14 @@ export default {
         symbol: 'APH',
         assetId: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
         name: 'Aphelion',
+        decimals: 8,
       };
     } else if (currentNetwork.net === 'TestNet') {
       aphToken = {
         symbol: 'APH',
         assetId: '591eedcd379a8981edeefe04ef26207e1391904a',
         name: 'Aphelion',
+        decimals: 8,
       };
     }
 

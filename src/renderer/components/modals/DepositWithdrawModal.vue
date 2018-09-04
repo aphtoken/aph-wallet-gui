@@ -68,6 +68,8 @@ export default {
       this.amount = this.isDeposit ?
         this.holding.balance.toString() :
         this.holding.contractBalance.toString();
+
+      this.cleanAmount();
     },
 
     cleanAmount() {
@@ -84,7 +86,9 @@ export default {
 
       if (cleanAmount && cleanAmount.length > 0) {
         if (this.holding) {
-          cleanAmount = new BigNumber(cleanAmount).toFixed(this.holding.decimals != null ? this.holding.decimals : 8);
+          const fixed = 10 ** this.holding.decimals;
+          const cleanNumber = Math.floor(new BigNumber(cleanAmount).toNumber() * fixed) / fixed;
+          cleanAmount = new BigNumber(cleanNumber).toFixed(this.holding.decimals);
         } else if (cleanAmount[cleanAmount.length - 1] !== '.'
           && cleanAmount[cleanAmount.length - 1] !== '0') {
           const n = new BigNumber(cleanAmount);

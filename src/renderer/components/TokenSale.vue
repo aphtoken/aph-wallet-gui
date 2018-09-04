@@ -167,7 +167,8 @@ export default {
 
       if (cleanAmount && cleanAmount.length > 0) {
         if (this.currency && this.currency.symbol === 'NEO') {
-          cleanAmount = Math.floor(new BigNumber(cleanAmount)).toFixed(0);
+          const cleanNumber = Math.floor(new BigNumber(cleanAmount).toNumber());
+          cleanAmount = new BigNumber(cleanNumber).toFixed(this.holding.decimals);
         } else if (cleanAmount[cleanAmount.length - 1] !== '.'
           && cleanAmount[cleanAmount.length - 1] !== '0') {
           const n = new BigNumber(cleanAmount);
