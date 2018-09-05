@@ -326,17 +326,24 @@ export default {
       try {
         const inMemory = _.get(store.state.transactionDetails, hash);
         if (inMemory) {
-          inMemory.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
-          inMemory.confirmations = inMemory.currentBlockHeight - inMemory.block;
+          if (network.getSelectedNetwork().bestBlock) {
+            inMemory.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
+            inMemory.confirmations = inMemory.currentBlockHeight - inMemory.block;
+          }
           return resolve(inMemory);
         }
 
         return rpcClient.getRawTransaction(hash, 1)
           .then((transaction) => {
-            transaction.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
+            if (network.getSelectedNetwork().bestBlock) {
+              transaction.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
+            }
             if (transaction.confirmations > 0) {
               transaction.confirmed = true;
-              transaction.block = transaction.currentBlockHeight - transaction.confirmations;
+              if (transaction.currentBlockHeight) {
+                // TODO: switch to looking up the block from the blockhash
+                transaction.block = transaction.currentBlockHeight - transaction.confirmations;
+              }
             } else {
               transaction.confirmed = false;
             }

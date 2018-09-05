@@ -96,13 +96,19 @@ export default {
 
     rpcClient.getBestBlockHash()
       .then((blockHash) => {
+        if (network.bestBlock && network.bestBlock.hash === blockHash) {
+          // Don't redundantly fetch the block we already fetched.
+          return;
+        }
         rpcClient.getBlock(blockHash)
           .then((data) => {
             if (network.bestBlock && network.bestBlock.index === data.index) {
+              // This should never happen now with the previous check above to not redundantly fetch the same block.
               return;
             }
             store.commit('setLastReceivedBlock');
             store.commit('setLastSuccessfulRequest');
+            // TODO: We should keep a cache with some information about blocks indexed by block hash.
             this.normalizeAndStore(_.set(network, 'bestBlock', data)).sync();
           })
           .catch((e) => {
