@@ -403,8 +403,8 @@ export default {
       let leftToSpend = baseAssetQuantity;
 
       if (willTakeOffers) {
-        book.forEach((l) => {
-          if (orderPrice && l.price.isGreaterThan(orderPrice)) {
+        book.forEach((level) => {
+          if (orderPrice && level.price.isGreaterThan(orderPrice)) {
             return;
           }
 
@@ -412,17 +412,16 @@ export default {
             return;
           }
 
-          const levelCost = l.quantity.multipliedBy(l.price);
+          const levelCost = level.quantity.multipliedBy(level.price);
 
           let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
           if (this.baseHolding.assetId === this.$services.assets.APH) {
-            leftToSpend = leftToSpend.minus(
-              spendAtThisLevel.dividedBy(l.price).dividedBy(this.currentMarket.minimumSize)
-                .multipliedBy(this.currentMarket.buyFee));
+            const maxLots = spendAtThisLevel.dividedBy(level.price).dividedBy(this.currentMarket.minimumSize);
+            leftToSpend = leftToSpend.minus(maxLots.multipliedBy(this.currentMarket.buyFee));
           }
 
           spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
-          newQuantity = newQuantity.plus(spendAtThisLevel.dividedBy(l.price));
+          newQuantity = newQuantity.plus(spendAtThisLevel.dividedBy(level.price));
           leftToSpend = leftToSpend.minus(spendAtThisLevel);
         });
       }
@@ -464,8 +463,8 @@ export default {
       let newQuantity = new BigNumber(0);
 
       if (willTakeOffers) {
-        book.forEach((l) => {
-          if (orderPrice && l.price.isLessThan(orderPrice)) {
+        book.forEach((level) => {
+          if (orderPrice && level.price.isLessThan(orderPrice)) {
             return;
           }
 
@@ -473,13 +472,12 @@ export default {
             return;
           }
 
-          const levelCost = l.quantity;
+          const levelCost = level.quantity;
 
           let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
           if (this.quoteHolding.assetId === this.$services.assets.APH) {
-            leftToSpend = leftToSpend.minus(
-              spendAtThisLevel.dividedBy(this.currentMarket.minimumSize)
-                .multipliedBy(this.currentMarket.sellFee));
+            const maxLots = spendAtThisLevel.dividedBy(this.currentMarket.minimumSize);
+            leftToSpend = leftToSpend.minus(maxLots.multipliedBy(this.currentMarket.sellFee));
           }
 
           spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
@@ -506,13 +504,13 @@ export default {
         book = this.$store.state.orderBook.bids;
       }
 
-      book.forEach((l) => {
-        const takeQuantity = l.quantity.isGreaterThan(quantityRemaining) ? quantityRemaining : l.quantity;
+      book.forEach((level) => {
+        const takeQuantity = level.quantity.isGreaterThan(quantityRemaining) ? quantityRemaining : level.quantity;
         if (quantityRemaining.isLessThanOrEqualTo(0)) {
           return;
         }
         quantityRemaining = quantityRemaining.minus(takeQuantity);
-        totalMultiple = totalMultiple.plus(takeQuantity.multipliedBy(l.price));
+        totalMultiple = totalMultiple.plus(takeQuantity.multipliedBy(level.price));
       });
 
       return (totalMultiple / quantity).toString();
