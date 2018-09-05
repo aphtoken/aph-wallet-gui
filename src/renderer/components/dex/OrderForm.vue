@@ -358,7 +358,8 @@ export default {
     },
 
     setPercent(value) {
-      if (this.orderType === 'Limit' && !this.$store.state.orderPrice) {
+      if (this.orderType === 'Limit' && !this.$store.state.orderPrice
+        && this.side === 'Buy') {
         this.$services.alerts.error(this.$t('pleaseEnterAPrice'));
         return;
       }
@@ -368,23 +369,130 @@ export default {
     },
 
     percent(value) {
-      let unitPrice = this.$store.state.orderPrice;
-      if (this.orderType !== 'Limit') {
-        // todo, make smarter to calculate price based on depth of book
-        if (this.side === 'Buy') {
-          unitPrice = this.$store.state.orderBook.asks[0].price;
-        } else if (this.side === 'Sell') {
-          unitPrice = this.$store.state.orderBook.bids[0].price;
-        }
-      }
-
-      let newQuantity = 0;
       if (this.side === 'Buy') {
-        newQuantity = (this.baseHolding.totalBalance / unitPrice) * value;
-      } else if (this.side === 'Sell') {
-        newQuantity = this.quoteHolding.totalBalance * value;
+        return this.percentForBuy(value);
       }
 
+      return this.percentForSell(value);
+    },
+
+    percentForBuy(value) {
+      if (!this.baseHolding || !this.baseHolding.balance
+        || this.baseHolding.balance.isLessThanOrEqualTo(0)) {
+        this.$services.alerts.error(this.$t('noBalanceAvailable', {
+          assetSymbol: this.currentMarket.baseCurrency,
+          sideDescription: 'Buy with',
+        }));
+        return '';
+      }
+
+      const baseAssetQuantity = this.baseHolding.balance.plus(this.baseHolding.contractBalance);
+
+      let newQuantity = new BigNumber(0);
+      const book = this.$store.state.orderBook.asks;
+      let orderPrice = null;
+      if (this.orderType !== 'Market' && this.$store.state.orderPrice !== '') {
+        orderPrice = new BigNumber(this.$store.state.orderPrice);
+      }
+
+      let willTakeOffers = false;
+      if (!orderPrice || orderPrice.isGreaterThanOrEqualTo(book[0].price)) {
+        willTakeOffers = !this.postOnly;
+      }
+
+      let leftToSpend = baseAssetQuantity;
+
+      if (willTakeOffers) {
+        book.forEach((l) => {
+          if (orderPrice && l.price.isGreaterThan(orderPrice)) {
+            return;
+          }
+
+          if (leftToSpend.isLessThanOrEqualTo(0)) {
+            return;
+          }
+
+          const levelCost = l.quantity.multipliedBy(l.price);
+
+          let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
+          if (this.baseHolding.assetId === this.$services.assets.APH) {
+            leftToSpend = leftToSpend.minus(
+              spendAtThisLevel.dividedBy(l.price).dividedBy(this.currentMarket.minimumSize)
+                .multipliedBy(this.currentMarket.buyFee));
+          }
+
+          spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
+          newQuantity = newQuantity.plus(spendAtThisLevel.dividedBy(l.price));
+          leftToSpend = leftToSpend.minus(spendAtThisLevel);
+        });
+      }
+
+      if (leftToSpend.isGreaterThan(0) && orderPrice) {
+        newQuantity = newQuantity.plus(leftToSpend.dividedBy(orderPrice));
+      }
+
+      newQuantity *= value;
+      newQuantity = Math.floor(newQuantity * 100000000) / 100000000.0;
+      return newQuantity.toString();
+    },
+
+    percentForSell(value) {
+      if (!this.quoteHolding || !this.quoteHolding.balance
+        || this.quoteHolding.balance.isLessThanOrEqualTo(0)) {
+        this.$services.alerts.error(this.$t('noBalanceAvailable', {
+          assetSymbol: this.currentMarket.quoteCurrency,
+          sideDescription: 'Sell',
+        }));
+        return '';
+      }
+
+      const quoteAssetQuantity = this.quoteHolding.balance.plus(this.quoteHolding.contractBalance);
+
+
+      let orderPrice = null;
+      if (this.orderType !== 'Market' && this.$store.state.orderPrice !== '') {
+        orderPrice = new BigNumber(this.$store.state.orderPrice);
+      }
+
+      const book = this.$store.state.orderBook.bids;
+      let willTakeOffers = false;
+      if (!orderPrice || orderPrice.isLessThanOrEqualTo(book[0].price)) {
+        willTakeOffers = !this.postOnly;
+      }
+
+      let leftToSpend = quoteAssetQuantity;
+      let newQuantity = new BigNumber(0);
+
+      if (willTakeOffers) {
+        book.forEach((l) => {
+          if (orderPrice && l.price.isLessThan(orderPrice)) {
+            return;
+          }
+
+          if (leftToSpend.isLessThanOrEqualTo(0)) {
+            return;
+          }
+
+          const levelCost = l.quantity;
+
+          let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
+          if (this.quoteHolding.assetId === this.$services.assets.APH) {
+            leftToSpend = leftToSpend.minus(
+              spendAtThisLevel.dividedBy(this.currentMarket.minimumSize)
+                .multipliedBy(this.currentMarket.sellFee));
+          }
+
+          spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
+          newQuantity = newQuantity.plus(spendAtThisLevel);
+          leftToSpend = leftToSpend.minus(spendAtThisLevel);
+        });
+      }
+
+      if (leftToSpend.isGreaterThan(0) && orderPrice) {
+        newQuantity = newQuantity.plus(leftToSpend);
+      }
+
+      newQuantity *= value;
       newQuantity = Math.floor(newQuantity * 100000000) / 100000000.0;
       return newQuantity.toString();
     },
@@ -424,7 +532,7 @@ export default {
       const floored = Math.floor(beforeRounded.multipliedBy(decimalFactor).toNumber());
       const roundedQuantity = new BigNumber(floored).dividedBy(decimalFactor);
       if (roundedQuantity.isEqualTo(beforeRounded) === false) {
-        this.$store.commit('setOrderQuantity', roundedQuantity);
+        this.$store.commit('setOrderQuantity', roundedQuantity.toString());
         this.$services.alerts.error(this.$t('orderQuantityLimited', {
           marketName: this.currentMarket.marketName,
           allowedQuantityDecimals,
