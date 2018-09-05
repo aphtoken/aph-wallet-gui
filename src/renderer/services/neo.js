@@ -341,7 +341,6 @@ export default {
             if (transaction.confirmations > 0) {
               transaction.confirmed = true;
 
-              // const blockHeader = await new Promise((resolve, reject) => {});
               // Look up the block from the blockhash
               inputPromises.push(new Promise((resolve, reject) => {
                 store.dispatch('fetchBlockHeaderByHash', {
