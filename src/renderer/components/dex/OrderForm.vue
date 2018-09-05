@@ -377,8 +377,8 @@ export default {
     },
 
     percentForBuy(value) {
-      if (!this.baseHolding || !this.baseHolding.balance
-        || this.baseHolding.balance.isLessThanOrEqualTo(0)) {
+      if (!this.baseHolding || !this.baseHolding.availableBalance
+        || this.baseHolding.availableBalance.isLessThanOrEqualTo(0)) {
         this.$services.alerts.error(this.$t('noBalanceAvailable', {
           assetSymbol: this.currentMarket.baseCurrency,
           sideDescription: 'Buy with',
@@ -386,7 +386,7 @@ export default {
         return '';
       }
 
-      const baseAssetQuantity = this.baseHolding.balance.plus(this.baseHolding.contractBalance);
+      const baseAssetQuantity = this.baseHolding.availableBalance;
 
       let newQuantity = new BigNumber(0);
       const book = this.$store.state.orderBook.asks;
@@ -436,8 +436,8 @@ export default {
     },
 
     percentForSell(value) {
-      if (!this.quoteHolding || !this.quoteHolding.balance
-        || this.quoteHolding.balance.isLessThanOrEqualTo(0)) {
+      if (!this.quoteHolding || !this.quoteHolding.availableBalance
+        || this.quoteHolding.availableBalance.isLessThanOrEqualTo(0)) {
         this.$services.alerts.error(this.$t('noBalanceAvailable', {
           assetSymbol: this.currentMarket.quoteCurrency,
           sideDescription: 'Sell',
@@ -445,7 +445,7 @@ export default {
         return '';
       }
 
-      const quoteAssetQuantity = this.quoteHolding.balance.plus(this.quoteHolding.contractBalance);
+      const quoteAssetQuantity = this.quoteHolding.availableBalance;
 
 
       let orderPrice = null;
