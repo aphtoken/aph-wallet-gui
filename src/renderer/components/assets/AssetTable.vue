@@ -14,6 +14,8 @@
 <script>
 
 import { mapGetters } from 'vuex';
+import { BigNumber } from 'bignumber.js';
+
 export default {
   computed: {
     filteredHoldings() {
@@ -28,7 +30,7 @@ export default {
           || symbol.toLowerCase().indexOf(searchBy) > -1;
       }).map((holding) => {
         const canRemove = holding.isNep5 === true && holding.isUserAsset === true
-          && holding.symbol !== 'APH' && (holding.balance === 0);
+          && holding.symbol !== 'APH' && new BigNumber(holding.balance).isZero();
 
         // Note: this must clone the holding or it will modify the holding without using store mutations and cause
         //       side effects.
