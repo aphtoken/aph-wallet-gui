@@ -101,24 +101,15 @@ export default {
           return;
         }
 
-        rpcClient.query({
-          method: 'getblockheader',
-          params: [blockHash, true],
-        })
-          .then((res) => {
-            const data = res.result;
-            if (network.bestBlock && network.bestBlock.index === data.index) {
-              // This should never happen now with the previous check above to not redundantly fetch the same block.
-              return;
-            }
+        store.dispatch('fetchBlockHeaderByHash', { blockHash,
+          done: ((data) => {
             store.commit('setLastReceivedBlock');
             store.commit('setLastSuccessfulRequest');
-            // TODO: We should keep a cache with some information about blocks indexed by block hash.
             this.normalizeAndStore(_.set(network, 'bestBlock', data)).sync();
-          })
-          .catch((e) => {
-            console.log(e);
-          });
+          }),
+          failed: ((ex) => {
+            console.log(ex);
+          }) });
       })
       .catch((e) => {
         console.log(e);

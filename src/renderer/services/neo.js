@@ -3,6 +3,7 @@ import {
   api,
   u,
 } from '@cityofzion/neon-js';
+import _ from 'lodash';
 import { BigNumber } from 'bignumber.js';
 import Async from 'async';
 
@@ -335,15 +336,25 @@ export default {
 
         return rpcClient.getRawTransaction(hash, 1)
           .then((transaction) => {
-            if (network.getSelectedNetwork().bestBlock) {
-              transaction.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
-            }
+            const inputPromises = [];
+
             if (transaction.confirmations > 0) {
               transaction.confirmed = true;
-              if (transaction.currentBlockHeight) {
-                // TODO: switch to looking up the block from the blockhash
-                transaction.block = transaction.currentBlockHeight - transaction.confirmations;
-              }
+
+              // const blockHeader = await new Promise((resolve, reject) => {});
+              // Look up the block from the blockhash
+              inputPromises.push(new Promise((resolve, reject) => {
+                store.dispatch('fetchBlockHeaderByHash', {
+                  blockHash: transaction.blockhash,
+                  done: ((data) => {
+                    resolve(data);
+                  }),
+                  failed: ((ex) => { reject(ex); }),
+                });
+              }).then((blockHeader) => {
+                transaction.block = blockHeader.index;
+                transaction.currentBlockHeight = transaction.confirmations + blockHeader.index;
+              }).catch(e => reject(e)));
             } else {
               transaction.confirmed = false;
             }
@@ -358,7 +369,6 @@ export default {
             });
 
             // pull information for inputs from their previous outputs
-            const inputPromises = [];
             transaction.vin.forEach((input) => {
               inputPromises.push(rpcClient
                 .getRawTransaction(input.txid, 1)

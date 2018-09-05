@@ -14,8 +14,8 @@ export {
   fetchCommitState,
   fetchHoldings,
   fetchLatestVersion,
-  // fetchPortfolio,
   fetchRecentTransactions,
+  fetchBlockHeaderByHash,
   findTransactions,
   importWallet,
   openEncryptedKey,
@@ -116,6 +116,57 @@ async function fetchCachedData(id, defaultValue) {
     result = JSON.parse(result);
   }
   return result;
+}
+
+async function fetchBlockHeaderByHash({ state, commit }, { blockHash, done, failed }) {
+  commit('startRequest', { identifier: 'fetchBlockHeaderByHash' });
+
+  // Check if the block is in memory
+  let blockHeader = _.get(state.blockDetails, blockHash);
+
+  if (!blockHeader || typeof blockHeader === 'function') {
+    const currentNetwork = network.getSelectedNetwork();
+
+    // Check if the block is in the pouchdb cache
+    const blockHeaderStorageKey = `blockheaders.${currentNetwork.net}.${blockHash}`;
+    try {
+      blockHeader = await fetchCachedData(blockHeaderStorageKey);
+    } catch (defaultVal) {
+      blockHeader = null;
+    }
+
+    if (!blockHeader) {
+      try {
+        blockHeader = await new Promise((resolve, reject) => {
+          const rpcClient = network.getRpcClient();
+          rpcClient.query({
+            method: 'getblockheader',
+            params: [blockHash, true],
+          })
+            .then((res) => {
+              db.upsert(blockHeaderStorageKey, JSON.stringify(res.result));
+              resolve(res.result);
+            })
+            .catch(e => reject(e));
+        });
+      } catch (e) {
+        console.log(e);
+        if (failed) {
+          failed(e);
+          const message = e.toString();
+          commit('failRequest', { identifier: 'fetchBlockHeaderByHash', message });
+        }
+        return;
+      }
+    }
+    // Make call to get the block
+    commit('putBlockDetails', blockHeader);
+  }
+
+  if (done) {
+    done(blockHeader);
+  }
+  commit('endRequest', { identifier: 'fetchBlockHeaderByHash' });
 }
 
 async function fetchCommitState({ commit }) {
