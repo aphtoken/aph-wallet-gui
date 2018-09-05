@@ -100,8 +100,13 @@ export default {
           // Don't redundantly fetch the block we already fetched.
           return;
         }
-        rpcClient.getBlock(blockHash)
-          .then((data) => {
+
+        rpcClient.query({
+          method: 'getblockheader',
+          params: [blockHash, true],
+        })
+          .then((res) => {
+            const data = res.result;
             if (network.bestBlock && network.bestBlock.index === data.index) {
               // This should never happen now with the previous check above to not redundantly fetch the same block.
               return;
