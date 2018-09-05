@@ -417,7 +417,8 @@ export default {
         return;
       }
 
-      const marketTickSizeDecimals = this.currentMarket.minimumTickSize.toString().split('.')[1].length;
+      const minTickSizeFraction = this.currentMarket.minimumTickSize - Math.floor(this.currentMarket.minimumTickSize);
+      const marketTickSizeDecimals = Math.log10(minTickSizeFraction * (10 ** 8));
       const allowedQuantityDecimals = 8 - marketTickSizeDecimals;
       const decimalFactor = 10 ** allowedQuantityDecimals;
       const beforeRounded = new BigNumber(this.$store.state.orderQuantity);
