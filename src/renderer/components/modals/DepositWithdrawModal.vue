@@ -15,7 +15,7 @@
         </div>
       </div>
       <div class="amount">
-        <aph-input @blur="cleanAmount" placeholder="Amount" :light="true" v-model="amount"></aph-input>
+        <aph-input :isNumeric="true" @blur="amount = $cleanAmount(amount, holding)" placeholder="Amount" :light="true" v-model="amount"></aph-input>
         <div class="max" v-if="hasAsset" @click="setAmountToMax">{{$t('max')}}</div>
       </div>
     </div>
@@ -28,7 +28,6 @@
 </template>
 
 <script>
-import { BigNumber } from 'bignumber.js';
 import ModalWrapper from './ModalWrapper';
 
 export default {
@@ -68,47 +67,6 @@ export default {
       this.amount = this.isDeposit ?
         this.holding.balance.toString() :
         this.holding.contractBalance.toString();
-
-      this.cleanAmount();
-    },
-
-    cleanAmount() {
-      if (!this.amount) {
-        return;
-      }
-
-      let cleanAmount = this.amount.replace(/[^\d.]/g, '');
-
-      const cleanSplit = _.split(cleanAmount, '.');
-      if (cleanSplit.length > 2) {
-        cleanAmount = `${cleanSplit[0]}.${cleanSplit[1]}`;
-      }
-
-      if (cleanAmount && cleanAmount.length > 0) {
-        if (this.holding) {
-          const fixed = 10 ** this.holding.decimals;
-          const cleanNumber = Math.floor(new BigNumber(cleanAmount).toNumber() * fixed) / fixed;
-          cleanAmount = new BigNumber(cleanNumber).toFixed(this.holding.decimals);
-        } else if (cleanAmount[cleanAmount.length - 1] !== '.'
-          && cleanAmount[cleanAmount.length - 1] !== '0') {
-          const n = new BigNumber(cleanAmount);
-          cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
-        }
-      }
-
-      // remove trailing zeros if there is a decimal
-      if (cleanAmount.indexOf('.') > -1) {
-        cleanAmount = _.trimEnd(cleanAmount, '0');
-      }
-
-      // remove decimal point if it is the last character
-      if (this.amount && this.amount.length > 0 && this.amount[this.amount.length - 1] !== '.') {
-        cleanAmount = _.trimEnd(cleanAmount, '.');
-      }
-
-      if (this.amount !== cleanAmount) {
-        this.amount = cleanAmount;
-      }
     },
   },
 
