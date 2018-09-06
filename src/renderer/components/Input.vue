@@ -33,6 +33,10 @@ export default {
 
   methods: {
     onInput(event) {
+      if (this.isNumeric) {
+        event.target.value = event.target.value.replace(/[^\d.]/g, '');
+      }
+
       this.$emit('input', event.target.value);
     },
 
@@ -83,6 +87,11 @@ export default {
     value: {
       default: '',
       type: String,
+    },
+
+    isNumeric: {
+      default: false,
+      type: Boolean,
     },
   },
 };
