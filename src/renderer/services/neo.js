@@ -336,13 +336,13 @@ export default {
 
         return rpcClient.getRawTransaction(hash, 1)
           .then((transaction) => {
-            const inputPromises = [];
+            const transactionPromises = [];
 
             if (transaction.confirmations > 0) {
               transaction.confirmed = true;
 
               // Look up the block from the blockhash
-              inputPromises.push(new Promise((resolve, reject) => {
+              transactionPromises.push(new Promise((resolve, reject) => {
                 store.dispatch('fetchBlockHeaderByHash', {
                   blockHash: transaction.blockhash,
                   done: ((data) => {
@@ -369,7 +369,7 @@ export default {
 
             // pull information for inputs from their previous outputs
             transaction.vin.forEach((input) => {
-              inputPromises.push(rpcClient
+              transactionPromises.push(rpcClient
                 .getRawTransaction(input.txid, 1)
                 .then((inputTransaction) => {
                   const inputSource = inputTransaction.vout[input.vout];
@@ -384,7 +384,7 @@ export default {
                 .catch(e => reject(e)));
             });
 
-            Promise.all(inputPromises)
+            Promise.all(transactionPromises)
               .then(() => {
                 store.commit('putTransactionDetail', transaction);
                 resolve(transaction);
