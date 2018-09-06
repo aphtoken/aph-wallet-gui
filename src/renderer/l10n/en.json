@@ -166,6 +166,7 @@
   "noOptionSelected": "No Option Selected",
   "noSavedWallets": "You do not have any saved wallets. Create one?",
   "noTransactions": "No transactions",
+  "noBalanceAvailable": "No balance of {assetSymbol} available to {sideDescription}",
   "notMetMinimumBlocksToClaim": "You have not met the minimum number of blocks required to collect fees.",
   "nowListedOnKucoin": "APH Tokens Now Listed On Kucoin!",
   "open": "Open",

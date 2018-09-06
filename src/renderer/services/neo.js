@@ -31,6 +31,10 @@ const calculateHoldingTotalBalance = (holding) => {
     .plus(_.get(holding, 'contractBalance', toBigNumber(0)))
     .plus(_.get(holding, 'openOrdersBalance', toBigNumber(0)));
 };
+const calculateHoldingAvailableBalance = (holding) => {
+  return toBigNumber(_.get(holding, 'balance', toBigNumber(0)))
+    .plus(_.get(holding, 'contractBalance', toBigNumber(0)));
+};
 
 export default {
   createWallet(name, passphrase, passphraseConfirm) {
@@ -513,6 +517,7 @@ export default {
                     holding.balance = new BigNumber(val.balance.toString());
                     holding.symbol = val.symbol;
                     holding.name = val.name;
+                    holding.availableBalance = calculateHoldingAvailableBalance(holding);
                     holding.totalBalance = calculateHoldingTotalBalance(holding);
                     holding.decimals = val.decimals;
 
@@ -536,6 +541,7 @@ export default {
               promises.push(dex.fetchContractBalance(holding.assetId)
                 .then((res) => {
                   holding.contractBalance = toBigNumber(res);
+                  holding.availableBalance = calculateHoldingAvailableBalance(holding);
                   holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {
@@ -545,6 +551,7 @@ export default {
               promises.push(dex.fetchOpenOrderBalance(holding.assetId)
                 .then((res) => {
                   holding.openOrdersBalance = toBigNumber(res);
+                  holding.availableBalance = calculateHoldingAvailableBalance(holding);
                   holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {
