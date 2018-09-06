@@ -123,7 +123,8 @@ export default {
     if (cleanAmount && cleanAmount.length > 0) {
       if (currency) {
         const fixed = 10 ** currency.decimals;
-        const cleanNumber = Math.floor(new BigNumber(cleanAmount).toNumber() * fixed) / fixed;
+        const cleanNumber = new BigNumber(cleanAmount)
+          .multipliedBy(fixed).decimalPlaces(0, BigNumber.ROUND_DOWN).dividedBy(fixed);
         cleanAmount = new BigNumber(cleanNumber).toFixed(currency.decimals);
       } else if (cleanAmount[cleanAmount.length - 1] !== '.'
         && cleanAmount[cleanAmount.length - 1] !== '0') {
