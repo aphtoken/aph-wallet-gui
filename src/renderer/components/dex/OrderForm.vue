@@ -430,8 +430,11 @@ export default {
         newQuantity = newQuantity.plus(leftToSpend.dividedBy(orderPrice));
       }
 
-      newQuantity *= value;
-      newQuantity = Math.floor(newQuantity * 100000000) / 100000000.0;
+      newQuantity = newQuantity.multipliedBy(value);
+      newQuantity = newQuantity
+        .multipliedBy(100000000)
+        .decimalPlaces(0, BigNumber.ROUND_DOWN)
+        .dividedBy(100000000.0);
       return newQuantity.toString();
     },
 
@@ -490,8 +493,11 @@ export default {
         newQuantity = newQuantity.plus(leftToSpend);
       }
 
-      newQuantity *= value;
-      newQuantity = Math.floor(newQuantity * 100000000) / 100000000.0;
+      newQuantity = newQuantity.multipliedBy(value);
+      newQuantity = newQuantity
+        .multipliedBy(100000000)
+        .decimalPlaces(0, BigNumber.ROUND_DOWN)
+        .dividedBy(100000000.0);
       return newQuantity.toString();
     },
 
@@ -528,8 +534,8 @@ export default {
       const allowedQuantityDecimals = 8 - marketTickSizeDecimals;
       const decimalFactor = 10 ** allowedQuantityDecimals;
       const beforeRounded = new BigNumber(this.$store.state.orderQuantity);
-      const floored = Math.floor(beforeRounded.multipliedBy(decimalFactor).toNumber());
-      const roundedQuantity = new BigNumber(floored).dividedBy(decimalFactor);
+      const floored = beforeRounded.multipliedBy(decimalFactor).decimalPlaces(0, BigNumber.ROUND_DOWN);
+      const roundedQuantity = floored.dividedBy(decimalFactor);
       if (roundedQuantity.isEqualTo(beforeRounded) === false) {
         this.$store.commit('setOrderQuantity', roundedQuantity.toString());
         this.$services.alerts.error(this.$t('orderQuantityLimited', {
