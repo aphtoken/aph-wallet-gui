@@ -107,4 +107,42 @@ export default {
     return toBigNumber(value).isGreaterThan(threshold) ?
       accounting.formatMoney(toBigNumber(value), '', 0) : formatNumberBase(value);
   },
+
+  cleanAmount(amount, currency) {
+    if (nullOrUndefined(amount)) {
+      return null;
+    }
+
+    let cleanAmount = amount.replace(/[^\d.]/g, '');
+
+    const cleanSplit = _.split(cleanAmount, '.');
+    if (cleanSplit.length > 2) {
+      cleanAmount = `${cleanSplit[0]}.${cleanSplit[1]}`;
+    }
+
+    if (cleanAmount && cleanAmount.length > 0) {
+      if (currency) {
+        const fixed = 10 ** currency.decimals;
+        const cleanNumber = new BigNumber(cleanAmount)
+          .multipliedBy(fixed).decimalPlaces(0, BigNumber.ROUND_DOWN).dividedBy(fixed);
+        cleanAmount = new BigNumber(cleanNumber).toFixed(currency.decimals);
+      } else if (cleanAmount[cleanAmount.length - 1] !== '.'
+        && cleanAmount[cleanAmount.length - 1] !== '0') {
+        const n = new BigNumber(cleanAmount);
+        cleanAmount = formatNumberBase(n, formats.WHOLE_NUMBER_NO_COMMAS);
+      }
+    }
+
+    // remove trailing zeros if there is a decimal
+    if (cleanAmount.indexOf('.') > -1) {
+      cleanAmount = _.trimEnd(cleanAmount, '0');
+    }
+
+    // remove decimal point if it is the last character
+    if (amount && amount.length > 0 && amount[amount.length - 1] !== '.') {
+      cleanAmount = _.trimEnd(cleanAmount, '.');
+    }
+
+    return cleanAmount;
+  },
 };

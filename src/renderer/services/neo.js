@@ -3,6 +3,7 @@ import {
   api,
   u,
 } from '@cityofzion/neon-js';
+import _ from 'lodash';
 import { BigNumber } from 'bignumber.js';
 import Async from 'async';
 
@@ -330,17 +331,33 @@ export default {
       try {
         const inMemory = _.get(store.state.transactionDetails, hash);
         if (inMemory) {
-          inMemory.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
-          inMemory.confirmations = inMemory.currentBlockHeight - inMemory.block;
+          if (network.getSelectedNetwork().bestBlock) {
+            inMemory.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
+            inMemory.confirmations = inMemory.currentBlockHeight - inMemory.block;
+          }
           return resolve(inMemory);
         }
 
         return rpcClient.getRawTransaction(hash, 1)
           .then((transaction) => {
-            transaction.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
+            const transactionPromises = [];
+
             if (transaction.confirmations > 0) {
               transaction.confirmed = true;
-              transaction.block = transaction.currentBlockHeight - transaction.confirmations;
+
+              // Look up the block from the blockhash
+              transactionPromises.push(new Promise((resolve, reject) => {
+                store.dispatch('fetchBlockHeaderByHash', {
+                  blockHash: transaction.blockhash,
+                  done: ((data) => {
+                    resolve(data);
+                  }),
+                  failed: ((ex) => { reject(ex); }),
+                });
+              }).then((blockHeader) => {
+                transaction.block = blockHeader.index;
+                transaction.currentBlockHeight = transaction.confirmations + blockHeader.index;
+              }).catch(e => reject(e)));
             } else {
               transaction.confirmed = false;
             }
@@ -355,9 +372,8 @@ export default {
             });
 
             // pull information for inputs from their previous outputs
-            const inputPromises = [];
             transaction.vin.forEach((input) => {
-              inputPromises.push(rpcClient
+              transactionPromises.push(rpcClient
                 .getRawTransaction(input.txid, 1)
                 .then((inputTransaction) => {
                   const inputSource = inputTransaction.vout[input.vout];
@@ -372,7 +388,7 @@ export default {
                 .catch(e => reject(e)));
             });
 
-            Promise.all(inputPromises)
+            Promise.all(transactionPromises)
               .then(() => {
                 store.commit('putTransactionDetail', transaction);
                 resolve(transaction);
