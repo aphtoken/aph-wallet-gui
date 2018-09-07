@@ -104,6 +104,7 @@ export default {
       this.$services.network.setSelectedNetwork(this.selectedNetwork);
       this.$store.commit('handleNetworkChange');
       this.$store.dispatch('fetchHoldings', {});
+      this.$services.neo.promptGASFractureIfNecessary();
     },
 
     selectedLanguage(language) {

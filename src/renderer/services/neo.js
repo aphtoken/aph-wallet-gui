@@ -22,8 +22,10 @@ const GAS_ASSET_ID = '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969
 const NEO_ASSET_ID = 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 
 let lastClaimSent;
+let lastGasFractureNotification;
 let lastVerifiedTokenBalances;
 let tokensToRetryBalances = {};
+let addressBalances = {};
 
 const calculateHoldingTotalBalance = (holding) => {
   return toBigNumber(_.get(holding, 'balance', toBigNumber(0)))
@@ -826,16 +828,8 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    return api.getBalanceFrom({
-      net: currentNetwork.net,
-      url: currentNetwork.rpc,
-      address: currentWallet.address,
-    }, api.neoscan)
+    return this.fetchSystemAssetBalance()
       .then((balance) => {
-        if (balance.net !== currentNetwork.net) {
-          alerts.error('Unable to read address balance from neonDB or neoscan api. Please try again later.');
-          return null;
-        }
         const config = {
           net: currentNetwork.net,
           url: currentNetwork.rpc,
@@ -851,7 +845,10 @@ export default {
         }
 
         return api.sendAsset(config)
-          .then(res => res)
+          .then((res) => {
+            this.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx);
+            return res;
+          })
           .catch((e) => {
             alerts.exception(e);
           });
@@ -906,6 +903,223 @@ export default {
       .catch((e) => {
         alerts.exception(e);
       });
+  },
+
+  fetchSystemAssetBalance(forAddress) {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+
+        if (!forAddress) {
+          const currentWallet = wallets.getCurrentWallet();
+          forAddress = currentWallet.address;
+        }
+
+        if (_.has(addressBalances, forAddress)) {
+          const existingBalance = _.get(addressBalances, forAddress);
+          if (existingBalance && existingBalance.pulled
+            && existingBalance.isExpired !== true
+            && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
+            resolve(existingBalance.balance);
+            return;
+          }
+        }
+
+        api.getBalanceFrom({
+          net: currentNetwork.net,
+          url: currentNetwork.rpc,
+          address: forAddress,
+        }, api.neoscan)
+          .then((balance) => {
+            if (balance.net !== currentNetwork.net) {
+              reject('Unable to read address balance from block explorer.');
+              return;
+            }
+
+            _.set(addressBalances, forAddress, {
+              balance,
+              isExpired: false,
+              pulled: moment().utc(),
+            });
+
+            resolve(balance);
+          })
+          .catch((e) => {
+            reject(`Unable to fetch system asset balances. Error: ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Unable to fetch system asset balances. Error: ${e.message}`);
+      }
+    });
+  },
+
+  applyTxToAddressSystemAssetBalance(address, tx) {
+    if (_.has(addressBalances, address)) {
+      const existingBalance = _.get(addressBalances, address);
+      if (existingBalance && existingBalance.pulled
+        && existingBalance.isExpired !== true
+        && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
+        existingBalance.balance.balance.applyTx(tx);
+      }
+    }
+  },
+
+  resetSystemAssetBalanceCache() {
+    addressBalances = {};
+  },
+
+  promptGASFractureIfNecessary() {
+    const currentNetwork = network.getSelectedNetwork();
+    const recommendedUTXOs = 10;
+
+    if (!currentNetwork || currentNetwork.fee <= 0) {
+      return;
+    }
+
+    if (store.state.gasFracture === false) {
+      return;
+    }
+
+    if (new Date() - lastGasFractureNotification < intervals.GAS_FRACTURE_NOTIFCATION) {
+      return;
+    }
+
+    this.fetchSystemAssetBalance()
+      .then((balance) => {
+        if (!balance.balance
+          || !balance.balance.assets.GAS
+          || !balance.balance.assets.GAS.unspent
+          || balance.balance.assets.GAS.unspent.length <= 0
+          || balance.balance.assets.GAS.balance.toNumber() <= currentNetwork.fee) {
+          return;
+        }
+
+        let outputsAboveFee = 0;
+        balance.balance.assets.GAS.unspent.forEach((unspent) => {
+          if (unspent.value.toNumber() >= currentNetwork.fee) {
+            outputsAboveFee += 1;
+          }
+        });
+
+        if (outputsAboveFee < recommendedUTXOs) {
+          store.commit('setFractureGasModalModel', {
+            walletBalance: balance.balance.assets.GAS.balance.toString(),
+            currentOutputsAboveFee: outputsAboveFee,
+            recommendedUTXOs,
+            fee: currentNetwork.fee,
+          });
+
+          lastGasFractureNotification = new Date();
+        }
+      })
+      .catch((e) => {
+        alerts.exception(e);
+      });
+  },
+
+  fractureGAS(targetNumberOfOutputs, minimumSize) {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+        const currentWallet = wallets.getCurrentWallet();
+        let sizeOfOutputs = new BigNumber(minimumSize);
+
+        this.fetchSystemAssetBalance(currentWallet.address)
+          .then((balance) => {
+            const config = {
+              net: currentNetwork.net,
+              url: currentNetwork.rpc,
+              gas: 0,
+              intents: [],
+              balance: balance.balance,
+            };
+
+            if (currentWallet.isLedger === true) {
+              config.signingFunction = ledger.signWithLedger;
+              config.address = currentWallet.address;
+            } else {
+              config.account = new wallet.Account(currentWallet.wif);
+            }
+
+            api.fillKeys(config)
+              .then((config) => {
+                return api.createTx(config, 'contract');
+              })
+              .then((config) => {
+                const gas = balance.balance.assets.GAS;
+                const extraBalanceCheckSize = sizeOfOutputs.multipliedBy(targetNumberOfOutputs).multipliedBy(10);
+                if (extraBalanceCheckSize.isLessThanOrEqualTo(gas.balance)) {
+                  // there is plenty of gas available, make the outputs larger than needed
+                  sizeOfOutputs = sizeOfOutputs.multipliedBy(10);
+                }
+
+                const sortedUnspents = _.sortBy(gas.unspent, [unspent => unspent.value.toNumber()]).reverse();
+                let totalInputs = new BigNumber(0);
+                config.tx.inputs = [];
+                config.tx.outputs = [];
+                config.fees = currentNetwork.fee;
+
+                sortedUnspents.forEach((unspent) => {
+                  if (totalInputs.isGreaterThanOrEqualTo(targetNumberOfOutputs * sizeOfOutputs)) {
+                    return;
+                  }
+                  totalInputs = totalInputs.plus(unspent.value);
+                  config.tx.inputs.push({
+                    prevHash: unspent.txid,
+                    prevIndex: unspent.index,
+                  });
+                });
+
+                let usedInputs = new BigNumber(0);
+                for (let i = 0; i < targetNumberOfOutputs; i += 1) {
+                  if (usedInputs.isLessThanOrEqualTo(totalInputs)) {
+                    config.tx.outputs.push({
+                      assetId: assets.GAS,
+                      scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),
+                      value: sizeOfOutputs,
+                    });
+                    usedInputs = usedInputs.plus(sizeOfOutputs);
+                  }
+                }
+
+                const change = totalInputs.minus(usedInputs).minus(currentNetwork.fee);
+                config.tx.outputs.push({
+                  assetId: assets.GAS,
+                  scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),
+                  value: change,
+                });
+                return api.signTx(config);
+              })
+              .then((config) => {
+                return api.sendTx(config);
+              })
+              .then((config) => {
+                resolve({
+                  success: config.response.result,
+                  tx: config.tx,
+                });
+              })
+              .catch((e) => {
+                const dump = {
+                  net: config.net,
+                  address: config.address,
+                  intents: config.intents,
+                  balance: config.balance,
+                  script: config.script,
+                  gas: config.gas,
+                  tx: config.tx,
+                };
+                console.log(dump);
+                reject(`Failed to send GAS fracture transaction. ${e.message}`);
+              });
+          })
+          .catch((e) => {
+            reject(`Failed to send GAS fracture transaction. ${e.message}`);
+          });
+      } catch (e) {
+        reject(`Failed to send GAS fracture transaction. ${e.message}`);
+      }
+    });
   },
 
   monitorTransactionConfirmation(tx, checkRpcForDetails) {

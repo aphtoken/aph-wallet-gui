@@ -1094,7 +1094,7 @@ export default {
         api.fillKeys(config)
           .then((c) => {
             return new Promise((resolveBalance) => {
-              api.neoscan.getBalance(c.net, dexAddress)
+              neo.fetchSystemAssetBalance(dexAddress)
                 .then((balance) => {
                   c.balance = balance;
                   resolveBalance(c);
@@ -1196,7 +1196,7 @@ export default {
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-        api.neoscan.getBalance(config.net, dexAddress)
+        neo.fetchSystemAssetBalance(dexAddress)
           .then((balance) => {
             config.balance = balance;
             const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
@@ -1300,11 +1300,7 @@ export default {
 
         api.fillKeys(config)
           .then(() => {
-            return api.getBalanceFrom({
-              net: currentNetwork.net,
-              url: currentNetwork.rpc,
-              address: wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH),
-            }, api.neoscan);
+            return neo.fetchSystemAssetBalance(wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH));
           })
           .then((c) => {
             config.balance = c.balance;
@@ -1412,7 +1408,7 @@ export default {
         api.fillKeys(config)
           .then((c) => {
             return new Promise((resolveBalance) => {
-              api.neoscan.getBalance(c.net, dexAddress)
+              neo.fetchSystemAssetBalance(dexAddress)
                 .then((balance) => {
                   c.balance = balance;
                   resolveBalance(c);
@@ -1427,7 +1423,7 @@ export default {
           })
           .then((c) => {
             return new Promise((resolveInputs) => {
-              api.neoscan.getBalance(c.net, dexAddress)
+              neo.fetchSystemAssetBalance(dexAddress)
                 .then((balance) => {
                   const unspents = assetId === assets.GAS ? balance.assets.GAS.unspent : balance.assets.NEO.unspent;
                   const input = _.find(unspents, (o) => {
@@ -1557,11 +1553,10 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
-        const currentNetwork = network.getSelectedNetwork();
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
-        api.neoscan.getBalance(currentNetwork.net, dexAddress)
+        neo.fetchSystemAssetBalance(dexAddress)
           .then((balance) => {
             if (balance.assets.GAS) {
               balance.assets.GAS.unspent.forEach((u) => {
@@ -2006,7 +2001,16 @@ export default {
               });
             }
 
-            return api.getBalanceFrom(c, api.neoscan);
+            return new Promise((resolveBalance) => {
+              neo.fetchSystemAssetBalance()
+                .then((balance) => {
+                  c.balance = balance;
+                  resolveBalance(c);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            });
           })
           .then((c) => {
             return api.createTx(c, 'invocation');
@@ -2084,7 +2088,7 @@ export default {
           api.fillKeys(config)
             .then((configResponse) => {
               return new Promise((resolveBalance) => {
-                api.neoscan.getBalance(configResponse.net, currentWallet.address)
+                neo.fetchSystemAssetBalance()
                   .then((balance) => {
                     configResponse.balance = balance;
                     resolveBalance(configResponse);
