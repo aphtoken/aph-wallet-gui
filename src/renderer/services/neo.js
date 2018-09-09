@@ -858,7 +858,7 @@ export default {
           url: currentNetwork.rpc,
           address: currentWallet.address,
           privateKey: currentWallet.privateKey,
-          balance: balance.balance,
+          balance,
           intents: api.makeIntent(intentAmounts, toAddress),
           fees: currentNetwork.fee,
         };
@@ -928,7 +928,7 @@ export default {
       });
   },
 
-  fetchSystemAssetBalance(forAddress) {
+  fetchSystemAssetBalance(forAddress, intents) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -943,8 +943,50 @@ export default {
           if (existingBalance && existingBalance.pulled
             && existingBalance.isExpired !== true
             && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
-            resolve(existingBalance.balance);
-            return;
+            if (intents || currentNetwork.fee > 0) {
+              // ensure that we have valid unspent UTXOs in the in memory balance to use
+              // if not pull from block explorer again
+              let unspentNEOTotal = new BigNumber(0);
+              let unspentGASTotal = new BigNumber(0);
+              let requiredNEO = new BigNumber(0);
+              let requiredGAS = new BigNumber(0);
+
+              if (existingBalance.balance.balance.assets.NEO.unspent) {
+                existingBalance.balance.balance.assets.NEO.unspent.forEach((unspent) => {
+                  unspentNEOTotal = unspentNEOTotal.plus(unspent.value);
+                });
+              }
+
+              if (existingBalance.balance.balance.assets.GAS.unspent) {
+                existingBalance.balance.balance.assets.GAS.unspent.forEach((unspent) => {
+                  unspentGASTotal = unspentGASTotal.plus(unspent.value);
+                });
+              }
+
+              if (intents && intents.NEO) {
+                requiredNEO = requiredNEO.plus(intents.NEO);
+              }
+              if (intents && intents.GAS) {
+                requiredGAS = requiredGAS.plus(intents.GAS);
+              }
+              requiredGAS = requiredGAS.plus(currentNetwork.fee);
+
+              let intentsHaveUnspents = true;
+              if (requiredNEO && requiredNEO.isGreaterThan(unspentNEOTotal)) {
+                intentsHaveUnspents = false;
+              }
+              if (requiredGAS && requiredGAS.isGreaterThan(unspentGASTotal)) {
+                intentsHaveUnspents = false;
+              }
+
+              if (intentsHaveUnspents) {
+                resolve(existingBalance.balance.balance);
+                return;
+              }
+            } else {
+              resolve(existingBalance.balance.balance);
+              return;
+            }
           }
         }
 
@@ -965,7 +1007,7 @@ export default {
               pulled: moment().utc(),
             });
 
-            resolve(balance);
+            resolve(balance.balance);
           })
           .catch((e) => {
             reject(`Unable to fetch system asset balances. Error: ${e.message}`);
@@ -1009,16 +1051,16 @@ export default {
 
     this.fetchSystemAssetBalance()
       .then((balance) => {
-        if (!balance.balance
-          || !balance.balance.assets.GAS
-          || !balance.balance.assets.GAS.unspent
-          || balance.balance.assets.GAS.unspent.length <= 0
-          || balance.balance.assets.GAS.balance.toNumber() <= currentNetwork.fee) {
+        if (!balance
+          || !balance.assets.GAS
+          || !balance.assets.GAS.unspent
+          || balance.assets.GAS.unspent.length <= 0
+          || balance.assets.GAS.balance.toNumber() <= currentNetwork.fee) {
           return;
         }
 
         let outputsAboveFee = 0;
-        balance.balance.assets.GAS.unspent.forEach((unspent) => {
+        balance.assets.GAS.unspent.forEach((unspent) => {
           if (unspent.value.toNumber() >= currentNetwork.fee) {
             outputsAboveFee += 1;
           }
@@ -1026,7 +1068,7 @@ export default {
 
         if (outputsAboveFee < recommendedUTXOs) {
           store.commit('setFractureGasModalModel', {
-            walletBalance: balance.balance.assets.GAS.balance.toString(),
+            walletBalance: balance.assets.GAS.balance.toString(),
             currentOutputsAboveFee: outputsAboveFee,
             recommendedUTXOs,
             fee: currentNetwork.fee,
@@ -1054,7 +1096,7 @@ export default {
               url: currentNetwork.rpc,
               gas: 0,
               intents: [],
-              balance: balance.balance,
+              balance,
             };
 
             if (currentWallet.isLedger === true) {

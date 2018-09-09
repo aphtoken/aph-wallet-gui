@@ -1094,7 +1094,7 @@ export default {
         api.fillKeys(config)
           .then((c) => {
             return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(dexAddress)
+              neo.fetchSystemAssetBalance(dexAddress, config.intents)
                 .then((balance) => {
                   c.balance = balance;
                   resolveBalance(c);
@@ -1299,13 +1299,21 @@ export default {
         const token = assets.getNetworkAsset(assetId);
 
         api.fillKeys(config)
-          .then(() => {
-            return neo.fetchSystemAssetBalance(wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH));
+          .then((c) => {
+            return new Promise((resolveBalance) => {
+              neo.fetchSystemAssetBalance(currentWallet.address)
+                .then((balance) => {
+                  c.balance = balance;
+                  resolveBalance(c);
+                })
+                .catch((e) => {
+                  reject(e);
+                });
+            });
           })
           .then((c) => {
-            config.balance = c.balance;
             config.sendingFromSmartContract = true;
-            return api.createTx(config, 'invocation');
+            return api.createTx(c, 'invocation');
           })
           .then((c) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
@@ -1408,7 +1416,7 @@ export default {
         api.fillKeys(config)
           .then((c) => {
             return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(dexAddress)
+              neo.fetchSystemAssetBalance(dexAddress, config.intents)
                 .then((balance) => {
                   c.balance = balance;
                   resolveBalance(c);
@@ -1423,7 +1431,7 @@ export default {
           })
           .then((c) => {
             return new Promise((resolveInputs) => {
-              neo.fetchSystemAssetBalance(dexAddress)
+              neo.fetchSystemAssetBalance(dexAddress, config.intents)
                 .then((balance) => {
                   const unspents = assetId === assets.GAS ? balance.assets.GAS.unspent : balance.assets.NEO.unspent;
                   const input = _.find(unspents, (o) => {
@@ -2002,7 +2010,7 @@ export default {
             }
 
             return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance()
+              neo.fetchSystemAssetBalance(currentWallet.address, config.intents)
                 .then((balance) => {
                   c.balance = balance;
                   resolveBalance(c);
