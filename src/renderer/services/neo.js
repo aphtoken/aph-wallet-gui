@@ -941,7 +941,6 @@ export default {
         if (_.has(addressBalances, forAddress)) {
           const existingBalance = _.get(addressBalances, forAddress);
           if (existingBalance && existingBalance.pulled
-            && existingBalance.isExpired !== true
             && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
             if (intents || currentNetwork.fee > 0) {
               // ensure that we have valid unspent UTXOs in the in memory balance to use
@@ -1045,7 +1044,7 @@ export default {
       return;
     }
 
-    if (new Date() - lastGasFractureNotification < intervals.GAS_FRACTURE_NOTIFCATION) {
+    if (new Date() - lastGasFractureNotification < intervals.GAS_FRACTURE_NOTIFICATION) {
       return;
     }
 
