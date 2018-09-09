@@ -125,7 +125,7 @@ export default new Router({
           component: require('@/components/Dex').default,
           meta: {
             isMenuToggleable: true,
-            showTransactionsSidebar: true,
+            showTransactionsSidebar: false, // TODO: enable this later when it shows pending transactions.
           },
           children: [
             {

@@ -16,6 +16,7 @@ const state = {
   acceptDexOutOfDate: false,
   activeTransaction: null,
   assetsThatNeedRefresh: [],
+  blockDetails: {},
   claimModalModel: null,
   commitModalModel: null,
   commitState: null,

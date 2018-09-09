@@ -37,5 +37,9 @@ export default {
     $formatTokenAmount(...args) {
       return formatting.formatTokenAmount.apply(null, args);
     },
+
+    $cleanAmount(...args) {
+      return formatting.cleanAmount.apply(null, args);
+    },
   },
 };

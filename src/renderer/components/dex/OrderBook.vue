@@ -15,7 +15,7 @@
             <div class="body">
               <div class="row" v-for="(ask, index) in $store.state.orderBook.asks" :key="index">
                 <div class="cell price red" @click="setPrice(ask.price)">{{ $formatNumber(ask.price) }}</div>
-                <div class="cell quantity" @click="setQuantity(ask.quantity)">{{ $formatNumber(ask.quantity) }}</div>
+                <div class="cell quantity" @click="setQuantity(index, $store.state.orderBook.asks)">{{ $formatNumber(ask.quantity) }}</div>
                 <div class="cell graph">
                   <span class="size-bar size-total red" :style="{ width: (ask.quantityTotalRatio * 100) + '%' }"></span>
                   <span class="size-bar red" :style="{ width: (ask.quantityRatio * 100) + '%' }"></span>
@@ -32,7 +32,7 @@
             <div class="body">
               <div class="row" v-for="(bid, index) in $store.state.orderBook.bids" :key="index">
                 <div class="cell price green" @click="setPrice(bid.price)">{{ $formatNumber(bid.price) }}</div>
-                <div class="cell quantity" @click="setQuantity(bid.quantity)">{{ $formatNumber(bid.quantity) }}</div>
+                <div class="cell quantity" @click="setQuantity(index, $store.state.orderBook.bids)">{{ $formatNumber(bid.quantity) }}</div>
                 <div class="cell graph" >
                   <span class="size-bar size-total green" :style="{ width: (bid.quantityTotalRatio * 100) + '%' }"></span>
                   <span class="size-bar green" :style="{ width: (bid.quantityRatio * 100) + '%', 'border-right-width': (bid.quantityTotalRatio * 100) + '%' }"></span>
@@ -47,6 +47,8 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
+
 let loadBookIntervalId;
 let storeUnwatch;
 
@@ -93,8 +95,14 @@ export default {
       this.$store.commit('setOrderPrice', price.toString());
     },
 
-    setQuantity(quantity) {
-      this.$store.commit('setOrderQuantity', quantity.toString());
+    setQuantity(selectedOrderIndex, orders) {
+      if (selectedOrderIndex >= 0 && orders && orders.length) {
+        this.$store.commit('setOrderQuantity',
+          _.reduce(
+            _.slice(orders, 0, selectedOrderIndex),
+            (sum, order) => sum.plus(new BigNumber(order.quantity)),
+            new BigNumber(orders[selectedOrderIndex].quantity)).toString());
+      }
     },
   },
 };

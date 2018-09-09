@@ -15,6 +15,7 @@ export {
   handleNetworkChange,
   orderBookSnapshotReceived,
   orderBookUpdateReceived,
+  putBlockDetails,
   putTransactionDetail,
   removeAssetHoldingsNeedRefresh,
   resetRequests,
@@ -128,6 +129,10 @@ function handleNetworkChange(state) {
 function putTransactionDetail(state, transactionDetail) {
   const details = state.transactionDetails;
   _.set(details, transactionDetail.txid, transactionDetail);
+}
+
+function putBlockDetails(state, blockDetails) {
+  _.set(state.blockDetails, blockDetails.hash, blockDetails);
 }
 
 function removeAssetHoldingsNeedRefresh(state, assetIds) {
