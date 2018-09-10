@@ -172,7 +172,7 @@ export default {
   }
 
   .aph-select--dropdown {
-    background: #f4f4fc;
+    background: $light-grey;
     color: $purple;
     border-radius: $border-radius;
     left: 0;
@@ -186,7 +186,6 @@ export default {
     width: 100%;
     z-index: 100;
     box-shadow: $box-shadow;
-    border: 1px solid #99999e;
 
     > li {
       cursor: pointer;
@@ -195,7 +194,6 @@ export default {
       line-height: $button-height;
       padding: 0 $space;
       transition: all .1s linear;
-      border-bottom: 1px solid #dbdbe2;
 
       &:hover,
       &.selected {
@@ -223,6 +221,10 @@ export default {
       color: $dark;
       text-align: left;
       padding: toRem(16px) $space;
+    }
+
+    .aph-select--dropdown {
+      border: $border-width solid $background;
     }
 
     .aph-icon .fill {

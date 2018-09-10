@@ -54,7 +54,7 @@
             <aph-input :placeholder="$t('enterSendToAddress')" v-model="address"></aph-input>
           </div>
           <div class="amount">
-            <aph-input @blur="cleanAmount" :placeholder="$t('enterAmount')" v-model="amount"></aph-input>
+            <aph-input :isNumeric="true" @blur="amount = $cleanAmount(amount, currency)" :placeholder="$t('enterAmount')" v-model="amount"></aph-input>
             <div class="symbol">{{ currency ? currency.value : '' }}</div>
             <div class="max" v-if="currency" @click="setAmountToMax">{{$t('max')}}</div>
           </div>
@@ -77,7 +77,6 @@
 </template>
 
 <script>
-import { BigNumber } from 'bignumber.js';
 import { mapGetters } from 'vuex';
 let sendTimeoutIntervalId;
 let storeUnwatch;
@@ -157,43 +156,6 @@ export default {
       }
     },
 
-    cleanAmount() {
-      if (!this.amount) {
-        return;
-      }
-
-      let cleanAmount = this.amount.replace(/[^\d.]/g, '');
-
-      const cleanSplit = _.split(cleanAmount, '.');
-      if (cleanSplit.length > 2) {
-        cleanAmount = `${cleanSplit[0]}.${cleanSplit[1]}`;
-      }
-
-      if (cleanAmount && cleanAmount.length > 0) {
-        if (this.currency) {
-          cleanAmount = new BigNumber(cleanAmount).toFixed(this.currency.decimals != null ? this.currency.decimals : 8);
-        } else if (cleanAmount[cleanAmount.length - 1] !== '.'
-          && cleanAmount[cleanAmount.length - 1] !== '0') {
-          const n = new BigNumber(cleanAmount);
-          cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
-        }
-      }
-
-      // remove trailing zeros if there is a decimal
-      if (cleanAmount.indexOf('.') > -1) {
-        cleanAmount = _.trimEnd(cleanAmount, '0');
-      }
-
-      // remove decimal point if it is the last character
-      if (this.amount && this.amount.length > 0 && this.amount[this.amount.length - 1] !== '.') {
-        cleanAmount = _.trimEnd(cleanAmount, '.');
-      }
-
-      if (this.amount !== cleanAmount) {
-        this.amount = cleanAmount;
-      }
-    },
-
     send() {
       this.sending = true;
 
@@ -205,7 +167,7 @@ export default {
           })
           .catch((e) => {
             this.sending = false;
-            this.$services.alerts.error(e);
+            this.$services.alerts.exception(e);
             this.$store.commit('setSendInProgress', false);
           });
       }, this.$constants.timeouts.NEO_API_CALL);
@@ -245,10 +207,6 @@ export default {
   watch: {
     address() {
       this.contact = this.$services.contacts.findContactByAddress(this.address);
-    },
-
-    currency() {
-      this.cleanAmount();
     },
   },
 

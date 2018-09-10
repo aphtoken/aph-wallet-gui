@@ -2,27 +2,27 @@
   <section id="dex">
     <div class="grid" v-if="connected">
       <div class="grid--column column-left">
-        <div class="grid--cell top-left">
-          <router-view name="top-left"></router-view>
+        <div class="grid--cell left-top">
+          <router-view name="left-top"></router-view>
         </div>
-        <div class="grid--cell bottom-left">
-          <router-view name="bottom-left"></router-view>
+        <div class="grid--cell left-bottom">
+          <router-view name="left-bottom"></router-view>
         </div>
       </div>
       <div class="grid--column column-middle">
-        <div class="grid--cell top-middle">
-          <router-view name="top-middle"></router-view>
+        <div class="grid--cell middle-top">
+          <router-view name="middle-top"></router-view>
         </div>
-        <div class="grid--cell bottom-middle">
-          <router-view name="bottom-middle"></router-view>
+        <div class="grid--cell middle-bottom">
+          <router-view name="middle-bottom"></router-view>
         </div>
       </div>
       <div class="grid--column column-right">
-        <div class="grid--cell top-right">
-          <router-view name="top-right"></router-view>
+        <div class="grid--cell right-top">
+          <router-view name="right-top"></router-view>
         </div>
-        <div class="grid--cell bottom-right">
-          <router-view name="bottom-right"></router-view>
+        <div class="grid--cell right-bottom">
+          <router-view name="right-bottom"></router-view>
         </div>
       </div>
     </div>
@@ -140,8 +140,7 @@ export default {
 #dex {
   align-items: center;
   display: flex;
-  flex-direction: column;
-  flex-direction: column;
+  flex-direction: row;
   flex: 1;
   justify-content: center;
   padding-top: toRem(30px);
@@ -182,27 +181,28 @@ export default {
         flex: 1;
       }
 
-      &.top-right {
+      &.right-top {
         flex: 2;
+        margin-top: 0 !important;
       }
 
-      &.bottom-right {
+      &.right-bottom {
         flex: 1;
       }
 
-      &.top-left {
+      &.left-top {
         flex: none;
       }
 
-      &.bottom-left {
+      &.left-bottom {
         flex: 1;
       }
 
-      &.bottom-middle {
+      &.middle-bottom {
         flex: 1;
       }
 
-      &.top-middle {
+      &.middle-top {
         flex: none;
       }
 

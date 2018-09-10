@@ -1,5 +1,5 @@
 <template>
-  <section id="login--saved-wallet">
+  <section id="login--encrypted-key">
     <login-form-wrapper identifier="openEncryptedKey" :on-submit="login">
       <aph-input :hasError="$isFailed('openEncryptedKey')" v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password"></aph-input>
       <aph-input :hasError="$isFailed('openEncryptedKey')" v-model="encryptedKey" :placeholder="$t('enterYourEncryptedKey')" type="password"></aph-input>
@@ -44,7 +44,7 @@ export default {
 </script>
 
 <style lang="scss">
-#login--saved-wallet {
+#login--encrypted-key {
   max-width: toRem(400px);
   width: 60%;
 

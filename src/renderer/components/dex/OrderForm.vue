@@ -90,6 +90,7 @@ const ORDER_TYPES_LIST = [
 ];
 
 let loadHoldingsIntervalId;
+let storeUnwatch;
 
 export default {
   components: {
@@ -105,10 +106,22 @@ export default {
     loadHoldingsIntervalId = setInterval(() => {
       this.loadHoldingsSilently();
     }, this.$constants.intervals.HOLDINGS_POLLING);
+
+    storeUnwatch = this.$store.watch(
+      () => {
+        return this.$store.state.orderQuantity;
+      }, () => {
+        if (this.selectedPercent && this.percent(this.selectedPercent) !== this.$store.state.orderQuantity) {
+          this.selectedPercent = null;
+        }
+
+        this.validateQuantity();
+      });
   },
 
   beforeDestroy() {
     clearInterval(loadHoldingsIntervalId);
+    storeUnwatch();
   },
 
   computed: {
@@ -315,6 +328,8 @@ export default {
   watch: {
     currentMarket() {
       this.actionableHolding = this.quoteHolding;
+      this.$store.commit('setOrderQuantity', '');
+      this.$store.commit('setOrderPrice', '');
     },
 
     orderType() {
@@ -322,6 +337,7 @@ export default {
         this.$store.commit('setOrderPrice', '');
       }
     },
+
     quantity() {
       if (this.selectedPercent && this.percent(this.selectedPercent) !== this.$store.state.orderQuantity) {
         this.selectedPercent = null;
@@ -342,7 +358,8 @@ export default {
     },
 
     setPercent(value) {
-      if (this.orderType === 'Limit' && !this.$store.state.orderPrice) {
+      if (this.orderType === 'Limit' && !this.$store.state.orderPrice
+        && this.side === 'Buy') {
         this.$services.alerts.error(this.$t('pleaseEnterAPrice'));
         return;
       }
@@ -352,24 +369,135 @@ export default {
     },
 
     percent(value) {
-      let unitPrice = this.$store.state.orderPrice;
-      if (this.orderType !== 'Limit') {
-        // todo, make smarter to calculate price based on depth of book
-        if (this.side === 'Buy') {
-          unitPrice = this.$store.state.orderBook.asks[0].price;
-        } else if (this.side === 'Sell') {
-          unitPrice = this.$store.state.orderBook.bids[0].price;
-        }
-      }
-
-      let newQuantity = 0;
       if (this.side === 'Buy') {
-        newQuantity = (this.baseHolding.totalBalance / unitPrice) * value;
-      } else if (this.side === 'Sell') {
-        newQuantity = this.quoteHolding.totalBalance * value;
+        return this.percentForBuy(value);
       }
 
-      newQuantity = Math.floor(newQuantity * 100000000) / 100000000.0;
+      return this.percentForSell(value);
+    },
+
+    percentForBuy(value) {
+      if (!this.baseHolding || !this.baseHolding.availableBalance
+        || this.baseHolding.availableBalance.isLessThanOrEqualTo(0)) {
+        this.$services.alerts.error(this.$t('noBalanceAvailable', {
+          assetSymbol: this.currentMarket.baseCurrency,
+          sideDescription: 'Buy with',
+        }));
+        return '';
+      }
+
+      const baseAssetQuantity = this.baseHolding.availableBalance;
+
+      let newQuantity = new BigNumber(0);
+      const book = this.$store.state.orderBook.asks;
+      let orderPrice = null;
+      if (this.orderType !== 'Market' && this.$store.state.orderPrice !== '') {
+        orderPrice = new BigNumber(this.$store.state.orderPrice);
+      }
+
+      let willTakeOffers = false;
+      if (!orderPrice || orderPrice.isGreaterThanOrEqualTo(book[0].price)) {
+        willTakeOffers = !this.postOnly;
+      }
+
+      let leftToSpend = baseAssetQuantity;
+
+      if (willTakeOffers) {
+        book.forEach((level) => {
+          if (orderPrice && level.price.isGreaterThan(orderPrice)) {
+            return;
+          }
+
+          if (leftToSpend.isLessThanOrEqualTo(0)) {
+            return;
+          }
+
+          const levelCost = level.quantity.multipliedBy(level.price);
+
+          let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
+          if (this.baseHolding.assetId === this.$services.assets.APH) {
+            const maxLots = spendAtThisLevel.dividedBy(level.price).dividedBy(this.currentMarket.minimumSize);
+            leftToSpend = leftToSpend.minus(maxLots.multipliedBy(this.currentMarket.buyFee));
+          }
+
+          spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
+          newQuantity = newQuantity.plus(spendAtThisLevel.dividedBy(level.price));
+          leftToSpend = leftToSpend.minus(spendAtThisLevel);
+        });
+      }
+
+      if (leftToSpend.isGreaterThan(0) && orderPrice) {
+        newQuantity = newQuantity.plus(leftToSpend.dividedBy(orderPrice));
+      }
+
+      newQuantity = newQuantity.multipliedBy(value);
+      newQuantity = newQuantity
+        .multipliedBy(100000000)
+        .decimalPlaces(0, BigNumber.ROUND_DOWN)
+        .dividedBy(100000000.0);
+      return newQuantity.toString();
+    },
+
+    percentForSell(value) {
+      if (!this.quoteHolding || !this.quoteHolding.availableBalance
+        || this.quoteHolding.availableBalance.isLessThanOrEqualTo(0)) {
+        this.$services.alerts.error(this.$t('noBalanceAvailable', {
+          assetSymbol: this.currentMarket.quoteCurrency,
+          sideDescription: 'Sell',
+        }));
+        return '';
+      }
+
+      const quoteAssetQuantity = this.quoteHolding.availableBalance;
+
+
+      let orderPrice = null;
+      if (this.orderType !== 'Market' && this.$store.state.orderPrice !== '') {
+        orderPrice = new BigNumber(this.$store.state.orderPrice);
+      }
+
+      const book = this.$store.state.orderBook.bids;
+      let willTakeOffers = false;
+      if (!orderPrice || orderPrice.isLessThanOrEqualTo(book[0].price)) {
+        willTakeOffers = !this.postOnly;
+      }
+
+      let leftToSpend = quoteAssetQuantity;
+      let newQuantity = new BigNumber(0);
+
+      if (willTakeOffers) {
+        book.forEach((level) => {
+          if (orderPrice && level.price.isLessThan(orderPrice)) {
+            return;
+          }
+
+          if (leftToSpend.isLessThanOrEqualTo(0)) {
+            return;
+          }
+
+          const levelCost = level.quantity;
+
+          let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
+          if (this.quoteHolding.assetId === this.$services.assets.APH) {
+            const maxLots = spendAtThisLevel.dividedBy(this.currentMarket.minimumSize);
+            leftToSpend = leftToSpend.minus(maxLots.multipliedBy(this.currentMarket.sellFee));
+          }
+
+          spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
+          newQuantity = newQuantity.plus(spendAtThisLevel);
+          leftToSpend = leftToSpend.minus(spendAtThisLevel);
+        });
+      }
+
+      if (leftToSpend.isGreaterThan(0) && orderPrice) {
+        newQuantity = newQuantity.plus(leftToSpend);
+      }
+
+      newQuantity = newQuantity.multipliedBy(value);
+      newQuantity = newQuantity
+        .multipliedBy(100000000)
+        .decimalPlaces(0, BigNumber.ROUND_DOWN)
+        .dividedBy(100000000.0);
       return newQuantity.toString();
     },
 
@@ -382,19 +510,44 @@ export default {
         book = this.$store.state.orderBook.bids;
       }
 
-      book.forEach((l) => {
-        const takeQuantity = l.quantity.isGreaterThan(quantityRemaining) ? quantityRemaining : l.quantity;
+      book.forEach((level) => {
+        const takeQuantity = level.quantity.isGreaterThan(quantityRemaining) ? quantityRemaining : level.quantity;
         if (quantityRemaining.isLessThanOrEqualTo(0)) {
           return;
         }
         quantityRemaining = quantityRemaining.minus(takeQuantity);
-        totalMultiple = totalMultiple.plus(takeQuantity.multipliedBy(l.price));
+        totalMultiple = totalMultiple.plus(takeQuantity.multipliedBy(level.price));
       });
 
       return (totalMultiple / quantity).toString();
     },
 
+    validateQuantity() {
+      if (!this.$store.state.orderQuantity
+        || this.$store.state.orderQuantity === ''
+        || this.$store.state.orderQuantity[this.$store.state.orderQuantity - 1] === '.') {
+        return;
+      }
+
+      const minTickSizeFraction = this.currentMarket.minimumTickSize - Math.floor(this.currentMarket.minimumTickSize);
+      const marketTickSizeDecimals = Math.log10(minTickSizeFraction * (10 ** 8));
+      const allowedQuantityDecimals = 8 - marketTickSizeDecimals;
+      const decimalFactor = 10 ** allowedQuantityDecimals;
+      const beforeRounded = new BigNumber(this.$store.state.orderQuantity);
+      const floored = beforeRounded.multipliedBy(decimalFactor).decimalPlaces(0, BigNumber.ROUND_DOWN);
+      const roundedQuantity = floored.dividedBy(decimalFactor);
+      if (roundedQuantity.isEqualTo(beforeRounded) === false) {
+        this.$store.commit('setOrderQuantity', roundedQuantity.toString());
+        this.$services.alerts.error(this.$t('orderQuantityLimited', {
+          marketName: this.currentMarket.marketName,
+          allowedQuantityDecimals,
+        }));
+      }
+    },
+
     confirmOrder() {
+      this.validateQuantity();
+
       if (this.orderType === 'Market') {
         this.$store.commit('setOrderPrice', '');
         if (this.canPlaceMarketOrder !== true) {
@@ -567,11 +720,11 @@ export default {
     .side {
       display: flex;
 
-      .buy-btn { 
+      .buy-btn {
         margin-right: $space-sm;
       }
 
-      .sell-btn { 
+      .sell-btn {
         margin-left: $space-sm;
       }
     }

@@ -3,6 +3,7 @@ import {
   api,
   u,
 } from '@cityofzion/neon-js';
+import _ from 'lodash';
 import { BigNumber } from 'bignumber.js';
 import Async from 'async';
 
@@ -29,6 +30,10 @@ const calculateHoldingTotalBalance = (holding) => {
   return toBigNumber(_.get(holding, 'balance', toBigNumber(0)))
     .plus(_.get(holding, 'contractBalance', toBigNumber(0)))
     .plus(_.get(holding, 'openOrdersBalance', toBigNumber(0)));
+};
+const calculateHoldingAvailableBalance = (holding) => {
+  return toBigNumber(_.get(holding, 'balance', toBigNumber(0)))
+    .plus(_.get(holding, 'contractBalance', toBigNumber(0)));
 };
 
 export default {
@@ -326,17 +331,33 @@ export default {
       try {
         const inMemory = _.get(store.state.transactionDetails, hash);
         if (inMemory) {
-          inMemory.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
-          inMemory.confirmations = inMemory.currentBlockHeight - inMemory.block;
+          if (network.getSelectedNetwork().bestBlock) {
+            inMemory.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
+            inMemory.confirmations = inMemory.currentBlockHeight - inMemory.block;
+          }
           return resolve(inMemory);
         }
 
         return rpcClient.getRawTransaction(hash, 1)
           .then((transaction) => {
-            transaction.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
+            const transactionPromises = [];
+
             if (transaction.confirmations > 0) {
               transaction.confirmed = true;
-              transaction.block = transaction.currentBlockHeight - transaction.confirmations;
+
+              // Look up the block from the blockhash
+              transactionPromises.push(new Promise((resolve, reject) => {
+                store.dispatch('fetchBlockHeaderByHash', {
+                  blockHash: transaction.blockhash,
+                  done: ((data) => {
+                    resolve(data);
+                  }),
+                  failed: ((ex) => { reject(ex); }),
+                });
+              }).then((blockHeader) => {
+                transaction.block = blockHeader.index;
+                transaction.currentBlockHeight = transaction.confirmations + blockHeader.index;
+              }).catch(e => reject(e)));
             } else {
               transaction.confirmed = false;
             }
@@ -351,9 +372,8 @@ export default {
             });
 
             // pull information for inputs from their previous outputs
-            const inputPromises = [];
             transaction.vin.forEach((input) => {
-              inputPromises.push(rpcClient
+              transactionPromises.push(rpcClient
                 .getRawTransaction(input.txid, 1)
                 .then((inputTransaction) => {
                   const inputSource = inputTransaction.vout[input.vout];
@@ -368,7 +388,7 @@ export default {
                 .catch(e => reject(e)));
             });
 
-            Promise.all(inputPromises)
+            Promise.all(transactionPromises)
               .then(() => {
                 store.commit('putTransactionDetail', transaction);
                 resolve(transaction);
@@ -433,6 +453,10 @@ export default {
                 totalBalance: new BigNumber(0),
                 canPull: asset.canPull,
                 isUserAsset,
+                /* eslint-disable no-nested-ternary */
+                decimals: asset.decimals ?
+                  asset.decimals : (asset.symbol === 'NEO' ? 0 : 8),
+                /* eslint-enable no-nested-ternary */
               };
             };
 
@@ -479,6 +503,12 @@ export default {
                     if (!val.valid) {
                       if (val.retry) {
                         _.set(tokensToRetryBalances, holding.assetId, holding);
+                        // if we currently have a holding value for this ensure it doesn't vanish for a retriable error
+                        const existingHolding = this.getHolding(holding.assetId);
+                        if (existingHolding) {
+                          // TODO: May need some way in the UI to show that the balance of this asset may be out of date
+                          holdings.push(existingHolding);
+                        }
                       }
 
                       return; // token not found or other failure
@@ -487,6 +517,7 @@ export default {
                     holding.balance = new BigNumber(val.balance.toString());
                     holding.symbol = val.symbol;
                     holding.name = val.name;
+                    holding.availableBalance = calculateHoldingAvailableBalance(holding);
                     holding.totalBalance = calculateHoldingTotalBalance(holding);
                     holding.decimals = val.decimals;
 
@@ -510,6 +541,7 @@ export default {
               promises.push(dex.fetchContractBalance(holding.assetId)
                 .then((res) => {
                   holding.contractBalance = toBigNumber(res);
+                  holding.availableBalance = calculateHoldingAvailableBalance(holding);
                   holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {
@@ -519,6 +551,7 @@ export default {
               promises.push(dex.fetchOpenOrderBalance(holding.assetId)
                 .then((res) => {
                   holding.openOrdersBalance = toBigNumber(res);
+                  holding.availableBalance = calculateHoldingAvailableBalance(holding);
                   holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {

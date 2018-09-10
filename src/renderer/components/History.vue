@@ -52,7 +52,7 @@ export default {
     &.right {
       flex: none;
       margin-left: $space-lg;
-      width: $right-sidebar-width;
+      width: $right-column-width;
 
       .add-token {
         position: relative;

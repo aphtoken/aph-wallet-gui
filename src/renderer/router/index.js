@@ -125,17 +125,18 @@ export default new Router({
           component: require('@/components/Dex').default,
           meta: {
             isMenuToggleable: true,
+            showTransactionsSidebar: false, // TODO: enable this later when it shows pending transactions.
           },
           children: [
             {
               path: '',
               components: {
-                'top-left': require('@/components/dex/MarketSelection').default,
-                'bottom-left': require('@/components/dex/OrderForm').default,
-                'top-middle': require('@/components/dex/Chart').default,
-                'bottom-middle': require('@/components/dex/OrderHistory').default,
-                'top-right': require('@/components/dex/OrderBook').default,
-                'bottom-right': require('@/components/dex/TradeHistory').default,
+                'left-top': require('@/components/dex/MarketSelection').default,
+                'left-bottom': require('@/components/dex/OrderForm').default,
+                'middle-top': require('@/components/dex/Chart').default,
+                'middle-bottom': require('@/components/dex/OrderHistory').default,
+                'right-top': require('@/components/dex/OrderBook').default,
+                'right-bottom': require('@/components/dex/TradeHistory').default,
               },
             },
           ],

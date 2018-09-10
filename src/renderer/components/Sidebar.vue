@@ -1,9 +1,9 @@
 <template>
-  <section id="sidebar" @click="collapsed ? setCollapsed(!collapsed) : null" 
+  <section id="sidebar" @click="collapsed ? setCollapsed(!collapsed) : null"
     :class="{'collapsed': toggleable && collapsed, 'expanded': toggleable && !collapsed}">
-    <aph-icon class="toggle" 
+    <aph-icon class="toggle"
       v-if="toggleable"
-      @click.stop.prevent="setCollapsed(!collapsed)" 
+      @click.stop.prevent="setCollapsed(!collapsed)"
       :name="collapsed ? 'double-arrow-right' : 'double-arrow-left'">
     </aph-icon>
     <template v-if="!toggleable || (toggleable && !collapsed)">
@@ -24,9 +24,9 @@
           <span class="label">{{ $t('tradeDEX') }}</span>
         </router-link>
         <router-link v-if="currentNetwork.net !== 'MainNet'" to="/authenticated/commit">
-        <span class="icon">
-          <aph-icon name="commit"></aph-icon>
-        </span>
+          <span class="icon">
+            <aph-icon name="commit"></aph-icon>
+          </span>
           <span class="label">{{$t('commit')}} APH</span>
         </router-link>
         <router-link v-else to="/authenticated/buy-aph">
@@ -129,6 +129,7 @@ export default {
   watch: {
     $route(to) {
       const isToggleable = to.matched.some(record => record.meta.isMenuToggleable);
+
       this.$store.commit('setMenuToggleable', isToggleable);
 
       if (isToggleable) {

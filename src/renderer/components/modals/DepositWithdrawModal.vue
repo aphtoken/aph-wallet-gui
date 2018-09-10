@@ -14,7 +14,10 @@
           <span class="value">{{ $formatNumber(holding.balance) }}</span> 
         </div>
       </div>
-      <aph-input type="number" placeholder="Amount" :light="true" v-model="amount"></aph-input>
+      <div class="amount">
+        <aph-input :isNumeric="true" @blur="amount = $cleanAmount(amount, holding)" placeholder="Amount" :light="true" v-model="amount"></aph-input>
+        <div class="max" v-if="hasAsset" @click="setAmountToMax">{{$t('max')}}</div>
+      </div>
     </div>
     <div class="footer">
       <button class="cancel-btn" @click="onCancel">{{$t('cancel')}}</button>
@@ -34,12 +37,21 @@ export default {
 
   computed: {
     shouldDisableDepositWithdrawButton() {
-      return !this.amount.length || this.amount <= 0;
+      return isNaN(this.amount) ||
+        !this.amount.length ||
+        this.amount <= 0;
     },
     holding() {
       return _.find(this.$store.state.holdings, (holding) => {
         return holding.assetId === this.$store.state.depositWithdrawModalModel.holdingAssetId;
       });
+    },
+    hasAsset() {
+      const balance = this.isDeposit ?
+        this.holding.balance :
+        this.holding.contractBalance;
+
+      return balance > 0;
     },
   },
 
@@ -48,6 +60,14 @@ export default {
       isDeposit: false,
       amount: '',
     };
+  },
+
+  methods: {
+    setAmountToMax() {
+      this.amount = this.isDeposit ?
+        this.holding.balance.toString() :
+        this.holding.contractBalance.toString();
+    },
   },
 
   mounted() {
@@ -96,24 +116,46 @@ export default {
         }
       }
     }
-    .aph-input {
-      border-color: $grey;
 
-      &.focused {
-        border-color: $purple;
+    .amount {
+      position: relative;
+
+      .aph-input { 
+        border-color: $grey;
+
+        &.focused {
+          border-color: $purple;
+        }
+
+        input {
+          color: $dark;
+        }
+
+        .placeholder {
+          color: $grey;
+          font-family: GilroyMedium;
+        }
+
+        & + .aph-input {
+          margin-top: $space;
+        }
       }
 
-      input {
-        color: $dark;
-      }
+      .max {
+        @include transition(color);
 
-      .placeholder {
+        bottom: toRem(16px);
         color: $grey;
-        font-family: GilroyMedium;
-      }
+        cursor: pointer;
+        font-size: toRem(10px);
+        position: absolute;
+        right: 0;
+        text-transform: uppercase;
+        z-index: 0;
 
-      & + .aph-input {
-        margin-top: $space;
+        &:hover {
+          color: $purple;
+        }
       }
     }
   }
