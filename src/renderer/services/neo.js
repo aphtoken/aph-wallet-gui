@@ -950,13 +950,13 @@ export default {
               let requiredNEO = new BigNumber(0);
               let requiredGAS = new BigNumber(0);
 
-              if (existingBalance.balance.balance.assets.NEO.unspent) {
+              if (existingBalance.balance.balance.assets.NEO) {
                 existingBalance.balance.balance.assets.NEO.unspent.forEach((unspent) => {
                   unspentNEOTotal = unspentNEOTotal.plus(unspent.value);
                 });
               }
 
-              if (existingBalance.balance.balance.assets.GAS.unspent) {
+              if (existingBalance.balance.balance.assets.GAS) {
                 existingBalance.balance.balance.assets.GAS.unspent.forEach((unspent) => {
                   unspentGASTotal = unspentGASTotal.plus(unspent.value);
                 });
@@ -1077,7 +1077,7 @@ export default {
         }
       })
       .catch((e) => {
-        alerts.exception(e);
+        alerts.error(`Failed to fetch address balance. ${e.message}`);
       });
   },
 
@@ -1164,16 +1164,6 @@ export default {
                 });
               })
               .catch((e) => {
-                const dump = {
-                  net: config.net,
-                  address: config.address,
-                  intents: config.intents,
-                  balance: config.balance,
-                  script: config.script,
-                  gas: config.gas,
-                  tx: config.tx,
-                };
-                console.log(dump);
                 reject(`Failed to send GAS fracture transaction. ${e.message}`);
               });
           })
