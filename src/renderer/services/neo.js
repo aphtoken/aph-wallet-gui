@@ -928,7 +928,7 @@ export default {
       });
   },
 
-  fetchSystemAssetBalance(forAddress, intents) {
+  fetchSystemAssetBalance(forAddress, intents, useCache) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -938,7 +938,7 @@ export default {
           forAddress = currentWallet.address;
         }
 
-        if (_.has(addressBalances, forAddress)) {
+        if (useCache !== false && _.has(addressBalances, forAddress)) {
           const existingBalance = _.get(addressBalances, forAddress);
           if (existingBalance && existingBalance.pulled
             && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {

@@ -1094,7 +1094,7 @@ export default {
         api.fillKeys(config)
           .then((configResponse) => {
             return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(dexAddress, config.intents)
+              neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
                 .then((balance) => {
                   configResponse.balance = balance;
                   resolveBalance(configResponse);
@@ -1186,7 +1186,7 @@ export default {
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-        neo.fetchSystemAssetBalance(dexAddress)
+        neo.fetchSystemAssetBalance(dexAddress, null, false)
           .then((balance) => {
             config.balance = balance;
             const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
@@ -1396,7 +1396,7 @@ export default {
         api.fillKeys(config)
           .then((configResponse) => {
             return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(dexAddress, config.intents)
+              neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
                 .then((balance) => {
                   configResponse.balance = balance;
                   resolveBalance(configResponse);
@@ -1411,7 +1411,7 @@ export default {
           })
           .then((configResponse) => {
             return new Promise((resolveInputs) => {
-              neo.fetchSystemAssetBalance(dexAddress, config.intents)
+              neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
                 .then((balance) => {
                   const unspents = assetId === assets.GAS ? balance.assets.GAS.unspent : balance.assets.NEO.unspent;
                   const input = _.find(unspents, (o) => {
@@ -1534,7 +1534,7 @@ export default {
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
-        neo.fetchSystemAssetBalance(dexAddress)
+        neo.fetchSystemAssetBalance(dexAddress, null, false)
           .then((balance) => {
             if (balance.assets.GAS) {
               balance.assets.GAS.unspent.forEach((u) => {
