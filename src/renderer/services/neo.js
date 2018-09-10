@@ -1110,7 +1110,7 @@ export default {
                 return api.createTx(config, 'contract');
               })
               .then((config) => {
-                const gas = balance.balance.assets.GAS;
+                const gas = balance.assets.GAS;
                 const extraBalanceCheckSize = sizeOfOutputs.multipliedBy(targetNumberOfOutputs).multipliedBy(10);
                 if (extraBalanceCheckSize.isLessThanOrEqualTo(gas.balance)) {
                   // there is plenty of gas available, make the outputs larger than needed
