@@ -198,6 +198,11 @@ export default {
     .offer {
       margin-bottom: $space-xs;
     }
+
+    .taking > div:first-child {
+      overflow-y:auto;
+      max-height: toRem(400px);
+    }
   }
 
   .footer {
