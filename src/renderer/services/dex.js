@@ -1072,13 +1072,6 @@ export default {
           gas: 0,
         };
 
-        const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-        if (assetId === assets.NEO) {
-          config.intents = api.makeIntent({ NEO: quantity }, assets.DEX_SCRIPT_HASH);
-        } else if (assetId === assets.GAS) {
-          config.intents = api.makeIntent({ GAS: quantity }, assets.DEX_SCRIPT_HASH);
-        }
-
         quantity = toBigNumber(quantity);
 
         if (currentWallet.isLedger === true) {
@@ -1094,7 +1087,7 @@ export default {
         api.fillKeys(config)
           .then((configResponse) => {
             return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
+              neo.fetchSystemAssetBalance(currentWallet.address, null, false)
                 .then((balance) => {
                   configResponse.balance = balance;
                   resolveBalance(configResponse);
@@ -1190,9 +1183,6 @@ export default {
           .then((balance) => {
             config.balance = balance;
             const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
-
-            config.tx.inputs = [];
-            config.tx.outputs = [];
 
             const promises = [];
             unspents.forEach((u) => {
