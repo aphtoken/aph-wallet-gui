@@ -530,8 +530,12 @@ export default {
       }
 
       const minTickSizeFraction = this.currentMarket.minimumTickSize - Math.floor(this.currentMarket.minimumTickSize);
-      const marketTickSizeDecimals = Math.log10(minTickSizeFraction * (10 ** 8));
-      const allowedQuantityDecimals = 8 - marketTickSizeDecimals;
+      let allowedQuantityDecimals;
+      if (minTickSizeFraction <= 0.00000001) {
+        allowedQuantityDecimals = 0;
+      } else {
+        allowedQuantityDecimals = Math.log10(minTickSizeFraction * (10 ** 8));
+      }
       const decimalFactor = 10 ** allowedQuantityDecimals;
       const beforeRounded = new BigNumber(this.$store.state.orderQuantity);
       const floored = beforeRounded.multipliedBy(decimalFactor).decimalPlaces(0, BigNumber.ROUND_DOWN);
