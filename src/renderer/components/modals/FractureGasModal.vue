@@ -55,9 +55,8 @@ export default {
     fracture() {
       this.$services.settings.setGasFracture(true);
       this.sending = true;
-      this.$services.neo.fractureGAS(this.$store.state.fractureGasModalModel.recommendedUTXOs
-        - this.$store.state.fractureGasModalModel.currentOutputsAboveFee,
-      this.$store.state.fractureGasModalModel.fee)
+      this.$services.neo.fractureGAS(this.$store.state.fractureGasModalModel.recommendedUTXOs,
+        this.$store.state.fractureGasModalModel.fee)
         .then(() => {
           this.$services.alerts.success(this.$t('sentFracture'));
           this.onClose();

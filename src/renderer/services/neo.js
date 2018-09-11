@@ -1086,7 +1086,6 @@ export default {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
-        let sizeOfOutputs = new BigNumber(minimumSize);
 
         this.fetchSystemAssetBalance(currentWallet.address)
           .then((balance) => {
@@ -1110,13 +1109,9 @@ export default {
                 return api.createTx(config, 'contract');
               })
               .then((config) => {
-                const gas = balance.assets.GAS;
-                const extraBalanceCheckSize = sizeOfOutputs.multipliedBy(targetNumberOfOutputs).multipliedBy(10);
-                if (extraBalanceCheckSize.isLessThanOrEqualTo(gas.balance)) {
-                  // there is plenty of gas available, make the outputs larger than needed
-                  sizeOfOutputs = sizeOfOutputs.multipliedBy(10);
-                }
+                BigNumber.config({ DECIMAL_PLACES: 8, ROUNDING_MODE: 3 });
 
+                const gas = balance.assets.GAS;
                 const sortedUnspents = _.sortBy(gas.unspent, [unspent => unspent.value.toNumber()]).reverse();
                 let totalInputs = new BigNumber(0);
                 config.tx.inputs = [];
@@ -1124,9 +1119,6 @@ export default {
                 config.fees = currentNetwork.fee;
 
                 sortedUnspents.forEach((unspent) => {
-                  if (totalInputs.isGreaterThanOrEqualTo(targetNumberOfOutputs * sizeOfOutputs)) {
-                    return;
-                  }
                   totalInputs = totalInputs.plus(unspent.value);
                   config.tx.inputs.push({
                     prevHash: unspent.txid,
@@ -1135,14 +1127,24 @@ export default {
                 });
 
                 let usedInputs = new BigNumber(0);
+                let outputSize = totalInputs.minus(currentNetwork.fee).dividedBy(targetNumberOfOutputs);
+                if (outputSize.isLessThan(minimumSize)) {
+                  outputSize = minimumSize;
+                }
+
                 for (let i = 0; i < targetNumberOfOutputs; i += 1) {
-                  if (usedInputs.isLessThanOrEqualTo(totalInputs)) {
+                  let thisOutputSize = outputSize;
+                  if (usedInputs.plus(thisOutputSize).isGreaterThanOrEqualTo(totalInputs)) {
+                    thisOutputSize = new BigNumber(totalInputs).minus(usedInputs);
+                  }
+
+                  if (thisOutputSize.isGreaterThan(0)) {
                     config.tx.outputs.push({
                       assetId: assets.GAS,
                       scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),
-                      value: sizeOfOutputs,
+                      value: outputSize,
                     });
-                    usedInputs = usedInputs.plus(sizeOfOutputs);
+                    usedInputs = usedInputs.plus(outputSize);
                   }
                 }
 
