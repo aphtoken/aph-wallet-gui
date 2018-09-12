@@ -476,13 +476,29 @@ async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilen
 }
 
 async function fetchOrderHistory({ commit }, { isRequestSilent }) {
-  let orders;
+  let orderHistory;
   commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
     { identifier: 'fetchOrderHistory' });
 
+  const currentNetwork = network.getSelectedNetwork();
+  const currentWallet = wallets.getCurrentWallet();
+  const orderHistoryStorageKey = `orderhistory.${currentWallet.address}.${currentNetwork.net}`;
   try {
-    orders = await dex.fetchOrderHistory();
-    commit('setOrderHistory', orders);
+    orderHistory = await fetchCachedData(orderHistoryStorageKey);
+    commit('setOrderHistory', orderHistory);
+  } catch (holdings) {
+    commit('setOrderHistory', orderHistory);
+  }
+
+  try {
+    if (orderHistory && orderHistory.length > 0) {
+      const newOrders = await dex.fetchOrderHistory(0, orderHistory[0].created);
+      commit('addToOrderHistory', newOrders);
+    } else {
+      const orders = await dex.fetchOrderHistory();
+      commit('setOrderHistory', orders);
+    }
+
     commit('endRequest', { identifier: 'fetchOrderHistory' });
   } catch (message) {
     alerts.networkException(message);

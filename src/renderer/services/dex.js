@@ -301,7 +301,7 @@ export default {
     });
   },
 
-  fetchOrderHistory(before = 0) {
+  fetchOrderHistory(before = 0, after = 0) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -309,7 +309,7 @@ export default {
         const ordersPageSize = 100;
 
         axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}
-?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&before=${before}`)
+?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&before=${before}&after=${after}`)
           .then((res) => {
             const orders = res.data.orders;
 
@@ -340,7 +340,7 @@ export default {
               resolve(orders);
             } else {
               // get the next page
-              this.fetchOrderHistory(orders[orders.length - 1].created)
+              this.fetchOrderHistory(orders[orders.length - 1].created, after)
                 .then((nextOrders) => {
                   orders.push(...nextOrders);
                   resolve(orders);
@@ -390,6 +390,11 @@ export default {
   fetchOpenOrderBalance(assetId) {
     return new Promise((resolve, reject) => {
       try {
+        if (!store.state.orderHistory) {
+          resolve(0);
+          return;
+        }
+
         const openOrdersForAsset = _.filter(store.state.orderHistory, (order) => {
           return order.assetIdToGive === assetId && (order.status === 'Open' || order.status === 'PartiallyFilled');
         });

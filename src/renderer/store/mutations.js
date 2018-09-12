@@ -6,6 +6,7 @@ import { requests } from '../constants';
 import { alerts, db, neo, dex } from '../services';
 
 export {
+  addToOrderHistory,
   clearActiveTransaction,
   clearRecentTransactions,
   clearSearchTransactions,
@@ -477,6 +478,21 @@ function setTradeHistory(state, trades) {
 
 function setOrderHistory(state, orders) {
   state.orderHistory = orders;
+
+  const orderHistoryStorageKey = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
+}
+function addToOrderHistory(state, newOrders) {
+  if (!state.orderHistory) {
+    state.orderHistory = [];
+  }
+
+  for (let i = newOrders.length - 1; i >= 0; i -= 1) {
+    state.orderHistory.unshift(newOrders[i]);
+  }
+
+  const orderHistoryStorageKey = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 
 function setOrderToConfirm(state, order) {
