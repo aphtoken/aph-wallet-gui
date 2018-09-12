@@ -301,7 +301,7 @@ export default {
     });
   },
 
-  fetchOrderHistory(before = 0, after = 0) {
+  fetchOrderHistory(before = 0, after = 0, sort = 'DESC') {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -309,7 +309,7 @@ export default {
         const ordersPageSize = 100;
 
         axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}
-?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&before=${before}&after=${after}`)
+?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&before=${before}&after=${after}&sort=${sort}`)
           .then((res) => {
             const orders = res.data.orders;
 
@@ -340,7 +340,7 @@ export default {
               resolve(orders);
             } else {
               // get the next page
-              this.fetchOrderHistory(orders[orders.length - 1].created, after)
+              this.fetchOrderHistory(orders[orders.length - 1].created, after, sort)
                 .then((nextOrders) => {
                   orders.push(...nextOrders);
                   resolve(orders);

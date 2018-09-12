@@ -493,7 +493,7 @@ async function fetchOrderHistory({ commit }, { isRequestSilent }) {
   try {
     if (orderHistory && orderHistory.length > 0
       && orderHistory[0].updated) {
-      const newOrders = await dex.fetchOrderHistory(0, orderHistory[0].updated);
+      const newOrders = await dex.fetchOrderHistory(0, orderHistory[0].updated, 'ASC');
       commit('addToOrderHistory', newOrders);
     } else {
       const orders = await dex.fetchOrderHistory();

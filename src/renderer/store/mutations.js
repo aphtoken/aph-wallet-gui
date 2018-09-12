@@ -487,7 +487,7 @@ function addToOrderHistory(state, newOrders) {
     state.orderHistory = [];
   }
 
-  for (let i = newOrders.length - 1; i >= 0; i -= 1) {
+  for (let i = 0; i < newOrders.length; i += 1) {
     const existingOrderIndex = _.findIndex(state.orderHistory, (o) => {
       return o.orderId === newOrders[i].orderId;
     });
