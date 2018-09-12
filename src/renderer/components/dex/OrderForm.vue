@@ -24,6 +24,7 @@
           </div>
           <div class="options">
             <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
+              <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info"></aph-icon>
               <label>{{$t('postOnly')}}</label>
               <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
               <aph-icon name="radio-off" v-else></aph-icon>
@@ -233,6 +234,13 @@ export default {
         const openOrdersBalance = this.aphHolding.openOrdersBalance
           ? this.$formatNumber(this.aphHolding.openOrdersBalance) : '0';
         return this.$t('walletBalanceContractBalance', { walletBalance, contractBalance, openOrdersBalance });
+      } catch (e) {
+        return '';
+      }
+    },
+    postOnlyToolTip() {
+      try {
+        return this.$t('postOnlyTooltip');
       } catch (e) {
         return '';
       }
@@ -734,7 +742,7 @@ export default {
     }
 
     .order-type {
-      margin: $space 0;
+      margin-top: $space;
     }
 
     .percentages {
@@ -749,7 +757,7 @@ export default {
 
         cursor: pointer;
         flex: 1;
-        padding: $space 0;
+        padding: $space-sm 0;
         text-align: center;
 
         &:hover {
@@ -793,6 +801,8 @@ export default {
     }
 
     .options {
+      display: flex;
+      justify-content: center;
       color: $grey;
       margin: $space 0 $space;
 
@@ -816,6 +826,10 @@ export default {
           .fill {
             fill: $dark-grey;
           }
+        }
+
+        .post-only-info-icon {
+          margin-right: $space-sm;
         }
       }
     }
@@ -925,7 +939,7 @@ export default {
     .label {
       @extend %small-uppercase-grey-label-dark;
 
-      flex: none
+      flex: none;
     }
 
     .value {
@@ -967,6 +981,12 @@ export default {
           .aph-icon {
             .fill {
               fill: $purple !important;
+            }
+          }
+
+          .post-only-info-icon {
+            .fill {
+              fill: $dark-grey !important;
             }
           }
         }

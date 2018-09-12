@@ -195,6 +195,7 @@
   "pleaseEnterValidScriptHash": "Please enter a valid ICO script hash",
   "pleaseWaitForGas": "Please wait for the GAS claim to complete.",
   "postOnly": "Post Only",
+  "postOnlyTooltip": "Post Only option ensures the order won't match with a pre-existing order. If your order would cause a match with a pre-existing order, the order will be canceled. This ensures that you are the market maker and won't pay any fees.",
   "preferences": "Preferences",
   "price": "Price",
   "priceBase": "Price ({base})",
