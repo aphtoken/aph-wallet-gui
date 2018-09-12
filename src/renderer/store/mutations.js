@@ -488,6 +488,16 @@ function addToOrderHistory(state, newOrders) {
   }
 
   for (let i = newOrders.length - 1; i >= 0; i -= 1) {
+    const existingOrderIndex = _.findIndex(state.orderHistory, (o) => {
+      return o.orderId === newOrders[i].orderId;
+    });
+
+    if (existingOrderIndex > -1) {
+      // this order is already in our cache, must be an update
+      // remove the existing order and add the updated version to the top
+      state.orderHistory.splice(existingOrderIndex, 1);
+    }
+
     state.orderHistory.unshift(newOrders[i]);
   }
 
