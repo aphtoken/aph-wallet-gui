@@ -1072,13 +1072,6 @@ export default {
           gas: 0,
         };
 
-        const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-        if (assetId === assets.NEO) {
-          config.intents = api.makeIntent({ NEO: quantity }, assets.DEX_SCRIPT_HASH);
-        } else if (assetId === assets.GAS) {
-          config.intents = api.makeIntent({ GAS: quantity }, assets.DEX_SCRIPT_HASH);
-        }
-
         quantity = toBigNumber(quantity);
 
         if (currentWallet.isLedger === true) {
@@ -1092,63 +1085,63 @@ export default {
 
         alerts.success('Processing withdraw request...');
         api.fillKeys(config)
-          .then((c) => {
+          .then((configResponse) => {
             return new Promise((resolveBalance) => {
-              api.neoscan.getBalance(c.net, dexAddress)
+              neo.fetchSystemAssetBalance(currentWallet.address, null, false)
                 .then((balance) => {
-                  c.balance = balance;
-                  resolveBalance(c);
+                  configResponse.balance = balance;
+                  resolveBalance(configResponse);
                 })
                 .catch((e) => {
-                  reject(e);
+                  reject(`Failed to fetch address balance. ${e.message}`);
                 });
             });
           })
-          .then((c) => {
-            return api.createTx(c, 'invocation');
+          .then((configResponse) => {
+            return api.createTx(configResponse, 'invocation');
           })
-          .then((c) => {
+          .then((configResponse) => {
             return new Promise((resolveTx) => {
-              this.calculateWithdrawInputsAndOutputs(c, assetId, quantity)
+              this.calculateWithdrawInputsAndOutputs(configResponse, assetId, quantity)
                 .then(() => {
                   const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-                  c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
-                  c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+                  configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
+                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
+                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
                     u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
 
-                  c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-                  c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+                  configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+                  configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
                     u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
-                  resolveTx(c);
+                  resolveTx(configResponse);
                 })
                 .catch(() => {
                   reject('Failed to calculate withdraw inputs and outputs');
                 });
             });
           })
-          .then((c) => {
-            return api.signTx(c);
+          .then((configResponse) => {
+            return api.signTx(configResponse);
           })
-          .then((c) => {
+          .then((configResponse) => {
             const attachInvokedContract = {
               invocationScript: ('00').repeat(2),
               verificationScript: '',
             };
 
             // We need to order this for the VM.
-            const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
+            const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
             if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
-              c.tx.scripts.push(attachInvokedContract);
+              configResponse.tx.scripts.push(attachInvokedContract);
             } else {
-              c.tx.scripts.unshift(attachInvokedContract);
+              configResponse.tx.scripts.unshift(attachInvokedContract);
             }
 
             let i = 0;
 
-            c.tx.outputs.forEach((o) => {
+            configResponse.tx.outputs.forEach((o) => {
               if (utxoIndex === -1 && quantity.isEqualTo(o.value)) {
                 utxoIndex = i;
               }
@@ -1158,29 +1151,19 @@ export default {
             if (utxoIndex === -1) {
               throw new Error('Unable to generate valid UTXO');
             }
-            return c;
+            return configResponse;
           })
-          .then((c) => {
-            return api.sendTx(c);
+          .then((configResponse) => {
+            return api.sendTx(configResponse);
           })
-          .then((c) => {
+          .then((configResponse) => {
             resolve({
-              success: c.response.result,
-              tx: c.tx,
+              success: configResponse.response.result,
+              tx: configResponse.tx,
               utxoIndex,
             });
           })
           .catch((e) => {
-            const dump = {
-              net: config.net,
-              address: config.address,
-              intents: config.intents,
-              balance: config.balance,
-              script: config.script,
-              gas: config.gas,
-              tx: config.tx,
-            };
-            console.log(dump);
             reject(`Failed to Mark Withdraw. ${e.message}`);
           });
       } catch (e) {
@@ -1196,13 +1179,10 @@ export default {
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-        api.neoscan.getBalance(config.net, dexAddress)
+        neo.fetchSystemAssetBalance(dexAddress, null, false)
           .then((balance) => {
             config.balance = balance;
             const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
-
-            config.tx.inputs = [];
-            config.tx.outputs = [];
 
             const promises = [];
             unspents.forEach((u) => {
@@ -1260,7 +1240,7 @@ export default {
               });
           })
           .catch((e) => {
-            reject(e);
+            reject(`Failed to fetch address balance. ${e.message}`);
           });
       } catch (e) {
         reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
@@ -1299,75 +1279,69 @@ export default {
         const token = assets.getNetworkAsset(assetId);
 
         api.fillKeys(config)
-          .then(() => {
-            return api.getBalanceFrom({
-              net: currentNetwork.net,
-              url: currentNetwork.rpc,
-              address: wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH),
-            }, api.neoscan);
+          .then((configResponse) => {
+            return new Promise((resolveBalance) => {
+              neo.fetchSystemAssetBalance(currentWallet.address)
+                .then((balance) => {
+                  configResponse.balance = balance;
+                  resolveBalance(configResponse);
+                })
+                .catch((e) => {
+                  reject(`Failed to fetch address balance. ${e.message}`);
+                });
+            });
           })
-          .then((c) => {
-            config.balance = c.balance;
-            config.sendingFromSmartContract = true;
-            return api.createTx(config, 'invocation');
+          .then((configResponse) => {
+            configResponse.sendingFromSmartContract = true;
+            return api.createTx(configResponse, 'invocation');
           })
-          .then((c) => {
+          .then((configResponse) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
 
-            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
 
             if (token.canPull !== false) {
-              c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
             }
 
-            c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
-            return api.signTx(c);
+            return api.signTx(configResponse);
           })
-          .then((c) => {
+          .then((configResponse) => {
             if (token.canPull !== false) {
               const attachInvokedContract = {
                 invocationScript: ('00').repeat(2),
                 verificationScript: '',
               };
               // We need to order this for the VM.
-              const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
+              const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
               if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
-                c.tx.scripts.push(attachInvokedContract);
+                configResponse.tx.scripts.push(attachInvokedContract);
               } else {
-                c.tx.scripts.unshift(attachInvokedContract);
+                configResponse.tx.scripts.unshift(attachInvokedContract);
               }
             }
 
-            return api.sendTx(c);
+            return api.sendTx(configResponse);
           })
-          .then((c) => {
+          .then((configResponse) => {
             resolve({
-              success: c.response.result,
-              tx: c.tx,
+              success: configResponse.response.result,
+              tx: configResponse.tx,
             });
           })
           .catch((e) => {
-            const dump = {
-              net: config.net,
-              address: config.address,
-              intents: config.intents,
-              balance: config.balance,
-              script: config.script,
-              gas: config.gas,
-              tx: config.tx,
-            };
-            console.log(dump);
-            reject(e);
+            reject(`Failed to Withdraw NEP5 balance. Error: ${e.message}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to Withdraw NEP5 balance. Error: ${e.message}`);
       }
     });
   },
@@ -1410,24 +1384,24 @@ export default {
         }
 
         api.fillKeys(config)
-          .then((c) => {
+          .then((configResponse) => {
             return new Promise((resolveBalance) => {
-              api.neoscan.getBalance(c.net, dexAddress)
+              neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
                 .then((balance) => {
-                  c.balance = balance;
-                  resolveBalance(c);
+                  configResponse.balance = balance;
+                  resolveBalance(configResponse);
                 })
                 .catch((e) => {
-                  reject(e);
+                  reject(`Failed to fetch address balance. ${e.message}`);
                 });
             });
           })
-          .then((c) => {
-            return api.createTx(c, 'invocation');
+          .then((configResponse) => {
+            return api.createTx(configResponse, 'invocation');
           })
-          .then((c) => {
+          .then((configResponse) => {
             return new Promise((resolveInputs) => {
-              api.neoscan.getBalance(c.net, dexAddress)
+              neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
                 .then((balance) => {
                   const unspents = assetId === assets.GAS ? balance.assets.GAS.unspent : balance.assets.NEO.unspent;
                   const input = _.find(unspents, (o) => {
@@ -1448,59 +1422,59 @@ export default {
                     return;
                   }
 
-                  c.tx.inputs = [{
+                  configResponse.tx.inputs = [{
                     prevHash: input.txid,
                     prevIndex: input.index,
                   }];
 
-                  c.tx.outputs = [{
+                  configResponse.tx.outputs = [{
                     assetId,
                     scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),
                     value: input.value,
                   }];
 
-                  resolveInputs(c);
+                  resolveInputs(configResponse);
                 })
                 .catch((e) => {
-                  reject(e);
+                  reject(`Failed to fetch address balance. ${e.message}`);
                 });
             });
           })
-          .then((c) => {
+          .then((configResponse) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
-            c.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
 
-            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
-            return api.signTx(c);
+            return api.signTx(configResponse);
           })
-          .then((c) => {
+          .then((configResponse) => {
             const attachInvokedContract = {
               invocationScript: ('00').repeat(2),
               verificationScript: '',
             };
 
             // We need to order this for the VM.
-            const acct = c.privateKey ? new wallet.Account(c.privateKey) : new wallet.Account(c.publicKey);
+            const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
             if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
-              c.tx.scripts.push(attachInvokedContract);
+              configResponse.tx.scripts.push(attachInvokedContract);
             } else {
-              c.tx.scripts.unshift(attachInvokedContract);
+              configResponse.tx.scripts.unshift(attachInvokedContract);
             }
 
-            return c;
+            return configResponse;
           })
-          .then((c) => {
-            return api.sendTx(c);
+          .then((configResponse) => {
+            return api.sendTx(configResponse);
           })
-          .then((c) => {
-            if (c.response.result !== true && tryCount < 3) {
+          .then((configResponse) => {
+            if (configResponse.response.result !== true && tryCount < 3) {
               alerts.error('Withdraw rejected by the network. Retrying...');
               setTimeout(() => {
                 this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1);
@@ -1508,14 +1482,14 @@ export default {
               return;
             }
 
-            if (c.response.result === true) {
+            if (configResponse.response.result === true) {
               alerts.success('Withdraw relayed, waiting for confirmation...');
               lastUTXOWithdrawn = `${utxoTxHash}${utxoIndex}`;
             }
 
             resolve({
-              success: c.response.result,
-              tx: c.tx,
+              success: configResponse.response.result,
+              tx: configResponse.tx,
             });
           })
           .catch((e) => {
@@ -1527,17 +1501,7 @@ export default {
               return;
             }
 
-            const dump = {
-              net: config.net,
-              address: config.address,
-              intents: config.intents,
-              balance: config.balance,
-              script: config.script,
-              gas: config.gas,
-              tx: config.tx,
-            };
-            console.log(dump);
-            reject(e);
+            reject(`Failed to send asset withdraw transaction. ${e.message}`);
           });
       } catch (e) {
         if (tryCount < 3) {
@@ -1548,7 +1512,7 @@ export default {
           return;
         }
 
-        reject(e);
+        reject(`Failed to send asset withdraw transaction. ${e.message}`);
       }
     });
   },
@@ -1557,11 +1521,10 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
-        const currentNetwork = network.getSelectedNetwork();
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
-        api.neoscan.getBalance(currentNetwork.net, dexAddress)
+        neo.fetchSystemAssetBalance(dexAddress, null, false)
           .then((balance) => {
             if (balance.assets.GAS) {
               balance.assets.GAS.unspent.forEach((u) => {
@@ -1572,7 +1535,7 @@ export default {
                     }
                   })
                   .catch((e) => {
-                    reject(e);
+                    reject(`Failed to fetch reserved UTXOs. ${e.message}`);
                   });
               });
             }
@@ -1585,16 +1548,16 @@ export default {
                     }
                   })
                   .catch((e) => {
-                    reject(e);
+                    reject(`Failed to fetch reserved UTXOs. ${e.message}`);
                   });
               });
             }
           })
           .catch((e) => {
-            reject(e);
+            reject(`Failed to fetch address balance. ${e.message}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to fetch reserved UTXOs. ${e.message}`);
       }
     });
   },
@@ -1807,7 +1770,7 @@ export default {
                   resolve(res.tx);
                 })
                 .catch((e) => {
-                  reject(e);
+                  reject(`Commit Failed. ${e.message}`);
                 });
             } else {
               reject('Transaction rejected');
@@ -1998,45 +1961,43 @@ export default {
         }
 
         api.fillKeys(config)
-          .then((c) => {
-            if (!c.intents && currentNetwork.fee === 0) {
+          .then((configResponse) => {
+            if (!configResponse.intents && currentNetwork.fee === 0) {
               return new Promise((balanceResolve) => {
-                c.balance = new wallet.Balance({ address: c.address, net: c.net });
-                balanceResolve(c);
+                configResponse.balance = new wallet.Balance({ address: configResponse.address, net: configResponse.net });
+                balanceResolve(configResponse);
               });
             }
 
-            return api.getBalanceFrom(c, api.neoscan);
+            return new Promise((resolveBalance) => {
+              neo.fetchSystemAssetBalance(currentWallet.address, config.intents)
+                .then((balance) => {
+                  configResponse.balance = balance;
+                  resolveBalance(configResponse);
+                })
+                .catch((e) => {
+                  reject(`Failed to fetch address balance. ${e.message}`);
+                });
+            });
           })
-          .then((c) => {
-            return api.createTx(c, 'invocation');
+          .then((configResponse) => {
+            return api.createTx(configResponse, 'invocation');
           })
-          .then((c) => {
+          .then((configResponse) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            c.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            c.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
-            return api.signTx(c);
+            return api.signTx(configResponse);
           })
-          .then((c) => {
-            resolve(c);
+          .then((configResponse) => {
+            resolve(configResponse);
           })
           .catch((e) => {
-            const dump = {
-              net: config.net,
-              url: config.url,
-              address: config.address,
-              intents: config.intents,
-              balance: config.balance,
-              script: config.script,
-              gas: config.gas,
-              tx: config.tx,
-            };
-            console.log(dump);
-            reject(e);
+            reject(`Failed to build contract transaction. ${e.message}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to build contract transaction. ${e.message}`);
       }
     });
   },
@@ -2045,15 +2006,14 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         this.buildContractTransaction(operation, parameters, neoToSend, gasToSend)
-          .then(c => api.sendTx(c))
-          .then((c) => {
+          .then(configResponse => api.sendTx(configResponse))
+          .then((configResponse) => {
             resolve({
-              success: c.response.result,
-              tx: c.tx,
+              success: configResponse.response.result,
+              tx: configResponse.tx,
             });
           })
           .catch((e) => {
-            console.log(e);
             reject(e);
           });
       } catch (e) {
@@ -2084,13 +2044,13 @@ export default {
           api.fillKeys(config)
             .then((configResponse) => {
               return new Promise((resolveBalance) => {
-                api.neoscan.getBalance(configResponse.net, currentWallet.address)
+                neo.fetchSystemAssetBalance()
                   .then((balance) => {
                     configResponse.balance = balance;
                     resolveBalance(configResponse);
                   })
                   .catch((e) => {
-                    reject(`Failed to get address balance. Error: ${e.message}`);
+                    reject(`Failed to fetch address balance. ${e.message}`);
                   });
               });
             })
@@ -2137,21 +2097,11 @@ export default {
               });
             })
             .catch((e) => {
-              const dump = {
-                net: config.net,
-                address: config.address,
-                intents: config.intents,
-                balance: config.balance,
-                script: config.script,
-                gas: config.gas,
-                tx: config.tx,
-              };
-              console.log(dump);
               reject(`Failed to Claim Contract GAS. Error: ${e.message}`);
             });
         })
         .catch((e) => {
-          alerts.exception(e);
+          reject(`Failed to Claim Contract GAS. Error: ${e.message}`);
         });
     });
   },

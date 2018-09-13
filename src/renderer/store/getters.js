@@ -14,6 +14,7 @@ export const currentLoginToWallet = state => state.currentLoginToWallet;
 export const currentNetwork = state => state.currentNetwork;
 export const currentWallet = state => state.currentWallet;
 export const depositWithdrawModalModel = state => state.depositWithdrawModalModel;
+export const fractureGasModalModel = state => state.fractureGasModalModel;
 export const holdings = state => state.holdings;
 export const lastReceivedBlock = state => state.lastReceivedBlock;
 export const lastSuccessfulRequest = state => state.lastSuccessfulRequest;
