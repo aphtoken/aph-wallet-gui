@@ -604,10 +604,12 @@ export default {
     depositWithdrawConfirmed(isDeposit, holding, amount) {
       this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.assetId, Number(amount))
         .then(() => {
+          const action = (isDeposit ? this.$t('deposit') : this.$t('withdraw'));
+
           const message = this.$t('relayedToNetwork', {
             amount,
             symbol: holding.symbol,
-            action: (isDeposit ? this.$t('deposit') : this.$t('withdraw')),
+            action,
           });
           this.$services.alerts.success(message);
         })
