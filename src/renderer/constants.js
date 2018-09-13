@@ -70,6 +70,7 @@ const formats = {
 
 const intervals = {
   BLOCK: 20 * 1000,
+  GAS_FRACTURE_NOTIFICATION: 15 * 60 * 1000,
   HOLDINGS_POLLING: 30 * 1000,
   MARKETS_POLLING: 5 * 60 * 1000,
   NETWORK_STATUS: 10 * 1000,
@@ -97,6 +98,7 @@ const requests = {
 };
 
 const timeouts = {
+  BALANCE_PERSIST_FOR: 5 * 60 * 1000,
   CANCEL_ORDER: 5 * 60 * 1000,
   MONITOR_TRANSACTIONS: 10 * 60 * 1000,
   NEO_API_CALL: 500,

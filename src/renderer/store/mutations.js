@@ -34,7 +34,9 @@ export {
   setCurrentNetwork,
   setCurrentWallet,
   setDepositWithdrawModalModel,
+  setFractureGasModalModel,
   setGasClaim,
+  setGasFracture,
   setHoldings,
   setLastReceivedBlock,
   setLastSuccessfulRequest,
@@ -281,6 +283,7 @@ function setRecentTransactions(state, transactions) {
     state.recentTransactions.unshift(t);
     if (existingIsEmpty === false) {
       alerts.success(`New Transaction Found. TX: ${t.hash}`);
+      neo.resetSystemAssetBalanceCache();
     }
   });
 
@@ -401,6 +404,14 @@ function setWallets(state, wallets) {
 
 function setGasClaim(state, value) {
   state.gasClaim = value;
+}
+
+function setGasFracture(state, facture) {
+  state.gasFracture = facture;
+}
+
+function setFractureGasModalModel(state, model) {
+  state.fractureGasModalModel = model;
 }
 
 function setShowClaimGasModal(state, value) {

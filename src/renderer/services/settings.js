@@ -44,6 +44,7 @@ const CURRENCIES = {
     value: 'AUD',
   },
 };
+const GAS_FRACTURE_STORAGE_KEY = `${SETTINGS_STORAGE_KEY}.gasFracture`;
 const STYLE_MODE_STORAGE_KEY = `${SETTINGS_STORAGE_KEY}.style`;
 
 export default {
@@ -82,6 +83,7 @@ export default {
     store.commit('setCurrency', this.getCurrency());
     store.commit('setCurrencySymbol', this.getCurrencySymbol());
     store.commit('setStyleMode', this.getStyleMode());
+    store.commit('setGasFracture', this.getGasFracture());
   },
 
   getStyleMode() {
@@ -90,6 +92,17 @@ export default {
 
   setStyleMode(style) {
     storage.set(STYLE_MODE_STORAGE_KEY, style);
+    this.sync();
+
+    return this;
+  },
+
+  getGasFracture() {
+    return storage.get(GAS_FRACTURE_STORAGE_KEY, null);
+  },
+
+  setGasFracture(fracture) {
+    storage.set(GAS_FRACTURE_STORAGE_KEY, fracture);
     this.sync();
 
     return this;

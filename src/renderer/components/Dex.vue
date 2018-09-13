@@ -71,6 +71,8 @@ export default {
     this.$store.commit('setSocketOrderMatchFailed', (message) => {
       this.$services.alerts.error(`Failed to Match ${(message.side === 'bid' ? 'Buy' : 'Sell')} x${message.data.quantity}. ${message.data.errorMessage}`);
     });
+
+    this.$services.neo.promptGASFractureIfNecessary();
   },
 
   components: {
