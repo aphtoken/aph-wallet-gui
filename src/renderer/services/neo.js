@@ -1034,7 +1034,7 @@ export default {
 
   promptGASFractureIfNecessary() {
     const currentNetwork = network.getSelectedNetwork();
-    const recommendedUTXOs = 10;
+    const recommendedUTXOs = 16;
 
     if (!currentNetwork || currentNetwork.fee <= 0) {
       return;

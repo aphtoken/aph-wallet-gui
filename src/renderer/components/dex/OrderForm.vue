@@ -605,7 +605,6 @@ export default {
       this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.assetId, Number(amount))
         .then(() => {
           const action = (isDeposit ? this.$t('deposit') : this.$t('withdraw'));
-
           const message = this.$t('relayedToNetwork', {
             amount,
             symbol: holding.symbol,
@@ -622,8 +621,8 @@ export default {
     hideOrderConfirmationModal() {
       this.$store.commit('setOrderToConfirm', null);
     },
-    setMarket() {
-      this.$services.dex.setMarket(this.$services.assets.APH,
+    async setMarket() {
+      await this.$services.dex.setMarket(this.$services.assets.APH,
         this.$services.assets.GAS,
         100, 0.00001, 0.0000, 0.25)
         .then(() => {
@@ -632,7 +631,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.ATI,
+      await this.$services.dex.setMarket(this.$services.assets.ATI,
         this.$services.assets.APH,
         200, 0.00001, 0.25, 0)
         .then(() => {
@@ -641,7 +640,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.NEO,
+      await this.$services.dex.setMarket(this.$services.assets.NEO,
         this.$services.assets.GAS,
         0.5, 0.000001, 0.30946428, 0.30946428)
         .then(() => {
@@ -650,7 +649,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.ATI,
+      await this.$services.dex.setMarket(this.$services.assets.ATI,
         this.$services.assets.NEO,
         200, 0.00001, 0.25, 0.25)
         .then(() => {
@@ -659,7 +658,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.ATI,
+      await this.$services.dex.setMarket(this.$services.assets.ATI,
         this.$services.assets.GAS,
         200, 0.00001, 0.25, 0.25)
         .then(() => {
@@ -668,7 +667,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.APH,
+      await this.$services.dex.setMarket(this.$services.assets.APH,
         this.$services.assets.NEO,
         100, 0.0000001, 0, 0.25)
         .then(() => {
