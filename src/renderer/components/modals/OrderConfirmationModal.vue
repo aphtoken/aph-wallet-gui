@@ -73,19 +73,21 @@
         <div v-if="$store.state.orderToConfirm.assetIdToSell">
           <p v-if="quantityToPullFromWallet > 0">
             {{$t('thisOrderRequires', {
-            quantity: $formatNumber(quantityToPullFromWallet),
-            symbol: holdingForAssetToGive.symbol,
-            balance: $formatNumber(holdingForAssetToGive.contractBalance),
-            deposit: $formatNumber(quantityToPullFromWallet),
-            })}}
+                quantity: $formatNumber(quantityToPullFromWallet),
+                symbol: holdingForAssetToGive.symbol,
+                balance: $formatNumber(holdingForAssetToGive.contractBalance),
+                deposit: $formatNumber(quantityToPullFromWallet),
+              })
+            }}
           </p>
           <p v-if="$store.state.orderToConfirm.feeDeposit && $store.state.orderToConfirm.feeDeposit.quantityToDeposit > 0">
-          {{$t('thisOrderRequires', {
-          quantity: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityRequired),
-          symbol: $store.state.orderToConfirm.feeDeposit.symbol,
-          balance: $formatNumber($store.state.orderToConfirm.feeDeposit.currentQuantity),
-          deposit: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityToDeposit),
-          })}}
+            {{$t('thisOrderRequires', {
+                quantity: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityRequired),
+                symbol: $store.state.orderToConfirm.feeDeposit.symbol,
+                balance: $formatNumber($store.state.orderToConfirm.feeDeposit.currentQuantity),
+                deposit: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityToDeposit),
+              })
+            }}
           </p>
         </div>
 
