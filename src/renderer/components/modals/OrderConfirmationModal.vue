@@ -70,16 +70,25 @@
             {{$t('theFeeForCompletingYourTradeWillBe', { amount: $formatNumber($store.state.orderToConfirm.maxTakerFees)})}}
           </div>
         </div>
-        <div v-if="$store.state.orderToConfirm.deposits.length > 0">
-          <div class="deposit" v-for="(deposit, index) in $store.state.orderToConfirm.deposits" :key="index">
+        <div v-if="$store.state.orderToConfirm.assetIdToSell">
+          <p v-if="quantityToPullFromWallet > 0">
             {{$t('thisOrderRequires', {
-              quantity: $formatNumber(deposit.quantityRequired),
-              symbol: deposit.symbol,
-              balance: $formatNumber(deposit.currentQuantity),
-              deposit: $formatNumber(deposit.quantityToDeposit),
+            quantity: $formatNumber(quantityToPullFromWallet),
+            symbol: holdingForAssetToGive.symbol,
+            balance: $formatNumber(holdingForAssetToGive.contractBalance),
+            deposit: $formatNumber(quantityToPullFromWallet),
             })}}
-          </div>
+          </p>
+          <p v-if="$store.state.orderToConfirm.feeDeposit && $store.state.orderToConfirm.feeDeposit.quantityToDeposit > 0">
+          {{$t('thisOrderRequires', {
+          quantity: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityRequired),
+          symbol: $store.state.orderToConfirm.feeDeposit.symbol,
+          balance: $formatNumber($store.state.orderToConfirm.feeDeposit.currentQuantity),
+          deposit: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityToDeposit),
+          })}}
+          </p>
         </div>
+
         <div v-if="offersToTake.length > 0 && $store.state.orderToConfirm.quantityToTake < $store.state.orderToConfirm.quantity && $store.state.orderToConfirm.postOnly === false">
           <div v-if="offersToTake.length > 0">
             {{$t('youWillBeCreatingTheFollowingMakerOrder')}}
@@ -128,6 +137,16 @@ export default {
       return _.filter(this.$store.state.orderToConfirm.offersToTake, (offer) => {
         return offer.isBackupOffer !== true;
       });
+    },
+
+    holdingForAssetToGive() {
+      return _.find(this.$store.state.holdings, (o) => {
+        return o.assetId === this.$store.state.orderToConfirm.assetIdToSell;
+      });
+    },
+
+    quantityToPullFromWallet() {
+      return this.$store.state.orderToConfirm.expectedQuantityToGive - this.holdingForAssetToGive.contractBalance;
     },
 
     backupOffersToTake() {
