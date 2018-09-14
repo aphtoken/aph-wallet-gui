@@ -54,7 +54,7 @@
           </div>
           <div @click="actionableHolding = aphHolding" :class="['balance', {active: aphHolding.symbol === actionableHolding.symbol}]" :title="aphBalanceToolTip" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
             <div class="label">{{$t('balance')}} (APH)</div>
-            <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
+            <div class="value">{{ $formatNumber(aphHolding.availableBalance) }}</div>
           </div>
           <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="footer-buttons">
             <div class="row">
