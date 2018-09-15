@@ -561,8 +561,8 @@ export default {
                 .then((innerOrder) => {
                   resolve(innerOrder);
                 })
-                .catch((e) => {
-                  reject(`Error sending order retry. Error: ${e.message}`);
+                .catch((error) => {
+                  reject(`Error sending order. Error: ${error}`);
                 });
             }, 5000);
             return;
@@ -574,8 +574,8 @@ export default {
                 .then((innerOrder) => {
                   resolve(innerOrder);
                 })
-                .catch((e) => {
-                  reject(`Error sending order retry. Error: ${e.message}`);
+                .catch((error) => {
+                  reject(`Error sending order. Error: ${error}`);
                 });
             })
             .catch((error) => {
@@ -647,12 +647,12 @@ export default {
                           .then((secondaryOrder) => {
                             resolve(secondaryOrder);
                           })
-                          .catch((e) => {
-                            reject(`Error sending order retry. Error: ${e.message}`);
+                          .catch((error) => {
+                            reject(`Error sending order retry. Error: ${error}`);
                           });
                       })
-                      .catch((e) => {
-                        reject(`Error sending order retry. Error: ${e.message}`);
+                      .catch((error) => {
+                        reject(`Error sending order retry. Error: ${error}`);
                       });
                     return;
                   }
