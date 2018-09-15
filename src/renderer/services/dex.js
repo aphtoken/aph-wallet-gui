@@ -462,6 +462,14 @@ export default {
 
             order.quantityToTake = new BigNumber(res.data.quantityToTake);
             order.quantityToMake = order.quantity.minus(order.quantityToTake);
+
+            if (order.quantityToTake.isGreaterThan(0)
+              && order.quantityToMake.isGreaterThan(0)
+              && order.quantityToMake.isLessThan(order.market.minimumSize)) {
+              order.quantity = order.quantityToTake;
+              order.quantityToMake = new BigNumber(0);
+            }
+
             order.minTakerFees = new BigNumber(res.data.minTakerFees);
             order.maxTakerFees = new BigNumber(res.data.maxTakerFees);
             if (order.price !== null) {
@@ -549,14 +557,26 @@ export default {
           if (waitForDeposits) {
             // We have deposits pending, wait for our balance to reflect
             setTimeout(() => {
-              this.placeOrder(order, true);
+              this.placeOrder(order, true)
+                .then((innerOrder) => {
+                  resolve(innerOrder);
+                })
+                .catch((e) => {
+                  reject(`Error sending order retry. Error: ${e.message}`);
+                });
             }, 5000);
             return;
           }
 
           this.makeOrderDeposits(order)
             .then((o) => {
-              this.placeOrder(o, true);
+              this.placeOrder(o, true)
+                .then((innerOrder) => {
+                  resolve(innerOrder);
+                })
+                .catch((e) => {
+                  reject(`Error sending order retry. Error: ${e.message}`);
+                });
             })
             .catch((error) => {
               reject(`Failed to make automatic deposits. Error: ${error}`);
@@ -575,8 +595,14 @@ export default {
         });
 
         if (order.quantityToTake < order.quantity) {
+          // there is an amount remaining after taking all available open offers
+          // add a new maker offer to the book (if it meets minimum size requirements)
           order.quantity = order.quantity.minus(new BigNumber(order.quantityToTake));
-          buildPromises.push(this.buildAddOffer(order));
+          if (order.quantity.isGreaterThanOrEqualTo(new BigNumber(order.market.minimumSize))) {
+            buildPromises.push(this.buildAddOffer(order));
+          } else {
+            order.quantity = new BigNumber();
+          }
         }
 
         Promise.all(buildPromises)
@@ -620,6 +646,9 @@ export default {
                         this.placeOrder(secondaryFormedOrder)
                           .then((secondaryOrder) => {
                             resolve(secondaryOrder);
+                          })
+                          .catch((e) => {
+                            reject(`Error sending order retry. Error: ${e.message}`);
                           });
                       })
                       .catch((e) => {
@@ -1991,6 +2020,7 @@ export default {
             return api.signTx(configResponse);
           })
           .then((configResponse) => {
+            neo.applyTxToAddressSystemAssetBalance(currentWallet.address, configResponse.tx);
             resolve(configResponse);
           })
           .catch((e) => {
