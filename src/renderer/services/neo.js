@@ -962,11 +962,14 @@ export default {
                 });
               }
 
-              if (intents && intents.NEO) {
-                requiredNEO = requiredNEO.plus(intents.NEO);
-              }
-              if (intents && intents.GAS) {
-                requiredGAS = requiredGAS.plus(intents.GAS);
+              if (intents && intents.length > 0) {
+                intents.forEach((intent) => {
+                  if (intent.assetId === assets.NEO) {
+                    requiredNEO = requiredNEO.plus(intent.value);
+                  } else if (intent.assetId === assets.GAS) {
+                    requiredGAS = requiredGAS.plus(intent.value);
+                  }
+                });
               }
               requiredGAS = requiredGAS.plus(currentNetwork.fee);
 

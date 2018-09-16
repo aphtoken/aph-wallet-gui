@@ -462,6 +462,14 @@ export default {
 
             order.quantityToTake = new BigNumber(res.data.quantityToTake);
             order.quantityToMake = order.quantity.minus(order.quantityToTake);
+
+            if (order.quantityToTake.isGreaterThan(0)
+              && order.quantityToMake.isGreaterThan(0)
+              && order.quantityToMake.isLessThan(order.market.minimumSize)) {
+              order.quantity = order.quantityToTake;
+              order.quantityToMake = new BigNumber(0);
+            }
+
             order.minTakerFees = new BigNumber(res.data.minTakerFees);
             order.maxTakerFees = new BigNumber(res.data.maxTakerFees);
             if (order.price !== null) {
@@ -536,7 +544,7 @@ export default {
   },
 
   placeOrder(order, waitForDeposits) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         if (order.postOnly && order.offersToTake.length > 0) {
           reject('Post Only order would take open offers.');
@@ -549,14 +557,28 @@ export default {
           if (waitForDeposits) {
             // We have deposits pending, wait for our balance to reflect
             setTimeout(() => {
-              this.placeOrder(order, true);
+              this.placeOrder(order, true)
+                .then((innerOrder) => {
+                  resolve(innerOrder);
+                })
+                .catch((error) => {
+                  reject(`Error sending order. Error: ${error}`);
+                });
             }, 5000);
             return;
           }
 
           this.makeOrderDeposits(order)
-            .then((o) => {
-              this.placeOrder(o, true);
+            .then(() => {
+              setTimeout(() => {
+                this.placeOrder(order, true)
+                  .then((innerOrder) => {
+                    resolve(innerOrder);
+                  })
+                  .catch((error) => {
+                    reject(`Error sending order. Error: ${error}`);
+                  });
+              }, 500);
             })
             .catch((error) => {
               reject(`Failed to make automatic deposits. Error: ${error}`);
@@ -569,74 +591,83 @@ export default {
         Vue.set(order, 'status', 'Submitting');
 
         // build all the order transactions
-        const buildPromises = [];
-        order.offersToTake.forEach((o) => {
-          buildPromises.push(this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.orderType, order.market, o));
-        });
-
-        if (order.quantityToTake < order.quantity) {
-          order.quantity = order.quantity.minus(new BigNumber(order.quantityToTake));
-          buildPromises.push(this.buildAddOffer(order));
+        for (let i = 0; i < order.offersToTake.length; i += 1) {
+          const offer = order.offersToTake[i];
+          /* eslint-disable no-await-in-loop */
+          // need to ignore this rule, each of these build operations has to happen in order
+          // that way they'll each select the right UTXO inputs
+          await this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.orderType, order.market, offer);
+          /* eslint-enable no-await-in-loop */
         }
 
-        Promise.all(buildPromises)
-          .then(() => {
-            // send the signed transactions to the api for relay
-            const currentNetwork = network.getSelectedNetwork();
-            axios.post(`${currentNetwork.aph}/order`, JSON.stringify({
-              market: order.market.marketName,
-              postOnly: order.postOnly,
-              side: order.side,
-              orderType: order.orderType,
-              offersToTake: order.offersToTake,
-              quantityToTake: order.quantityToTake,
-              makerTx: order.makerTx,
-              quantityToMake: order.quantity,
-            }), {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            })
-              .then((res) => {
-                if (!res.data || !res.data.result) {
-                  reject('Order failed.');
-                } else if (res.data.result.error) {
-                  reject(`Order failed. Error: ${res.data.result.error}`);
-                } else {
-                  const responseQuantityToTake = new BigNumber(res.data.quantityToTake);
-                  const responseQuantityTaken = new BigNumber(res.data.quantityTaken);
+        if (order.quantityToTake < order.quantity) {
+          // there is an amount remaining after taking all available open offers
+          // add a new maker offer to the book (if it meets minimum size requirements)
+          order.quantity = order.quantity.minus(new BigNumber(order.quantityToTake));
+          if (order.quantity.isGreaterThanOrEqualTo(new BigNumber(order.market.minimumSize))) {
+            await this.buildAddOffer(order);
+          } else {
+            order.quantity = new BigNumber();
+          }
+        }
 
-                  if (responseQuantityToTake.isEqualTo(res.data.quantityTaken)) {
-                    resolve(res.data.transactionsSent.length);
-                    // for some reason this resolve isn't getting sent back to actions, temp fix here
-                    alerts.success(`${res.data.transactionsSent.length} orders relayed.`);
-                    store.commit('setOrderToConfirm', null);
-                    store.commit('endRequest', { identifier: 'placeOrder' });
-                  } else if (responseQuantityToTake.isGreaterThan(0)) {
-                    // didn't match enough quantity, try to form a new order and place it again
-                    order.quantity = responseQuantityToTake.minus(responseQuantityTaken);
-                    this.formOrder(order)
-                      .then((secondaryFormedOrder) => {
-                        this.placeOrder(secondaryFormedOrder)
-                          .then((secondaryOrder) => {
-                            resolve(secondaryOrder);
-                          });
+        // send the signed transactions to the api for relay
+        const currentNetwork = network.getSelectedNetwork();
+        axios.post(`${currentNetwork.aph}/order`, JSON.stringify({
+          market: order.market.marketName,
+          postOnly: order.postOnly,
+          side: order.side,
+          orderType: order.orderType,
+          offersToTake: order.offersToTake,
+          quantityToTake: order.quantityToTake,
+          makerTx: order.makerTx,
+          quantityToMake: order.quantity,
+        }), {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+          .then((res) => {
+            if (!res.data || !res.data.result) {
+              reject('Order failed.');
+            } else if (res.data.result.error) {
+              reject(`Order failed. Error: ${res.data.result.error}`);
+            } else {
+              const responseQuantityToTake = new BigNumber(res.data.quantityToTake);
+              const responseQuantityTaken = new BigNumber(res.data.quantityTaken);
+
+              if (responseQuantityToTake.isEqualTo(res.data.quantityTaken)) {
+                resolve(res.data.transactionsSent.length);
+                // for some reason this resolve isn't getting sent back to actions, temp fix here
+                alerts.success(`${res.data.transactionsSent.length} orders relayed.`);
+                store.commit('setOrderToConfirm', null);
+                store.commit('endRequest', { identifier: 'placeOrder' });
+              } else if (responseQuantityToTake.isGreaterThan(0)) {
+                // didn't match enough quantity, try to form a new order and place it again
+                order.quantity = responseQuantityToTake.minus(responseQuantityTaken);
+                this.formOrder(order)
+                  .then((secondaryFormedOrder) => {
+                    this.placeOrder(secondaryFormedOrder)
+                      .then((secondaryOrder) => {
+                        resolve(secondaryOrder);
                       })
-                      .catch((e) => {
-                        reject(`Error sending order retry. Error: ${e.message}`);
+                      .catch((error) => {
+                        reject(`Error sending order retry. Error: ${error}`);
                       });
-                    return;
-                  }
-                }
+                  })
+                  .catch((error) => {
+                    reject(`Error sending order retry. Error: ${error}`);
+                  });
+                return;
+              }
+            }
 
-                store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
-              })
-              .catch((e) => {
-                // console.log(e);
-                reject(`APH API Error: ${e.message}`);
-              });
+            store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
           })
-          .catch(e => reject(e));
+          .catch((e) => {
+            // console.log(e);
+            reject(`APH API Error: ${e.message}`);
+          });
       } catch (e) {
         reject(e);
       }
@@ -738,12 +769,16 @@ export default {
   },
 
   makeOrderDeposits(order) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
-        const depositPromises = [];
-        order.deposits.forEach((d) => {
-          depositPromises.push(this.depositAsset(d.assetId, d.quantityToDeposit.toNumber()));
-        });
+        for (let i = 0; i < order.deposits.length; i += 1) {
+          const deposit = order.deposits[i];
+          /* eslint-disable no-await-in-loop */
+          // need to ignore this rule, each of these build operations has to happen in order
+          // that way they'll each select the right UTXO inputs
+          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
+          /* eslint-enable no-await-in-loop */
+        }
 
         const watchInterval = setInterval(() => {
           let waiting = false;
@@ -760,18 +795,15 @@ export default {
           }
         }, intervals.BLOCK);
 
-        Promise.all(depositPromises)
-          .then(() => {
-            store.dispatch('fetchHoldings', {
-              done: () => {
-                clearInterval(watchInterval);
-                setTimeout(() => {
-                  resolve(order);
-                }, 5000);
-              },
-            });
-          })
-          .catch(e => reject(e));
+        store.dispatch('fetchHoldings', {
+          done: () => {
+            clearInterval(watchInterval);
+            setTimeout(() => {
+              neo.resetSystemAssetBalanceCache();
+              resolve(order);
+            }, 5000);
+          },
+        });
       } catch (e) {
         reject(e);
       }
@@ -960,11 +992,11 @@ export default {
                 neo.monitorTransactionConfirmation(res.tx, true)
                   .then(() => {
                     store.commit('setAssetHoldingsNeedRefresh', [assetId]);
-
+                    neo.resetSystemAssetBalanceCache();
                     resolve(res.tx);
                   })
                   .catch((e) => {
-                    reject(`Deposit Failed. ${e.message}`);
+                    reject(`Deposit Failed. ${e}`);
                   });
               } else {
                 reject('Transaction rejected');
@@ -974,7 +1006,7 @@ export default {
               store.commit('setAssetHoldingsNeedRefresh', [assetId]);
             })
             .catch((e) => {
-              reject(`Deposit Failed. ${e.message}`);
+              reject(`Deposit Failed. ${e}`);
             });
         } else {
           const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
@@ -1777,7 +1809,7 @@ export default {
             }
           })
           .catch((e) => {
-            reject(`Commit Failed. ${e.message}`);
+            reject(`Commit Failed. ${e}`);
           });
       } catch (e) {
         reject(`Commit Failed. ${e.message}`);
@@ -1807,7 +1839,7 @@ export default {
             }
           })
           .catch((e) => {
-            reject(`Claim Failed. ${e.message}`);
+            reject(`Claim Failed. ${e}`);
           });
       } catch (e) {
         reject(`Claim Failed. ${e.message}`);
@@ -1837,7 +1869,7 @@ export default {
             }
           })
           .catch((e) => {
-            reject(`Compound Failed. ${e.message}`);
+            reject(`Compound Failed. ${e}`);
           });
       } catch (e) {
         reject(`Compound Failed. ${e.message}`);
@@ -1991,6 +2023,7 @@ export default {
             return api.signTx(configResponse);
           })
           .then((configResponse) => {
+            neo.applyTxToAddressSystemAssetBalance(currentWallet.address, configResponse.tx);
             resolve(configResponse);
           })
           .catch((e) => {

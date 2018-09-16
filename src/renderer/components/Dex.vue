@@ -56,20 +56,24 @@ export default {
       /* eslint-disable max-len */
       this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Created. x${message.data.quantity} @${message.data.price}`);
       this.$store.dispatch('fetchHoldings', { done: null });
+      this.$services.neo.resetSystemAssetBalanceCache();
     });
 
     this.$store.commit('setSocketOrderMatched', (message) => {
       /* eslint-disable max-len */
       this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Filled. x${message.data.quantity} @${message.data.price}`);
       this.$store.dispatch('fetchHoldings', { done: null });
+      this.$services.neo.resetSystemAssetBalanceCache();
     });
 
     this.$store.commit('setSocketOrderCreationFailed', (message) => {
       this.$services.alerts.error(`Failed to Create ${(message.side === 'bid' ? 'Buy' : 'Sell')} Order. ${message.data.errorMessage}`);
+      this.$services.neo.resetSystemAssetBalanceCache();
     });
 
     this.$store.commit('setSocketOrderMatchFailed', (message) => {
       this.$services.alerts.error(`Failed to Match ${(message.side === 'bid' ? 'Buy' : 'Sell')} x${message.data.quantity}. ${message.data.errorMessage}`);
+      this.$services.neo.resetSystemAssetBalanceCache();
     });
 
     this.$services.neo.promptGASFractureIfNecessary();
