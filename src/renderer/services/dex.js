@@ -776,7 +776,7 @@ export default {
           /* eslint-disable no-await-in-loop */
           // need to ignore this rule, each of these build operations has to happen in order
           // that way they'll each select the right UTXO inputs
-          const depositTx = await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
+          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
           /* eslint-enable no-await-in-loop */
         }
 
