@@ -398,7 +398,7 @@ export default {
               .catch(e => reject(e));
           })
           .catch((e) => {
-            reject(new Error(`NEO RPC Network Error: ${e.message}`));
+            reject(new Error(`NEO RPC Network Error: ${e}`));
           });
       } catch (e) {
         return reject(e);
@@ -625,7 +625,7 @@ export default {
               .catch(e => reject(e));
           })
           .catch((e) => {
-            reject(new Error(`NEO RPC Network Error: ${e.message}`));
+            reject(new Error(`NEO RPC Network Error: ${e}`));
           });
       } catch (e) {
         return reject(e);
@@ -683,7 +683,7 @@ export default {
               }
             })
             .catch((e) => {
-              alerts.exception(new Error(`APH API Error: ${e.message}`));
+              alerts.exception(new Error(`APH API Error: ${e}`));
             });
         } catch (e) {
           return reject(e);
@@ -743,7 +743,7 @@ export default {
             resolve(res);
           })
           .catch((e) => {
-            alerts.exception(new Error(`APH API Error: ${e.message}`));
+            alerts.exception(new Error(`APH API Error: ${e}`));
             resolve({
               data: {
                 transfers: [],
@@ -1012,7 +1012,7 @@ export default {
             resolve(balance.balance);
           })
           .catch((e) => {
-            reject(`Unable to fetch system asset balances. Error: ${e.message}`);
+            reject(`Unable to fetch system asset balances. Error: ${e}`);
           });
       } catch (e) {
         reject(`Unable to fetch system asset balances. Error: ${e.message}`);
@@ -1037,7 +1037,13 @@ export default {
 
   promptGASFractureIfNecessary() {
     const currentNetwork = network.getSelectedNetwork();
-    const recommendedUTXOs = 16;
+    const currentWallet = wallets.getCurrentWallet();
+
+    let recommendedUTXOs = 16;
+    if (currentWallet.isLedger === true) {
+      // ledger has limitations on tx size
+      recommendedUTXOs = 5;
+    }
 
     if (!currentNetwork || currentNetwork.fee <= 0) {
       return;
@@ -1080,7 +1086,7 @@ export default {
         }
       })
       .catch((e) => {
-        alerts.error(`Failed to fetch address balance. ${e.message}`);
+        alerts.error(`Failed to fetch address balance. ${e}`);
       });
   },
 
@@ -1130,7 +1136,8 @@ export default {
                 });
 
                 let usedInputs = new BigNumber(0);
-                let outputSize = totalInputs.minus(currentNetwork.fee).dividedBy(targetNumberOfOutputs);
+                let outputSize = totalInputs.minus(currentNetwork.fee)
+                  .dividedBy(targetNumberOfOutputs - 1).dividedBy(targetNumberOfOutputs - 1);
                 if (outputSize.isLessThan(minimumSize)) {
                   outputSize = minimumSize;
                 }
@@ -1169,11 +1176,11 @@ export default {
                 });
               })
               .catch((e) => {
-                reject(`Failed to send GAS fracture transaction. ${e.message}`);
+                reject(`Failed to send GAS fracture transaction. ${e}`);
               });
           })
           .catch((e) => {
-            reject(`Failed to send GAS fracture transaction. ${e.message}`);
+            reject(`Failed to send GAS fracture transaction. ${e}`);
           });
       } catch (e) {
         reject(`Failed to send GAS fracture transaction. ${e.message}`);

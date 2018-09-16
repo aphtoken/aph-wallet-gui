@@ -42,7 +42,7 @@ export default {
             resolve(res.data.markets);
           })
           .catch((e) => {
-            alerts.exception(`APH API Error: ${e.message}`);
+            alerts.exception(`APH API Error: ${e}`);
           });
       } catch (e) {
         reject(e);
@@ -193,7 +193,7 @@ export default {
             resolve(history);
           })
           .catch((e) => {
-            alerts.exception(`APH API Error: ${e.message}`);
+            alerts.exception(`APH API Error: ${e}`);
           });
       } catch (e) {
         reject(e);
@@ -346,12 +346,12 @@ export default {
                   resolve(orders);
                 })
                 .catch((e) => {
-                  alerts.exception(`APH API Error: ${e.message}`);
+                  alerts.exception(`APH API Error: ${e}`);
                 });
             }
           })
           .catch((e) => {
-            alerts.exception(`APH API Error: ${e.message}`);
+            alerts.exception(`APH API Error: ${e}`);
           });
       } catch (e) {
         reject(e);
@@ -535,7 +535,7 @@ export default {
             resolve(order);
           })
           .catch((e) => {
-            reject(`APH API Error: ${e.message}`);
+            reject(`APH API Error: ${e}`);
           });
       } catch (e) {
         reject(e);
@@ -666,7 +666,7 @@ export default {
           })
           .catch((e) => {
             // console.log(e);
-            reject(`APH API Error: ${e.message}`);
+            reject(`APH API Error: ${e}`);
           });
       } catch (e) {
         reject(e);
@@ -934,7 +934,7 @@ export default {
                 store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
               })
               .catch((e) => {
-                reject(`APH API Error: ${e.message}`);
+                reject(`APH API Error: ${e}`);
               });
           })
           .catch((e) => {
@@ -1020,7 +1020,7 @@ export default {
               store.commit('setAssetHoldingsNeedRefresh', [assetId]);
             })
             .catch((e) => {
-              reject(`Deposit Failed. ${e.message}`);
+              reject(`Deposit Failed. ${e}`);
             });
         }
       } catch (e) {
@@ -1077,7 +1077,7 @@ export default {
             }
           })
           .catch((e) => {
-            reject(`Withdraw Failed. ${e.message}`);
+            reject(`Withdraw Failed. ${e}`);
           });
       } catch (e) {
         reject(`Withdraw Failed. ${e.message}`);
@@ -1125,7 +1125,7 @@ export default {
                   resolveBalance(configResponse);
                 })
                 .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e.message}`);
+                  reject(`Failed to fetch address balance. ${e}`);
                 });
             });
           })
@@ -1196,7 +1196,7 @@ export default {
             });
           })
           .catch((e) => {
-            reject(`Failed to Mark Withdraw. ${e.message}`);
+            reject(`Failed to Mark Withdraw. ${e}`);
           });
       } catch (e) {
         reject(`Failed to Mark Withdraw. ${e.message}`);
@@ -1268,11 +1268,11 @@ export default {
                 resolve(config);
               })
               .catch((e) => {
-                reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
+                reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e}`);
               });
           })
           .catch((e) => {
-            reject(`Failed to fetch address balance. ${e.message}`);
+            reject(`Failed to fetch address balance. ${e}`);
           });
       } catch (e) {
         reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
@@ -1319,7 +1319,7 @@ export default {
                   resolveBalance(configResponse);
                 })
                 .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e.message}`);
+                  reject(`Failed to fetch address balance. ${e}`);
                 });
             });
           })
@@ -1370,7 +1370,7 @@ export default {
             });
           })
           .catch((e) => {
-            reject(`Failed to Withdraw NEP5 balance. Error: ${e.message}`);
+            reject(`Failed to Withdraw NEP5 balance. Error: ${e}`);
           });
       } catch (e) {
         reject(`Failed to Withdraw NEP5 balance. Error: ${e.message}`);
@@ -1424,7 +1424,7 @@ export default {
                   resolveBalance(configResponse);
                 })
                 .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e.message}`);
+                  reject(`Failed to fetch address balance. ${e}`);
                 });
             });
           })
@@ -1468,7 +1468,7 @@ export default {
                   resolveInputs(configResponse);
                 })
                 .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e.message}`);
+                  reject(`Failed to fetch address balance. ${e}`);
                 });
             });
           })
@@ -1533,7 +1533,7 @@ export default {
               return;
             }
 
-            reject(`Failed to send asset withdraw transaction. ${e.message}`);
+            reject(`Failed to send asset withdraw transaction. ${e}`);
           });
       } catch (e) {
         if (tryCount < 3) {
@@ -1567,7 +1567,7 @@ export default {
                     }
                   })
                   .catch((e) => {
-                    reject(`Failed to fetch reserved UTXOs. ${e.message}`);
+                    reject(`Failed to fetch reserved UTXOs. ${e}`);
                   });
               });
             }
@@ -1580,13 +1580,13 @@ export default {
                     }
                   })
                   .catch((e) => {
-                    reject(`Failed to fetch reserved UTXOs. ${e.message}`);
+                    reject(`Failed to fetch reserved UTXOs. ${e}`);
                   });
               });
             }
           })
           .catch((e) => {
-            reject(`Failed to fetch address balance. ${e.message}`);
+            reject(`Failed to fetch address balance. ${e}`);
           });
       } catch (e) {
         reject(`Failed to fetch reserved UTXOs. ${e.message}`);
@@ -1617,7 +1617,7 @@ export default {
             resolve(input);
           })
           .catch((e) => {
-            reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e.message}`);
+            reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e}`);
           });
       } catch (e) {
         reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e.message}`);
@@ -1661,11 +1661,11 @@ export default {
                 resolve(commitState);
               })
               .catch((e) => {
-                reject(`Failed to fetch commit state. ${e.message}`);
+                reject(`Failed to fetch commit state. ${e}`);
               });
           })
           .catch((e) => {
-            reject(`Failed to fetch commit state. ${e.message}`);
+            reject(`Failed to fetch commit state. ${e}`);
           });
       } catch (e) {
         reject(`Failed to fetch commit state. ${e.message}`);
@@ -1713,7 +1713,7 @@ export default {
               });
           })
           .catch((e) => {
-            reject(`Failed to fetch commit state. ${e.message}`);
+            reject(`Failed to fetch commit state. ${e}`);
           });
       } catch (e) {
         reject(`Failed to fetch commit state. ${e.message}`);
@@ -1773,11 +1773,11 @@ export default {
                   });
               })
               .catch((e) => {
-                reject(`Failed to fetch DEX commit state, Total Fees Collected. ${e.message}`);
+                reject(`Failed to fetch DEX commit state, Total Fees Collected. ${e}`);
               });
           })
           .catch((e) => {
-            reject(`Failed to fetch DEX commit state, Contribution Sums. ${e.message}`);
+            reject(`Failed to fetch DEX commit state, Contribution Sums. ${e}`);
           });
       } catch (e) {
         reject(`Failed to fetch commit state. ${e.message}`);
@@ -1802,7 +1802,7 @@ export default {
                   resolve(res.tx);
                 })
                 .catch((e) => {
-                  reject(`Commit Failed. ${e.message}`);
+                  reject(`Commit Failed. ${e}`);
                 });
             } else {
               reject('Transaction rejected');
@@ -2008,7 +2008,7 @@ export default {
                   resolveBalance(configResponse);
                 })
                 .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e.message}`);
+                  reject(`Failed to fetch address balance. ${e}`);
                 });
             });
           })
@@ -2027,7 +2027,7 @@ export default {
             resolve(configResponse);
           })
           .catch((e) => {
-            reject(`Failed to build contract transaction. ${e.message}`);
+            reject(`Failed to build contract transaction. ${e}`);
           });
       } catch (e) {
         reject(`Failed to build contract transaction. ${e.message}`);
@@ -2083,7 +2083,7 @@ export default {
                     resolveBalance(configResponse);
                   })
                   .catch((e) => {
-                    reject(`Failed to fetch address balance. ${e.message}`);
+                    reject(`Failed to fetch address balance. ${e}`);
                   });
               });
             })
@@ -2130,11 +2130,11 @@ export default {
               });
             })
             .catch((e) => {
-              reject(`Failed to Claim Contract GAS. Error: ${e.message}`);
+              reject(`Failed to Claim Contract GAS. Error: ${e}`);
             });
         })
         .catch((e) => {
-          reject(`Failed to Claim Contract GAS. Error: ${e.message}`);
+          reject(`Failed to Claim Contract GAS. Error: ${e}`);
         });
     });
   },
