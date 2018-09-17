@@ -601,26 +601,30 @@ export default {
     hideDepositWithdrawModal() {
       this.$store.commit('setDepositWithdrawModalModel', null);
     },
+
     depositWithdrawConfirmed(isDeposit, holding, amount) {
+      const action = (isDeposit ? this.$t('deposit') : this.$t('withdraw'));
+      const message = this.$t('relayedToNetwork', {
+        amount,
+        symbol: holding.symbol,
+        action,
+      });
+      const services = this.$services;
       this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.assetId, Number(amount))
         .then(() => {
-          const action = (isDeposit ? this.$t('deposit') : this.$t('withdraw'));
-          const message = this.$t('relayedToNetwork', {
-            amount,
-            symbol: holding.symbol,
-            action,
-          });
-          this.$services.alerts.success(message);
+          services.alerts.success(message);
         })
         .catch((e) => {
-          this.$services.alerts.exception(e);
+          services.alerts.exception(e);
         });
 
       this.hideDepositWithdrawModal();
     },
+
     hideOrderConfirmationModal() {
       this.$store.commit('setOrderToConfirm', null);
     },
+
     async setMarket() {
       await this.$services.dex.setMarket(this.$services.assets.APH,
         this.$services.assets.GAS,
