@@ -514,7 +514,7 @@ export default {
                           holding.name = existingHolding.name;
                           holding.availableBalance = calculateHoldingAvailableBalance(holding);
                           holding.totalBalance = calculateHoldingTotalBalance(holding);
-                          holding.decimals = val.decimals;
+                          holding.decimals = existingHolding.decimals;
 
                           holdings.push(holding);
                         }
