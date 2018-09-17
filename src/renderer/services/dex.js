@@ -669,7 +669,7 @@ export default {
             reject(`APH API Error: ${e}`);
           });
       } catch (e) {
-        reject(`Failed to place order. ${e.message}`);
+        reject(`Failed to place order. ${e}`);
       }
     });
   },
@@ -707,9 +707,6 @@ export default {
 
       if (sellAssetHolding.canPull === false && order.quantity.isGreaterThan(0)) {
         // this is an MCT based token that can not be pulled from our DEX contract, have to send a deposit first
-        depositMakerQuantity = true;
-      } else if (sellAssetHolding.decimals < 8) {
-        // this is a token with < 8 decimals, NEO for example, make the deposit of the minimum amount needed to make the order
         depositMakerQuantity = true;
       } else if (order.offersToTake.length > 0 && order.quantityToMake.isGreaterThan(0)) {
         // we have maker and taker quantities, need to deposit the maker quanity first because we don't know the order they will be confirmed
@@ -831,8 +828,16 @@ export default {
         if (order.assetIdToSell === assets.NEO) {
           const neoHolding = neo.getHolding(assets.NEO);
           if (neoHolding.contractBalance < order.quantityToSell) {
-            neoToSend = order.quantityToSell - neoHolding.contractBalance;
-            if (neoToSend > neoHolding.balance) {
+            neoToSend = new BigNumber(order.quantityToSell - neoHolding.contractBalance);
+
+            const toDepositTruncated = new BigNumber(neoToSend.toFixed(0));
+            if (toDepositTruncated.isGreaterThanOrEqualTo(neoToSend)) {
+              neoToSend = toDepositTruncated;
+            } else {
+              neoToSend = toDepositTruncated.plus(1);
+            }
+
+            if (neoToSend.isGreaterThan(neoHolding.balance)) {
               reject('Insufficient NEO.');
               return;
             }
@@ -842,8 +847,8 @@ export default {
         if (order.assetIdToSell === assets.GAS) {
           const gasHolding = neo.getHolding(assets.GAS);
           if (gasHolding.contractBalance < order.quantityToSell) {
-            gasToSend = order.quantityToSell - gasHolding.contractBalance;
-            if (gasToSend > gasHolding.balance) {
+            gasToSend = new BigNumber(order.quantityToSell - gasHolding.contractBalance);
+            if (gasToSend.isGreaterThan(gasHolding.balance)) {
               reject('Insufficient GAS.');
               return;
             }
@@ -1111,7 +1116,8 @@ export default {
 
         let utxoIndex = -1;
 
-        alerts.success('Processing withdraw request...');
+        const assetHolding = neo.getHolding(assetId);
+        alerts.success(`Processing withdraw request for ${quantity.toString()} ${assetHolding.symbol}...`);
         api.fillKeys(config)
           .then((configResponse) => {
             return new Promise((resolveBalance) => {

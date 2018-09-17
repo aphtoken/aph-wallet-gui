@@ -21,7 +21,7 @@
     </div>
     <div class="footer">
       <button class="cancel-btn" @click="onCancel">{{$t('cancel')}}</button>
-      <button class="deposit-withdraw-btn" @click="onConfirmed(isDeposit, holding, amount)" 
+      <button class="deposit-withdraw-btn" @click="confirm()" 
         :disabled="shouldDisableDepositWithdrawButton">{{isDeposit ? $t('deposit') : $t('withdraw')}}</button>
     </div>
   </modal-wrapper>
@@ -67,6 +67,11 @@ export default {
       this.amount = this.isDeposit ?
         this.holding.balance.toString() :
         this.holding.contractBalance.toString();
+      this.amount = this.$cleanAmount(this.amount, this.holding);
+    },
+    confirm() {
+      this.amount = this.$cleanAmount(this.amount, this.holding);
+      this.onConfirmed(this.isDeposit, this.holding, this.amount);
     },
   },
 

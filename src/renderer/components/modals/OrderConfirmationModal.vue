@@ -114,6 +114,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 import ModalWrapper from './ModalWrapper';
 
 export default {
@@ -148,7 +149,17 @@ export default {
     },
 
     quantityToPullFromWallet() {
-      return this.$store.state.orderToConfirm.expectedQuantityToGive - this.holdingForAssetToGive.contractBalance;
+      let quantityToDeposit = this.$store.state.orderToConfirm.expectedQuantityToGive
+        - this.holdingForAssetToGive.contractBalance;
+      if (this.holdingForAssetToGive.decimals < 8) {
+        const toDepositTruncated = new BigNumber(quantityToDeposit.toFixed(this.holdingForAssetToGive.decimals));
+        if (toDepositTruncated.isGreaterThanOrEqualTo(quantityToDeposit)) {
+          quantityToDeposit = toDepositTruncated;
+        } else {
+          quantityToDeposit = toDepositTruncated.plus(1 / (10 ** this.holdingForAssetToGive.decimals));
+        }
+      }
+      return quantityToDeposit;
     },
 
     backupOffersToTake() {
