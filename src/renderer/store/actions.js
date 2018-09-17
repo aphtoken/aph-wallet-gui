@@ -531,6 +531,7 @@ async function placeOrder({ commit }, { order, done }) {
     commit('endRequest', { identifier: 'placeOrder' });
   } catch (message) {
     alerts.exception(message);
+    commit('setOrderToConfirm', null);
     commit('failRequest', { identifier: 'placeOrder', message });
   }
 }

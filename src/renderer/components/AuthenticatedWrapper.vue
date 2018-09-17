@@ -6,6 +6,7 @@
       <router-view></router-view>
       <aph-claim-gas-modal v-if="$store.state.showClaimGasModal"></aph-claim-gas-modal>
       <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal"></aph-send-with-ledger-modal>
+      <aph-fracture-gas-modal v-if="$store.state.fractureGasModalModel" :onClose="hideFractureGasModal"></aph-fracture-gas-modal>
     </div>
     <transactions-sidebar v-if="showTransactionsSidebar"></transactions-sidebar>
   </section>
@@ -15,6 +16,7 @@
 import { mapGetters } from 'vuex';
 
 import AphClaimGasModal from './modals/ClaimGasModal';
+import AphFractureGasModal from './modals/FractureGasModal';
 import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
 import PortfolioHeader from './PortfolioHeader';
 import Sidebar from './Sidebar';
@@ -47,11 +49,16 @@ export default {
     loadHoldings() {
       this.$store.dispatch('fetchHoldings', { });
     },
+
+    hideFractureGasModal() {
+      this.$store.commit('setFractureGasModalModel', null);
+    },
   },
 
   components: {
     AphClaimGasModal,
     AphSendWithLedgerModal,
+    AphFractureGasModal,
     PortfolioHeader,
     Sidebar,
     TransactionsSidebar,
