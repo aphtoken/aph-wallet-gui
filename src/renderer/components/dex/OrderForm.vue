@@ -24,7 +24,7 @@
           </div>
           <div class="options">
             <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
-              <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info"></aph-icon>
+              <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info-question-mark"></aph-icon>
               <label>{{$t('postOnly')}}</label>
               <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
               <aph-icon name="radio-off" v-else></aph-icon>
