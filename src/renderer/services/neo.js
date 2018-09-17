@@ -509,7 +509,14 @@ export default {
                         const existingHolding = this.getHolding(holding.assetId);
                         if (existingHolding) {
                           // TODO: May need some way in the UI to show that the balance of this asset may be out of date
-                          holdings.push(existingHolding);
+                          holding.balance = existingHolding.balance;
+                          holding.symbol = existingHolding.symbol;
+                          holding.name = existingHolding.name;
+                          holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                          holding.totalBalance = calculateHoldingTotalBalance(holding);
+                          holding.decimals = val.decimals;
+
+                          holdings.push(holding);
                         }
                       }
 
@@ -547,6 +554,12 @@ export default {
                   holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {
+                  const existingHolding = this.getHolding(holding.assetId);
+                  if (existingHolding) {
+                    holding.contractBalance = existingHolding.contractBalance;
+                    holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                    holding.totalBalance = calculateHoldingTotalBalance(holding);
+                  }
                   alerts.networkException(e);
                 }));
 
@@ -558,6 +571,12 @@ export default {
                 })
                 .catch((e) => {
                   alerts.networkException(e);
+                  const existingHolding = this.getHolding(holding.assetId);
+                  if (existingHolding) {
+                    holding.openOrdersBalance = existingHolding.openOrdersBalance;
+                    holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                    holding.totalBalance = calculateHoldingTotalBalance(holding);
+                  }
                 }));
 
               if (holding.symbol === 'NEO') {
