@@ -45,7 +45,7 @@ export default {
             alerts.exception(`APH API Error: ${e}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to fetch markets. ${e.message}`);
       }
     });
   },
@@ -196,7 +196,7 @@ export default {
             alerts.exception(`APH API Error: ${e}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to fetch trade history. ${e.message}`);
       }
     });
   },
@@ -296,7 +296,7 @@ export default {
             resolve([]);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to fetch trade buckets. ${e.message}`);
       }
     });
   },
@@ -354,7 +354,7 @@ export default {
             alerts.exception(`APH API Error: ${e}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to fetch order history. ${e.message}`);
       }
     });
   },
@@ -379,10 +379,10 @@ export default {
             }
           })
           .catch((e) => {
-            reject(e);
+            reject(`Failed to fetch contract balance. ${e}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to fetch contract balance. ${e.message}`);
       }
     });
   },
@@ -538,7 +538,7 @@ export default {
             reject(`APH API Error: ${e}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to form order. ${e.message}`);
       }
     });
   },
@@ -669,7 +669,7 @@ export default {
             reject(`APH API Error: ${e}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to place order. ${e.message}`);
       }
     });
   },
@@ -805,7 +805,7 @@ export default {
           },
         });
       } catch (e) {
-        reject(e);
+        reject(`Failed to make order deposits. ${e.message}`);
       }
     });
   },
@@ -863,10 +863,10 @@ export default {
             resolve(order);
           })
           .catch((e) => {
-            reject(e);
+            reject(`Failed to build add offer contract transaction. ${e}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to build add offer transaction. ${e.message}`);
       }
     });
   },
@@ -905,10 +905,10 @@ export default {
             resolve(offer);
           })
           .catch((e) => {
-            reject(e);
+            reject(`Failed to build accept offer contract transaction. ${e}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to build accept offer. ${e.message}`);
       }
     });
   },
@@ -938,10 +938,10 @@ export default {
               });
           })
           .catch((e) => {
-            reject(e);
+            reject(`Failed to build cancel order contract transaction. ${e}`);
           });
       } catch (e) {
-        reject(e);
+        reject(`Failed to build cancel order transaction. ${e.message}`);
       }
     });
   },
@@ -972,10 +972,6 @@ export default {
           const holdingAsset = holding != null ? holding.symbol : assetId;
           if (holding == null || holding.balance === null || holding.balance.isLessThan(quantity)) {
             reject(`Insufficient balance of asset '${holdingAsset}'.`);
-            return;
-          }
-          if (_.includes(store.state.assetsThatNeedRefresh, holding.assetId)) {
-            reject(`Balance of asset '${holdingAsset}' is currently refreshing. Please try again.`);
             return;
           }
         }
@@ -1053,16 +1049,16 @@ export default {
                         }
                       })
                       .catch((e) => {
-                        reject(e);
+                        reject(`Failed to withdraw system asset. ${e}`);
                       });
                   }, 10000);
                 })
                 .catch((e) => {
-                  reject(e);
+                  reject(`Failed to monitor transaction for confirmation. ${e}`);
                 });
             })
             .catch((e) => {
-              reject(e);
+              reject(`Failed to mark system asset for withdrawal. ${e}`);
             });
 
           return;
@@ -1832,7 +1828,7 @@ export default {
                   resolve(res.tx);
                 })
                 .catch((e) => {
-                  reject(e);
+                  reject(`Failed to monitor transaction confirmation. ${e}`);
                 });
             } else {
               reject('Transaction rejected');
@@ -1862,7 +1858,7 @@ export default {
                   resolve(res.tx);
                 })
                 .catch((e) => {
-                  reject(e);
+                  reject(`Failed to monitor transaction confirmation. ${e}`);
                 });
             } else {
               reject('Transaction rejected');
@@ -1900,7 +1896,7 @@ export default {
             reject(e);
           });
       } catch (e) {
-        reject(e);
+        reject(e.message);
       }
     });
   },
