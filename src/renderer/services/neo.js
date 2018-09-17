@@ -292,7 +292,7 @@ export default {
             alerts.networkException(e);
           });
       } catch (e) {
-        return reject(e);
+        return reject(e.message);
       }
     });
   },
@@ -321,7 +321,7 @@ export default {
             alerts.exception(e);
           });
       } catch (e) {
-        return reject(e);
+        return reject(e.message);
       }
     });
   },
@@ -398,10 +398,10 @@ export default {
               .catch(e => reject(e));
           })
           .catch((e) => {
-            reject(new Error(`NEO RPC Network Error: ${e}`));
+            reject(`NEO RPC Network Error: ${e}`);
           });
       } catch (e) {
-        return reject(e);
+        return reject(e.message);
       }
     });
   },
@@ -625,10 +625,10 @@ export default {
               .catch(e => reject(e));
           })
           .catch((e) => {
-            reject(new Error(`NEO RPC Network Error: ${e}`));
+            reject(`NEO RPC Network Error: ${e}`);
           });
       } catch (e) {
-        return reject(e);
+        return reject(e.message);
       }
     });
   },
@@ -683,13 +683,13 @@ export default {
               }
             })
             .catch((e) => {
-              alerts.exception(new Error(`APH API Error: ${e}`));
+              alerts.exception(`APH API Error: ${e}`);
             });
         } catch (e) {
           return reject(e);
         }
       } catch (e) {
-        return reject(e);
+        return reject(e.message);
       }
     });
   },
@@ -743,7 +743,7 @@ export default {
             resolve(res);
           })
           .catch((e) => {
-            alerts.exception(new Error(`APH API Error: ${e}`));
+            alerts.exception(`APH API Error: ${e}`);
             resolve({
               data: {
                 transfers: [],
@@ -834,7 +834,7 @@ export default {
         return sendPromise;
       } catch (e) {
         store.commit('setSendInProgress', false);
-        return reject(e);
+        return reject(e.message);
       }
     });
   },
@@ -1238,7 +1238,7 @@ export default {
         }, 15 * 1000); // wait a block for propagation
         return null;
       } catch (e) {
-        return reject(e);
+        return reject(e.message);
       }
     });
   },
@@ -1436,7 +1436,7 @@ export default {
             reject(e);
           });
       } catch (e) {
-        reject(e);
+        reject(e.message);
       }
     });
   },
