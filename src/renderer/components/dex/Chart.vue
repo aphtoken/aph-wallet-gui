@@ -71,6 +71,7 @@ import { BigNumber } from 'bignumber.js';
 
 let storeUnwatch;
 let storeMarketUnwatch;
+let tradeHistoryUnwatch;
 let tradingView;
 let barsSubscription;
 let lastPrice = 0;
@@ -85,9 +86,12 @@ export default {
   },
 
   mounted() {
-    setTimeout(() => {
-      this.loadChart();
-    }, 1000);
+    tradeHistoryUnwatch = this.$store.watch(
+      () => {
+        return this.$store.state.tradeHistory;
+      }, () => {
+        this.loadChart();
+      });
 
     this.styleMode = this.$store.state.styleMode;
     storeUnwatch = this.$store.watch(
@@ -99,18 +103,12 @@ export default {
         }
         this.styleMode = this.$store.state.styleMode;
       });
-
-    storeMarketUnwatch = this.$store.watch(
-      () => {
-        return this.$store.state.currentMarket;
-      }, () => {
-        this.loadChart();
-      });
   },
 
   beforeDestroy() {
     storeUnwatch();
     storeMarketUnwatch();
+    tradeHistoryUnwatch();
     clearInterval(barsSubscription);
   },
 
@@ -193,7 +191,10 @@ export default {
           },
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            const bars = this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, lastPrice);
+            const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ? 
+              this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, lastPrice) : 
+              [];
+
             if (bars.length === 0) {
               onDataCallback(bars, { noData: true })
             } else {
