@@ -482,7 +482,8 @@ async function fetchOrderHistory({ commit }, { isRequestSilent }) {
 
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
-  const orderHistoryStorageKey = `orderhistory.${currentWallet.address}.${currentNetwork.net}`;
+  const orderHistoryStorageKey
+    = `orderhistory.${currentWallet.address}.${currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
   try {
     orderHistory = await fetchCachedData(orderHistoryStorageKey);
     commit('setOrderHistory', orderHistory);

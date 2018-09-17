@@ -3,7 +3,7 @@ import Vue from 'vue';
 import moment from 'moment';
 
 import { requests } from '../constants';
-import { alerts, db, neo, dex } from '../services';
+import { alerts, assets, db, neo, dex } from '../services';
 
 export {
   addToOrderHistory,
@@ -479,7 +479,8 @@ function setTradeHistory(state, trades) {
 function setOrderHistory(state, orders) {
   state.orderHistory = orders;
 
-  const orderHistoryStorageKey = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  const orderHistoryStorageKey
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
   db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 function addToOrderHistory(state, newOrders) {
@@ -501,7 +502,8 @@ function addToOrderHistory(state, newOrders) {
     state.orderHistory.unshift(newOrders[i]);
   }
 
-  const orderHistoryStorageKey = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}`;
+  const orderHistoryStorageKey
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
   db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 
