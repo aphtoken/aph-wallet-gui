@@ -69,24 +69,22 @@
 <script>
 import { BigNumber } from 'bignumber.js';
 
-let storeUnwatch;
-let storeMarketUnwatch;
-let tradeHistoryUnwatch;
-let tradingView;
-let barsSubscription;
-let lastPrice = 0;
-
 export default {
   data() {
     return {
       tab: 'Chart',
       styleMode: 'Night',
       depthPrecision: 4,
+      lastPrice: 0,
+      barsSubscription: null,
+      tradingView: null,
+      tradeHistoryUnwatch: null,
+      storeUnwatch: null,
     };
   },
 
   mounted() {
-    tradeHistoryUnwatch = this.$store.watch(
+    this.tradeHistoryUnwatch = this.$store.watch(
       () => {
         return this.$store.state.tradeHistory;
       }, () => {
@@ -94,7 +92,7 @@ export default {
       });
 
     this.styleMode = this.$store.state.styleMode;
-    storeUnwatch = this.$store.watch(
+    this.storeUnwatch = this.$store.watch(
       () => {
         return this.$store.state.styleMode;
       }, () => {
@@ -106,10 +104,9 @@ export default {
   },
 
   beforeDestroy() {
-    storeUnwatch();
-    storeMarketUnwatch();
-    tradeHistoryUnwatch();
-    clearInterval(barsSubscription);
+    this.storeUnwatch();
+    this.tradeHistoryUnwatch();
+    clearInterval(this.barsSubscription);
   },
 
   methods: {
@@ -127,7 +124,7 @@ export default {
       while (container && container.hasChildNodes()) {
         container.removeChild(container.lastChild);
       }
-      clearInterval(barsSubscription);
+      clearInterval(this.barsSubscription);
     },
 
     loadChart() {
@@ -192,31 +189,31 @@ export default {
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
             const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ? 
-              this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, lastPrice) : 
+              this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice) :
               [];
 
             if (bars.length === 0) {
               onDataCallback(bars, { noData: true })
             } else {
-              lastPrice = bars[bars.length - 1].close;
+              this.lastPrice = bars[bars.length - 1].close;
               onDataCallback(bars, { noData: false })
             }
           },
 
           subscribeBars: (_symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
             let lastBarTime = NaN;
-            if (barsSubscription) {
-              clearInterval(barsSubscription);
+            if (this.barsSubscription) {
+              clearInterval(this.barsSubscription);
             }
 
-            barsSubscription = setInterval(() => {
-              if (!tradingView || !tradingView._options) {
+            this.barsSubscription = setInterval(() => {
+              if (!this.tradingView || !this.tradingView._options) {
                 return;
               }
               const to = parseInt((new Date().valueOf()) / 1000, 10)
               const from = to - 120
 
-              tradingView._options.datafeed.getBars(_symbolInfo, resolution, from, to, (bars) => {
+              this.tradingView._options.datafeed.getBars(_symbolInfo, resolution, from, to, (bars) => {
                 if (bars.length === 0) {
                   return;
                 }
@@ -251,7 +248,7 @@ export default {
           },
 
           unsubscribeBars: (subscriberUID) => {
-            clearInterval(barsSubscription);
+            clearInterval(this.barsSubscription);
           },
         }
 
@@ -308,7 +305,7 @@ export default {
           }
         }, 1000);
 
-        tradingView = new TradingView.widget(settings);
+        this.tradingView = new TradingView.widget(settings);
       } catch (e) {
         console.log(e);
         alert(e);
