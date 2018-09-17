@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 import ModalWrapper from './ModalWrapper';
 
 export default {
@@ -67,6 +68,12 @@ export default {
       this.amount = this.isDeposit ?
         this.holding.balance.toString() :
         this.holding.contractBalance.toString();
+
+      if (this.isDeposit && this.holding.symbol === 'GAS') {
+        // multiply by 10 to save some additional gas for transactions and to withdrawal
+        this.amount = new BigNumber(this.amount).minus(this.$services.network.getSelectedNetwork().fee * 10).toString();
+      }
+
       this.amount = this.$cleanAmount(this.amount, this.holding);
     },
     confirm() {

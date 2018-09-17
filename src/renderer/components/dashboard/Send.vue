@@ -77,6 +77,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 import { mapGetters } from 'vuex';
 let sendTimeoutIntervalId;
 let storeUnwatch;
@@ -153,6 +154,9 @@ export default {
     setAmountToMax() {
       if (this.currency) {
         this.amount = this.currency.balance.toString();
+        if (this.currency.symbol === 'GAS') {
+          this.amount = new BigNumber(this.amount).minus(this.currentNetwork.fee).toString();
+        }
       }
     },
 
