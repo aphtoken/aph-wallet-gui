@@ -150,7 +150,7 @@ export default {
 
     quantityToPullFromWallet() {
       let quantityToDeposit = this.$store.state.orderToConfirm.expectedQuantityToGive
-        - this.holdingForAssetToGive.contractBalance;
+        .minus(this.holdingForAssetToGive.contractBalance);
       if (this.holdingForAssetToGive.decimals < 8) {
         const toDepositTruncated = new BigNumber(quantityToDeposit.toFixed(this.holdingForAssetToGive.decimals));
         if (toDepositTruncated.isGreaterThanOrEqualTo(quantityToDeposit)) {
