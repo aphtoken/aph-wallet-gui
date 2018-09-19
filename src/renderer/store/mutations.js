@@ -123,7 +123,14 @@ function handleNetworkChange(state) {
   state.searchTransactions = [];
   state.nep5Balances = {};
   state.currentMarket = null;
-  neo.fetchNEP5Tokens();
+  neo.fetchNEP5Tokens(() => {
+    // Fast load balances of user assets
+    this.dispatch('fetchHoldings', {
+      onlyFetchUserAssets: true,
+      // force refresh all assets on network change
+      done: () => { this.dispatch('fetchHoldings', { forceRefreshAll: true }); },
+    });
+  });
 }
 
 function putTransactionDetail(state, transactionDetail) {

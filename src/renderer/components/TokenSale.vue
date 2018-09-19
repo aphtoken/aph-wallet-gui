@@ -56,6 +56,7 @@ export default {
   },
 
   beforeMount() {
+    // This fetch seems redundant with AuthenticatedWrapper periodic fetch, can probably remove it.
     this.$store.dispatch('fetchHoldings', { done: null });
     this.loadTransactions();
 
@@ -216,6 +217,7 @@ export default {
           this.$services.alerts.success(
             this.$t('tokenSaleSuccessful', { symbol: res.symbol, balance: res.balance }),
           );
+          // TODO: we should add to user assets right away here and then add onlyFetchUserAssets: true to fetch call
           this.$store.dispatch('fetchHoldings', { done: null });
           this.sending = false;
         })
