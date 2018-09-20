@@ -101,8 +101,6 @@ export default {
       return;
     }
 
-    const assets = this.getNetworkAssets();
-    const userAssets = this.getUserAssets();
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
@@ -110,12 +108,16 @@ export default {
       return;
     }
 
-    _.set(userAssets, assetId, _.get(assets, assetId));
+    const assets = this.getNetworkAssets();
+    const userAssets = this.getUserAssets();
+
+    const asset = _.get(assets, assetId);
+    // console.log(`Adding user asset ${asset.symbol}`)
+    _.set(userAssets, assetId, asset);
     storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);
   },
 
   removeUserAsset(assetId) {
-    let userAssets = this.getUserAssets();
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
@@ -123,8 +125,13 @@ export default {
       return;
     }
 
-    userAssets = _.omit(userAssets, assetId);
-    storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);
+    let userAssets = this.getUserAssets();
+
+    if (_.has(userAssets, assetId)) {
+      // console.log(`Removing user asset: ${assetId}`)
+      userAssets = _.omit(userAssets, assetId);
+      storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);
+    }
   },
 
   getUserAssets() {
