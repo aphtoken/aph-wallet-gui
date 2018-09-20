@@ -356,10 +356,10 @@ export default {
 
   methods: {
     loadHoldings() {
-      this.$store.dispatch('fetchHoldings', { done: null, onlyFetchUserAssets: true });
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
     },
     loadHoldingsSilently() {
-      this.$store.dispatch('fetchHoldings', { done: null, isRequestSilent: true });
+      this.$store.dispatch('fetchHoldings', { isRequestSilent: true });
     },
     setSide(side) {
       this.side = side;

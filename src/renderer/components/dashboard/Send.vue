@@ -203,7 +203,7 @@ export default {
         this.$services.ledger.close();
       }
 
-      this.$store.dispatch('fetchHoldings', { done: null, onlyFetchUserAssets: true });
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
       clearInterval(sendTimeoutIntervalId);
     },
   },

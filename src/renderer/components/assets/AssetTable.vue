@@ -57,7 +57,7 @@ export default {
 
   methods: {
     loadHoldings() {
-      this.$store.dispatch('fetchHoldings', { done: null, onlyFetchUserAssets: true });
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
     },
 
     remove(holding) {

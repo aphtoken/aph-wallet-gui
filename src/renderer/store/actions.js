@@ -195,7 +195,7 @@ async function fetchCommitState({ commit }) {
   }
 }
 
-async function fetchHoldings({ commit }, { done, isRequestSilent, onlyFetchUserAssets, forceRefreshAll }) {
+async function fetchHoldings({ commit }, { done, isRequestSilent, onlyFetchUserAssets, forceRefreshAll } = {}) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let portfolio;
