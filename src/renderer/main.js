@@ -1,7 +1,7 @@
 import DomPortal from 'vue-dom-portal';
 import Vue from 'vue';
-import VueI18n from 'vue-i18n';
 import VueFlashMessage from 'vue-flash-message';
+import VueI18n from 'vue-i18n';
 import VueHighCharts from 'vue-highcharts';
 import VueNativeSock from 'vue-native-websocket';
 import _ from 'lodash';
@@ -50,9 +50,10 @@ Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 
 // Vue Plugins.
-Vue.use(VueHighCharts);
-Vue.use(VueFlashMessage);
 Vue.use(DomPortal);
+Vue.use(VueFlashMessage);
+Vue.use(VueHighCharts);
+Vue.use(VueI18n);
 require('vue-flash-message/dist/vue-flash-message.min.css');
 
 // Vue.use(VueNativeSock, 'ws://localhost:62433/ws', {
@@ -62,8 +63,6 @@ Vue.use(VueNativeSock, 'wss://testnet.aphelion-neo.com:62443/ws', {
   reconnection: true, // (Boolean) whether to reconnect automatically (false)
   reconnectionDelay: 3000, // (Number) how long to initially wait before attempting a new (1000)
 });
-
-Vue.use(VueI18n);
 
 // Register global mixins.
 _.each(mixins, (mixin) => {
@@ -93,8 +92,9 @@ wallets.sync();
 
 // get user's locale settings
 const language = localStorage.getItem('language') ||
-                 (window.navigator.userLanguage ||
-                 window.navigator.language).split('-')[0];
+  (window.navigator.userLanguage ||
+    window.navigator.language).split('-')[0];
+
 // Create VueI18n instance with options
 const i18n = new VueI18n({
   locale: language,

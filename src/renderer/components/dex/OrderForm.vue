@@ -105,6 +105,7 @@ export default {
     this.actionableHolding = this.quoteHolding;
 
     loadHoldingsIntervalId = setInterval(() => {
+      // TODO: is this redundant with the fetch occurring in AuthenticatedWrapper.vue
       this.loadHoldingsSilently();
     }, this.$constants.intervals.HOLDINGS_POLLING);
 
@@ -355,10 +356,10 @@ export default {
 
   methods: {
     loadHoldings() {
-      this.$store.dispatch('fetchHoldings', { done: null });
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
     },
     loadHoldingsSilently() {
-      this.$store.dispatch('fetchHoldings', { done: null, isRequestSilent: true });
+      this.$store.dispatch('fetchHoldings', { isRequestSilent: true });
     },
     setSide(side) {
       this.side = side;

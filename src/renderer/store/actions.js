@@ -22,7 +22,6 @@ export {
   openLedger,
   openPrivateKey,
   openSavedWallet,
-  verifyLedgerConnection,
   fetchMarkets,
   fetchTradeHistory,
   fetchOrderHistory,
@@ -31,6 +30,7 @@ export {
   pingSocket,
   subscribeToMarket,
   unsubscribeFromMarket,
+  verifyLedgerConnection,
 };
 
 function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
@@ -195,7 +195,7 @@ async function fetchCommitState({ commit }) {
   }
 }
 
-async function fetchHoldings({ commit }, { done, isRequestSilent }) {
+async function fetchHoldings({ commit }, { done, isRequestSilent, onlyFetchUserAssets, forceRefreshAll } = {}) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let portfolio;
@@ -223,7 +223,7 @@ async function fetchHoldings({ commit }, { done, isRequestSilent }) {
   }
 
   try {
-    holdings = await neo.fetchHoldings(currentWallet.address);
+    holdings = await neo.fetchHoldings(currentWallet.address, false, onlyFetchUserAssets, forceRefreshAll);
 
     commit('setHoldings', holdings.holdings);
     commit('setPortfolio', {
