@@ -44,6 +44,7 @@ export default {
     this.$store.state.showPortfolioHeader = true;
     clearInterval(this.connectionStatusInterval);
     clearInterval(this.marketsRefreshInterval);
+    clearInterval(this.completeSystemAssetWithdrawalsInterval);
   },
 
   mounted() {
@@ -92,6 +93,9 @@ export default {
     this.marketsRefreshInterval = setInterval(() => {
       this.loadMarkets();
     }, this.$constants.intervals.MARKETS_POLLING);
+    this.completeSystemAssetWithdrawalsInterval = setInterval(() => {
+      this.$services.dex.completeSystemAssetWithdrawals();
+    }, this.$constants.intervals.COMPLETE_SYSTEM_WITHDRAWALS);
   },
 
   data() {

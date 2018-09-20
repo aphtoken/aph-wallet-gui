@@ -1061,6 +1061,7 @@ export default {
                 })
                 .catch((e) => {
                   reject(`Failed to monitor transaction for confirmation. ${e}`);
+                  this.completeSystemAssetWithdrawals();
                 });
             })
             .catch((e) => {
