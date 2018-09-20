@@ -52,8 +52,8 @@ export default {
     this.selectedCurrency = this.$services.settings.getCurrency();
 
     const storedNetwork = this.$services.network.getSelectedNetwork();
-    this.selectedNetwork = _.find(this.networks, (o) => {
-      return o.value.net === storedNetwork.net;
+    this.selectedNetwork = _.find(this.networks, ({ value }) => {
+      return value.net === storedNetwork.net;
     }).value;
 
     if (!this.selectedNetwork && this.networks && this.networks.length > 0) {
@@ -136,16 +136,16 @@ export default {
     .row {
       display: flex;
       flex-direction: row;
-      
+
       .column {
         flex: 1;
         margin-right: $space;
-        
+
         &:last-child {
           margin-right: 0;
         }
       }
-      
+
       .label {
         @extend %small-uppercase-grey-label;
 

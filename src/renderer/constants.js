@@ -1,3 +1,4 @@
+/* eslint-disable id-length */
 import en from './l10n/en';
 import de from './l10n/de';
 import nl from './l10n/nl';

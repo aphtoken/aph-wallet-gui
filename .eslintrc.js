@@ -36,5 +36,6 @@ module.exports = {
     'arrow-body-style': 0,
     'array-callback-return': 0,
     'max-len': [2, 120],
+    'id-length': [2, {min: 3, exceptions: ['e', 'vm', '_', 'el', 'i', 'to', 'tx', 'id', 'db', 'en'], properties: 'never'}],
   }
 }

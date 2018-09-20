@@ -100,6 +100,11 @@ export default new Router({
                 'top-left': require('@/components/dashboard/TokenStats').default,
                 'top-right': require('@/components/dashboard/Send').default,
               },
+              beforeEnter() {
+                console.log('************************');
+                console.log('beforeEnter');
+                console.log('************************');
+              },
             },
             {
               path: 'confirming',

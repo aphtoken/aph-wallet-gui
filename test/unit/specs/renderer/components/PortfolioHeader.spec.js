@@ -9,6 +9,9 @@ let wrapper;
 describe('PortfolioHeader.vue', () => {
   beforeEach(() => {
     const customState = {
+      currentNetwork: {
+        net: 'MainNet',
+      },
       portfolio: {
         balance: 200,
         changePercent: 50,
@@ -34,23 +37,19 @@ describe('PortfolioHeader.vue', () => {
   });
 
   context('when a user clicks the receive button', () => {
-    beforeEach(() => {
+    it('should show the address modal component', () => {
       wrapper.vm.$services.wallets.setCurrentWallet({ address: 'address' });
       wrapper.find('.receive-btn').trigger('click');
-    });
 
-    it('should show the address modal component', () => {
       expect(wrapper.contains('#aph-address-modal')).to.be.true();
     });
   });
 
   context('when a user clicks the send button', () => {
-    beforeEach(() => {
+    it('should update the route', () => {
       push = wrapper.vm.$router.push = sinon.spy();
       wrapper.find('.send-btn').trigger('click');
-    });
 
-    it('should update the route', () => {
       expect(push).to.have.been.calledWith('/authenticated/dashboard/send');
     });
   });
