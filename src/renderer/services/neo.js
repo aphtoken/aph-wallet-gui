@@ -355,7 +355,7 @@ export default {
                   done: ((data) => {
                     resolve(data);
                   }),
-                  failed: ((ex) => { reject(ex); }),
+                  failed: e => reject(e),
                 });
               }).then((blockHeader) => {
                 transaction.block = blockHeader.index;
@@ -673,9 +673,7 @@ export default {
   },
 
   getHolding(assetId) {
-    const holding = _.find(store.state.holdings, (o) => {
-      return o.assetId === assetId;
-    });
+    const holding = _.find(store.state.holdings, { assetId });
 
     if (holding) {
       if (holding.balance !== null) {
@@ -748,13 +746,13 @@ export default {
             balance: token.balance,
           });
         })
-        .catch((ex) => {
+        .catch((e) => {
           let retry = true;
-          if (ex.message.indexOf('Expected a hexstring but got') > -1) {
-            // console.log(`Removing token due to exception: ${assetId} ${ex}`);
+          if (e.message.indexOf('Expected a hexstring but got') > -1) {
+            // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
             assets.removeUserAsset(assetId);
             retry = false;
-          } else if (ex.message.indexOf('Invalid results length!') > -1) {
+          } else if (e.message.indexOf('Invalid results length!') > -1) {
             // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
             retry = false;
           }
@@ -762,7 +760,7 @@ export default {
           resolve({
             valid: false,
             retry,
-            error: `Error fetching NEP5 balance. Error: ${ex.message}`,
+            error: `Error fetching NEP5 balance. Error: ${e.message}`,
           });
         });
     });
@@ -1300,8 +1298,8 @@ export default {
 
     lastClaimSent = new Date();
     return this.fetchHoldings(currentWallet.address, 'NEO')
-      .then((h) => {
-        const neoAmount = h.holdings[0].balance;
+      .then((holding) => {
+        const neoAmount = holding.holdings[0].balance;
         const callback = () => {
           gasClaim.step = 2;
         };
@@ -1309,7 +1307,7 @@ export default {
         gasClaim.step = 1;
 
 
-        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
+        if (holding.holdings.length === 0 || holding.holdings[0].balance <= 0) {
           this.sendClaimGas(gasClaim);
         } else {
           // send neo to ourself to make all gas available for claim

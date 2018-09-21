@@ -230,9 +230,8 @@ async function setHoldings(state, holdings) {
   if (!state.statsToken && !_.isEmpty(holdings)) {
     state.statsToken = holdings[0];
   } else if (state.statsToken) {
-    state.statsToken = _.find(state.holdings, (o) => {
-      return o.symbol === state.statsToken.symbol;
-    });
+    state.statsToken = _.find(state.holdings, { symbol: state.statsToken.symbol });
+
     if (!state.statsToken && !_.isEmpty(holdings)) {
       state.statsToken = holdings[0];
     }
@@ -280,16 +279,17 @@ function setPortfolio(state, portfolio) {
 function setRecentTransactions(state, transactions) {
   const existingIsEmpty = !state.recentTransactions || state.recentTransactions.length === 0;
 
-  _.sortBy(transactions, 'block_index').forEach((t) => {
-    const existingTransaction = _.find(state.recentTransactions, (o) => {
-      return o.hash === t.hash && o.symbol === t.symbol;
-    });
+  _.sortBy(transactions, 'block_index').forEach((transaction) => {
+    const existingTransaction = _.find(
+      state.recentTransactions,
+      { hash: transaction.hash, symbol: transaction.symbol },
+    );
     if (existingTransaction) {
       return;
     }
-    state.recentTransactions.unshift(t);
+    state.recentTransactions.unshift(transaction);
     if (existingIsEmpty === false) {
-      alerts.success(`New Transaction Found. TX: ${t.hash}`);
+      alerts.success(`New Transaction Found. TX: ${transaction.hash}`);
       neo.resetSystemAssetBalanceCache();
     }
   });
@@ -623,9 +623,9 @@ function normalizeRecentTransactions(transactions) {
             value: i.value.toString(),
           };
         }),
-        vout: transaction.details.vout.map((o) => {
+        vout: transaction.details.vout.map(({ value }) => {
           return {
-            value: o.value.toString(),
+            value: value.toString(),
           };
         }),
       },

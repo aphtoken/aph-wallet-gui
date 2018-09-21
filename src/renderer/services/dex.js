@@ -58,15 +58,15 @@ export default {
       bids: [],
     };
 
-    asks.forEach((l) => {
-      l.price = toBigNumber(l[0]);
-      l.quantity = toBigNumber(l[1]);
-      book.asks.push(l);
+    asks.forEach((ask) => {
+      ask.price = toBigNumber(ask[0]);
+      ask.quantity = toBigNumber(ask[1]);
+      book.asks.push(ask);
     });
-    bids.forEach((l) => {
-      l.price = toBigNumber(l[0]);
-      l.quantity = toBigNumber(l[1]);
-      book.bids.push(l);
+    bids.forEach((bid) => {
+      bid.price = toBigNumber(bid[0]);
+      bid.quantity = toBigNumber(bid[1]);
+      book.bids.push(bid);
     });
 
     this.setOrderBookMeta(book);
@@ -79,12 +79,12 @@ export default {
     book.asks = _.sortBy(book.asks, [level => level.price.toNumber()]);
     book.bids = _.sortBy(book.bids, [level => level.price.toNumber()]).reverse();
 
-    book.asks.forEach((l) => {
-      totalAsk = totalAsk.plus(l.quantity);
+    book.asks.forEach(({ quantity }) => {
+      totalAsk = totalAsk.plus(quantity);
     });
     let totalBid = new BigNumber(0);
-    book.bids.forEach((l) => {
-      totalBid = totalBid.plus(l.quantity);
+    book.bids.forEach(({ quantity }) => {
+      totalBid = totalBid.plus(quantity);
     });
 
     if (book.asks.length > 0 && book.bids.length > 0) {
@@ -93,16 +93,16 @@ export default {
     }
 
     let runningAsks = new BigNumber(0);
-    book.asks.forEach((l) => {
-      runningAsks = runningAsks.plus(l.quantity);
-      l.quantityTotalRatio = runningAsks.dividedBy(totalAsk);
-      l.quantityRatio = l.quantity.dividedBy(totalAsk);
+    book.asks.forEach((ask) => {
+      runningAsks = runningAsks.plus(ask.quantity);
+      ask.quantityTotalRatio = runningAsks.dividedBy(totalAsk);
+      ask.quantityRatio = ask.quantity.dividedBy(totalAsk);
     });
     let runningBids = new BigNumber(0);
-    book.bids.forEach((l) => {
-      runningBids = runningBids.plus(l.quantity);
-      l.quantityTotalRatio = runningBids.dividedBy(totalBid);
-      l.quantityRatio = l.quantity.dividedBy(totalBid);
+    book.bids.forEach((bids) => {
+      runningBids = runningBids.plus(bids.quantity);
+      bids.quantityTotalRatio = runningBids.dividedBy(totalBid);
+      bids.quantityRatio = bids.quantity.dividedBy(totalBid);
     });
 
     return book;
@@ -110,10 +110,10 @@ export default {
 
   updateOrderBook(book, side, changes) {
     const sideLevels = side === 'ask' ? book.asks : book.bids;
-    changes.forEach((c) => {
-      const price = toBigNumber(c[0]);
-      const remainingQuantity = toBigNumber(c[1]);
-      const pendingQuantity = toBigNumber(c[2]);
+    changes.forEach((change) => {
+      const price = toBigNumber(change[0]);
+      const remainingQuantity = toBigNumber(change[1]);
+      const pendingQuantity = toBigNumber(change[2]);
 
       const availableQuantity = remainingQuantity.minus(pendingQuantity);
       let quantity;
@@ -123,8 +123,8 @@ export default {
         quantity = availableQuantity;
       }
 
-      const level = _.find(sideLevels, (o) => {
-        return o.price.isEqualTo(price);
+      const level = _.find(sideLevels, (sideLevel) => {
+        return sideLevel.price.isEqualTo(price);
       });
 
       if (!level) {
@@ -175,9 +175,9 @@ export default {
             if (todayTrades.length > 0) {
               history.close24Hour = todayTrades[0].price;
               history.open24Hour = todayTrades[todayTrades.length - 1].price;
-              history.low24Hour = _.minBy(todayTrades, (t) => { return t.price; }).price;
-              history.high24Hour = _.maxBy(todayTrades, (t) => { return t.price; }).price;
-              history.volume24Hour = _.sumBy(todayTrades, (t) => { return t.quantity; });
+              history.low24Hour = _.minBy(todayTrades, 'price').price;
+              history.high24Hour = _.maxBy(todayTrades, 'price').price;
+              history.volume24Hour = _.sumBy(todayTrades, 'quantity');
               history.change24HourPercent = Math.round(((history.close24Hour - history.open24Hour)
                 / history.open24Hour) * 10000) / 100;
               history.change24Hour = history.close24Hour - history.open24Hour;
@@ -493,8 +493,8 @@ export default {
 
             if (!order.price) {
               let quantityToGive = new BigNumber(0);
-              order.offersToTake.forEach((o) => {
-                quantityToGive = quantityToGive.plus(o.quantity.multipliedBy(o.price));
+              order.offersToTake.forEach(({ quantity, price }) => {
+                quantityToGive = quantityToGive.plus(quantity.multipliedBy(price));
               });
               if (order.side === 'Sell') {
                 order.quantityToBuy = quantityToGive.toNumber();
@@ -770,15 +770,6 @@ export default {
   makeOrderDeposits(order) {
     return new Promise(async (resolve, reject) => {
       try {
-        for (let i = 0; i < order.deposits.length; i += 1) {
-          const deposit = order.deposits[i];
-          /* eslint-disable no-await-in-loop */
-          // need to ignore this rule, each of these build operations has to happen in order
-          // that way they'll each select the right UTXO inputs
-          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
-          /* eslint-enable no-await-in-loop */
-        }
-
         const watchInterval = setInterval(() => {
           let waiting = false;
           order.deposits.forEach((deposit) => {
@@ -794,6 +785,15 @@ export default {
           }
         }, intervals.BLOCK);
 
+        for (let i = 0; i < order.deposits.length; i += 1) {
+          const deposit = order.deposits[i];
+          /* eslint-disable no-await-in-loop */
+          // need to ignore this rule, each of these build operations has to happen in order
+          // that way they'll each select the right UTXO inputs
+          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
+          /* eslint-enable no-await-in-loop */
+        }
+
         store.dispatch('fetchHoldings', {
           done: () => {
             clearInterval(watchInterval);
@@ -804,7 +804,7 @@ export default {
           },
         });
       } catch (e) {
-        reject(`Failed to make order deposits. ${e.message}`);
+        reject(`Failed to make order deposits. ${e.message ? e.message : e}`);
       }
     });
   },
@@ -865,8 +865,8 @@ export default {
             u.num2fixed8(parseFloat(order.quantityToSell)),
             u.num2fixed8(new Date().getTime() * 0.00000001),
           ], neoToSend, gasToSend)
-          .then((t) => {
-            order.makerTx = tx.serializeTransaction(t.tx, true);
+          .then((transaction) => {
+            order.makerTx = tx.serializeTransaction(transaction.tx, true);
             resolve(order);
           })
           .catch((e) => {
@@ -907,8 +907,8 @@ export default {
             orderType === 'Market' ? 0 : 1, // whether or not to create a taker offer if this is no longer available
             u.num2fixed8(new Date().getTime() * 0.00000001),
           ])
-          .then((t) => {
-            offer.tx = tx.serializeTransaction(t.tx, true);
+          .then((transaction) => {
+            offer.tx = tx.serializeTransaction(transaction.tx, true);
             resolve(offer);
           })
           .catch((e) => {
@@ -927,10 +927,10 @@ export default {
           [
             order.offerId.replace('0x', ''),
           ])
-          .then((t) => {
+          .then((transaction) => {
             // send the signed transactions to the api for relay
             const currentNetwork = network.getSelectedNetwork();
-            axios.delete(`${currentNetwork.aph}/order/${order.marketName}/${order.offerId}/${tx.serializeTransaction(t.tx, true)}`)
+            axios.delete(`${currentNetwork.aph}/order/${order.marketName}/${order.offerId}/${tx.serializeTransaction(transaction.tx, true)}`)
               .then((res) => {
                 if (res.data.result) {
                   resolve('Order Cancelled');
@@ -1187,8 +1187,8 @@ export default {
 
             let i = 0;
 
-            configResponse.tx.outputs.forEach((o) => {
-              if (utxoIndex === -1 && quantity.isEqualTo(o.value)) {
+            configResponse.tx.outputs.forEach(({ value }) => {
+              if (utxoIndex === -1 && quantity.isEqualTo(value)) {
                 utxoIndex = i;
               }
               i += 1;
@@ -1493,9 +1493,7 @@ export default {
               neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
                 .then((balance) => {
                   const unspents = assetId === assets.GAS ? balance.assets.GAS.unspent : balance.assets.NEO.unspent;
-                  const input = _.find(unspents, (o) => {
-                    return o.txid === utxoTxHash && o.index === utxoIndex;
-                  });
+                  const input = _.find(unspents, { txid: utxoTxHash, index: utxoIndex });
 
                   if (!input) {
                     // skip displaying this error if we've already relayed this withdraw utxo, retry in case the explorer hasn't picked up the utxo yet
@@ -1998,9 +1996,9 @@ export default {
       try {
         const rpcClient = network.getRpcClient();
 
-        const sb = new sc.ScriptBuilder();
-        sb.emitAppCall(assets.DEX_SCRIPT_HASH, operation, parameters);
-        const script = sb.str;
+        const scriptBuilder = new sc.ScriptBuilder();
+        scriptBuilder.emitAppCall(assets.DEX_SCRIPT_HASH, operation, parameters);
+        const script = scriptBuilder.str;
 
         rpcClient.query({
           method: 'invokescript',
@@ -2163,8 +2161,8 @@ export default {
               configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
                 u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
 
-              configResponse.tx.outputs.forEach((o) => {
-                o.scriptHash = assets.DEX_SCRIPT_HASH;
+              configResponse.tx.outputs.forEach((output) => {
+                output.scriptHash = assets.DEX_SCRIPT_HASH;
               });
 
               return api.signTx(configResponse);

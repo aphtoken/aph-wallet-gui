@@ -128,8 +128,7 @@ export default {
         cleanAmount = new BigNumber(cleanNumber).toFixed(currency.decimals);
       } else if (cleanAmount[cleanAmount.length - 1] !== '.'
         && cleanAmount[cleanAmount.length - 1] !== '0') {
-        const n = new BigNumber(cleanAmount);
-        cleanAmount = formatNumberBase(n, formats.WHOLE_NUMBER_NO_COMMAS);
+        cleanAmount = formatNumberBase(BigNumber(cleanAmount), formats.WHOLE_NUMBER_NO_COMMAS);
       }
     }
 

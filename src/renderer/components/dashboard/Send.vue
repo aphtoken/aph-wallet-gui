@@ -41,7 +41,7 @@
       <div class="waiting" v-if="sendInProgress">{{$t('waitingForTransaction')}}</div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">{{$t('back')}}</button>
-        <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
+        <button class="send-btn" @click="send" :disabled="sending">{{ sendButtonLabel }}</button>
       </div>
     </template>
     <template v-else>

@@ -121,17 +121,17 @@ export default {
   computed: {
     transactions() {
       try {
-        return _.filter(this.$store.state.searchTransactions, (t) => {
+        return _.filter(this.$store.state.searchTransactions, (transaction) => {
           const fromDate = this.$store.state.searchTransactionFromDate;
           const toDate = this.$store.state.searchTransactionToDate
             ? moment(this.$store.state.searchTransactionToDate).add(1, 'days') : null;
 
           if (fromDate
-            && t.block_time < fromDate.unix()) {
+            && transaction.block_time < fromDate.unix()) {
             return false;
           }
           if (toDate
-            && t.block_time > toDate.unix()) {
+            && transaction.block_time > toDate.unix()) {
             return false;
           }
 
