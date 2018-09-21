@@ -485,8 +485,6 @@ export default {
             //  willRefreshAllDueToPollingInterval: ${willRefreshAllDueToPollingInterval}`);
             if (forceRefreshAll || (!onlyFetchUserAssets && (!lastVerifiedTokenBalances
               || willRefreshAllDueToPollingInterval))) {
-              // TODO: For TestNet there are 1000 tokens here. Should not refresh them all at the same time
-              // NOTE: this will be fixed with getting updates to balances over websockets, so may not address now.
               _.values(networkAssets).forEach((nep5Asset) => {
                 if (_.has(holdingsToQueryBalance, nep5Asset.assetId) === false) {
                   // This would turn off isUserAsset erroneously without user assets being added first.
@@ -507,46 +505,37 @@ export default {
               });
             }
 
-            _.values(holdingsToQueryBalance).forEach((holding) => {
-              if (restrictToSymbol && holding.symbol !== restrictToSymbol) {
-                return;
-              }
+            return this.fetchNEP5Balances(address)
+              .then((balances) => {
+                _.values(holdingsToQueryBalance).forEach((holding) => {
+                  // keep limiting this loop until the api also returns contract balances
+                  if (restrictToSymbol && holding.symbol !== restrictToSymbol) {
+                    return;
+                  }
 
-              if (holding.isNep5 === true) {
-                promises.push(this.fetchNEP5Balance(address, holding.assetId)
-                  .then((val) => {
-                    if (!val.valid) {
-                      if (val.retry) {
-                        _.set(tokensToRetryBalances, holding.assetId, holding);
-                        // if we currently have a holding value for this ensure it doesn't vanish for a retryable error
-                        const existingHolding = this.getHolding(holding.assetId);
-                        if (existingHolding) {
-                          // TODO: May need some way in the UI to show that the balance of this asset may be out of date
-                          holding.balance = existingHolding.balance;
-                          holding.symbol = existingHolding.symbol;
-                          holding.name = existingHolding.name;
-                          holding.availableBalance = calculateHoldingAvailableBalance(holding);
-                          holding.totalBalance = calculateHoldingTotalBalance(holding);
-                          holding.decimals = existingHolding.decimals;
-                          // console.log(`Using previous balance for token ${holding.symbol} ${holding.assetId}`
-                          //   + `balance: ${holding.balance}`);
-                          holdings.push(holding);
-                        }
-                      }
-
-                      return; // token not found or other failure
+                  if (holding.isNep5 === true) {
+                    const asset = assets.getNetworkAsset(holding.assetId);
+                    if (!asset) {
+                      return; // token not found
                     }
 
-                    holding.balance = new BigNumber(val.balance.toString());
-                    holding.symbol = val.symbol;
-                    holding.name = val.name;
+                    let balance = { walletBalance: new BigNumber(0) };
+                    if (_.has(balances, holding.assetId)) {
+                      balance = _.get(balances, holding.assetId);
+                    }
+
+                    holding.balance = balance.walletBalance;
+                    holding.symbol = asset.symbol;
+                    holding.name = asset.name;
                     holding.availableBalance = calculateHoldingAvailableBalance(holding);
                     holding.totalBalance = calculateHoldingTotalBalance(holding);
-                    holding.decimals = val.decimals;
+                    holding.decimals = asset.decimals;
 
                     store.commit('removeAssetHoldingsNeedRefresh', [holding.assetId]);
 
-                    if (val.balance > 0 || holding.totalBalance.isGreaterThan(0) || holding.isUserAsset === true) {
+                    if (holding.balance.isGreaterThan(0)
+                      || holding.totalBalance.isGreaterThan(0)
+                      || holding.isUserAsset === true) {
                       if (holding.isUserAsset !== true) {
                         // Saw a balance > 0 on this token but we haven't explicitly added to user assets.
                         // Add to user's assets so it will stay there until explicitly removed.
@@ -555,113 +544,113 @@ export default {
                         // console.log(`adding user asset ${holding.symbol} ${holding.assetId}
                         //   + balance: ${holding.balance}`);
                       }
-
-                      // console.log(`adding holding ${holding.symbol} ${holding.assetId} balance: ${holding.balance}`);
                       holdings.push(holding);
                     }
-                  }));
-              } else {
-                // console.log(`fetched system asset ${holding.symbol} ${holding.assetId} balance: ${holding.balance}`);
-                holdings.push(holding);
-              }
-
-              promises.push(dex.fetchContractBalance(holding.assetId)
-                .then((res) => {
-                  holding.contractBalance = toBigNumber(res);
-                  holding.availableBalance = calculateHoldingAvailableBalance(holding);
-                  holding.totalBalance = calculateHoldingTotalBalance(holding);
-                })
-                .catch((e) => {
-                  const existingHolding = this.getHolding(holding.assetId);
-                  if (existingHolding) {
-                    holding.contractBalance = existingHolding.contractBalance;
-                    holding.availableBalance = calculateHoldingAvailableBalance(holding);
-                    holding.totalBalance = calculateHoldingTotalBalance(holding);
+                  } else {
+                    holdings.push(holding);
                   }
-                  alerts.networkException(e);
-                }));
 
-              promises.push(dex.fetchOpenOrderBalance(holding.assetId)
-                .then((res) => {
-                  holding.openOrdersBalance = toBigNumber(res);
-                  holding.availableBalance = calculateHoldingAvailableBalance(holding);
-                  holding.totalBalance = calculateHoldingTotalBalance(holding);
-                })
-                .catch((e) => {
-                  alerts.networkException(e);
-                  const existingHolding = this.getHolding(holding.assetId);
-                  if (existingHolding) {
-                    holding.openOrdersBalance = existingHolding.openOrdersBalance;
-                    holding.availableBalance = calculateHoldingAvailableBalance(holding);
-                    holding.totalBalance = calculateHoldingTotalBalance(holding);
-                  }
-                }));
+                  promises.push(dex.fetchContractBalance(holding.assetId)
+                    .then((res) => {
+                      holding.contractBalance = toBigNumber(res);
+                      holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                      holding.totalBalance = calculateHoldingTotalBalance(holding);
+                    })
+                    .catch((e) => {
+                      const existingHolding = this.getHolding(holding.assetId);
+                      if (existingHolding) {
+                        holding.contractBalance = existingHolding.contractBalance;
+                        holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                        holding.totalBalance = calculateHoldingTotalBalance(holding);
+                      }
+                      alerts.networkException(e);
+                    }));
 
-              if (holding.symbol === 'NEO') {
-                promises.push(api.getMaxClaimAmountFrom({
-                  net: currentNetwork.net,
-                  url: currentNetwork.rpc,
-                  address: currentWallet.address,
-                  privateKey: currentWallet.privateKey,
-                }, api.neoscan)
-                  .then((res) => {
-                    holding.availableToClaim = toBigNumber(res);
-                  })
-                  .catch((e) => {
-                    const msg = `Couldn't get available to claim for ${holding.symbol}: ${e.message}`;
-                    alerts.networkException(msg);
-                    // console.log(msg);
-                  }));
-              }
-            });
+                  promises.push(dex.fetchOpenOrderBalance(holding.assetId)
+                    .then((res) => {
+                      holding.openOrdersBalance = toBigNumber(res);
+                      holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                      holding.totalBalance = calculateHoldingTotalBalance(holding);
+                    })
+                    .catch((e) => {
+                      alerts.networkException(e);
+                      const existingHolding = this.getHolding(holding.assetId);
+                      if (existingHolding) {
+                        holding.openOrdersBalance = existingHolding.openOrdersBalance;
+                        holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                        holding.totalBalance = calculateHoldingTotalBalance(holding);
+                      }
+                    }));
 
-            return Promise.all(promises)
-              .then(() => {
-                const valuationsPromises = [];
-                const lowercaseCurrency = settings.getCurrency().toLowerCase();
-
-                holdings.forEach((holdingBalance) => {
-                  valuationsPromises.push((done) => {
-                    valuation.getValuation(holdingBalance.symbol)
-                      .then((val) => {
-                        holdingBalance.totalSupply = val.total_supply;
-                        holdingBalance.marketCap = val[`market_cap_${lowercaseCurrency}`];
-                        holdingBalance.change24hrPercent = val.percent_change_24h;
-                        holdingBalance.unitValue = val[`price_${lowercaseCurrency}`]
-                          ? parseFloat(val[`price_${lowercaseCurrency}`]) : 0;
-                        holdingBalance.unitValue24hrAgo = holdingBalance.unitValue
-                          / (1 + (holdingBalance.change24hrPercent / 100.0));
-                        holdingBalance.change24hrValue = (holdingBalance.unitValue * holdingBalance.balance)
-                          - (holdingBalance.unitValue24hrAgo * holdingBalance.balance);
-                        holdingBalance.totalValue = holdingBalance.unitValue * holdingBalance.balance;
-                        if (holdingBalance.unitValue === null || isNaN(holdingBalance.unitValue)) {
-                          holdingBalance.totalValue = null;
-                          holdingBalance.change24hrPercent = null;
-                          holdingBalance.change24hrValue = null;
-                        }
-                        done();
+                  if (holding.symbol === 'NEO') {
+                    promises.push(api.getMaxClaimAmountFrom({
+                      net: currentNetwork.net,
+                      url: currentNetwork.rpc,
+                      address: currentWallet.address,
+                      privateKey: currentWallet.privateKey,
+                    }, api.neoscan)
+                      .then((res) => {
+                        holding.availableToClaim = toBigNumber(res);
                       })
                       .catch((e) => {
-                        alerts.networkException(e);
-                        done(e);
-                      });
-                  });
-                });
-                return Async.series(valuationsPromises, (e) => {
-                  if (e) {
-                    return reject(e);
+                        const msg = `Couldn't get available to claim for ${holding.symbol}: ${e.message}`;
+                        alerts.networkException(msg);
+                        // console.log(msg);
+                      }));
                   }
-                  const res = { };
-                  res.holdings = _.sortBy(holdings, [holding => holding.symbol.toLowerCase()], ['symbol']);
-                  res.totalBalance = _.sumBy(holdings, 'totalValue');
-                  res.change24hrValue = _.sumBy(holdings, 'change24hrValue');
-                  res.change24hrPercent = Math.round(10000 * (res.change24hrValue
-                    / (res.totalBalance - res.change24hrValue))) / 100.0;
-
-                  return resolve(res);
                 });
+
+                Promise.all(promises)
+                  .then(() => {
+                    const valuationsPromises = [];
+                    const lowercaseCurrency = settings.getCurrency().toLowerCase();
+
+                    holdings.forEach((holdingBalance) => {
+                      valuationsPromises.push((done) => {
+                        valuation.getValuation(holdingBalance.symbol)
+                          .then((val) => {
+                            holdingBalance.totalSupply = val.total_supply;
+                            holdingBalance.marketCap = val[`market_cap_${lowercaseCurrency}`];
+                            holdingBalance.change24hrPercent = val.percent_change_24h;
+                            holdingBalance.unitValue = val[`price_${lowercaseCurrency}`]
+                              ? parseFloat(val[`price_${lowercaseCurrency}`]) : 0;
+                            holdingBalance.unitValue24hrAgo = holdingBalance.unitValue
+                              / (1 + (holdingBalance.change24hrPercent / 100.0));
+                            holdingBalance.change24hrValue = (holdingBalance.unitValue * holdingBalance.balance)
+                              - (holdingBalance.unitValue24hrAgo * holdingBalance.balance);
+                            holdingBalance.totalValue = holdingBalance.unitValue * holdingBalance.balance;
+                            if (holdingBalance.unitValue === null || isNaN(holdingBalance.unitValue)) {
+                              holdingBalance.totalValue = null;
+                              holdingBalance.change24hrPercent = null;
+                              holdingBalance.change24hrValue = null;
+                            }
+                            done();
+                          })
+                          .catch((e) => {
+                            alerts.networkException(e);
+                            done(e);
+                          });
+                      });
+                    });
+                    return Async.series(valuationsPromises, (e) => {
+                      if (e) {
+                        return reject(e);
+                      }
+                      const res = {};
+                      res.holdings = _.sortBy(holdings, [holding => holding.symbol.toLowerCase()], ['symbol']);
+                      res.totalBalance = _.sumBy(holdings, 'totalValue');
+                      res.change24hrValue = _.sumBy(holdings, 'change24hrValue');
+                      res.change24hrPercent = Math.round(10000 * (res.change24hrValue
+                        / (res.totalBalance - res.change24hrValue))) / 100.0;
+
+                      return resolve(res);
+                    });
+                  })
+                  .catch(e => reject(e));
               })
-              .catch(e => reject(e));
+              .catch((e) => {
+                reject(`APH API Network Error: ${e}`);
+              });
           })
           .catch((e) => {
             reject(`NEO RPC Network Error: ${e}`);
@@ -733,38 +722,32 @@ export default {
     });
   },
 
-  fetchNEP5Balance(address, assetId) {
+  fetchNEP5Balances(address) {
     const currentNetwork = network.getSelectedNetwork();
 
-    return new Promise((resolve) => {
-      return api.nep5.getToken(currentNetwork.rpc, assetId, address)
-        .then((token) => {
-          resolve({
-            valid: !!token.symbol,
-            name: token.name,
-            symbol: token.symbol,
-            decimals: token.decimals,
-            totalSupply: token.totalSupply,
-            balance: token.balance,
-          });
-        })
-        .catch((ex) => {
-          let retry = true;
-          if (ex.message.indexOf('Expected a hexstring but got') > -1) {
-            // console.log(`Removing token due to exception: ${assetId} ${ex}`);
-            assets.removeUserAsset(assetId);
-            retry = false;
-          } else if (ex.message.indexOf('Invalid results length!') > -1) {
-            // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
-            retry = false;
-          }
+    return new Promise((resolve, reject) => {
+      try {
+        const assetsMap = {};
+        try {
+          return axios.get(`${currentNetwork.aph}/balances?address=${address}`)
+            .then((res) => {
+              res.data.balances.forEach((fetchedBalance) => {
+                _.set(assetsMap, fetchedBalance.scriptHash.replace('0x', ''), {
+                  walletBalance: new BigNumber(fetchedBalance.balance),
+                });
+              });
 
-          resolve({
-            valid: false,
-            retry,
-            error: `Error fetching NEP5 balance. Error: ${ex.message}`,
-          });
-        });
+              resolve(assetsMap);
+            })
+            .catch((e) => {
+              alerts.exception(`APH API Error: ${e}`);
+            });
+        } catch (e) {
+          return reject(e);
+        }
+      } catch (e) {
+        return reject(e.message);
+      }
     });
   },
 
