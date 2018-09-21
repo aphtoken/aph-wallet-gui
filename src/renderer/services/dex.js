@@ -769,15 +769,6 @@ export default {
   makeOrderDeposits(order) {
     return new Promise(async (resolve, reject) => {
       try {
-        for (let i = 0; i < order.deposits.length; i += 1) {
-          const deposit = order.deposits[i];
-          /* eslint-disable no-await-in-loop */
-          // need to ignore this rule, each of these build operations has to happen in order
-          // that way they'll each select the right UTXO inputs
-          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
-          /* eslint-enable no-await-in-loop */
-        }
-
         const watchInterval = setInterval(() => {
           let waiting = false;
           order.deposits.forEach((deposit) => {
@@ -793,6 +784,15 @@ export default {
           }
         }, intervals.BLOCK);
 
+        for (let i = 0; i < order.deposits.length; i += 1) {
+          const deposit = order.deposits[i];
+          /* eslint-disable no-await-in-loop */
+          // need to ignore this rule, each of these build operations has to happen in order
+          // that way they'll each select the right UTXO inputs
+          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
+          /* eslint-enable no-await-in-loop */
+        }
+
         store.dispatch('fetchHoldings', {
           done: () => {
             clearInterval(watchInterval);
@@ -803,7 +803,7 @@ export default {
           },
         });
       } catch (e) {
-        reject(`Failed to make order deposits. ${e.message}`);
+        reject(`Failed to make order deposits. ${e.message ? e.message : e}`);
       }
     });
   },
