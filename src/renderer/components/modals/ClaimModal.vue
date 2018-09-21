@@ -16,8 +16,8 @@
           {{$t('areYouSureYouWantToClaim')}}
         </p>
         <p>
-          {{$t('committedAPHBalance', { 
-            balance: $store.state.commitState.quantityCommitted 
+          {{$t('committedAPHBalance', {
+            balance: $store.state.commitState.quantityCommitted
           })}}
         </p>
       </div>
@@ -26,16 +26,16 @@
           {{$t('notMetMinimumBlocksToClaim')}}
         </p>
         <p>
-          {{$t('youMayStillClaim', { 
-            balance: $store.state.commitState.quantityCommitted 
+          {{$t('youMayStillClaim', {
+            balance: $store.state.commitState.quantityCommitted
           })}}
         </p>
         <p>
-          {{$t('waitAnAdditionalBlocks', { 
-            blocks: $store.state.commitState.ableToClaimHeight - this.currentBlock 
+          {{$t('waitAnAdditionalBlocks', {
+            blocks: $store.state.commitState.ableToClaimHeight - this.currentBlock
           })}}
         </p>
-      </div>      
+      </div>
       <button class="commit-btn" @click="onConfirmed()">{{$t('claim')}}</button>
     </div>
     <div class="footer">
@@ -62,9 +62,7 @@ export default {
     },
     aphHolding() {
       if (this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.$services.assets.APH;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.$services.assets.APH });
 
         if (holding) {
           return holding;
@@ -105,30 +103,30 @@ export default {
     width: toRem(500px);
     overflow: visible;
   }
-  
+
   .header {
     font-size: toRem(30px);
-    padding: $space-lg $space-lg 0; 
+    padding: $space-lg $space-lg 0;
     text-align: center;
   }
 
   .body {
     padding: $space $space-lg $space-lg;
-    
+
     p {
       font-family: GilroySemiBold;
       text-align: center;
     }
   }
-    
-      
-        
+
+
+
   .icons {
     position: relative;
     margin: toRem(-30px) auto toRem(30px) auto;
     width: toRem(40px);
-    height: toRem(40px);     
-          
+    height: toRem(40px);
+
     .aph-icon {
       position: absolute;
       width: toRem(40px);
@@ -139,14 +137,14 @@ export default {
           position: relative;
           margin-top: 10%;
         }
-            
+
         &.claim {
           margin: toRem(5px) 0 0 0;
           .fill {
             fill: white;
           }
         }
-            
+
         &.hex {
           margin: toRem(-25px);
           .fill {
@@ -155,7 +153,7 @@ export default {
         }
       }
     }
-  }  
+  }
 
   .footer {
     text-align:center;
@@ -172,7 +170,7 @@ export default {
 
   .commit-btn {
     @extend %btn;
-    
+
     margin: $space-lg auto 0 auto;
     width: toRem(300px);
   }

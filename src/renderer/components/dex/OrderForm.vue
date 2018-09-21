@@ -147,9 +147,7 @@ export default {
 
     quoteHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.currentMarket.quoteAssetId;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.currentMarket.quoteAssetId });
 
         if (holding) {
           return holding;
@@ -165,9 +163,7 @@ export default {
     },
     baseHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.currentMarket.baseAssetId;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.currentMarket.baseAssetId });
 
         if (holding) {
           return holding;
@@ -183,9 +179,7 @@ export default {
     },
     aphHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.$services.assets.APH;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.$services.assets.APH });
 
         if (holding) {
           return holding;
