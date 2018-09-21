@@ -32,6 +32,7 @@ const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
 let lastUTXOWithdrawn;
 const assetUTXOsToIgnore = {};
+const contractUTXOsReservedFor = {};
 
 export default {
   fetchMarkets() {
@@ -1061,6 +1062,7 @@ export default {
                 })
                 .catch((e) => {
                   reject(`Failed to monitor transaction for confirmation. ${e}`);
+                  this.completeSystemAssetWithdrawals();
                 });
             })
             .catch((e) => {
@@ -1157,9 +1159,9 @@ export default {
                     u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
                   resolveTx(configResponse);
                 })
-                .catch(() => {
+                .catch((e) => {
                   if (tryCount <= 1) {
-                    reject('Failed to calculate withdraw inputs and outputs');
+                    reject(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
                   } else {
                     reject('Failed to Mark Withdraw.');
                   }
@@ -1276,69 +1278,59 @@ export default {
 
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
         neo.fetchSystemAssetBalance(dexAddress, null, false)
-          .then((balance) => {
+          .then(async (balance) => {
             config.balance = balance;
             const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
+            await this.checkUnspentsReservedState(assetId, unspents);
 
-            const promises = [];
-            unspents.forEach((unspent) => {
-              promises.push(this.fetchSystemAssetUTXOReserved(unspent));
+            let inputTotal = new BigNumber(0);
+            _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).forEach((currentUnspent) => {
+              if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
+                return;
+              }
+              if (currentUnspent.reservedFor === currentWalletScriptHash) {
+                this.completeSystemAssetWithdrawals();
+                reject('Already have a UTXO reserved for your address. Completing open withdraw.');
+                return;
+              }
+              if (currentUnspent.reservedFor && currentUnspent.reservedFor.length >= 40) {
+                // reserved for someone else
+                return;
+              }
+              if (_.has(assetUTXOsToIgnore, currentUnspent.txid)
+                && _.get(assetUTXOsToIgnore, currentUnspent.txid) === currentUnspent.index) {
+                // we've tried to use this UTXO before and failed, skip it
+                return;
+              }
+
+              inputTotal = inputTotal.plus(currentUnspent.value);
+              config.tx.inputs.push({
+                prevHash: currentUnspent.txid,
+                prevIndex: currentUnspent.index,
+              });
             });
 
-            Promise.all(promises)
-              .then(() => {
-                let inputTotal = new BigNumber(0);
-                _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).forEach((currentUnspent) => {
-                  if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
-                    return;
-                  }
-                  if (currentUnspent.reservedFor === currentWalletScriptHash) {
-                    this.completeSystemAssetWithdrawals();
-                    reject('Already have a UTXO reserved for your address. Completing open withdraw.');
-                    return;
-                  }
-                  if (currentUnspent.reservedFor && currentUnspent.reservedFor.length > 0) {
-                    // reserved for someone else
-                    return;
-                  }
-                  if (_.has(assetUTXOsToIgnore, currentUnspent.txid)
-                    && _.get(assetUTXOsToIgnore, currentUnspent.txid) === currentUnspent.index) {
-                    // we've tried to use this UTXO before and failed, skip it
-                    return;
-                  }
+            if (inputTotal.isLessThan(quantity)) {
+              reject('Contract does not have enough balance for withdraw.');
+              return;
+            }
 
-                  inputTotal = inputTotal.plus(currentUnspent.value);
-                  config.tx.inputs.push({
-                    prevHash: currentUnspent.txid,
-                    prevIndex: currentUnspent.index,
-                  });
-                });
+            config.tx.outputs.push({
+              assetId,
+              scriptHash: assets.DEX_SCRIPT_HASH,
+              value: quantity,
+            });
 
-                if (inputTotal.isLessThan(quantity)) {
-                  reject('Contract does not have enough balance for withdraw.');
-                  return;
-                }
-
-                config.tx.outputs.push({
-                  assetId,
-                  scriptHash: assets.DEX_SCRIPT_HASH,
-                  value: quantity,
-                });
-
-                if (inputTotal.isGreaterThan(quantity)) {
-                  // change output
-                  config.tx.outputs.push({
-                    assetId,
-                    scriptHash: assets.DEX_SCRIPT_HASH,
-                    value: inputTotal.minus(quantity),
-                  });
-                }
-
-                resolve(config);
-              })
-              .catch((e) => {
-                reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e}`);
+            if (inputTotal.isGreaterThan(quantity)) {
+              // change output
+              config.tx.outputs.push({
+                assetId,
+                scriptHash: assets.DEX_SCRIPT_HASH,
+                value: inputTotal.minus(quantity),
               });
+            }
+
+            resolve(config);
           })
           .catch((e) => {
             reject(`Failed to fetch address balance. ${e}`);
@@ -1615,37 +1607,15 @@ export default {
   completeSystemAssetWithdrawals() {
     return new Promise((resolve, reject) => {
       try {
-        const currentWallet = wallets.getCurrentWallet();
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-        const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
         neo.fetchSystemAssetBalance(dexAddress, null, false)
           .then((balance) => {
             if (balance.assets.GAS) {
-              balance.assets.GAS.unspent.forEach((unspent) => {
-                this.fetchSystemAssetUTXOReserved(unspent)
-                  .then(() => {
-                    if (unspent.reservedFor === currentWalletScriptHash) {
-                      this.withdrawSystemAsset(assets.GAS, unspent.value.toNumber(), unspent.txid, unspent.index);
-                    }
-                  })
-                  .catch((e) => {
-                    reject(`Failed to fetch reserved UTXOs. ${e}`);
-                  });
-              });
+              this.checkUnspentsReservedState(assets.GAS, balance.assets.GAS.unspent);
             }
             if (balance.assets.NEO) {
-              balance.assets.NEO.unspent.forEach((unspent) => {
-                this.fetchSystemAssetUTXOReserved(unspent)
-                  .then(() => {
-                    if (unspent.reservedFor === currentWalletScriptHash) {
-                      this.withdrawSystemAsset(assets.NEO, unspent.value.toNumber(), unspent.txid, unspent.index);
-                    }
-                  })
-                  .catch((e) => {
-                    reject(`Failed to fetch reserved UTXOs. ${e}`);
-                  });
-              });
+              this.checkUnspentsReservedState(assets.NEO, balance.assets.NEO.unspent);
             }
           })
           .catch((e) => {
@@ -1655,6 +1625,34 @@ export default {
         reject(`Failed to fetch reserved UTXOs. ${e.message}`);
       }
     });
+  },
+
+  async checkUnspentsReservedState(assetId, unspents) {
+    const currentWallet = wallets.getCurrentWallet();
+    const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
+
+    for (let i = 0; i < unspents.length; i += 1) {
+      const unspent = unspents[i];
+      const utxoKey = `${unspent.txid}_${unspent.index}`;
+
+      if (_.has(contractUTXOsReservedFor, utxoKey)) {
+        unspent.reservedFor = _.get(contractUTXOsReservedFor);
+      }
+
+      /* eslint-disable no-await-in-loop */
+      if (!unspent.reservedFor) {
+        await this.fetchSystemAssetUTXOReserved(unspent);
+      }
+
+      if (unspent.reservedFor === currentWalletScriptHash) {
+        await this.withdrawSystemAsset(assetId, unspent.value.toNumber(), unspent.txid, unspent.index);
+      }
+      /* eslint-enable no-await-in-loop */
+
+      if (unspent.reservedFor) {
+        _.set(contractUTXOsReservedFor, utxoKey, unspent.reservedFor);
+      }
+    }
   },
 
   fetchSystemAssetUTXOReserved(input) {
@@ -1676,6 +1674,8 @@ export default {
           .then((res) => {
             if (!!res.result && res.result.length > 0) {
               input.reservedFor = u.reverseHex(res.result);
+            } else {
+              input.reservedFor = 'none';
             }
             resolve(input);
           })
