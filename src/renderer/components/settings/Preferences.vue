@@ -84,7 +84,7 @@ export default {
   watch: {
     selectedCurrency(currency) {
       this.$services.settings.setCurrency(currency);
-      this.$store.dispatch('fetchHoldings', {});
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
     },
 
     selectedNetwork(network) {
@@ -95,7 +95,11 @@ export default {
       network.fee = this.selectedNetworkFee;
       this.$services.network.setSelectedNetwork(network);
       this.$store.commit('handleNetworkChange');
-      this.$store.dispatch('fetchHoldings', {});
+      // For fast response
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true,
+        done: (() => {
+          this.$store.dispatch('fetchHoldings', { forceRefreshAll: true });
+        }) });
       this.$store.dispatch('fetchLatestVersion');
     },
 
@@ -103,7 +107,6 @@ export default {
       this.selectedNetwork.fee = fee;
       this.$services.network.setSelectedNetwork(this.selectedNetwork);
       this.$store.commit('handleNetworkChange');
-      this.$store.dispatch('fetchHoldings', {});
       this.$services.neo.promptGASFractureIfNecessary();
     },
 

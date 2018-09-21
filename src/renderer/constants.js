@@ -25,7 +25,7 @@ const languages = [{
   label: '中文',
   value: 'cn',
 }, {
-  label: 'Deutsche',
+  label: 'Deutsch',
   value: 'de',
 }, {
   label: '日本語',

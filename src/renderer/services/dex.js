@@ -31,6 +31,7 @@ const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
 const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
 let lastUTXOWithdrawn;
+const assetUTXOsToIgnore = {};
 
 export default {
   fetchMarkets() {
@@ -768,15 +769,6 @@ export default {
   makeOrderDeposits(order) {
     return new Promise(async (resolve, reject) => {
       try {
-        for (let i = 0; i < order.deposits.length; i += 1) {
-          const deposit = order.deposits[i];
-          /* eslint-disable no-await-in-loop */
-          // need to ignore this rule, each of these build operations has to happen in order
-          // that way they'll each select the right UTXO inputs
-          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
-          /* eslint-enable no-await-in-loop */
-        }
-
         const watchInterval = setInterval(() => {
           let waiting = false;
           order.deposits.forEach((deposit) => {
@@ -792,6 +784,15 @@ export default {
           }
         }, intervals.BLOCK);
 
+        for (let i = 0; i < order.deposits.length; i += 1) {
+          const deposit = order.deposits[i];
+          /* eslint-disable no-await-in-loop */
+          // need to ignore this rule, each of these build operations has to happen in order
+          // that way they'll each select the right UTXO inputs
+          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
+          /* eslint-enable no-await-in-loop */
+        }
+
         store.dispatch('fetchHoldings', {
           done: () => {
             clearInterval(watchInterval);
@@ -802,7 +803,7 @@ export default {
           },
         });
       } catch (e) {
-        reject(`Failed to make order deposits. ${e.message}`);
+        reject(`Failed to make order deposits. ${e.message ? e.message : e}`);
       }
     });
   },
@@ -1086,25 +1087,25 @@ export default {
     });
   },
 
-  markWithdraw(assetId, quantity) {
+  markWithdraw(assetId, quantity, tryCount = 1) {
     return new Promise((resolve, reject) => {
+      const currentNetwork = network.getSelectedNetwork();
+      const currentWallet = wallets.getCurrentWallet();
+
+      const config = {
+        net: currentNetwork.net,
+        url: currentNetwork.rpc,
+        script: {
+          scriptHash: assets.DEX_SCRIPT_HASH,
+          operation: 'withdraw',
+          args: [
+          ],
+        },
+        fees: currentNetwork.fee,
+        gas: 0,
+      };
+
       try {
-        const currentNetwork = network.getSelectedNetwork();
-        const currentWallet = wallets.getCurrentWallet();
-
-        const config = {
-          net: currentNetwork.net,
-          url: currentNetwork.rpc,
-          script: {
-            scriptHash: assets.DEX_SCRIPT_HASH,
-            operation: 'withdraw',
-            args: [
-            ],
-          },
-          fees: currentNetwork.fee,
-          gas: 0,
-        };
-
         quantity = toBigNumber(quantity);
 
         if (currentWallet.isLedger === true) {
@@ -1117,7 +1118,12 @@ export default {
         let utxoIndex = -1;
 
         const assetHolding = neo.getHolding(assetId);
-        alerts.success(`Processing withdraw request for ${quantity.toString()} ${assetHolding.symbol}...`);
+        if (tryCount > 1) {
+          alerts.success(`Processing withdraw request for ${quantity.toString()} ${assetHolding.symbol}... Retry attempt ${tryCount}`);
+        } else {
+          alerts.success(`Processing withdraw request for ${quantity.toString()} ${assetHolding.symbol}...`);
+        }
+
         api.fillKeys(config)
           .then((configResponse) => {
             return new Promise((resolveBalance) => {
@@ -1152,7 +1158,11 @@ export default {
                   resolveTx(configResponse);
                 })
                 .catch(() => {
-                  reject('Failed to calculate withdraw inputs and outputs');
+                  if (tryCount <= 1) {
+                    reject('Failed to calculate withdraw inputs and outputs');
+                  } else {
+                    reject('Failed to Mark Withdraw.');
+                  }
                 });
             });
           })
@@ -1191,18 +1201,70 @@ export default {
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
-            resolve({
-              success: configResponse.response.result,
-              tx: configResponse.tx,
-              utxoIndex,
-            });
+            if (!configResponse.response.result && tryCount < 3) {
+              setTimeout(() => {
+                this.ignoreWithdrawInputs(config);
+                neo.resetSystemAssetBalanceCache();
+                this.markWithdraw(assetId, quantity, tryCount + 1)
+                  .then((res) => {
+                    resolve(res);
+                  })
+                  .catch((e) => {
+                    reject(e);
+                  });
+              }, 10000);
+            } else {
+              resolve({
+                success: configResponse.response.result,
+                tx: configResponse.tx,
+                utxoIndex,
+              });
+            }
           })
           .catch((e) => {
-            reject(`Failed to Mark Withdraw. ${e}`);
+            if (tryCount < 3) {
+              setTimeout(() => {
+                this.ignoreWithdrawInputs(config);
+                neo.resetSystemAssetBalanceCache();
+                this.markWithdraw(assetId, quantity, tryCount + 1)
+                  .then((res) => {
+                    resolve(res);
+                  })
+                  .catch((e) => {
+                    reject(e);
+                  });
+              }, 10000);
+            } else {
+              reject(`Failed to Mark Withdraw. ${e}`);
+            }
           });
       } catch (e) {
-        reject(`Failed to Mark Withdraw. ${e.message}`);
+        if (tryCount < 3) {
+          setTimeout(() => {
+            this.ignoreWithdrawInputs(config);
+            neo.resetSystemAssetBalanceCache();
+            this.markWithdraw(assetId, quantity, tryCount + 1)
+              .then((res) => {
+                resolve(res);
+              })
+              .catch((e) => {
+                reject(e);
+              });
+          }, 10000);
+        } else {
+          reject(`Failed to Mark Withdraw. ${e.message}`);
+        }
       }
+    });
+  },
+
+  ignoreWithdrawInputs(config) {
+    if (!config || !config.tx) {
+      return;
+    }
+
+    config.tx.inputs.forEach((input) => {
+      _.set(assetUTXOsToIgnore, input.prevHash, input.prevIndex);
     });
   },
 
@@ -1226,24 +1288,29 @@ export default {
             Promise.all(promises)
               .then(() => {
                 let inputTotal = new BigNumber(0);
-                _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).reverse().forEach((unspent) => {
+                _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).forEach((currentUnspent) => {
                   if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
                     return;
                   }
-                  if (unspent.reservedFor === currentWalletScriptHash) {
+                  if (currentUnspent.reservedFor === currentWalletScriptHash) {
                     this.completeSystemAssetWithdrawals();
                     reject('Already have a UTXO reserved for your address. Completing open withdraw.');
                     return;
                   }
-                  if (unspent.reservedFor && unspent.reservedFor.length > 0) {
+                  if (currentUnspent.reservedFor && currentUnspent.reservedFor.length > 0) {
                     // reserved for someone else
                     return;
                   }
+                  if (_.has(assetUTXOsToIgnore, currentUnspent.txid)
+                    && _.get(assetUTXOsToIgnore, currentUnspent.txid) === currentUnspent.index) {
+                    // we've tried to use this UTXO before and failed, skip it
+                    return;
+                  }
 
-                  inputTotal = inputTotal.plus(unspent.value);
+                  inputTotal = inputTotal.plus(currentUnspent.value);
                   config.tx.inputs.push({
-                    prevHash: unspent.txid,
-                    prevIndex: unspent.index,
+                    prevHash: currentUnspent.txid,
+                    prevIndex: currentUnspent.index,
                   });
                 });
 
@@ -1380,13 +1447,9 @@ export default {
     });
   },
 
-  withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount) {
+  withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount = 1) {
     return new Promise((resolve, reject) => {
       try {
-        if (!tryCount) {
-          tryCount = 1;
-        }
-
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
 
