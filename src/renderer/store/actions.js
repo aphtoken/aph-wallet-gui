@@ -22,7 +22,6 @@ export {
   openLedger,
   openPrivateKey,
   openSavedWallet,
-  verifyLedgerConnection,
   fetchMarkets,
   fetchTradeHistory,
   fetchOrderHistory,
@@ -31,6 +30,7 @@ export {
   pingSocket,
   subscribeToMarket,
   unsubscribeFromMarket,
+  verifyLedgerConnection,
 };
 
 function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
@@ -43,9 +43,7 @@ function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
 
   hashOrSymbol = hashOrSymbol.replace('0x', '');
 
-  token = _.find(_.values(networkAssets), (o) => {
-    return o.symbol === hashOrSymbol;
-  });
+  token = _.find(_.values(networkAssets), { symbol: hashOrSymbol });
 
   if (!token) {
     token = _.get(networkAssets, hashOrSymbol);
@@ -195,7 +193,7 @@ async function fetchCommitState({ commit }) {
   }
 }
 
-async function fetchHoldings({ commit }, { done, isRequestSilent }) {
+async function fetchHoldings({ commit }, { done, isRequestSilent, onlyFetchUserAssets, forceRefreshAll } = {}) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let portfolio;
@@ -223,7 +221,7 @@ async function fetchHoldings({ commit }, { done, isRequestSilent }) {
   }
 
   try {
-    holdings = await neo.fetchHoldings(currentWallet.address);
+    holdings = await neo.fetchHoldings(currentWallet.address, false, onlyFetchUserAssets, forceRefreshAll);
 
     commit('setHoldings', holdings.holdings);
     commit('setPortfolio', {
@@ -604,14 +602,14 @@ function normalizeRecentTransactions(transactions) {
     const changes = {
       value: new BigNumber(transaction.value),
       details: {
-        vin: transaction.details.vin.map((i) => {
+        vin: transaction.details.vin.map(({ value }) => {
           return {
-            value: new BigNumber(i.value),
+            value: new BigNumber(value),
           };
         }),
-        vout: transaction.details.vout.map((o) => {
+        vout: transaction.details.vout.map(({ value }) => {
           return {
-            value: new BigNumber(o.value),
+            value: new BigNumber(value),
           };
         }),
       },

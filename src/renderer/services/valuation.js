@@ -92,19 +92,19 @@ export default {
               });
               return;
             }
-            res.data.Data.forEach((d) => {
-              returnData.dates.push(d.time);
-              returnData.prices.push(d.close);
+            res.data.Data.forEach((value) => {
+              returnData.dates.push(value.time);
+              returnData.prices.push(value.close);
 
-              if (d.high > returnData.high) {
-                returnData.high = d.high;
+              if (value.high > returnData.high) {
+                returnData.high = value.high;
               }
-              if (d.low < returnData.low) {
-                returnData.low = d.low;
+              if (value.low < returnData.low) {
+                returnData.low = value.low;
               }
-              returnData.volume += d.volumeto;
+              returnData.volume += value.volumeto;
               if (i === res.data.Data.length - 1) {
-                returnData.last = d.close;
+                returnData.last = value.close;
               }
               i += 1;
             });

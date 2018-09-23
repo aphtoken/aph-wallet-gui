@@ -44,6 +44,7 @@ export default {
     this.$store.state.showPortfolioHeader = true;
     clearInterval(this.connectionStatusInterval);
     clearInterval(this.marketsRefreshInterval);
+    clearInterval(this.completeSystemAssetWithdrawalsInterval);
   },
 
   mounted() {
@@ -55,14 +56,14 @@ export default {
     this.$store.commit('setSocketOrderCreated', (message) => {
       /* eslint-disable max-len */
       this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Created. x${message.data.quantity} @${message.data.price}`);
-      this.$store.dispatch('fetchHoldings', { done: null });
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
       this.$services.neo.resetSystemAssetBalanceCache();
     });
 
     this.$store.commit('setSocketOrderMatched', (message) => {
       /* eslint-disable max-len */
       this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Filled. x${message.data.quantity} @${message.data.price}`);
-      this.$store.dispatch('fetchHoldings', { done: null });
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
       this.$services.neo.resetSystemAssetBalanceCache();
     });
 
@@ -92,6 +93,9 @@ export default {
     this.marketsRefreshInterval = setInterval(() => {
       this.loadMarkets();
     }, this.$constants.intervals.MARKETS_POLLING);
+    this.completeSystemAssetWithdrawalsInterval = setInterval(() => {
+      this.$services.dex.completeSystemAssetWithdrawals();
+    }, this.$constants.intervals.COMPLETE_SYSTEM_WITHDRAWALS);
   },
 
   data() {

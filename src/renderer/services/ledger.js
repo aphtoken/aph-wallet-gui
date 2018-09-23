@@ -175,26 +175,26 @@ export default {
   },
 
   assembleSignature(response) {
-    const ss = new u.StringStream(response);
+    const stringStream = new u.StringStream(response);
     // The first byte is format. It is usually 0x30 (SEQ) or 0x31 (SET)
     // The second byte represents the total length of the DER module.
-    ss.read(2);
+    stringStream.read(2);
     // Now we read each field off
     // Each field is encoded with a type byte, length byte followed by the data itself
-    ss.read(1); // Read and drop the type
-    const r = ss.readVarBytes();
-    ss.read(1);
-    const s = ss.readVarBytes();
+    stringStream.read(1); // Read and drop the type
+    const stringStreamR = stringStream.readVarBytes();
+    stringStream.read(1);
+    const stringStreamS = stringStream.readVarBytes();
 
     // We will need to ensure both integers are 32 bytes long
-    const integers = [r, s].map((i) => {
-      if (i.length < 64) {
-        i = i.padStart(64, '0');
+    const integers = [stringStreamR, stringStreamS].map((stringStream) => {
+      if (stringStream.length < 64) {
+        stringStream = stringStream.padStart(64, '0');
       }
-      if (i.length > 64) {
-        i = i.substr(-64);
+      if (stringStream.length > 64) {
+        stringStream = stringStream.substr(-64);
       }
-      return i;
+      return stringStream;
     });
 
     return integers.join('');
@@ -212,9 +212,8 @@ export default {
   sendChunk(i, chunks) {
     return new Promise((resolve, reject) => {
       try {
-        const p = i === chunks.length - 1 ? '80' : '00';
         const chunk = chunks[i];
-        const params = `8002${p}00`;
+        const params = `8002${chunks.length - 1 ? '80' : '00'}00`;
         this.send(params, chunk, [VALID_STATUS])
           .then((res) => {
             i += 1;

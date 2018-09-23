@@ -60,7 +60,7 @@ describe('TransactionsSidebar.vue', () => {
     });
 
     it('should render with correctly formatted data', () => {
-      expect(wrapper.find('h1.underlined').text()).contains('Recent transactions');
+      expect(wrapper.find('h1.underlined').text()).contains('Recent Transactions');
       expect(wrapper.contains('#transactions-sidebar')).to.be.true();
     });
 
@@ -69,38 +69,32 @@ describe('TransactionsSidebar.vue', () => {
     });
 
     it('should fetch transactions', () => {
-      expect(loadTransactions).to.have.been.calledThrice();
+      expect(loadTransactions).to.have.been.callCount(4);
     });
   });
 
   context('the user clicks the toggle to open', () => {
-    beforeEach(() => {
-      wrapper.find('.toggle').trigger('click');
-    });
-
     it('should show the correct icon', () => {
+      wrapper.find('.toggle').trigger('click');
+
       expect(wrapper.contains('.icon.double-arrow-right')).to.be.true();
     });
   });
 
   context('the user clicks the toggle to close', () => {
-    beforeEach(() => {
+    it('should show the correct icon', () => {
       wrapper.setData({ open: true });
       wrapper.find('.toggle').trigger('click');
-    });
 
-    it('should show the correct icon', () => {
       expect(wrapper.contains('.icon.history')).to.be.true();
     });
   });
 
   context('the component is destroyed', () => {
-    beforeEach(() => {
+    it('should clear the interval', () => {
       window.clearInterval = sinon.spy();
       wrapper.destroy();
-    });
 
-    it('should clear the interval', () => {
       expect(window.clearInterval).to.have.been.calledOnce();
     });
   });

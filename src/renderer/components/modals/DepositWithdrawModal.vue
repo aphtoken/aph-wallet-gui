@@ -21,13 +21,14 @@
     </div>
     <div class="footer">
       <button class="cancel-btn" @click="onCancel">{{$t('cancel')}}</button>
-      <button class="deposit-withdraw-btn" @click="onConfirmed(isDeposit, holding, amount)" 
+      <button class="deposit-withdraw-btn" @click="confirm()" 
         :disabled="shouldDisableDepositWithdrawButton">{{isDeposit ? $t('deposit') : $t('withdraw')}}</button>
     </div>
   </modal-wrapper>
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 import ModalWrapper from './ModalWrapper';
 
 export default {
@@ -67,6 +68,17 @@ export default {
       this.amount = this.isDeposit ?
         this.holding.balance.toString() :
         this.holding.contractBalance.toString();
+
+      if (this.isDeposit && this.holding.symbol === 'GAS') {
+        // multiply by 10 to save some additional gas for transactions and to withdrawal
+        this.amount = new BigNumber(this.amount).minus(this.$services.network.getSelectedNetwork().fee * 10).toString();
+      }
+
+      this.amount = this.$cleanAmount(this.amount, this.holding);
+    },
+    confirm() {
+      this.amount = this.$cleanAmount(this.amount, this.holding);
+      this.onConfirmed(this.isDeposit, this.holding, this.amount);
     },
   },
 

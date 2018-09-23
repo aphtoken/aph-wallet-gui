@@ -24,9 +24,10 @@ const NEO_ASSET_ID = 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6da
 
 let lastClaimSent;
 let lastGasFractureNotification;
-let lastVerifiedTokenBalances;
 let tokensToRetryBalances = {};
 let addressBalances = {};
+// TODO: this should be per network
+let lastVerifiedTokenBalances = 0;
 
 const calculateHoldingTotalBalance = (holding) => {
   return toBigNumber(_.get(holding, 'balance', toBigNumber(0)))
@@ -118,7 +119,7 @@ export default {
                   promises.push(this.fetchTransactionDetails(fetchedTransaction.txid)
                     .then((transactionDetails) => {
                       if (!transactionDetails) {
-                        console.log(`failed fetching details for ${fetchedTransaction.txid}`);
+                        // console.log(`failed fetching details for ${fetchedTransaction.txid}`);
                         return;
                       }
 
@@ -354,7 +355,7 @@ export default {
                   done: ((data) => {
                     resolve(data);
                   }),
-                  failed: ((ex) => { reject(ex); }),
+                  failed: e => reject(e),
                 });
               }).then((blockHeader) => {
                 transaction.block = blockHeader.index;
@@ -406,7 +407,7 @@ export default {
     });
   },
 
-  fetchHoldings(address, restrictToSymbol) {
+  fetchHoldings(address, restrictToSymbol, onlyFetchUserAssets, forceRefreshAll) {
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
     const rpcClient = network.getRpcClient();
@@ -469,26 +470,38 @@ export default {
               }
             });
 
-            if (!lastVerifiedTokenBalances
-              || moment().utc().diff(moment.unix(lastVerifiedTokenBalances), 'milliseconds')
-                > intervals.TOKENS_BALANCES_POLL_ALL) {
-              _.values(networkAssets).forEach((nep5Asset) => {
-                _.set(holdingsToQueryBalance, nep5Asset.assetId, assetToHolding(nep5Asset, false));
-              });
-              lastVerifiedTokenBalances = moment.utc();
-            }
-
             _.values(userAssets).forEach((nep5Asset) => {
               const asset = assetToHolding(nep5Asset, true);
               if (_.has(holdingsToQueryBalance, asset.assetId) === false) {
                 _.set(holdingsToQueryBalance, nep5Asset.assetId, asset);
+                // console.log(`Fetching due to user asset ${asset.symbol} ${asset.assetId}`);
               }
             });
+
+            const willRefreshAllDueToPollingInterval
+              = moment().utc().diff(moment.unix(lastVerifiedTokenBalances), 'milliseconds')
+                > intervals.TOKENS_BALANCES_POLL_ALL;
+            // console.log(`forceRefreshAll: ${forceRefreshAll} onlyFetchUserAssets: ${onlyFetchUserAssets}
+            //  willRefreshAllDueToPollingInterval: ${willRefreshAllDueToPollingInterval}`);
+            if (forceRefreshAll || (!onlyFetchUserAssets && (!lastVerifiedTokenBalances
+              || willRefreshAllDueToPollingInterval))) {
+              // TODO: For TestNet there are 1000 tokens here. Should not refresh them all at the same time
+              // NOTE: this will be fixed with getting updates to balances over websockets, so may not address now.
+              _.values(networkAssets).forEach((nep5Asset) => {
+                if (_.has(holdingsToQueryBalance, nep5Asset.assetId) === false) {
+                  // This would turn off isUserAsset erroneously without user assets being added first.
+                  _.set(holdingsToQueryBalance, nep5Asset.assetId, assetToHolding(nep5Asset, false));
+                }
+                // console.log(`Fetching due to token balances poll ${nep5Asset.symbol} ${nep5Asset.assetId}`);
+              });
+              lastVerifiedTokenBalances = moment.utc();
+            }
 
             if (!restrictToSymbol) {
               _.values(tokensToRetryBalances).forEach((holding) => {
                 if (_.has(holdingsToQueryBalance, holding.assetId) === false) {
                   _.set(holdingsToQueryBalance, holding.assetId, holding);
+                  // console.log(`Fetching due retry flag set ${holding.symbol} ${holding.assetId}`);
                 }
                 tokensToRetryBalances = _.omit(tokensToRetryBalances, holding.assetId);
               });
@@ -505,11 +518,19 @@ export default {
                     if (!val.valid) {
                       if (val.retry) {
                         _.set(tokensToRetryBalances, holding.assetId, holding);
-                        // if we currently have a holding value for this ensure it doesn't vanish for a retriable error
+                        // if we currently have a holding value for this ensure it doesn't vanish for a retryable error
                         const existingHolding = this.getHolding(holding.assetId);
                         if (existingHolding) {
                           // TODO: May need some way in the UI to show that the balance of this asset may be out of date
-                          holdings.push(existingHolding);
+                          holding.balance = existingHolding.balance;
+                          holding.symbol = existingHolding.symbol;
+                          holding.name = existingHolding.name;
+                          holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                          holding.totalBalance = calculateHoldingTotalBalance(holding);
+                          holding.decimals = existingHolding.decimals;
+                          // console.log(`Using previous balance for token ${holding.symbol} ${holding.assetId}`
+                          //   + `balance: ${holding.balance}`);
+                          holdings.push(holding);
                         }
                       }
 
@@ -525,18 +546,22 @@ export default {
 
                     store.commit('removeAssetHoldingsNeedRefresh', [holding.assetId]);
 
-                    if (val.balance > 0 || holding.isUserAsset === true) {
-                      if (holding.isUserAsset !== true && holding.totalBalance.isGreaterThan(0)) {
-                        // saw a balance > 0 on this token but we haven't explicitly added to our tokens we hold,
-                        // add to user's assets so it will stay there until explicitly removed
+                    if (val.balance > 0 || holding.totalBalance.isGreaterThan(0) || holding.isUserAsset === true) {
+                      if (holding.isUserAsset !== true) {
+                        // Saw a balance > 0 on this token but we haven't explicitly added to user assets.
+                        // Add to user's assets so it will stay there until explicitly removed.
                         holding.isUserAsset = true;
                         assets.addUserAsset(holding.assetId);
+                        // console.log(`adding user asset ${holding.symbol} ${holding.assetId}
+                        //   + balance: ${holding.balance}`);
                       }
 
+                      // console.log(`adding holding ${holding.symbol} ${holding.assetId} balance: ${holding.balance}`);
                       holdings.push(holding);
                     }
                   }));
               } else {
+                // console.log(`fetched system asset ${holding.symbol} ${holding.assetId} balance: ${holding.balance}`);
                 holdings.push(holding);
               }
 
@@ -547,6 +572,12 @@ export default {
                   holding.totalBalance = calculateHoldingTotalBalance(holding);
                 })
                 .catch((e) => {
+                  const existingHolding = this.getHolding(holding.assetId);
+                  if (existingHolding) {
+                    holding.contractBalance = existingHolding.contractBalance;
+                    holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                    holding.totalBalance = calculateHoldingTotalBalance(holding);
+                  }
                   alerts.networkException(e);
                 }));
 
@@ -558,6 +589,12 @@ export default {
                 })
                 .catch((e) => {
                   alerts.networkException(e);
+                  const existingHolding = this.getHolding(holding.assetId);
+                  if (existingHolding) {
+                    holding.openOrdersBalance = existingHolding.openOrdersBalance;
+                    holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                    holding.totalBalance = calculateHoldingTotalBalance(holding);
+                  }
                 }));
 
               if (holding.symbol === 'NEO') {
@@ -571,7 +608,9 @@ export default {
                     holding.availableToClaim = toBigNumber(res);
                   })
                   .catch((e) => {
-                    alerts.networkException(e);
+                    const msg = `Couldn't get available to claim for ${holding.symbol}: ${e.message}`;
+                    alerts.networkException(msg);
+                    // console.log(msg);
                   }));
               }
             });
@@ -634,9 +673,7 @@ export default {
   },
 
   getHolding(assetId) {
-    const holding = _.find(store.state.holdings, (o) => {
-      return o.assetId === assetId;
-    });
+    const holding = _.find(store.state.holdings, { assetId });
 
     if (holding) {
       if (holding.balance !== null) {
@@ -709,13 +746,13 @@ export default {
             balance: token.balance,
           });
         })
-        .catch((ex) => {
+        .catch((e) => {
           let retry = true;
-          if (ex.message.indexOf('Expected a hexstring but got') > -1) {
+          if (e.message.indexOf('Expected a hexstring but got') > -1) {
             // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
             assets.removeUserAsset(assetId);
             retry = false;
-          } else if (ex.message.indexOf('Invalid results length!') > -1) {
+          } else if (e.message.indexOf('Invalid results length!') > -1) {
             // console.log(`Removing token due to exception: ${nep5.assetId} ${e}`);
             retry = false;
           }
@@ -723,7 +760,7 @@ export default {
           resolve({
             valid: false,
             retry,
-            error: `Error fetching NEP5 balance. Error: ${ex.message}`,
+            error: `Error fetching NEP5 balance. Error: ${e.message}`,
           });
         });
     });
@@ -1261,8 +1298,8 @@ export default {
 
     lastClaimSent = new Date();
     return this.fetchHoldings(currentWallet.address, 'NEO')
-      .then((h) => {
-        const neoAmount = h.holdings[0].balance;
+      .then((holding) => {
+        const neoAmount = holding.holdings[0].balance;
         const callback = () => {
           gasClaim.step = 2;
         };
@@ -1270,7 +1307,7 @@ export default {
         gasClaim.step = 1;
 
 
-        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
+        if (holding.holdings.length === 0 || holding.holdings[0].balance <= 0) {
           this.sendClaimGas(gasClaim);
         } else {
           // send neo to ourself to make all gas available for claim

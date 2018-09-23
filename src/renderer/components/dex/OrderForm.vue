@@ -24,7 +24,7 @@
           </div>
           <div class="options">
             <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
-              <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info"></aph-icon>
+              <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info-question-mark"></aph-icon>
               <label>{{$t('postOnly')}}</label>
               <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
               <aph-icon name="radio-off" v-else></aph-icon>
@@ -105,6 +105,7 @@ export default {
     this.actionableHolding = this.quoteHolding;
 
     loadHoldingsIntervalId = setInterval(() => {
+      // TODO: is this redundant with the fetch occurring in AuthenticatedWrapper.vue
       this.loadHoldingsSilently();
     }, this.$constants.intervals.HOLDINGS_POLLING);
 
@@ -146,9 +147,7 @@ export default {
 
     quoteHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.currentMarket.quoteAssetId;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.currentMarket.quoteAssetId });
 
         if (holding) {
           return holding;
@@ -164,9 +163,7 @@ export default {
     },
     baseHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.currentMarket.baseAssetId;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.currentMarket.baseAssetId });
 
         if (holding) {
           return holding;
@@ -182,9 +179,7 @@ export default {
     },
     aphHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.$services.assets.APH;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.$services.assets.APH });
 
         if (holding) {
           return holding;
@@ -355,10 +350,10 @@ export default {
 
   methods: {
     loadHoldings() {
-      this.$store.dispatch('fetchHoldings', { done: null });
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
     },
     loadHoldingsSilently() {
-      this.$store.dispatch('fetchHoldings', { done: null, isRequestSilent: true });
+      this.$store.dispatch('fetchHoldings', { isRequestSilent: true });
     },
     setSide(side) {
       this.side = side;

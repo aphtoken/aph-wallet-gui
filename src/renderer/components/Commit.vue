@@ -178,9 +178,7 @@ export default {
     },
     aphHolding() {
       if (this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.$services.assets.APH;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.$services.assets.APH });
 
         if (holding) {
           return holding;
@@ -296,7 +294,7 @@ export default {
     flex: 1 0 85%;
     max-width: toRem(1105px);
     min-width: toRem(1150px);
-    
+
     .exchange-values {
       display: flex;
       justify-content: space-around;
@@ -316,23 +314,23 @@ export default {
         font-size: toRem(18px);
         max-width: toRem(250px);
       }
-      
+
       .highlight {
         color: $purple;
         font-family: 'GilroySemibold';
         font-size: toRem(28px);
         padding: $space-sm 0;
       }
-      
+
       .estimate {
         text-transform: uppercase;
       }
-        
+
       .icons {
         margin: toRem(23px) $space-lg 0 0;
         position: relative;
         width: toRem(80px);
-          
+
         .aph-icon {
           position: absolute;
           width: toRem(55px);
@@ -342,11 +340,11 @@ export default {
               margin-top: 10%;
               position: relative;
             }
-            
+
             &.star {
               margin: toRem(5px) 0 0 0;
             }
-            
+
             &.hex {
               margin: toRem(-25px);
               .fill {
@@ -357,31 +355,31 @@ export default {
         }
       }
     }
-              
+
     .user-values {
       background-color: white;
       display: flex;
       flex-direction: row;
       margin-bottom: $space-lg;
       padding: $space-lg;
-    
+
       &> div {
         flex: 1;
       }
-      
+
       .underlined {
         @extend %underlined-header-sm;
 
         font-size: toRem(24px);
       }
-      
+
       .highlight {
         color: $purple;
         font-family: 'GilroySemibold';
         font-size: toRem(18px);
         margin: 0 0 $space 0;
       }
-      
+
       .lower {
         text-transform: uppercase;
 
@@ -391,17 +389,17 @@ export default {
         }
       }
     }
-    
+
     .actions {
       display: flex;
       flex-direction: row;
       flex: 1;
       max-height: toRem(339px);
-      
+
       &> div {
         flex: 1 1 50%;
       }
-      
+
       .btn-square {
         @extend %btn-square;
 
@@ -409,7 +407,7 @@ export default {
         font-size: toRem(55px);
         padding: 3rem 0;
         width: toRem(200px);
-        
+
         &> div {
           width: 100%;
 
@@ -418,7 +416,7 @@ export default {
             padding-top: $space-lg;
           }
         }
-            
+
         &:disabled {
           background-color: $grey;
           color: $dark;
@@ -451,13 +449,13 @@ export default {
         margin-left: $space-lg;
         margin-right: $space-lg;
       }
-      
+
       .claim-info {
         background-color: white;
         display: flex;
         justify-content: center;
         margin-bottom: $space;
-        
+
         &> div {
           font-size: toRem(14px);
           text-align: center;
@@ -465,14 +463,14 @@ export default {
 
           &> div {
             margin: $space;
-            
+
             span {
               color: $dark-grey;
               display: block;
             }
           }
         }
-        
+
         h2 {
           color: $purple;
           font-size: 30px;
@@ -488,7 +486,7 @@ export default {
       max-height: toRem(50px);
       padding-left: $space-lg;
       width: 50%;
-      
+
       .btn-square {
         @extend %btn-square;
 
@@ -496,9 +494,9 @@ export default {
         font-size: toRem(55px);
         padding: 3rem 0;
         position: relative;
-        top: -100px; 
+        top: -100px;
         width: toRem(200px);
-        
+
         &> div {
           width: 100%;
 
@@ -507,7 +505,7 @@ export default {
             padding-top: $space-lg;
           }
         }
-            
+
         &:disabled {
           background-color: $grey;
           color: $dark;

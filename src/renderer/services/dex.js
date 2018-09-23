@@ -31,6 +31,8 @@ const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
 const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
 let lastUTXOWithdrawn;
+const assetUTXOsToIgnore = {};
+const contractUTXOsReservedFor = {};
 
 export default {
   fetchMarkets() {
@@ -56,15 +58,15 @@ export default {
       bids: [],
     };
 
-    asks.forEach((l) => {
-      l.price = toBigNumber(l[0]);
-      l.quantity = toBigNumber(l[1]);
-      book.asks.push(l);
+    asks.forEach((ask) => {
+      ask.price = toBigNumber(ask[0]);
+      ask.quantity = toBigNumber(ask[1]);
+      book.asks.push(ask);
     });
-    bids.forEach((l) => {
-      l.price = toBigNumber(l[0]);
-      l.quantity = toBigNumber(l[1]);
-      book.bids.push(l);
+    bids.forEach((bid) => {
+      bid.price = toBigNumber(bid[0]);
+      bid.quantity = toBigNumber(bid[1]);
+      book.bids.push(bid);
     });
 
     this.setOrderBookMeta(book);
@@ -77,12 +79,12 @@ export default {
     book.asks = _.sortBy(book.asks, [level => level.price.toNumber()]);
     book.bids = _.sortBy(book.bids, [level => level.price.toNumber()]).reverse();
 
-    book.asks.forEach((l) => {
-      totalAsk = totalAsk.plus(l.quantity);
+    book.asks.forEach(({ quantity }) => {
+      totalAsk = totalAsk.plus(quantity);
     });
     let totalBid = new BigNumber(0);
-    book.bids.forEach((l) => {
-      totalBid = totalBid.plus(l.quantity);
+    book.bids.forEach(({ quantity }) => {
+      totalBid = totalBid.plus(quantity);
     });
 
     if (book.asks.length > 0 && book.bids.length > 0) {
@@ -91,16 +93,16 @@ export default {
     }
 
     let runningAsks = new BigNumber(0);
-    book.asks.forEach((l) => {
-      runningAsks = runningAsks.plus(l.quantity);
-      l.quantityTotalRatio = runningAsks.dividedBy(totalAsk);
-      l.quantityRatio = l.quantity.dividedBy(totalAsk);
+    book.asks.forEach((ask) => {
+      runningAsks = runningAsks.plus(ask.quantity);
+      ask.quantityTotalRatio = runningAsks.dividedBy(totalAsk);
+      ask.quantityRatio = ask.quantity.dividedBy(totalAsk);
     });
     let runningBids = new BigNumber(0);
-    book.bids.forEach((l) => {
-      runningBids = runningBids.plus(l.quantity);
-      l.quantityTotalRatio = runningBids.dividedBy(totalBid);
-      l.quantityRatio = l.quantity.dividedBy(totalBid);
+    book.bids.forEach((bids) => {
+      runningBids = runningBids.plus(bids.quantity);
+      bids.quantityTotalRatio = runningBids.dividedBy(totalBid);
+      bids.quantityRatio = bids.quantity.dividedBy(totalBid);
     });
 
     return book;
@@ -108,10 +110,10 @@ export default {
 
   updateOrderBook(book, side, changes) {
     const sideLevels = side === 'ask' ? book.asks : book.bids;
-    changes.forEach((c) => {
-      const price = toBigNumber(c[0]);
-      const remainingQuantity = toBigNumber(c[1]);
-      const pendingQuantity = toBigNumber(c[2]);
+    changes.forEach((change) => {
+      const price = toBigNumber(change[0]);
+      const remainingQuantity = toBigNumber(change[1]);
+      const pendingQuantity = toBigNumber(change[2]);
 
       const availableQuantity = remainingQuantity.minus(pendingQuantity);
       let quantity;
@@ -121,8 +123,8 @@ export default {
         quantity = availableQuantity;
       }
 
-      const level = _.find(sideLevels, (o) => {
-        return o.price.isEqualTo(price);
+      const level = _.find(sideLevels, (sideLevel) => {
+        return sideLevel.price.isEqualTo(price);
       });
 
       if (!level) {
@@ -173,9 +175,9 @@ export default {
             if (todayTrades.length > 0) {
               history.close24Hour = todayTrades[0].price;
               history.open24Hour = todayTrades[todayTrades.length - 1].price;
-              history.low24Hour = _.minBy(todayTrades, (t) => { return t.price; }).price;
-              history.high24Hour = _.maxBy(todayTrades, (t) => { return t.price; }).price;
-              history.volume24Hour = _.sumBy(todayTrades, (t) => { return t.quantity; });
+              history.low24Hour = _.minBy(todayTrades, 'price').price;
+              history.high24Hour = _.maxBy(todayTrades, 'price').price;
+              history.volume24Hour = _.sumBy(todayTrades, 'quantity');
               history.change24HourPercent = Math.round(((history.close24Hour - history.open24Hour)
                 / history.open24Hour) * 10000) / 100;
               history.change24Hour = history.close24Hour - history.open24Hour;
@@ -496,8 +498,8 @@ export default {
 
             if (!order.price) {
               let quantityToGive = new BigNumber(0);
-              order.offersToTake.forEach((o) => {
-                quantityToGive = quantityToGive.plus(o.quantity.multipliedBy(o.price));
+              order.offersToTake.forEach(({ quantity, price }) => {
+                quantityToGive = quantityToGive.plus(quantity.multipliedBy(price));
               });
               if (order.side === 'Sell') {
                 order.quantityToBuy = quantityToGive.toNumber();
@@ -674,7 +676,7 @@ export default {
             reject(`APH API Error: ${e}`);
           });
       } catch (e) {
-        reject(`Failed to place order. ${e.message}`);
+        reject(`Failed to place order. ${e}`);
       }
     });
   },
@@ -712,9 +714,6 @@ export default {
 
       if (sellAssetHolding.canPull === false && order.quantity.isGreaterThan(0)) {
         // this is an MCT based token that can not be pulled from our DEX contract, have to send a deposit first
-        depositMakerQuantity = true;
-      } else if (sellAssetHolding.decimals < 8) {
-        // this is a token with < 8 decimals, NEO for example, make the deposit of the minimum amount needed to make the order
         depositMakerQuantity = true;
       } else if (order.offersToTake.length > 0 && order.quantityToMake.isGreaterThan(0)) {
         // we have maker and taker quantities, need to deposit the maker quanity first because we don't know the order they will be confirmed
@@ -776,15 +775,6 @@ export default {
   makeOrderDeposits(order) {
     return new Promise(async (resolve, reject) => {
       try {
-        for (let i = 0; i < order.deposits.length; i += 1) {
-          const deposit = order.deposits[i];
-          /* eslint-disable no-await-in-loop */
-          // need to ignore this rule, each of these build operations has to happen in order
-          // that way they'll each select the right UTXO inputs
-          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
-          /* eslint-enable no-await-in-loop */
-        }
-
         const watchInterval = setInterval(() => {
           let waiting = false;
           order.deposits.forEach((deposit) => {
@@ -800,6 +790,15 @@ export default {
           }
         }, intervals.BLOCK);
 
+        for (let i = 0; i < order.deposits.length; i += 1) {
+          const deposit = order.deposits[i];
+          /* eslint-disable no-await-in-loop */
+          // need to ignore this rule, each of these build operations has to happen in order
+          // that way they'll each select the right UTXO inputs
+          await this.depositAsset(deposit.assetId, deposit.quantityToDeposit.toNumber());
+          /* eslint-enable no-await-in-loop */
+        }
+
         store.dispatch('fetchHoldings', {
           done: () => {
             clearInterval(watchInterval);
@@ -810,7 +809,7 @@ export default {
           },
         });
       } catch (e) {
-        reject(`Failed to make order deposits. ${e.message}`);
+        reject(`Failed to make order deposits. ${e.message ? e.message : e}`);
       }
     });
   },
@@ -836,8 +835,16 @@ export default {
         if (order.assetIdToSell === assets.NEO) {
           const neoHolding = neo.getHolding(assets.NEO);
           if (neoHolding.contractBalance < order.quantityToSell) {
-            neoToSend = order.quantityToSell - neoHolding.contractBalance;
-            if (neoToSend > neoHolding.balance) {
+            neoToSend = new BigNumber(order.quantityToSell - neoHolding.contractBalance);
+
+            const toDepositTruncated = new BigNumber(neoToSend.toFixed(0));
+            if (toDepositTruncated.isGreaterThanOrEqualTo(neoToSend)) {
+              neoToSend = toDepositTruncated;
+            } else {
+              neoToSend = toDepositTruncated.plus(1);
+            }
+
+            if (neoToSend.isGreaterThan(neoHolding.balance)) {
               reject('Insufficient NEO.');
               return;
             }
@@ -847,8 +854,8 @@ export default {
         if (order.assetIdToSell === assets.GAS) {
           const gasHolding = neo.getHolding(assets.GAS);
           if (gasHolding.contractBalance < order.quantityToSell) {
-            gasToSend = order.quantityToSell - gasHolding.contractBalance;
-            if (gasToSend > gasHolding.balance) {
+            gasToSend = new BigNumber(order.quantityToSell - gasHolding.contractBalance);
+            if (gasToSend.isGreaterThan(gasHolding.balance)) {
               reject('Insufficient GAS.');
               return;
             }
@@ -863,8 +870,8 @@ export default {
             u.num2fixed8(parseFloat(order.quantityToSell)),
             u.num2fixed8(new Date().getTime() * 0.00000001),
           ], neoToSend, gasToSend)
-          .then((t) => {
-            order.makerTx = tx.serializeTransaction(t.tx, true);
+          .then((transaction) => {
+            order.makerTx = tx.serializeTransaction(transaction.tx, true);
             resolve(order);
           })
           .catch((e) => {
@@ -905,8 +912,8 @@ export default {
             orderType === 'Market' ? 0 : 1, // whether or not to create a taker offer if this is no longer available
             u.num2fixed8(new Date().getTime() * 0.00000001),
           ])
-          .then((t) => {
-            offer.tx = tx.serializeTransaction(t.tx, true);
+          .then((transaction) => {
+            offer.tx = tx.serializeTransaction(transaction.tx, true);
             resolve(offer);
           })
           .catch((e) => {
@@ -925,10 +932,10 @@ export default {
           [
             order.offerId.replace('0x', ''),
           ])
-          .then((t) => {
+          .then((transaction) => {
             // send the signed transactions to the api for relay
             const currentNetwork = network.getSelectedNetwork();
-            axios.delete(`${currentNetwork.aph}/order/${order.marketName}/${order.offerId}/${tx.serializeTransaction(t.tx, true)}`)
+            axios.delete(`${currentNetwork.aph}/order/${order.marketName}/${order.offerId}/${tx.serializeTransaction(transaction.tx, true)}`)
               .then((res) => {
                 if (res.data.result) {
                   resolve('Order Cancelled');
@@ -1060,6 +1067,7 @@ export default {
                 })
                 .catch((e) => {
                   reject(`Failed to monitor transaction for confirmation. ${e}`);
+                  this.completeSystemAssetWithdrawals();
                 });
             })
             .catch((e) => {
@@ -1086,25 +1094,25 @@ export default {
     });
   },
 
-  markWithdraw(assetId, quantity) {
+  markWithdraw(assetId, quantity, tryCount = 1) {
     return new Promise((resolve, reject) => {
+      const currentNetwork = network.getSelectedNetwork();
+      const currentWallet = wallets.getCurrentWallet();
+
+      const config = {
+        net: currentNetwork.net,
+        url: currentNetwork.rpc,
+        script: {
+          scriptHash: assets.DEX_SCRIPT_HASH,
+          operation: 'withdraw',
+          args: [
+          ],
+        },
+        fees: currentNetwork.fee,
+        gas: 0,
+      };
+
       try {
-        const currentNetwork = network.getSelectedNetwork();
-        const currentWallet = wallets.getCurrentWallet();
-
-        const config = {
-          net: currentNetwork.net,
-          url: currentNetwork.rpc,
-          script: {
-            scriptHash: assets.DEX_SCRIPT_HASH,
-            operation: 'withdraw',
-            args: [
-            ],
-          },
-          fees: currentNetwork.fee,
-          gas: 0,
-        };
-
         quantity = toBigNumber(quantity);
 
         if (currentWallet.isLedger === true) {
@@ -1116,7 +1124,13 @@ export default {
 
         let utxoIndex = -1;
 
-        alerts.success('Processing withdraw request...');
+        const assetHolding = neo.getHolding(assetId);
+        if (tryCount > 1) {
+          alerts.success(`Processing withdraw request for ${quantity.toString()} ${assetHolding.symbol}... Retry attempt ${tryCount}`);
+        } else {
+          alerts.success(`Processing withdraw request for ${quantity.toString()} ${assetHolding.symbol}...`);
+        }
+
         api.fillKeys(config)
           .then((configResponse) => {
             return new Promise((resolveBalance) => {
@@ -1150,8 +1164,12 @@ export default {
                     u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
                   resolveTx(configResponse);
                 })
-                .catch(() => {
-                  reject('Failed to calculate withdraw inputs and outputs');
+                .catch((e) => {
+                  if (tryCount <= 1) {
+                    reject(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
+                  } else {
+                    reject('Failed to Mark Withdraw.');
+                  }
                 });
             });
           })
@@ -1174,8 +1192,8 @@ export default {
 
             let i = 0;
 
-            configResponse.tx.outputs.forEach((o) => {
-              if (utxoIndex === -1 && quantity.isEqualTo(o.value)) {
+            configResponse.tx.outputs.forEach(({ value }) => {
+              if (utxoIndex === -1 && quantity.isEqualTo(value)) {
                 utxoIndex = i;
               }
               i += 1;
@@ -1190,18 +1208,70 @@ export default {
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
-            resolve({
-              success: configResponse.response.result,
-              tx: configResponse.tx,
-              utxoIndex,
-            });
+            if (!configResponse.response.result && tryCount < 3) {
+              setTimeout(() => {
+                this.ignoreWithdrawInputs(config);
+                neo.resetSystemAssetBalanceCache();
+                this.markWithdraw(assetId, quantity, tryCount + 1)
+                  .then((res) => {
+                    resolve(res);
+                  })
+                  .catch((e) => {
+                    reject(e);
+                  });
+              }, 10000);
+            } else {
+              resolve({
+                success: configResponse.response.result,
+                tx: configResponse.tx,
+                utxoIndex,
+              });
+            }
           })
           .catch((e) => {
-            reject(`Failed to Mark Withdraw. ${e}`);
+            if (tryCount < 3) {
+              setTimeout(() => {
+                this.ignoreWithdrawInputs(config);
+                neo.resetSystemAssetBalanceCache();
+                this.markWithdraw(assetId, quantity, tryCount + 1)
+                  .then((res) => {
+                    resolve(res);
+                  })
+                  .catch((e) => {
+                    reject(e);
+                  });
+              }, 10000);
+            } else {
+              reject(`Failed to Mark Withdraw. ${e}`);
+            }
           });
       } catch (e) {
-        reject(`Failed to Mark Withdraw. ${e.message}`);
+        if (tryCount < 3) {
+          setTimeout(() => {
+            this.ignoreWithdrawInputs(config);
+            neo.resetSystemAssetBalanceCache();
+            this.markWithdraw(assetId, quantity, tryCount + 1)
+              .then((res) => {
+                resolve(res);
+              })
+              .catch((e) => {
+                reject(e);
+              });
+          }, 10000);
+        } else {
+          reject(`Failed to Mark Withdraw. ${e.message}`);
+        }
       }
+    });
+  },
+
+  ignoreWithdrawInputs(config) {
+    if (!config || !config.tx) {
+      return;
+    }
+
+    config.tx.inputs.forEach((input) => {
+      _.set(assetUTXOsToIgnore, input.prevHash, input.prevIndex);
     });
   },
 
@@ -1213,64 +1283,59 @@ export default {
 
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
         neo.fetchSystemAssetBalance(dexAddress, null, false)
-          .then((balance) => {
+          .then(async (balance) => {
             config.balance = balance;
             const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
+            await this.checkUnspentsReservedState(assetId, unspents);
 
-            const promises = [];
-            unspents.forEach((u) => {
-              promises.push(this.fetchSystemAssetUTXOReserved(u));
+            let inputTotal = new BigNumber(0);
+            _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).forEach((currentUnspent) => {
+              if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
+                return;
+              }
+              if (currentUnspent.reservedFor === currentWalletScriptHash) {
+                this.completeSystemAssetWithdrawals();
+                reject('Already have a UTXO reserved for your address. Completing open withdraw.');
+                return;
+              }
+              if (currentUnspent.reservedFor && currentUnspent.reservedFor.length >= 40) {
+                // reserved for someone else
+                return;
+              }
+              if (_.has(assetUTXOsToIgnore, currentUnspent.txid)
+                && _.get(assetUTXOsToIgnore, currentUnspent.txid) === currentUnspent.index) {
+                // we've tried to use this UTXO before and failed, skip it
+                return;
+              }
+
+              inputTotal = inputTotal.plus(currentUnspent.value);
+              config.tx.inputs.push({
+                prevHash: currentUnspent.txid,
+                prevIndex: currentUnspent.index,
+              });
             });
 
-            Promise.all(promises)
-              .then(() => {
-                let inputTotal = new BigNumber(0);
-                _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).reverse().forEach((u) => {
-                  if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
-                    return;
-                  }
-                  if (u.reservedFor === currentWalletScriptHash) {
-                    this.completeSystemAssetWithdrawals();
-                    reject('Already have a UTXO reserved for your address. Completing open withdraw.');
-                    return;
-                  }
-                  if (u.reservedFor && u.reservedFor.length > 0) {
-                    // reserved for someone else
-                    return;
-                  }
+            if (inputTotal.isLessThan(quantity)) {
+              reject('Contract does not have enough balance for withdraw.');
+              return;
+            }
 
-                  inputTotal = inputTotal.plus(u.value);
-                  config.tx.inputs.push({
-                    prevHash: u.txid,
-                    prevIndex: u.index,
-                  });
-                });
+            config.tx.outputs.push({
+              assetId,
+              scriptHash: assets.DEX_SCRIPT_HASH,
+              value: quantity,
+            });
 
-                if (inputTotal.isLessThan(quantity)) {
-                  reject('Contract does not have enough balance for withdraw.');
-                  return;
-                }
-
-                config.tx.outputs.push({
-                  assetId,
-                  scriptHash: assets.DEX_SCRIPT_HASH,
-                  value: quantity,
-                });
-
-                if (inputTotal.isGreaterThan(quantity)) {
-                  // change output
-                  config.tx.outputs.push({
-                    assetId,
-                    scriptHash: assets.DEX_SCRIPT_HASH,
-                    value: inputTotal.minus(quantity),
-                  });
-                }
-
-                resolve(config);
-              })
-              .catch((e) => {
-                reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e}`);
+            if (inputTotal.isGreaterThan(quantity)) {
+              // change output
+              config.tx.outputs.push({
+                assetId,
+                scriptHash: assets.DEX_SCRIPT_HASH,
+                value: inputTotal.minus(quantity),
               });
+            }
+
+            resolve(config);
           })
           .catch((e) => {
             reject(`Failed to fetch address balance. ${e}`);
@@ -1379,13 +1444,9 @@ export default {
     });
   },
 
-  withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount) {
+  withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount = 1) {
     return new Promise((resolve, reject) => {
       try {
-        if (!tryCount) {
-          tryCount = 1;
-        }
-
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
 
@@ -1437,9 +1498,7 @@ export default {
               neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
                 .then((balance) => {
                   const unspents = assetId === assets.GAS ? balance.assets.GAS.unspent : balance.assets.NEO.unspent;
-                  const input = _.find(unspents, (o) => {
-                    return o.txid === utxoTxHash && o.index === utxoIndex;
-                  });
+                  const input = _.find(unspents, { txid: utxoTxHash, index: utxoIndex });
 
                   if (!input) {
                     // skip displaying this error if we've already relayed this withdraw utxo, retry in case the explorer hasn't picked up the utxo yet
@@ -1553,37 +1612,15 @@ export default {
   completeSystemAssetWithdrawals() {
     return new Promise((resolve, reject) => {
       try {
-        const currentWallet = wallets.getCurrentWallet();
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
-        const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
         neo.fetchSystemAssetBalance(dexAddress, null, false)
           .then((balance) => {
             if (balance.assets.GAS) {
-              balance.assets.GAS.unspent.forEach((u) => {
-                this.fetchSystemAssetUTXOReserved(u)
-                  .then(() => {
-                    if (u.reservedFor === currentWalletScriptHash) {
-                      this.withdrawSystemAsset(assets.GAS, u.value.toNumber(), u.txid, u.index);
-                    }
-                  })
-                  .catch((e) => {
-                    reject(`Failed to fetch reserved UTXOs. ${e}`);
-                  });
-              });
+              this.checkUnspentsReservedState(assets.GAS, balance.assets.GAS.unspent);
             }
             if (balance.assets.NEO) {
-              balance.assets.NEO.unspent.forEach((u) => {
-                this.fetchSystemAssetUTXOReserved(u)
-                  .then(() => {
-                    if (u.reservedFor === currentWalletScriptHash) {
-                      this.withdrawSystemAsset(assets.NEO, u.value.toNumber(), u.txid, u.index);
-                    }
-                  })
-                  .catch((e) => {
-                    reject(`Failed to fetch reserved UTXOs. ${e}`);
-                  });
-              });
+              this.checkUnspentsReservedState(assets.NEO, balance.assets.NEO.unspent);
             }
           })
           .catch((e) => {
@@ -1593,6 +1630,34 @@ export default {
         reject(`Failed to fetch reserved UTXOs. ${e.message}`);
       }
     });
+  },
+
+  async checkUnspentsReservedState(assetId, unspents) {
+    const currentWallet = wallets.getCurrentWallet();
+    const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
+
+    for (let i = 0; i < unspents.length; i += 1) {
+      const unspent = unspents[i];
+      const utxoKey = `${unspent.txid}_${unspent.index}`;
+
+      if (_.has(contractUTXOsReservedFor, utxoKey)) {
+        unspent.reservedFor = _.get(contractUTXOsReservedFor);
+      }
+
+      /* eslint-disable no-await-in-loop */
+      if (!unspent.reservedFor) {
+        await this.fetchSystemAssetUTXOReserved(unspent);
+      }
+
+      if (unspent.reservedFor === currentWalletScriptHash) {
+        await this.withdrawSystemAsset(assetId, unspent.value.toNumber(), unspent.txid, unspent.index);
+      }
+      /* eslint-enable no-await-in-loop */
+
+      if (unspent.reservedFor) {
+        _.set(contractUTXOsReservedFor, utxoKey, unspent.reservedFor);
+      }
+    }
   },
 
   fetchSystemAssetUTXOReserved(input) {
@@ -1614,6 +1679,8 @@ export default {
           .then((res) => {
             if (!!res.result && res.result.length > 0) {
               input.reservedFor = u.reverseHex(res.result);
+            } else {
+              input.reservedFor = 'none';
             }
             resolve(input);
           })
@@ -1934,9 +2001,9 @@ export default {
       try {
         const rpcClient = network.getRpcClient();
 
-        const sb = new sc.ScriptBuilder();
-        sb.emitAppCall(assets.DEX_SCRIPT_HASH, operation, parameters);
-        const script = sb.str;
+        const scriptBuilder = new sc.ScriptBuilder();
+        scriptBuilder.emitAppCall(assets.DEX_SCRIPT_HASH, operation, parameters);
+        const script = scriptBuilder.str;
 
         rpcClient.query({
           method: 'invokescript',
@@ -2099,8 +2166,8 @@ export default {
               configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
                 u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
 
-              configResponse.tx.outputs.forEach((o) => {
-                o.scriptHash = assets.DEX_SCRIPT_HASH;
+              configResponse.tx.outputs.forEach((output) => {
+                output.scriptHash = assets.DEX_SCRIPT_HASH;
               });
 
               return api.signTx(configResponse);

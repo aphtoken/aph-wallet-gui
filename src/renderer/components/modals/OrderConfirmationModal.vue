@@ -114,6 +114,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 import ModalWrapper from './ModalWrapper';
 
 export default {
@@ -142,13 +143,21 @@ export default {
     },
 
     holdingForAssetToGive() {
-      return _.find(this.$store.state.holdings, (o) => {
-        return o.assetId === this.$store.state.orderToConfirm.assetIdToSell;
-      });
+      return _.find(this.$store.state.holdings, { assetId: this.$store.state.orderToConfirm.assetIdToSell });
     },
 
     quantityToPullFromWallet() {
-      return this.$store.state.orderToConfirm.expectedQuantityToGive - this.holdingForAssetToGive.contractBalance;
+      let quantityToDeposit = this.$store.state.orderToConfirm.expectedQuantityToGive
+        .minus(this.holdingForAssetToGive.contractBalance);
+      if (this.holdingForAssetToGive.decimals < 8) {
+        const toDepositTruncated = new BigNumber(quantityToDeposit.toFixed(this.holdingForAssetToGive.decimals));
+        if (toDepositTruncated.isGreaterThanOrEqualTo(quantityToDeposit)) {
+          quantityToDeposit = toDepositTruncated;
+        } else {
+          quantityToDeposit = toDepositTruncated.plus(1 / (10 ** this.holdingForAssetToGive.decimals));
+        }
+      }
+      return quantityToDeposit;
     },
 
     backupOffersToTake() {
@@ -187,17 +196,17 @@ export default {
     p, > div > div {
       margin-bottom: $space-lg;
     }
-    
+
     h2 {
       font-family: GilroySemibold;
     }
-    
+
     .description {
       .type, .side, .quantity, .currency, .price, .postOnly {
         font-family: GilroySemibold;
         font-size: toRem(16px);
       }
-      
+
       .side {
         font-size: toRem(18px);
         text-decoration: underline;
@@ -209,13 +218,13 @@ export default {
           color: $red;
         }
       }
-      
+
       .postOnly {
         font-style: italic;
         color: $grey;
       }
     }
-    
+
     .offer {
       margin-bottom: $space-xs;
     }

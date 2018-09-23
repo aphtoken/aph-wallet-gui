@@ -41,7 +41,7 @@
       <div class="waiting" v-if="sendInProgress">{{$t('waitingForTransaction')}}</div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">{{$t('back')}}</button>
-        <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
+        <button class="send-btn" @click="send" :disabled="sending">{{ sendButtonLabel }}</button>
       </div>
     </template>
     <template v-else>
@@ -77,6 +77,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 import { mapGetters } from 'vuex';
 let sendTimeoutIntervalId;
 let storeUnwatch;
@@ -153,6 +154,9 @@ export default {
     setAmountToMax() {
       if (this.currency) {
         this.amount = this.currency.balance.toString();
+        if (this.currency.symbol === 'GAS') {
+          this.amount = new BigNumber(this.amount).minus(this.currentNetwork.fee).toString();
+        }
       }
     },
 
@@ -199,7 +203,7 @@ export default {
         this.$services.ledger.close();
       }
 
-      this.$store.dispatch('fetchHoldings', { done: null });
+      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
       clearInterval(sendTimeoutIntervalId);
     },
   },

@@ -56,7 +56,8 @@ export default {
   },
 
   beforeMount() {
-    this.$store.dispatch('fetchHoldings', { done: null });
+    // This fetch seems redundant with AuthenticatedWrapper periodic fetch, can probably remove it.
+    this.$store.dispatch('fetchHoldings');
     this.loadTransactions();
 
     loadTransactionsIntervalId = setInterval(() => {
@@ -171,8 +172,7 @@ export default {
           cleanAmount = new BigNumber(cleanNumber).toFixed(this.holding.decimals);
         } else if (cleanAmount[cleanAmount.length - 1] !== '.'
           && cleanAmount[cleanAmount.length - 1] !== '0') {
-          const n = new BigNumber(cleanAmount);
-          cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
+          cleanAmount = this.$formatNumber(new BigNumber(cleanAmount), this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
         }
       }
 
@@ -216,7 +216,8 @@ export default {
           this.$services.alerts.success(
             this.$t('tokenSaleSuccessful', { symbol: res.symbol, balance: res.balance }),
           );
-          this.$store.dispatch('fetchHoldings', { done: null });
+          // TODO: we should add to user assets right away here and then add onlyFetchUserAssets: true to fetch call
+          this.$store.dispatch('fetchHoldings');
           this.sending = false;
         })
         .catch((e) => {
