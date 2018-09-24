@@ -402,7 +402,8 @@ export default {
   },
 
   fetchHoldingBalanceComponent(fetchFunc, memberBeingFetched, holding) {
-    return fetchFunc(holding.assetId)
+    // strange that this ends up undefined
+    return fetchFunc.call(dex, holding.assetId)
       .then((res) => {
         holding[memberBeingFetched] = toBigNumber(res);
         holding.availableBalance = calculateHoldingAvailableBalance(holding);
