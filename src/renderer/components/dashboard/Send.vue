@@ -161,6 +161,13 @@ export default {
     },
 
     send() {
+      if (new BigNumber(this.amount).isGreaterThan(this.currency.balance)) {
+        this.$services.alerts
+          .exception(`Insufficient ${this.currency.symbol}!` +
+            ` Need ${this.amount} but only found ${this.currency.balance}`);
+        return;
+      }
+
       this.sending = true;
 
       setTimeout(() => {
