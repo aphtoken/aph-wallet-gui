@@ -45,15 +45,24 @@
         </div>
         <div class="footer">
           <div @click="actionableHolding = quoteHolding" :class="['balance', {active: quoteHolding.symbol === actionableHolding.symbol}]" :title="quoteBalanceToolTip">
-            <div class="label">{{$t('balance')}} ({{ quoteHolding.symbol }})</div>
+            <div class="label">
+              <aph-icon name="info-question-mark"></aph-icon>
+              {{$t('balance')}} ({{ quoteHolding.symbol }})
+            </div>
             <div class="value">{{ $formatNumber(quoteHolding.availableBalance) }}</div>
           </div>
           <div @click="actionableHolding = baseHolding" :class="['balance', {active: baseHolding.symbol === actionableHolding.symbol}]" :title="baseBalanceToolTip">
-            <div class="label">{{$t('balance')}} ({{ baseHolding.symbol }})</div>
+            <div class="label">
+              <aph-icon name="info-question-mark"></aph-icon>
+              {{$t('balance')}} ({{ baseHolding.symbol }})
+            </div>
             <div class="value">{{ $formatNumber(baseHolding.availableBalance) }}</div>
           </div>
           <div @click="actionableHolding = aphHolding" :class="['balance', {active: aphHolding.symbol === actionableHolding.symbol}]" :title="aphBalanceToolTip" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
-            <div class="label">{{$t('balance')}} (APH)</div>
+            <div class="label">
+              <aph-icon name="info-question-mark"></aph-icon>
+              {{$t('balance')}} (APH)
+            </div>
             <div class="value">{{ $formatNumber(aphHolding.availableBalance) }}</div>
           </div>
           <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="footer-buttons">
@@ -940,6 +949,16 @@ export default {
       @extend %small-uppercase-grey-label-dark;
 
       flex: none;
+      display: flex;
+      align-items: center;
+
+      > .aph-icon {
+        margin-right: $space-sm;
+
+        > svg {
+          height: toRem(12px);
+        }
+      }
     }
 
     .value {
