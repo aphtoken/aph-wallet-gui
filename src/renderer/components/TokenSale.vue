@@ -172,8 +172,7 @@ export default {
           cleanAmount = new BigNumber(cleanNumber).toFixed(this.holding.decimals);
         } else if (cleanAmount[cleanAmount.length - 1] !== '.'
           && cleanAmount[cleanAmount.length - 1] !== '0') {
-          const n = new BigNumber(cleanAmount);
-          cleanAmount = this.$formatNumber(n, this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
+          cleanAmount = this.$formatNumber(new BigNumber(cleanAmount), this.$constants.formats.WHOLE_NUMBER_NO_COMMAS);
         }
       }
 

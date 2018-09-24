@@ -31,6 +31,14 @@ webpackConfig.module.rules
 module.exports = config => {
   config.set({
     browsers: ['visibleElectron'],
+    captureConsole: {
+      client: {
+        captureConsole: true,
+        mocha: {
+          bail: true
+        }
+      }
+    },
     client: {
       useIframe: false
     },
@@ -56,6 +64,6 @@ module.exports = config => {
     webpack: webpackConfig,
     webpackMiddleware: {
       noInfo: true
-    }
+    },
   })
 }

@@ -1,3 +1,4 @@
+/* eslint-disable id-length */
 import en from './l10n/en';
 import de from './l10n/de';
 import nl from './l10n/nl';
@@ -70,6 +71,7 @@ const formats = {
 
 const intervals = {
   BLOCK: 20 * 1000,
+  COMPLETE_SYSTEM_WITHDRAWALS: 15 * 60 * 1000,
   GAS_FRACTURE_NOTIFICATION: 15 * 60 * 1000,
   HOLDINGS_POLLING: 30 * 1000,
   MARKETS_POLLING: 5 * 60 * 1000,

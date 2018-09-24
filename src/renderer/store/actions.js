@@ -43,9 +43,7 @@ function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
 
   hashOrSymbol = hashOrSymbol.replace('0x', '');
 
-  token = _.find(_.values(networkAssets), (o) => {
-    return o.symbol === hashOrSymbol;
-  });
+  token = _.find(_.values(networkAssets), { symbol: hashOrSymbol });
 
   if (!token) {
     token = _.get(networkAssets, hashOrSymbol);
@@ -476,13 +474,20 @@ async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilen
 }
 
 async function fetchOrderHistory({ commit }, { isRequestSilent }) {
-  let orders;
+  let orderHistory;
   commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
     { identifier: 'fetchOrderHistory' });
 
   try {
-    orders = await dex.fetchOrderHistory();
-    commit('setOrderHistory', orders);
+    if (orderHistory && orderHistory.length > 0
+      && orderHistory[0].updated) {
+      const newOrders = await dex.fetchOrderHistory(0, orderHistory[0].updated, 'ASC');
+      commit('addToOrderHistory', newOrders);
+    } else {
+      const orders = await dex.fetchOrderHistory();
+      commit('setOrderHistory', orders);
+    }
+
     commit('endRequest', { identifier: 'fetchOrderHistory' });
   } catch (message) {
     alerts.networkException(message);
@@ -586,14 +591,14 @@ function normalizeRecentTransactions(transactions) {
     const changes = {
       value: new BigNumber(transaction.value),
       details: {
-        vin: transaction.details.vin.map((i) => {
+        vin: transaction.details.vin.map(({ value }) => {
           return {
-            value: new BigNumber(i.value),
+            value: new BigNumber(value),
           };
         }),
-        vout: transaction.details.vout.map((o) => {
+        vout: transaction.details.vout.map(({ value }) => {
           return {
-            value: new BigNumber(o.value),
+            value: new BigNumber(value),
           };
         }),
       },

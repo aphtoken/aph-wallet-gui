@@ -3,9 +3,10 @@ import Vue from 'vue';
 import moment from 'moment';
 
 import { requests } from '../constants';
-import { alerts, db, neo, dex } from '../services';
+import { alerts, assets, db, neo, dex } from '../services';
 
 export {
+  addToOrderHistory,
   clearActiveTransaction,
   clearRecentTransactions,
   clearSearchTransactions,
@@ -230,9 +231,8 @@ async function setHoldings(state, holdings) {
   if (!state.statsToken && !_.isEmpty(holdings)) {
     state.statsToken = holdings[0];
   } else if (state.statsToken) {
-    state.statsToken = _.find(state.holdings, (o) => {
-      return o.symbol === state.statsToken.symbol;
-    });
+    state.statsToken = _.find(state.holdings, { symbol: state.statsToken.symbol });
+
     if (!state.statsToken && !_.isEmpty(holdings)) {
       state.statsToken = holdings[0];
     }
@@ -280,16 +280,17 @@ function setPortfolio(state, portfolio) {
 function setRecentTransactions(state, transactions) {
   const existingIsEmpty = !state.recentTransactions || state.recentTransactions.length === 0;
 
-  _.sortBy(transactions, 'block_index').forEach((t) => {
-    const existingTransaction = _.find(state.recentTransactions, (o) => {
-      return o.hash === t.hash && o.symbol === t.symbol;
-    });
+  _.sortBy(transactions, 'block_index').forEach((transaction) => {
+    const existingTransaction = _.find(
+      state.recentTransactions,
+      { hash: transaction.hash, symbol: transaction.symbol },
+    );
     if (existingTransaction) {
       return;
     }
-    state.recentTransactions.unshift(t);
+    state.recentTransactions.unshift(transaction);
     if (existingIsEmpty === false) {
-      alerts.success(`New Transaction Found. TX: ${t.hash}`);
+      alerts.success(`New Transaction Found. TX: ${transaction.hash}`);
       neo.resetSystemAssetBalanceCache();
     }
   });
@@ -495,6 +496,33 @@ function setTradeHistory(state, trades) {
 
 function setOrderHistory(state, orders) {
   state.orderHistory = orders;
+
+  const orderHistoryStorageKey
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
+  db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
+}
+function addToOrderHistory(state, newOrders) {
+  if (!state.orderHistory) {
+    state.orderHistory = [];
+  }
+
+  for (let i = 0; i < newOrders.length; i += 1) {
+    const existingOrderIndex = _.findIndex(state.orderHistory, (order) => {
+      return order.orderId === newOrders[i].orderId;
+    });
+
+    if (existingOrderIndex > -1) {
+      // this order is already in our cache, must be an update
+      // remove the existing order and add the updated version to the top
+      state.orderHistory.splice(existingOrderIndex, 1);
+    }
+
+    state.orderHistory.unshift(newOrders[i]);
+  }
+
+  const orderHistoryStorageKey
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
+  db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 
 function setOrderToConfirm(state, order) {
@@ -623,9 +651,9 @@ function normalizeRecentTransactions(transactions) {
             value: i.value.toString(),
           };
         }),
-        vout: transaction.details.vout.map((o) => {
+        vout: transaction.details.vout.map(({ value }) => {
           return {
-            value: o.value.toString(),
+            value: value.toString(),
           };
         }),
       },

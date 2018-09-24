@@ -41,7 +41,7 @@
       <div class="waiting" v-if="sendInProgress">{{$t('waitingForTransaction')}}</div>
       <div class="footer">
         <button class="back-btn" @click="showConfirmation = false" :disabled="sending">{{$t('back')}}</button>
-        <button class="send-btn" @click="send()" :disabled="sending">{{ sendButtonLabel }}</button>
+        <button class="send-btn" @click="send" :disabled="sending">{{ sendButtonLabel }}</button>
       </div>
     </template>
     <template v-else>
@@ -161,6 +161,13 @@ export default {
     },
 
     send() {
+      if (new BigNumber(this.amount).isGreaterThan(this.currency.balance)) {
+        this.$services.alerts
+          .exception(`Insufficient ${this.currency.symbol}!` +
+            ` Need ${this.amount} but only found ${this.currency.balance}`);
+        return;
+      }
+
       this.sending = true;
 
       setTimeout(() => {

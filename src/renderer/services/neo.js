@@ -355,7 +355,7 @@ export default {
                   done: ((data) => {
                     resolve(data);
                   }),
-                  failed: ((ex) => { reject(ex); }),
+                  failed: e => reject(e),
                 });
               }).then((blockHeader) => {
                 transaction.block = blockHeader.index;
@@ -662,9 +662,7 @@ export default {
   },
 
   getHolding(assetId) {
-    const holding = _.find(store.state.holdings, (o) => {
-      return o.assetId === assetId;
-    });
+    const holding = _.find(store.state.holdings, { assetId });
 
     if (holding) {
       if (holding.balance !== null) {
@@ -1283,8 +1281,8 @@ export default {
 
     lastClaimSent = new Date();
     return this.fetchHoldings(currentWallet.address, 'NEO')
-      .then((h) => {
-        const neoAmount = h.holdings[0].balance;
+      .then((holding) => {
+        const neoAmount = holding.holdings[0].balance;
         const callback = () => {
           gasClaim.step = 2;
         };
@@ -1292,7 +1290,7 @@ export default {
         gasClaim.step = 1;
 
 
-        if (h.holdings.length === 0 || h.holdings[0].balance <= 0) {
+        if (holding.holdings.length === 0 || holding.holdings[0].balance <= 0) {
           this.sendClaimGas(gasClaim);
         } else {
           // send neo to ourself to make all gas available for claim
