@@ -478,19 +478,6 @@ async function fetchOrderHistory({ commit }, { isRequestSilent }) {
   commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
     { identifier: 'fetchOrderHistory' });
 
-  /* Not using PouchDB for caching order history for now. Want a restart to fix it potentially if something is wrong.
-  const currentNetwork = network.getSelectedNetwork();
-  const currentWallet = wallets.getCurrentWallet();
-  const orderHistoryStorageKey
-    = `orderhistory.${currentWallet.address}.${currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
-  try {
-    orderHistory = await fetchCachedData(orderHistoryStorageKey);
-    commit('setOrderHistory', orderHistory);
-  } catch (holdings) {
-    commit('setOrderHistory', orderHistory);
-  }
-  */
-
   try {
     if (orderHistory && orderHistory.length > 0
       && orderHistory[0].updated) {

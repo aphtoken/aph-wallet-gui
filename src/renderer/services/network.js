@@ -64,11 +64,11 @@ export default {
   },
 
   getSelectedNetwork() {
-    return storage.get(NETWORK_STORAGE_KEY, _.first(NETWORKS).value);
-  },
-
-  getSelectedNetworkFee() {
-    return storage.get(NETWORK_STORAGE_KEY, _.first(NETWORKS).value);
+    const network = storage.get(NETWORK_STORAGE_KEY, _.first(NETWORKS).value);
+    if (!network.fee) {
+      network.fee = 0;
+    }
+    return network;
   },
 
   init() {

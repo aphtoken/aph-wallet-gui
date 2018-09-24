@@ -15,7 +15,6 @@ import wallets from './wallets';
 import ledger from './ledger';
 import { store } from '../store';
 import { toBigNumber } from './formatting.js';
-
 import { claiming, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SCRIPT = 0x20;
@@ -341,8 +340,11 @@ export default {
                 || orders.length >= totalOrders) {
               resolve(orders);
             } else {
+              const lastOrder = orders[orders.length - 1];
+              const nextBefore = (before > 0 || sort === 'DESC') ? lastOrder.created : before;
+              const nextAfter = after > 0 ? lastOrder.updated : after;
               // get the next page
-              this.fetchOrderHistory(orders[orders.length - 1].created, after, sort)
+              this.fetchOrderHistory(nextBefore, nextAfter, sort)
                 .then((nextOrders) => {
                   orders.push(...nextOrders);
                   resolve(orders);
