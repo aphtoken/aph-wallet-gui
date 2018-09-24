@@ -350,7 +350,7 @@ export default {
 
   methods: {
     loadHoldings() {
-      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
+      this.$store.dispatch('fetchHoldings');
     },
     loadHoldingsSilently() {
       this.$store.dispatch('fetchHoldings', { isRequestSilent: true });

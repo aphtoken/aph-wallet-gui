@@ -84,7 +84,7 @@ export default {
   watch: {
     selectedCurrency(currency) {
       this.$services.settings.setCurrency(currency);
-      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true });
+      this.$store.dispatch('fetchHoldings');
     },
 
     selectedNetwork(network) {
@@ -96,10 +96,7 @@ export default {
       this.$services.network.setSelectedNetwork(network);
       this.$store.commit('handleNetworkChange');
       // For fast response
-      this.$store.dispatch('fetchHoldings', { onlyFetchUserAssets: true,
-        done: (() => {
-          this.$store.dispatch('fetchHoldings', { forceRefreshAll: true });
-        }) });
+      this.$store.dispatch('fetchHoldings');
       this.$store.dispatch('fetchLatestVersion');
     },
 

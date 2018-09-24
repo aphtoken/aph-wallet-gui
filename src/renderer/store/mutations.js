@@ -18,13 +18,11 @@ export {
   orderBookUpdateReceived,
   putBlockDetails,
   putTransactionDetail,
-  removeAssetHoldingsNeedRefresh,
   resetRequests,
   setAcceptCommitInfo,
   setAcceptDexDemoVersion,
   setAcceptDexOutOfDate,
   setActiveTransaction,
-  setAssetHoldingsNeedRefresh,
   setClaimModalModel,
   setCommitModalModel,
   setCommitState,
@@ -143,14 +141,6 @@ function putBlockDetails(state, blockDetails) {
   _.set(state.blockDetails, blockDetails.hash, blockDetails);
 }
 
-function removeAssetHoldingsNeedRefresh(state, assetIds) {
-  if (state.assetsThatNeedRefresh.length > 0) {
-    assetIds.forEach((assetId) => {
-      _.remove(state.assetsThatNeedRefresh, refreshId => assetId === refreshId);
-    });
-  }
-}
-
 function resetRequests(state) {
   state.requests = {};
 }
@@ -245,14 +235,6 @@ async function setHoldings(state, holdings) {
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
   // NOTE: serializing objects that hold BigNumbers need to use JSON.stringify to be able to be de-serialized properly.
   db.upsert(holdingsStorageKey, JSON.stringify(holdings));
-}
-
-function setAssetHoldingsNeedRefresh(state, assetIds) {
-  assetIds.forEach((assetId) => {
-    if (assetId) {
-      state.assetsThatNeedRefresh.push(assetId);
-    }
-  });
 }
 
 function setLastReceivedBlock(state) {

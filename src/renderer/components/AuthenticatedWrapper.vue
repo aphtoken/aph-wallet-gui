@@ -34,9 +34,7 @@ export default {
   mounted() {
     this.$services.neo.fetchNEP5Tokens(() => {
       // Fetch user assets more quickly on initial mount
-      this.$store.dispatch('fetchHoldings', {
-        onlyFetchUserAssets: true,
-        done: (() => { this.$store.dispatch('fetchHoldings'); }) });
+      this.$store.dispatch('fetchHoldings');
       // Fetch any other assets that have been added to the wallet
       this.loadHoldings();
     });
