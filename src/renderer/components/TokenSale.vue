@@ -216,7 +216,7 @@ export default {
           this.$services.alerts.success(
             this.$t('tokenSaleSuccessful', { symbol: res.symbol, balance: res.balance }),
           );
-          // TODO: we should add to user assets right away here and then add onlyFetchUserAssets: true to fetch call
+          // TODO: we should add to user assets right away here
           this.$store.dispatch('fetchHoldings');
           this.sending = false;
         })

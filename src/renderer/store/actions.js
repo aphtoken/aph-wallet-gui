@@ -193,7 +193,7 @@ async function fetchCommitState({ commit }) {
   }
 }
 
-async function fetchHoldings({ commit }, { done, isRequestSilent, onlyFetchUserAssets, forceRefreshAll } = {}) {
+async function fetchHoldings({ commit }, { done, isRequestSilent } = {}) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let portfolio;
@@ -221,7 +221,7 @@ async function fetchHoldings({ commit }, { done, isRequestSilent, onlyFetchUserA
   }
 
   try {
-    holdings = await neo.fetchHoldings(currentWallet.address, false, onlyFetchUserAssets, forceRefreshAll);
+    holdings = await neo.fetchHoldings(currentWallet.address, false);
 
     commit('setHoldings', holdings.holdings);
     commit('setPortfolio', {

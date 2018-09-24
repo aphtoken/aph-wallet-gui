@@ -667,11 +667,8 @@ export default {
                   .catch((error) => {
                     reject(`Error sending order retry. Error: ${error}`);
                   });
-                return;
               }
             }
-
-            store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
           })
           .catch((e) => {
             // console.log(e);
@@ -944,8 +941,6 @@ export default {
                 } else {
                   reject('Cancel failed');
                 }
-
-                store.commit('setAssetHoldingsNeedRefresh', [order.assetIdToBuy, order.assetIdToSell]);
               })
               .catch((e) => {
                 reject(`APH API Error: ${e}`);
@@ -1001,7 +996,6 @@ export default {
                 alerts.success('Deposit relayed, waiting for confirmation...');
                 neo.monitorTransactionConfirmation(res.tx, true)
                   .then(() => {
-                    store.commit('setAssetHoldingsNeedRefresh', [assetId]);
                     neo.resetSystemAssetBalanceCache();
                     resolve(res.tx);
                   })
@@ -1011,9 +1005,6 @@ export default {
               } else {
                 reject('Transaction rejected');
               }
-
-              // Set in memory holding needsRefresh flag to cause retrieving balances again
-              store.commit('setAssetHoldingsNeedRefresh', [assetId]);
             })
             .catch((e) => {
               reject(`Deposit Failed. ${e}`);
@@ -1025,9 +1016,6 @@ export default {
           })
             .then((tx) => {
               resolve(tx);
-
-              // Set in memory holding needsRefresh flag to cause retrieving balances again
-              store.commit('setAssetHoldingsNeedRefresh', [assetId]);
             })
             .catch((e) => {
               reject(`Deposit Failed. ${e}`);
@@ -1867,8 +1855,6 @@ export default {
               alerts.success('Commit relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  store.commit('setAssetHoldingsNeedRefresh', [assets.APH]);
-
                   resolve(res.tx);
                 })
                 .catch((e) => {
@@ -1897,8 +1883,6 @@ export default {
               alerts.success('Claim relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  store.commit('setAssetHoldingsNeedRefresh', [assets.APH]);
-
                   resolve(res.tx);
                 })
                 .catch((e) => {

@@ -2,7 +2,6 @@ export const acceptCommitInfo = state => state.acceptCommitInfo;
 export const acceptDexDemoVersion = state => state.acceptDexDemoVersion;
 export const acceptDexOutOfDate = state => state.acceptDexOutOfDate;
 export const activeTransaction = state => state.activeTransaction;
-export const assetsThatNeedRefresh = state => state.assetsThatNeedRefresh;
 export const claimModalModel = state => state.claimModalModel;
 export const commitModalModel = state => state.commitModalModel;
 export const commitState = state => state.commitState;
