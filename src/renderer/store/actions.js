@@ -473,8 +473,8 @@ async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilen
   }
 }
 
-async function fetchOrderHistory({ commit }, { isRequestSilent }) {
-  let orderHistory;
+async function fetchOrderHistory({ state, commit }, { isRequestSilent }) {
+  const orderHistory = state.orderHistory;
   commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
     { identifier: 'fetchOrderHistory' });
 

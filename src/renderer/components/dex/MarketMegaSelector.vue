@@ -2,7 +2,7 @@
   <div id="dex--market-mega-selector" :class="{'is-open': isOpen}">
     <div class="toggle" @click="isOpen = !isOpen">
       <div class="label">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
-      <div class="label disabled" v-if="$store.state.currentMarket.isOpen === false">[{{$t('tradingDisabled')}}]</div>
+      <div class="label disabled" v-if="$store.state.currentMarket && $store.state.currentMarket.isOpen === false">[{{$t('tradingDisabled')}}]</div>
       <aph-icon :name="iconName"></aph-icon>
     </div>
     <div class="menu">
