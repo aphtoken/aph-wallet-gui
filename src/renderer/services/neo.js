@@ -423,6 +423,21 @@ export default {
         const holdings = [];
         const promises = [];
 
+        const pushSystemAssetHolding = (assetId, symbol, balance) => {
+          const systemAssetHolding = {
+            assetId,
+            balance: new BigNumber(balance),
+            symbol,
+            name: symbol,
+            isNep5: false,
+            contractBalance: new BigNumber(0),
+            totalBalance: new BigNumber(0),
+            decimals: assetId === NEO_ASSET_ID ? 0 : 8,
+            isUserAsset: true,
+          };
+          holdings.push(systemAssetHolding);
+        };
+
         await rpcClient.query({ method: 'getaccountstate', params: [address] })
           .then(async (res) => {
             res.result.balances.forEach((fetchedBalance) => {
@@ -433,32 +448,31 @@ export default {
                 return;
               }
 
-              const systemAssetHolding = {
-                assetId: fetchedBalance.assetId,
-                balance: new BigNumber(fetchedBalance.value),
-                symbol: fetchedBalance.symbol,
-                name: fetchedBalance.symbol,
-                isNep5: false,
-                contractBalance: new BigNumber(0),
-                totalBalance: new BigNumber(0),
-                decimals: fetchedBalance.assetId === NEO_ASSET_ID ? 0 : 8,
-                isUserAsset: true,
-              };
-              holdings.push(systemAssetHolding);
+              pushSystemAssetHolding(fetchedBalance.assetId, fetchedBalance.symbol, fetchedBalance.value);
             });
           })
           .catch((e) => {
-            if (!restrictToSymbol || restrictToSymbol === NEO_ASSET_ID) {
+            const existingNeoHolding = this.getHolding(NEO_ASSET_ID);
+            if (existingNeoHolding && (!restrictToSymbol || restrictToSymbol === NEO_ASSET_ID)) {
               holdings.push(this.getHolding(NEO_ASSET_ID));
             }
 
-            if (!restrictToSymbol || restrictToSymbol === GAS_ASSET_ID) {
-              holdings.push(this.getHolding(GAS_ASSET_ID));
+            const existingGasHolding = this.getHolding(GAS_ASSET_ID);
+            if (existingGasHolding && (!restrictToSymbol || restrictToSymbol === GAS_ASSET_ID)) {
+              holdings.push();
             }
 
             // TODO: don't surface unless happening multiple times in a row
             alerts.networkException(`NEO RPC Network Error: ${e}`);
           });
+
+        // Ensure we have NEO and GAS
+        if ((!restrictToSymbol || restrictToSymbol === NEO_ASSET_ID) && !_.find(holdings, { assetId: NEO_ASSET_ID })) {
+          pushSystemAssetHolding(NEO_ASSET_ID, 'NEO', 0);
+        }
+        if ((!restrictToSymbol || restrictToSymbol === GAS_ASSET_ID) && !_.find(holdings, { assetId: GAS_ASSET_ID })) {
+          pushSystemAssetHolding(GAS_ASSET_ID, 'GAS', 0);
+        }
 
         const assetToHolding = (asset, isUserAsset) => {
           const assetId = asset.assetId.replace('0x', '');
@@ -509,6 +523,17 @@ export default {
             });
             alerts.networkException(`APH API Network Error: ${e}`);
           });
+
+        _.values(userAssets).forEach((nep5Asset) => {
+          if (restrictToSymbol && nep5Asset.symbol !== restrictToSymbol) {
+            return;
+          }
+
+          if (!_.find(holdings, { assetId: nep5Asset.assetId })) {
+            const holding = assetToHolding(nep5Asset, true);
+            holdings.push(holding);
+          }
+        });
 
         const fetchHoldingBalanceComponent = (fetchFunc, memberBeingFetched, holding) => {
           return fetchFunc.call(dex, holding.assetId)
