@@ -411,25 +411,6 @@ export default {
     });
   },
 
-  fetchHoldingBalanceComponent(fetchFunc, memberBeingFetched, holding) {
-    // strange that this ends up undefined
-    return fetchFunc.call(dex, holding.assetId)
-      .then((res) => {
-        holding[memberBeingFetched] = toBigNumber(res);
-        holding.availableBalance = calculateHoldingAvailableBalance(holding);
-        holding.totalBalance = calculateHoldingTotalBalance(holding);
-      })
-      .catch((e) => {
-        const existingHolding = this.getHolding(holding.assetId);
-        if (existingHolding) {
-          holding[memberBeingFetched] = existingHolding[memberBeingFetched];
-          holding.availableBalance = calculateHoldingAvailableBalance(holding);
-          holding.totalBalance = calculateHoldingTotalBalance(holding);
-        }
-        alerts.networkException(e);
-      });
-  },
-
   fetchHoldings(address, restrictToSymbol) {
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
@@ -529,10 +510,27 @@ export default {
             alerts.networkException(`APH API Network Error: ${e}`);
           });
 
+        const fetchHoldingBalanceComponent = (fetchFunc, memberBeingFetched, holding) => {
+          return fetchFunc.call(dex, holding.assetId)
+            .then((res) => {
+              holding[memberBeingFetched] = toBigNumber(res);
+              holding.availableBalance = calculateHoldingAvailableBalance(holding);
+              holding.totalBalance = calculateHoldingTotalBalance(holding);
+            })
+            .catch((e) => {
+              const existingHolding = this.getHolding(holding.assetId);
+              if (existingHolding) {
+                holding[memberBeingFetched] = existingHolding[memberBeingFetched];
+                holding.availableBalance = calculateHoldingAvailableBalance(holding);
+                holding.totalBalance = calculateHoldingTotalBalance(holding);
+              }
+              alerts.networkException(e);
+            });
+        };
 
         holdings.forEach((holding) => {
-          promises.push(this.fetchHoldingBalanceComponent(dex.fetchContractBalance, 'contractBalance', holding));
-          promises.push(this.fetchHoldingBalanceComponent(dex.fetchOpenOrderBalance, 'openOrdersBalance', holding));
+          promises.push(fetchHoldingBalanceComponent(dex.fetchContractBalance, 'contractBalance', holding));
+          promises.push(fetchHoldingBalanceComponent(dex.fetchOpenOrderBalance, 'openOrdersBalance', holding));
 
           if (holding.symbol === 'NEO') {
             promises.push(api.getMaxClaimAmountFrom({
