@@ -56,7 +56,7 @@ describe('TransactionsSidebar.vue', () => {
 
   context('always', () => {
     beforeEach((done) => {
-      setTimeout(done, 10);
+      setTimeout(done, 5);
     });
 
     it('should render with correctly formatted data', () => {
@@ -69,7 +69,7 @@ describe('TransactionsSidebar.vue', () => {
     });
 
     it('should fetch transactions', () => {
-      expect(loadTransactions).to.have.been.callCount(4);
+      expect(loadTransactions).to.have.been.calledThrice();
     });
   });
 

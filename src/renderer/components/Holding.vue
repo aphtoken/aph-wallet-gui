@@ -13,7 +13,7 @@
     <div class="right">
       <div class="balance">
         <div class="amount" :title="balanceToolTip">
-          <span>{{ $formatNumber(holding.balance) }}</span>
+          <span class="formatted">{{ $formatNumber(holding.balance) }}</span>
           <span class="currency">{{ holding.symbol }}</span>
           <aph-icon name="info-question-mark"></aph-icon>
         </div>
