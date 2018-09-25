@@ -473,7 +473,14 @@ function orderBookUpdateReceived(state, res) {
 }
 
 function setTradeHistory(state, trades) {
-  state.tradeHistory = trades;
+  if (state.tradeHistory == null ||
+    (trades.marketName !== state.tradeHistory.marketName) ||
+    (trades.trades[0].tradeTime !== state.tradeHistory.trades[0].tradeTime) ||
+    (trades.trades[0].quantity !== state.tradeHistory.trades[0].quantity) ||
+    (trades.trades[0].price !== state.tradeHistory.trades[0].price) ||
+    (trades.trades[0].side !== state.tradeHistory.trades[0].side)) {
+    state.tradeHistory = trades;
+  }
 }
 
 function setOrderHistory(state, orders) {
