@@ -459,12 +459,18 @@ async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilen
     { identifier: 'fetchTradeHistory' });
 
   try {
-    history = await dex.fetchTradeHistory(marketName);
+    let apiBuckets;
+    let promiseFetchTradesBucketed;
     if (state.tradeHistory && state.tradeHistory.apiBuckets && state.tradeHistory.marketName === marketName) {
-      history.apiBuckets = state.tradeHistory.apiBuckets;
+      apiBuckets = state.tradeHistory.apiBuckets;
     } else {
-      history.apiBuckets = await dex.fetchTradesBucketed(marketName);
+      promiseFetchTradesBucketed = dex.fetchTradesBucketed(marketName);
     }
+    history = await dex.fetchTradeHistory(marketName);
+    if (promiseFetchTradesBucketed) {
+      apiBuckets = await promiseFetchTradesBucketed;
+    }
+    history.apiBuckets = apiBuckets;
     commit('setTradeHistory', history);
     commit('endRequest', { identifier: 'fetchTradeHistory' });
   } catch (message) {
