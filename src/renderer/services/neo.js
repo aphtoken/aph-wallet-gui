@@ -454,12 +454,12 @@ export default {
           .catch((e) => {
             const existingNeoHolding = this.getHolding(NEO_ASSET_ID);
             if (existingNeoHolding && (!restrictToSymbol || restrictToSymbol === NEO_ASSET_ID)) {
-              holdings.push(this.getHolding(NEO_ASSET_ID));
+              holdings.push(existingNeoHolding);
             }
 
             const existingGasHolding = this.getHolding(GAS_ASSET_ID);
             if (existingGasHolding && (!restrictToSymbol || restrictToSymbol === GAS_ASSET_ID)) {
-              holdings.push(this.getHolding(GAS_ASSET_ID)));
+              holdings.push(existingGasHolding);
             }
 
             // TODO: don't surface unless happening multiple times in a row
