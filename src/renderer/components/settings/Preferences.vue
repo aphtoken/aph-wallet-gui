@@ -52,8 +52,8 @@ export default {
     this.selectedCurrency = this.$services.settings.getCurrency();
 
     const storedNetwork = this.$services.network.getSelectedNetwork();
-    this.selectedNetwork = _.find(this.networks, (o) => {
-      return o.value.net === storedNetwork.net;
+    this.selectedNetwork = _.find(this.networks, ({ value }) => {
+      return value.net === storedNetwork.net;
     }).value;
 
     if (!this.selectedNetwork && this.networks && this.networks.length > 0) {
@@ -84,7 +84,7 @@ export default {
   watch: {
     selectedCurrency(currency) {
       this.$services.settings.setCurrency(currency);
-      this.$store.dispatch('fetchHoldings', {});
+      this.$store.dispatch('fetchHoldings');
     },
 
     selectedNetwork(network) {
@@ -95,7 +95,8 @@ export default {
       network.fee = this.selectedNetworkFee;
       this.$services.network.setSelectedNetwork(network);
       this.$store.commit('handleNetworkChange');
-      this.$store.dispatch('fetchHoldings', {});
+      // For fast response
+      this.$store.dispatch('fetchHoldings');
       this.$store.dispatch('fetchLatestVersion');
     },
 
@@ -103,7 +104,7 @@ export default {
       this.selectedNetwork.fee = fee;
       this.$services.network.setSelectedNetwork(this.selectedNetwork);
       this.$store.commit('handleNetworkChange');
-      this.$store.dispatch('fetchHoldings', {});
+      this.$services.neo.promptGASFractureIfNecessary();
     },
 
     selectedLanguage(language) {
@@ -135,16 +136,16 @@ export default {
     .row {
       display: flex;
       flex-direction: row;
-      
+
       .column {
         flex: 1;
         margin-right: $space;
-        
+
         &:last-child {
           margin-right: 0;
         }
       }
-      
+
       .label {
         @extend %small-uppercase-grey-label;
 

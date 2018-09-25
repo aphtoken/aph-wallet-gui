@@ -90,7 +90,7 @@ export default {
         name: this.$store.state.currentLoginToWallet.label,
         passphrase: this.passphrase,
         done: () => {
-          this.$store.dispatch('fetchHoldings', { });
+          this.$store.dispatch('fetchHoldings');
           this.onCancel();
           this.$store.commit('handleLogout');
         },

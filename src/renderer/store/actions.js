@@ -22,7 +22,6 @@ export {
   openLedger,
   openPrivateKey,
   openSavedWallet,
-  verifyLedgerConnection,
   fetchMarkets,
   fetchTradeHistory,
   fetchOrderHistory,
@@ -31,6 +30,7 @@ export {
   pingSocket,
   subscribeToMarket,
   unsubscribeFromMarket,
+  verifyLedgerConnection,
 };
 
 function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
@@ -43,9 +43,7 @@ function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
 
   hashOrSymbol = hashOrSymbol.replace('0x', '');
 
-  token = _.find(_.values(networkAssets), (o) => {
-    return o.symbol === hashOrSymbol;
-  });
+  token = _.find(_.values(networkAssets), { symbol: hashOrSymbol });
 
   if (!token) {
     token = _.get(networkAssets, hashOrSymbol);
@@ -195,7 +193,7 @@ async function fetchCommitState({ commit }) {
   }
 }
 
-async function fetchHoldings({ commit }, { done, isRequestSilent }) {
+async function fetchHoldings({ commit }, { done, isRequestSilent } = {}) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
   let portfolio;
@@ -223,7 +221,7 @@ async function fetchHoldings({ commit }, { done, isRequestSilent }) {
   }
 
   try {
-    holdings = await neo.fetchHoldings(currentWallet.address);
+    holdings = await neo.fetchHoldings(currentWallet.address, false);
 
     commit('setHoldings', holdings.holdings);
     commit('setPortfolio', {
@@ -475,14 +473,21 @@ async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilen
   }
 }
 
-async function fetchOrderHistory({ commit }, { isRequestSilent }) {
-  let orders;
+async function fetchOrderHistory({ state, commit }, { isRequestSilent }) {
+  const orderHistory = state.orderHistory;
   commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
     { identifier: 'fetchOrderHistory' });
 
   try {
-    orders = await dex.fetchOrderHistory();
-    commit('setOrderHistory', orders);
+    if (orderHistory && orderHistory.length > 0
+      && orderHistory[0].updated) {
+      const newOrders = await dex.fetchOrderHistory(0, orderHistory[0].updated, 'ASC');
+      commit('addToOrderHistory', newOrders);
+    } else {
+      const orders = await dex.fetchOrderHistory();
+      commit('setOrderHistory', orders);
+    }
+
     commit('endRequest', { identifier: 'fetchOrderHistory' });
   } catch (message) {
     alerts.networkException(message);
@@ -513,6 +518,7 @@ async function placeOrder({ commit }, { order, done }) {
     commit('endRequest', { identifier: 'placeOrder' });
   } catch (message) {
     alerts.exception(message);
+    commit('setOrderToConfirm', null);
     commit('failRequest', { identifier: 'placeOrder', message });
   }
 }
@@ -585,14 +591,14 @@ function normalizeRecentTransactions(transactions) {
     const changes = {
       value: new BigNumber(transaction.value),
       details: {
-        vin: transaction.details.vin.map((i) => {
+        vin: transaction.details.vin.map(({ value }) => {
           return {
-            value: new BigNumber(i.value),
+            value: new BigNumber(value),
           };
         }),
-        vout: transaction.details.vout.map((o) => {
+        vout: transaction.details.vout.map(({ value }) => {
           return {
-            value: new BigNumber(o.value),
+            value: new BigNumber(value),
           };
         }),
       },

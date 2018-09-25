@@ -28,9 +28,7 @@ export default {
   },
 
   getOne(name) {
-    return _.find(this.getAllAsArray(), (o) => {
-      return o.name === name;
-    });
+    return _.find(this.getAllAsArray(), { name });
   },
 
   cleanForKey(key) {

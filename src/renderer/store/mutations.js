@@ -3,9 +3,10 @@ import Vue from 'vue';
 import moment from 'moment';
 
 import { requests } from '../constants';
-import { alerts, db, neo, dex } from '../services';
+import { alerts, assets, db, neo, dex } from '../services';
 
 export {
+  addToOrderHistory,
   clearActiveTransaction,
   clearRecentTransactions,
   clearSearchTransactions,
@@ -17,13 +18,11 @@ export {
   orderBookUpdateReceived,
   putBlockDetails,
   putTransactionDetail,
-  removeAssetHoldingsNeedRefresh,
   resetRequests,
   setAcceptCommitInfo,
   setAcceptDexDemoVersion,
   setAcceptDexOutOfDate,
   setActiveTransaction,
-  setAssetHoldingsNeedRefresh,
   setClaimModalModel,
   setCommitModalModel,
   setCommitState,
@@ -34,7 +33,9 @@ export {
   setCurrentNetwork,
   setCurrentWallet,
   setDepositWithdrawModalModel,
+  setFractureGasModalModel,
   setGasClaim,
+  setGasFracture,
   setHoldings,
   setLastReceivedBlock,
   setLastSuccessfulRequest,
@@ -121,24 +122,23 @@ function handleNetworkChange(state) {
   state.searchTransactions = [];
   state.nep5Balances = {};
   state.currentMarket = null;
-  neo.fetchNEP5Tokens();
+  neo.fetchNEP5Tokens(() => {
+    // Fast load balances of user assets
+    this.dispatch('fetchHoldings', {
+      onlyFetchUserAssets: true,
+      // force refresh all assets on network change
+      done: () => { this.dispatch('fetchHoldings', { forceRefreshAll: true }); },
+    });
+  });
 }
 
 function putTransactionDetail(state, transactionDetail) {
   const details = state.transactionDetails;
-  _.set(details, transactionDetail.txid, transactionDetail);
+  _.set(details, transactionDetail.txid.replace('0x', ''), transactionDetail);
 }
 
 function putBlockDetails(state, blockDetails) {
   _.set(state.blockDetails, blockDetails.hash, blockDetails);
-}
-
-function removeAssetHoldingsNeedRefresh(state, assetIds) {
-  if (state.assetsThatNeedRefresh.length > 0) {
-    assetIds.forEach((assetId) => {
-      _.remove(state.assetsThatNeedRefresh, refreshId => assetId === refreshId);
-    });
-  }
 }
 
 function resetRequests(state) {
@@ -221,9 +221,8 @@ async function setHoldings(state, holdings) {
   if (!state.statsToken && !_.isEmpty(holdings)) {
     state.statsToken = holdings[0];
   } else if (state.statsToken) {
-    state.statsToken = _.find(state.holdings, (o) => {
-      return o.symbol === state.statsToken.symbol;
-    });
+    state.statsToken = _.find(state.holdings, { symbol: state.statsToken.symbol });
+
     if (!state.statsToken && !_.isEmpty(holdings)) {
       state.statsToken = holdings[0];
     }
@@ -236,14 +235,6 @@ async function setHoldings(state, holdings) {
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
   // NOTE: serializing objects that hold BigNumbers need to use JSON.stringify to be able to be de-serialized properly.
   db.upsert(holdingsStorageKey, JSON.stringify(holdings));
-}
-
-function setAssetHoldingsNeedRefresh(state, assetIds) {
-  assetIds.forEach((assetId) => {
-    if (assetId) {
-      state.assetsThatNeedRefresh.push(assetId);
-    }
-  });
 }
 
 function setLastReceivedBlock(state) {
@@ -271,16 +262,18 @@ function setPortfolio(state, portfolio) {
 function setRecentTransactions(state, transactions) {
   const existingIsEmpty = !state.recentTransactions || state.recentTransactions.length === 0;
 
-  _.sortBy(transactions, 'block_index').forEach((t) => {
-    const existingTransaction = _.find(state.recentTransactions, (o) => {
-      return o.hash === t.hash && o.symbol === t.symbol;
-    });
+  _.sortBy(transactions, 'block_index').forEach((transaction) => {
+    const existingTransaction = _.find(
+      state.recentTransactions,
+      { hash: transaction.hash, symbol: transaction.symbol },
+    );
     if (existingTransaction) {
       return;
     }
-    state.recentTransactions.unshift(t);
+    state.recentTransactions.unshift(transaction);
     if (existingIsEmpty === false) {
-      alerts.success(`New Transaction Found. TX: ${t.hash}`);
+      alerts.success(`New Transaction Found. TX: ${transaction.hash}`);
+      neo.resetSystemAssetBalanceCache();
     }
   });
 
@@ -403,6 +396,14 @@ function setGasClaim(state, value) {
   state.gasClaim = value;
 }
 
+function setGasFracture(state, facture) {
+  state.gasFracture = facture;
+}
+
+function setFractureGasModalModel(state, model) {
+  state.fractureGasModalModel = model;
+}
+
 function setShowClaimGasModal(state, value) {
   state.showClaimGasModal = value;
 }
@@ -477,6 +478,33 @@ function setTradeHistory(state, trades) {
 
 function setOrderHistory(state, orders) {
   state.orderHistory = orders;
+
+  const orderHistoryStorageKey
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
+  db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
+}
+function addToOrderHistory(state, newOrders) {
+  if (!state.orderHistory) {
+    state.orderHistory = [];
+  }
+
+  for (let i = 0; i < newOrders.length; i += 1) {
+    const existingOrderIndex = _.findIndex(state.orderHistory, (order) => {
+      return order.orderId === newOrders[i].orderId;
+    });
+
+    if (existingOrderIndex > -1) {
+      // this order is already in our cache, must be an update
+      // remove the existing order and add the updated version to the top
+      state.orderHistory.splice(existingOrderIndex, 1);
+    }
+
+    state.orderHistory.unshift(newOrders[i]);
+  }
+
+  const orderHistoryStorageKey
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
+  db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 
 function setOrderToConfirm(state, order) {
@@ -605,9 +633,9 @@ function normalizeRecentTransactions(transactions) {
             value: i.value.toString(),
           };
         }),
-        vout: transaction.details.vout.map((o) => {
+        vout: transaction.details.vout.map(({ value }) => {
           return {
-            value: o.value.toString(),
+            value: value.toString(),
           };
         }),
       },

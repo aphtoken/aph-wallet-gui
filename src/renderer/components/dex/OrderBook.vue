@@ -5,7 +5,7 @@
         <h1 class="underlined">{{$t('orderBook')}}</h1>
       </div>
       <div class="body">
-        <div class="book" v-if="$store.state.orderBook">
+        <div class="book" v-if="$store.state.orderBook && $store.state.currentMarket">
           <div class="order-book-table asks">
             <div class="header">
               <div class="cell">price ({{ $store.state.currentMarket.baseCurrency }})</div>

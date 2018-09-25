@@ -1,3 +1,4 @@
+/* eslint-disable id-length */
 import en from './l10n/en';
 import de from './l10n/de';
 import nl from './l10n/nl';
@@ -24,7 +25,7 @@ const languages = [{
   label: '中文',
   value: 'cn',
 }, {
-  label: 'Deutsche',
+  label: 'Deutsch',
   value: 'de',
 }, {
   label: '日本語',
@@ -70,6 +71,8 @@ const formats = {
 
 const intervals = {
   BLOCK: 20 * 1000,
+  COMPLETE_SYSTEM_WITHDRAWALS: 15 * 60 * 1000,
+  GAS_FRACTURE_NOTIFICATION: 15 * 60 * 1000,
   HOLDINGS_POLLING: 30 * 1000,
   MARKETS_POLLING: 5 * 60 * 1000,
   NETWORK_STATUS: 10 * 1000,
@@ -97,6 +100,7 @@ const requests = {
 };
 
 const timeouts = {
+  BALANCE_PERSIST_FOR: 5 * 60 * 1000,
   CANCEL_ORDER: 5 * 60 * 1000,
   MONITOR_TRANSACTIONS: 10 * 60 * 1000,
   NEO_API_CALL: 500,

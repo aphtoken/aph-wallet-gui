@@ -70,16 +70,27 @@
             {{$t('theFeeForCompletingYourTradeWillBe', { amount: $formatNumber($store.state.orderToConfirm.maxTakerFees)})}}
           </div>
         </div>
-        <div v-if="$store.state.orderToConfirm.deposits.length > 0">
-          <div class="deposit" v-for="(deposit, index) in $store.state.orderToConfirm.deposits" :key="index">
+        <div v-if="$store.state.orderToConfirm.assetIdToSell">
+          <p v-if="quantityToPullFromWallet > 0">
             {{$t('thisOrderRequires', {
-              quantity: $formatNumber(deposit.quantityRequired),
-              symbol: deposit.symbol,
-              balance: $formatNumber(deposit.currentQuantity),
-              deposit: $formatNumber(deposit.quantityToDeposit),
-            })}}
-          </div>
+                quantity: $formatNumber(this.$store.state.orderToConfirm.expectedQuantityToGive),
+                symbol: holdingForAssetToGive.symbol,
+                balance: $formatNumber(holdingForAssetToGive.contractBalance),
+                deposit: $formatNumber(quantityToPullFromWallet),
+              })
+            }}
+          </p>
+          <p v-if="$store.state.orderToConfirm.feeDeposit && $store.state.orderToConfirm.feeDeposit.quantityToDeposit > 0">
+            {{$t('thisOrderRequires', {
+                quantity: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityRequired),
+                symbol: $store.state.orderToConfirm.feeDeposit.symbol,
+                balance: $formatNumber($store.state.orderToConfirm.feeDeposit.currentQuantity),
+                deposit: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityToDeposit),
+              })
+            }}
+          </p>
         </div>
+
         <div v-if="offersToTake.length > 0 && $store.state.orderToConfirm.quantityToTake < $store.state.orderToConfirm.quantity && $store.state.orderToConfirm.postOnly === false">
           <div v-if="offersToTake.length > 0">
             {{$t('youWillBeCreatingTheFollowingMakerOrder')}}
@@ -103,6 +114,7 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
 import ModalWrapper from './ModalWrapper';
 
 export default {
@@ -128,6 +140,24 @@ export default {
       return _.filter(this.$store.state.orderToConfirm.offersToTake, (offer) => {
         return offer.isBackupOffer !== true;
       });
+    },
+
+    holdingForAssetToGive() {
+      return _.find(this.$store.state.holdings, { assetId: this.$store.state.orderToConfirm.assetIdToSell });
+    },
+
+    quantityToPullFromWallet() {
+      let quantityToDeposit = this.$store.state.orderToConfirm.expectedQuantityToGive
+        .minus(this.holdingForAssetToGive.contractBalance);
+      if (this.holdingForAssetToGive.decimals < 8) {
+        const toDepositTruncated = new BigNumber(quantityToDeposit.toFixed(this.holdingForAssetToGive.decimals));
+        if (toDepositTruncated.isGreaterThanOrEqualTo(quantityToDeposit)) {
+          quantityToDeposit = toDepositTruncated;
+        } else {
+          quantityToDeposit = toDepositTruncated.plus(1 / (10 ** this.holdingForAssetToGive.decimals));
+        }
+      }
+      return quantityToDeposit;
     },
 
     backupOffersToTake() {
@@ -166,17 +196,17 @@ export default {
     p, > div > div {
       margin-bottom: $space-lg;
     }
-    
+
     h2 {
       font-family: GilroySemibold;
     }
-    
+
     .description {
       .type, .side, .quantity, .currency, .price, .postOnly {
         font-family: GilroySemibold;
         font-size: toRem(16px);
       }
-      
+
       .side {
         font-size: toRem(18px);
         text-decoration: underline;
@@ -188,15 +218,20 @@ export default {
           color: $red;
         }
       }
-      
+
       .postOnly {
         font-style: italic;
         color: $grey;
       }
     }
-    
+
     .offer {
       margin-bottom: $space-xs;
+    }
+
+    .taking > div:first-child {
+      overflow-y:auto;
+      max-height: toRem(400px);
     }
   }
 

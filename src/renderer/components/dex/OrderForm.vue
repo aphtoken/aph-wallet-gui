@@ -24,6 +24,7 @@
           </div>
           <div class="options">
             <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
+              <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info-question-mark"></aph-icon>
               <label>{{$t('postOnly')}}</label>
               <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
               <aph-icon name="radio-off" v-else></aph-icon>
@@ -44,16 +45,25 @@
         </div>
         <div class="footer">
           <div @click="actionableHolding = quoteHolding" :class="['balance', {active: quoteHolding.symbol === actionableHolding.symbol}]" :title="quoteBalanceToolTip">
-            <div class="label">{{$t('balance')}} ({{ quoteHolding.symbol }})</div>
-            <div class="value">{{ $formatNumber(quoteHolding.totalBalance) }}</div>
+            <div class="label">
+              <aph-icon name="info-question-mark"></aph-icon>
+              {{$t('balance')}} ({{ quoteHolding.symbol }})
+            </div>
+            <div class="value">{{ $formatNumber(quoteHolding.availableBalance) }}</div>
           </div>
           <div @click="actionableHolding = baseHolding" :class="['balance', {active: baseHolding.symbol === actionableHolding.symbol}]" :title="baseBalanceToolTip">
-            <div class="label">{{$t('balance')}} ({{ baseHolding.symbol }})</div>
-            <div class="value">{{ $formatNumber(baseHolding.totalBalance) }}</div>
+            <div class="label">
+              <aph-icon name="info-question-mark"></aph-icon>
+              {{$t('balance')}} ({{ baseHolding.symbol }})
+            </div>
+            <div class="value">{{ $formatNumber(baseHolding.availableBalance) }}</div>
           </div>
           <div @click="actionableHolding = aphHolding" :class="['balance', {active: aphHolding.symbol === actionableHolding.symbol}]" :title="aphBalanceToolTip" v-if="baseHolding.symbol !== 'APH' && quoteHolding.symbol !== 'APH'">
-            <div class="label">{{$t('balance')}} (APH)</div>
-            <div class="value">{{ $formatNumber(aphHolding.totalBalance) }}</div>
+            <div class="label">
+              <aph-icon name="info-question-mark"></aph-icon>
+              {{$t('balance')}} (APH)
+            </div>
+            <div class="value">{{ $formatNumber(aphHolding.availableBalance) }}</div>
           </div>
           <div v-if="baseHolding.symbol != '' && quoteHolding.symbol != ''" class="footer-buttons">
             <div class="row">
@@ -104,6 +114,7 @@ export default {
     this.actionableHolding = this.quoteHolding;
 
     loadHoldingsIntervalId = setInterval(() => {
+      // TODO: is this redundant with the fetch occurring in AuthenticatedWrapper.vue
       this.loadHoldingsSilently();
     }, this.$constants.intervals.HOLDINGS_POLLING);
 
@@ -145,9 +156,7 @@ export default {
 
     quoteHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.currentMarket.quoteAssetId;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.currentMarket.quoteAssetId });
 
         if (holding) {
           return holding;
@@ -163,9 +172,7 @@ export default {
     },
     baseHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.currentMarket.baseAssetId;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.currentMarket.baseAssetId });
 
         if (holding) {
           return holding;
@@ -181,9 +188,7 @@ export default {
     },
     aphHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, (o) => {
-          return o.assetId === this.$services.assets.APH;
-        });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.$services.assets.APH });
 
         if (holding) {
           return holding;
@@ -233,6 +238,13 @@ export default {
         const openOrdersBalance = this.aphHolding.openOrdersBalance
           ? this.$formatNumber(this.aphHolding.openOrdersBalance) : '0';
         return this.$t('walletBalanceContractBalance', { walletBalance, contractBalance, openOrdersBalance });
+      } catch (e) {
+        return '';
+      }
+    },
+    postOnlyToolTip() {
+      try {
+        return this.$t('postOnlyTooltip');
       } catch (e) {
         return '';
       }
@@ -347,10 +359,10 @@ export default {
 
   methods: {
     loadHoldings() {
-      this.$store.dispatch('fetchHoldings', { done: null });
+      this.$store.dispatch('fetchHoldings');
     },
     loadHoldingsSilently() {
-      this.$store.dispatch('fetchHoldings', { done: null, isRequestSilent: true });
+      this.$store.dispatch('fetchHoldings', { isRequestSilent: true });
     },
     setSide(side) {
       this.side = side;
@@ -530,8 +542,12 @@ export default {
       }
 
       const minTickSizeFraction = this.currentMarket.minimumTickSize - Math.floor(this.currentMarket.minimumTickSize);
-      const marketTickSizeDecimals = Math.log10(minTickSizeFraction * (10 ** 8));
-      const allowedQuantityDecimals = 8 - marketTickSizeDecimals;
+      let allowedQuantityDecimals;
+      if (minTickSizeFraction <= 0.00000001) {
+        allowedQuantityDecimals = 0;
+      } else {
+        allowedQuantityDecimals = Math.log10(minTickSizeFraction * (10 ** 8));
+      }
       const decimalFactor = 10 ** allowedQuantityDecimals;
       const beforeRounded = new BigNumber(this.$store.state.orderQuantity);
       const floored = beforeRounded.multipliedBy(decimalFactor).decimalPlaces(0, BigNumber.ROUND_DOWN);
@@ -589,27 +605,32 @@ export default {
     hideDepositWithdrawModal() {
       this.$store.commit('setDepositWithdrawModalModel', null);
     },
+
     depositWithdrawConfirmed(isDeposit, holding, amount) {
+      const action = (isDeposit ? this.$t('deposit') : this.$t('withdraw'));
+      const message = this.$t('relayedToNetwork', {
+        amount,
+        symbol: holding.symbol,
+        action,
+      });
+      const services = this.$services;
       this.$services.dex[isDeposit ? 'depositAsset' : 'withdrawAsset'](holding.assetId, Number(amount))
         .then(() => {
-          const message = this.$t('relayedToNetwork', {
-            amount,
-            symbol: holding.symbol,
-            action: (isDeposit ? this.$t('deposit') : this.$t('withdraw')),
-          });
-          this.$services.alerts.success(message);
+          services.alerts.success(message);
         })
         .catch((e) => {
-          this.$services.alerts.exception(e);
+          services.alerts.exception(e);
         });
 
       this.hideDepositWithdrawModal();
     },
+
     hideOrderConfirmationModal() {
       this.$store.commit('setOrderToConfirm', null);
     },
-    setMarket() {
-      this.$services.dex.setMarket(this.$services.assets.APH,
+
+    async setMarket() {
+      await this.$services.dex.setMarket(this.$services.assets.APH,
         this.$services.assets.GAS,
         100, 0.00001, 0.0000, 0.25)
         .then(() => {
@@ -618,7 +639,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.ATI,
+      await this.$services.dex.setMarket(this.$services.assets.ATI,
         this.$services.assets.APH,
         200, 0.00001, 0.25, 0)
         .then(() => {
@@ -627,7 +648,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.NEO,
+      await this.$services.dex.setMarket(this.$services.assets.NEO,
         this.$services.assets.GAS,
         0.5, 0.000001, 0.30946428, 0.30946428)
         .then(() => {
@@ -636,7 +657,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.ATI,
+      await this.$services.dex.setMarket(this.$services.assets.ATI,
         this.$services.assets.NEO,
         200, 0.00001, 0.25, 0.25)
         .then(() => {
@@ -645,7 +666,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.ATI,
+      await this.$services.dex.setMarket(this.$services.assets.ATI,
         this.$services.assets.GAS,
         200, 0.00001, 0.25, 0.25)
         .then(() => {
@@ -654,7 +675,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      this.$services.dex.setMarket(this.$services.assets.APH,
+      await this.$services.dex.setMarket(this.$services.assets.APH,
         this.$services.assets.NEO,
         100, 0.0000001, 0, 0.25)
         .then(() => {
@@ -730,7 +751,7 @@ export default {
     }
 
     .order-type {
-      margin: $space 0;
+      margin-top: $space;
     }
 
     .percentages {
@@ -745,7 +766,7 @@ export default {
 
         cursor: pointer;
         flex: 1;
-        padding: $space 0;
+        padding: $space-sm 0;
         text-align: center;
 
         &:hover {
@@ -789,6 +810,8 @@ export default {
     }
 
     .options {
+      display: flex;
+      justify-content: center;
       color: $grey;
       margin: $space 0 $space;
 
@@ -812,6 +835,10 @@ export default {
           .fill {
             fill: $dark-grey;
           }
+        }
+
+        .post-only-info-icon {
+          margin-right: $space-sm;
         }
       }
     }
@@ -921,7 +948,17 @@ export default {
     .label {
       @extend %small-uppercase-grey-label-dark;
 
-      flex: none
+      flex: none;
+      display: flex;
+      align-items: center;
+
+      > .aph-icon {
+        margin-right: $space-sm;
+
+        > svg {
+          height: toRem(12px);
+        }
+      }
     }
 
     .value {
@@ -963,6 +1000,12 @@ export default {
           .aph-icon {
             .fill {
               fill: $purple !important;
+            }
+          }
+
+          .post-only-info-icon {
+            .fill {
+              fill: $dark-grey !important;
             }
           }
         }

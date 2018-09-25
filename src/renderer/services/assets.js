@@ -10,7 +10,7 @@ export default {
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
 
   // TODO: these different per network
-  DEX_SCRIPT_HASH: '953548bb4b3cfbc7c63a9481d288106a4bfb10cf',
+  DEX_SCRIPT_HASH: '4066b92f3ef198445807177937e98a81fb730d6b',
   APH: '591eedcd379a8981edeefe04ef26207e1391904a',
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
 
@@ -101,8 +101,6 @@ export default {
       return;
     }
 
-    const assets = this.getNetworkAssets();
-    const userAssets = this.getUserAssets();
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
@@ -110,12 +108,16 @@ export default {
       return;
     }
 
-    _.set(userAssets, assetId, _.get(assets, assetId));
+    const assets = this.getNetworkAssets();
+    const userAssets = this.getUserAssets();
+
+    const asset = _.get(assets, assetId);
+    // console.log(`Adding user asset ${asset.symbol}`)
+    _.set(userAssets, assetId, asset);
     storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);
   },
 
   removeUserAsset(assetId) {
-    let userAssets = this.getUserAssets();
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
@@ -123,8 +125,13 @@ export default {
       return;
     }
 
-    userAssets = _.omit(userAssets, assetId);
-    storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);
+    let userAssets = this.getUserAssets();
+
+    if (_.has(userAssets, assetId)) {
+      // console.log(`Removing user asset: ${assetId}`)
+      userAssets = _.omit(userAssets, assetId);
+      storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);
+    }
   },
 
   getUserAssets() {

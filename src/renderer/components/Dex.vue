@@ -38,12 +38,14 @@
 <script>
 import DexDemoConfirmation from './modals/DexDemoConfirmation';
 import DexOutOfDate from './modals/DexOutOfDate';
+import assets from '../services/assets';
 
 export default {
   beforeDestroy() {
     this.$store.state.showPortfolioHeader = true;
     clearInterval(this.connectionStatusInterval);
     clearInterval(this.marketsRefreshInterval);
+    clearInterval(this.completeSystemAssetWithdrawalsInterval);
   },
 
   mounted() {
@@ -55,22 +57,52 @@ export default {
     this.$store.commit('setSocketOrderCreated', (message) => {
       /* eslint-disable max-len */
       this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Created. x${message.data.quantity} @${message.data.price}`);
-      this.$store.dispatch('fetchHoldings', { done: null });
+      this.$store.dispatch('fetchHoldings');
+      this.$services.neo.resetSystemAssetBalanceCache();
     });
 
-    this.$store.commit('setSocketOrderMatched', (message) => {
+    const services = this.$services;
+    const store = this.$store;
+    store.commit('setSocketOrderMatched', (message) => {
       /* eslint-disable max-len */
-      this.$services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Filled. x${message.data.quantity} @${message.data.price}`);
-      this.$store.dispatch('fetchHoldings', { done: null });
+      services.alerts.success(`${(message.side === 'bid' ? 'Buy' : 'Sell')} Order Filled. x${message.data.quantity} @${message.data.price}`);
+      // If the asset purchased is not a user asset, we must add it as one.
+      // Note: Since this runs from a mutation it is safe to add it directly)
+
+      const market = _.find(store.state.markets, { marketName: message.pair });
+
+      const userAssets = assets.getUserAssets();
+      let addedToken = false;
+      if (!_.has(userAssets, market.baseAssetId)) {
+        store.dispatch('addToken', {
+          hashOrSymbol: market.baseAssetId,
+        });
+        addedToken = true;
+      }
+      if (!_.has(userAssets, market.quoteAssetId)) {
+        store.dispatch('addToken', {
+          hashOrSymbol: market.quoteAssetId,
+        });
+        addedToken = true;
+      }
+
+      if (!addedToken) {
+        this.$store.dispatch('fetchHoldings');
+      }
+      this.$services.neo.resetSystemAssetBalanceCache();
     });
 
-    this.$store.commit('setSocketOrderCreationFailed', (message) => {
-      this.$services.alerts.error(`Failed to Create ${(message.side === 'bid' ? 'Buy' : 'Sell')} Order. ${message.data.errorMessage}`);
+    store.commit('setSocketOrderCreationFailed', (message) => {
+      services.alerts.error(`Failed to Create ${(message.side === 'bid' ? 'Buy' : 'Sell')} Order. ${message.data.errorMessage}`);
+      services.neo.resetSystemAssetBalanceCache();
     });
 
-    this.$store.commit('setSocketOrderMatchFailed', (message) => {
-      this.$services.alerts.error(`Failed to Match ${(message.side === 'bid' ? 'Buy' : 'Sell')} x${message.data.quantity}. ${message.data.errorMessage}`);
+    store.commit('setSocketOrderMatchFailed', (message) => {
+      services.alerts.error(`Failed to Match ${(message.side === 'bid' ? 'Buy' : 'Sell')} x${message.data.quantity}. ${message.data.errorMessage}`);
+      services.neo.resetSystemAssetBalanceCache();
     });
+
+    services.neo.promptGASFractureIfNecessary();
   },
 
   components: {
@@ -86,6 +118,9 @@ export default {
     this.marketsRefreshInterval = setInterval(() => {
       this.loadMarkets();
     }, this.$constants.intervals.MARKETS_POLLING);
+    this.completeSystemAssetWithdrawalsInterval = setInterval(() => {
+      this.$services.dex.completeSystemAssetWithdrawals();
+    }, this.$constants.intervals.COMPLETE_SYSTEM_WITHDRAWALS);
   },
 
   data() {

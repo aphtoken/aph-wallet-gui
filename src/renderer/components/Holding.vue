@@ -13,7 +13,9 @@
     <div class="right">
       <div class="balance">
         <div class="amount" :title="balanceToolTip">
-          {{ $formatNumber(holding.balance) }}<span class="currency">{{ holding.symbol }}</span>
+          <span class="formatted">{{ $formatNumber(holding.balance) }}</span>
+          <span class="currency">{{ holding.symbol }}</span>
+          <aph-icon name="info-question-mark"></aph-icon>
         </div>
         <div :class="['change', {decrease: holding.change24hrPercent < 0, increase: holding.change24hrPercent > 0}]">{{ $formatNumber(holding.change24hrPercent) }}</div>
       </div>
@@ -141,11 +143,20 @@ export default {
     text-align: right;
 
     .amount {
-      margin-bottom: $space-sm;
+      align-items: center;
+      display: flex;
       font-size: toRem(19px);
+      justify-content: flex-end;
+      margin-bottom: $space-sm;
+
+      .aph-icon {
+        svg {
+          height: toRem(14px);
+        }
+      }
 
       .currency {
-        margin-left: $space-xs;
+        margin: 0 $space-sm;
       }
     }
 
