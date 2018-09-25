@@ -459,7 +459,7 @@ export default {
 
             const existingGasHolding = this.getHolding(GAS_ASSET_ID);
             if (existingGasHolding && (!restrictToSymbol || restrictToSymbol === GAS_ASSET_ID)) {
-              holdings.push();
+              holdings.push(this.getHolding(GAS_ASSET_ID)));
             }
 
             // TODO: don't surface unless happening multiple times in a row
