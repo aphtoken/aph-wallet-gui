@@ -1088,7 +1088,7 @@ export default {
     return new Promise((resolve, reject) => {
       const currentNetwork = network.getSelectedNetwork();
       const currentWallet = wallets.getCurrentWallet();
-
+      // console.log(`markWithdraw assetId ${assetId} quantity ${quantity} tryCount ${tryCount}`);
       const config = {
         net: currentNetwork.net,
         url: currentNetwork.rpc,
@@ -1156,8 +1156,10 @@ export default {
                 })
                 .catch((e) => {
                   if (tryCount <= 1) {
+                    // console.log(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
                     reject(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
                   } else {
+                    // console.log('Failed to Mark Withdraw.');
                     reject('Failed to Mark Withdraw.');
                   }
                 });
@@ -1190,11 +1192,13 @@ export default {
             });
 
             if (utxoIndex === -1) {
+              // console.log('Unable to generate valid UTXO');
               throw new Error('Unable to generate valid UTXO');
             }
             return configResponse;
           })
           .then((configResponse) => {
+            // console.log(`sendTx to mark withdraw ${JSON.stringify(configResponse)}`);
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
@@ -1219,6 +1223,7 @@ export default {
             }
           })
           .catch((e) => {
+            // console.log(`failure to mark returned from sendTx ${e}`);
             if (tryCount < 3) {
               setTimeout(() => {
                 this.ignoreWithdrawInputs(config);
@@ -1274,38 +1279,67 @@ export default {
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
         neo.fetchSystemAssetBalance(dexAddress, null, false)
           .then(async (balance) => {
+            // console.log(`calculateWithdrawInputsAndOutputs fetched system asset balance to calculate withdraw inputs / outputs. ${JSON.stringify(balance)}`);
             config.balance = balance;
             const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
             await this.checkUnspentsReservedState(assetId, unspents);
 
-            let inputTotal = new BigNumber(0);
-            _.sortBy(unspents, [unspent => Math.abs(unspent.value.minus(quantity).toNumber())]).forEach((currentUnspent) => {
-              if (inputTotal.isGreaterThanOrEqualTo(quantity)) {
-                return;
-              }
+            const pickedInputs = [];
+            const pickedUnspents = [];
+            let quantitySumOfPickedInputs = new BigNumber(0);
+            _.orderBy(unspents, [unspent => parseFloat(unspent.value.toString())], ['desc']).some((currentUnspent) => {
               if (currentUnspent.reservedFor === currentWalletScriptHash) {
                 this.completeSystemAssetWithdrawals();
                 reject('Already have a UTXO reserved for your address. Completing open withdraw.');
-                return;
+                return false;
               }
               if (currentUnspent.reservedFor && currentUnspent.reservedFor.length >= 40) {
                 // reserved for someone else
-                return;
+                return false;
               }
               if (_.has(assetUTXOsToIgnore, currentUnspent.txid)
                 && _.get(assetUTXOsToIgnore, currentUnspent.txid) === currentUnspent.index) {
                 // we've tried to use this UTXO before and failed, skip it
-                return;
+                return false;
               }
 
-              inputTotal = inputTotal.plus(currentUnspent.value);
-              config.tx.inputs.push({
+              if (quantitySumOfPickedInputs.isGreaterThanOrEqualTo(quantity)) {
+                let isDonePicking = true;
+                let i = 0;
+                pickedUnspents.some((pickedUnspent) => {
+                  if (quantitySumOfPickedInputs.minus(pickedUnspent.value).plus(currentUnspent.value)
+                    .isGreaterThanOrEqualTo(quantity)) {
+                    // remove pickedInput and use the current one.
+                    pickedInputs.splice(i, 1);
+                    /* const removedUnspent = */ pickedUnspents.splice(i, 1);
+                    quantitySumOfPickedInputs = quantitySumOfPickedInputs.minus(pickedUnspent.value);
+                    // console.log(`-$ removed input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(removedUnspent)}`);
+                    isDonePicking = false;
+                    return true;
+                  }
+                  i += 1;
+                  return false;
+                });
+                if (isDonePicking) {
+                  return true;
+                }
+              }
+              quantitySumOfPickedInputs = quantitySumOfPickedInputs.plus(currentUnspent.value);
+              pickedUnspents.push(currentUnspent);
+              pickedInputs.push({
                 prevHash: currentUnspent.txid,
                 prevIndex: currentUnspent.index,
               });
+              // console.log(`$ added input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(currentUnspent)}`);
+              return false;
             });
 
+            // console.log(`pickedInputs.length: ${pickedInputs.length} quantitySumOfPickedInputs: ${quantitySumOfPickedInputs}`);
+            const inputTotal = quantitySumOfPickedInputs;
+            config.tx.inputs = config.tx.inputs.concat(pickedInputs);
+
             if (inputTotal.isLessThan(quantity)) {
+              // console.log('Contract does not have enough balance for withdraw.');
               reject('Contract does not have enough balance for withdraw.');
               return;
             }
@@ -1460,6 +1494,7 @@ export default {
           config.intents = api.makeIntent({ GAS: quantity }, currentWallet.address);
         }
 
+        // console.log(`withdrawSystemAsset ${assetId} quantity: ${quantity} utxoTxHash ${utxoTxHash} utxoIndex ${utxoIndex} intents ${JSON.stringify(config.intents)}`);
         if (currentWallet.isLedger === true) {
           config.signingFunction = ledger.signWithLedger;
           config.address = currentWallet.address;
@@ -1499,6 +1534,7 @@ export default {
                         }, 10000);
                         return;
                       }
+                      // console.log(`Unable to find marked input ${utxoTxHash} ${utxoIndex}`);
                       reject('Unable to find marked input.');
                     }
                     return;
@@ -1553,6 +1589,7 @@ export default {
             return configResponse;
           })
           .then((configResponse) => {
+            // console.log(`sending withdraw for utxo ${utxoTxHash} ${utxoIndex}`);
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
@@ -1640,11 +1677,17 @@ export default {
       }
 
       if (unspent.reservedFor === currentWalletScriptHash) {
+        // console.log(`unspent: ${JSON.stringify(unspent)}  is already reserved for us, attempting to withdraw.`);
         await this.withdrawSystemAsset(assetId, unspent.value.toNumber(), unspent.txid, unspent.index);
       }
       /* eslint-enable no-await-in-loop */
 
       if (unspent.reservedFor) {
+        // if (unspent.reservedFor.length >= 40) {
+        //   console.log(`Tracking reserved for someone else ${JSON.stringify(unspent)}`);
+        // } else {
+        //   console.log(`!! checkUnspentsReservedState found available UTXO ${JSON.stringify(unspent)}`);
+        // }
         _.set(contractUTXOsReservedFor, utxoKey, unspent.reservedFor);
       }
     }
