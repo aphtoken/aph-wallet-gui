@@ -885,6 +885,11 @@ export default {
     @extend %tile-light;
 
     margin-top: $space;
+    padding: $space 0;
+
+    .balance {
+      padding: 0 $space;
+    }
 
     .footer-btn {
       @extend %btn-outline;
@@ -914,6 +919,7 @@ export default {
 
     .footer-buttons {
       height: auto;
+      padding: 0 $space;
       width: 100%;
 
       .row {
@@ -975,8 +981,11 @@ export default {
 
   .balance {
     cursor: pointer;
+    border-left: $border-width-thin solid transparent;
 
     &.active {
+      border-color: $purple;
+
       .label {
         color: $purple !important;
         font-family: GilroySemibold;
