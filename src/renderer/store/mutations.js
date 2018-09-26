@@ -113,6 +113,7 @@ function handleLogout(state) {
   state.sendInProgress = {};
   state.currentMarket = null;
   state.menuToggleable = false;
+  state.orderHistory = [];
   neo.fetchNEP5Tokens();
 }
 
