@@ -87,8 +87,10 @@ export default {
     this.tradeHistoryUnwatch = this.$store.watch(
       () => {
         return this.$store.state.tradeHistory;
-      }, () => {
-        this.loadChart();
+      }, (val, oldValue) => {
+        if (!oldValue || val.marketName !== oldValue.marketName) {
+          this.loadChart();
+        }
       });
 
     this.styleMode = this.$store.state.styleMode;
