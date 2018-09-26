@@ -978,6 +978,7 @@ export default {
 
     &.active {
       .label {
+        color: $purple !important;
         font-family: GilroySemibold;
       }
     }
