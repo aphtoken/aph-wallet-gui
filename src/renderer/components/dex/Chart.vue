@@ -103,6 +103,7 @@ export default {
         }
         this.styleMode = this.$store.state.styleMode;
       });
+    this.loadChart();
   },
 
   beforeDestroy() {
