@@ -1193,7 +1193,7 @@ export default {
       try {
         setTimeout(() => {
           const startedMonitoring = moment().utc();
-          const interval = setInterval(() => {
+          const interval = setInterval(async () => {
             if (moment().utc().diff(startedMonitoring, 'milliseconds') > timeouts.MONITOR_TRANSACTIONS
                 && checkRpcForDetails !== true) {
               clearInterval(interval);
@@ -1201,20 +1201,17 @@ export default {
               return;
             }
 
-            if (moment().utc().diff(tx.lastBroadcasted, 'milliseconds') > intervals.REBROADCAST_TRANSACTIONS) {
-              tx.lastBroadcasted = moment().utc();
-              api.sendTx({
-                tx,
-                url: network.getSelectedNetwork().rpc,
-              });
+            const txInHistory = _.find(store.state.recentTransactions, { hash: tx.hash });
+            if (txInHistory) {
+              alerts.success(`TX: ${tx.hash} CONFIRMED`);
+              clearInterval(interval);
+              resolve(txInHistory);
               return;
             }
 
-            const txInHistory = _.find(store.state.recentTransactions, { hash: tx.hash });
-
-            if (!txInHistory && checkRpcForDetails === true
+            if (checkRpcForDetails === true
               && moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK) {
-              this.fetchTransactionDetails(tx.hash)
+              await this.fetchTransactionDetails(tx.hash)
                 .then((transactionDetails) => {
                   if (transactionDetails && transactionDetails.confirmed) {
                     alerts.success(`TX: ${transactionDetails.txid} CONFIRMED`);
@@ -1227,12 +1224,22 @@ export default {
                     reject('Transaction confirmation failed.');
                   }
                 });
+              return;
             }
 
-            if (txInHistory) {
-              alerts.success(`TX: ${tx.hash} CONFIRMED`);
-              clearInterval(interval);
-              resolve(txInHistory);
+            if (moment().utc().diff(tx.lastBroadcasted, 'milliseconds') > intervals.REBROADCAST_TRANSACTIONS) {
+              tx.lastBroadcasted = moment().utc();
+              api.sendTx({
+                tx,
+                url: network.getSelectedNetwork().rpc,
+              }).catch((e) => {
+                if (e.message.indexOf('transaction already exists') !== -1) {
+                  // already in the mem_pool
+                  alerts.info(`Transaction TX: ${tx.hash} still awaiting verification`);
+                } else {
+                  alerts.exception(e);
+                }
+              });
             }
           }, 1000);
         }, 15 * 1000); // wait a block for propagation
