@@ -21,32 +21,32 @@
         <div class="day-values">
           <div class="row">
             <div class="label">{{$t('vol')}}</div>
-            <div class="value">{{ $formatNumber($store.state.tradeHistory ? $store.state.tradeHistory.volume24Hour : 0) }}</div>
+            <div class="value">{{ $formatNumber(volume24Hour) }}</div>
           </div>
-          <div class="row">
+           <div class="row">
             <div class="label">{{$t('OPEN')}}</div>
-            <div class="value">{{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.open24Hour : 0) }}</div>
+            <div class="value">{{ $formatTokenAmount(open24Hour) }}</div>
           </div>
           <div class="row">
             <div class="label">{{$t('HIGH')}}</div>
-            <div class="value">{{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.high24Hour : 0) }}</div>
+            <div class="value">{{ $formatTokenAmount(high24Hour) }}</div>
           </div>
           <div class="row">
             <div class="label">{{$t('LOW')}}</div>
-            <div class="value">{{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.low24Hour : 0) }}</div>
+            <div class="value">{{ $formatTokenAmount(low24Hour) }}</div>
           </div>
         </div>
         <div class="token-details">
           <aph-token-icon v-if="$store.state.currentMarket && $store.state.currentMarket.quoteCurrency" :symbol="$store.state.currentMarket.quoteCurrency"></aph-token-icon>
           <div class="base-price">
-            {{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.close24Hour : 0) }}
+            {{ $formatTokenAmount(close24Hour) }}
           </div>
           <div class="base-price-converted">
-            {{ $formatMoney($store.state.tradeHistory ? $store.state.tradeHistory.close24Hour * baseCurrencyUnitPrice : 0) }}
+            {{ $formatMoney(close24Hour * baseCurrencyUnitPrice) }}
           </div>
           <span class="label">{{ $t('change24H') }} ({{ $store.state.currentMarket ? $store.state.currentMarket.quoteCurrency : '' }})</span>
-          <div :class="['change', {decrease: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour < 0 : false, increase: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour > 0 : false}]">
-            {{ $formatNumber($store.state.tradeHistory ? $store.state.tradeHistory.change24Hour : 0) }}
+          <div :class="['change', { decrease: change24Hour < 0 , increase: change24Hour > 0 }]">
+            {{ $formatNumber(change24Hour) }}
             ({{ $formatNumber(percentChangeAbsolute) }}%)
           </div>
         </div>
@@ -56,9 +56,11 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import MarketMegaSelector from './MarketMegaSelector';
 
 export default {
+
   components: {
     MarketMegaSelector,
   },
@@ -71,15 +73,64 @@ export default {
       return this.storeStateCurrentMarket && this.$store.state.holdings.length ?
         this.$services.neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue : 0;
     },
-    percentChangeAbsolute() {
-      return this.$store.state.tradeHistory ?
-        Math.abs(this.$store.state.tradeHistory.change24HourPercent) : 0;
+
+    close24Hour() {
+      return this.todayTrades.length > 0 ?
+        this.todayTrades[0].price : 0;
     },
+
+    open24Hour() {
+      return this.todayTrades.length > 0 ?
+        this.todayTrades[this.todayTrades.length - 1].price : 0;
+    },
+
+    low24Hour() {
+      return this.todayTrades.length > 0 ?
+        _.minBy(this.todayTrades, trade => Number(trade.price)).price : 0;
+    },
+
+    high24Hour() {
+      return this.todayTrades.length > 0 ?
+        _.maxBy(this.todayTrades, trade => Number(trade.price)).price : 0;
+    },
+
+    volume24Hour() {
+      return this.todayTrades.length > 0 ?
+        _.sumBy(this.todayTrades, trade => Number(trade.quantity)) : 0;
+    },
+
+    change24HourPercent() {
+      return this.todayTrades.length > 0 ?
+        Math.round(
+          ((this.close24Hour - this.open24Hour) / this.open24Hour) * 10000) / 100 : 0;
+    },
+
+    change24Hour() {
+      return this.close24Hour - this.open24Hour;
+    },
+
+    percentChangeAbsolute() {
+      return Math.abs(this.change24HourPercent);
+    },
+
+    todayTrades() {
+      return this.trades().length > 0 ? _.filter(this.trades(),
+        trade => trade.tradeTime >= moment().startOf('day').unix(),
+      ) : [];
+    },
+
+    ...mapGetters([
+      'tradeHistory',
+    ]),
   },
 
   methods: {
     toggleNightMode() {
       this.$services.settings.setStyleMode(this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
+    },
+    trades() {
+      return this.tradeHistory && this.tradeHistory.trades
+        && this.tradeHistory.trades.length ? this.tradeHistory.trades : [];
     },
   },
 };
