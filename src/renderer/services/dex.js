@@ -288,8 +288,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
-        axios.get(`${currentNetwork.aph}/trades/bucketed/${marketName}
-?binSize=${binSize}`)
+        axios.get(`${currentNetwork.aph}/trades/bucketed/${marketName}?binSize=${binSize}`)
           .then((res) => {
             resolve(res.data.buckets);
           })

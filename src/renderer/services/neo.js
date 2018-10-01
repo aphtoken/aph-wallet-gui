@@ -582,7 +582,7 @@ export default {
 
             holdings.forEach((holding) => {
               if (holding.balance.isGreaterThan(0)
-                || holding.totalBalance.isGreaterThan(0)
+                || (holding.totalBalance && holding.totalBalance.isGreaterThan(0))
                 || holding.isUserAsset === true) {
                 if (holding.isUserAsset !== true) {
                   // Saw a balance > 0 on this token but we haven't explicitly added to user assets.
