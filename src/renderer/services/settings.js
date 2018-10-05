@@ -108,4 +108,11 @@ export default {
     return this;
   },
 
+  toggleGasFracture() {
+    storage.set(GAS_FRACTURE_STORAGE_KEY, !this.getGasFracture());
+    this.sync();
+
+    return this;
+  },
+
 };

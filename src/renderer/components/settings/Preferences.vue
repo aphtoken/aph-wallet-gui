@@ -30,9 +30,9 @@
         </div>
       </div>
       <div class="row">
-        <div class="column fracture-gas">
-          <aph-icon name="radio-on" v-if="$store.state.gasFracture" @click="disableGasFracture"></aph-icon>
-          <aph-icon name="radio-off" v-else @click="enableGasFracture"></aph-icon>
+        <div class="column fracture-gas" @click="toggleGasFracture">
+          <aph-icon name="radio-on" v-if="$store.state.gasFracture"></aph-icon>
+          <aph-icon name="radio-off" v-else></aph-icon>
           <label>{{ $t('fractureGas') }}</label>
         </div>
       </div>
@@ -89,12 +89,8 @@ export default {
   },
 
   methods: {
-    disableGasFracture() {
-      this.$services.settings.setGasFracture(false);
-    },
-
-    enableGasFracture() {
-      this.$services.settings.setGasFracture(true);
+    toggleGasFracture() {
+      this.$services.settings.toggleGasFracture();
     },
   },
 
@@ -160,19 +156,19 @@ export default {
 
         &.fracture-gas {
           align-items: center;
+          cursor: pointer;
           display: flex;
           flex-direction: row;
           justify-content: center;
 
           > label {
+            cursor: pointer;
             font-family: GilroySemibold;
             font-size: toRem(16px);
             margin-left: $space;
           }
 
           > .aph-icon {
-            cursor: pointer;
-
             svg {
               height: toRem(20px);
             }
