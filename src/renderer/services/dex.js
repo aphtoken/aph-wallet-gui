@@ -738,14 +738,16 @@ export default {
       const aphAssetHolding = neo.getHolding(assets.APH);
       if (order.assetIdToSell === assets.APH) {
         totalQuantityToSell = totalQuantityToSell.plus(totalFees);
+        order.totalFees = totalFees;
       } else if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
-        order.deposits.push({
+        order.feeDeposit = {
           symbol: aphAssetHolding.symbol,
           assetId: assets.APH,
           currentQuantity: new BigNumber(aphAssetHolding.contractBalance),
           quantityRequired: new BigNumber(totalFees),
           quantityToDeposit: new BigNumber(totalFees).minus(aphAssetHolding.contractBalance),
-        });
+        };
+        order.deposits.push(order.feeDeposit);
       }
     }
 
@@ -1698,10 +1700,9 @@ export default {
         const prevTxHash = input.prevHash ? input.prevHash : input.txid;
         const prevTxIndex = input.prevIndex ? input.prevIndex : input.index;
 
-        let utxoParam = u.reverseHex(prevTxHash);
-        if (prevTxIndex > 0) {
-          utxoParam = `${utxoParam}${u.num2hexstring(prevTxIndex)}`; // todo: support > 8bit indexes
-        }
+        const utxoParam = `${u.reverseHex(prevTxHash)}${u.num2hexstring(prevTxIndex, 2, true)}`;
+
+        console.log(`utxoParam: ${utxoParam}`);
 
         const rpcClient = network.getRpcClient();
         rpcClient.query({
@@ -1898,6 +1899,7 @@ export default {
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
                   resolve(res.tx);
+                  this.fetchCommitState(wallets.getCurrentWallet().address);
                 })
                 .catch((e) => {
                   reject(`Commit Failed. ${e}`);
@@ -1929,6 +1931,9 @@ export default {
                 })
                 .catch((e) => {
                   reject(`Failed to monitor transaction confirmation. ${e}`);
+                })
+                .then(() => {
+                  this.fetchCommitState(wallets.getCurrentWallet().address);
                 });
             } else {
               reject('Transaction rejected');
@@ -2235,4 +2240,53 @@ export default {
     });
   },
 
+  reclaimOrphanFundsToOwner(assetId) {
+    return new Promise((resolve, reject) => {
+      try {
+        console.log('reclaiming orphaned funds');
+        this.executeContractTransaction('reclaimOrphanFunds',
+          [
+            u.reverseHex(assetId),
+          ])
+          .then((res) => {
+            if (res.success) {
+              console.log('sent tx');
+              resolve(res.tx);
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(e);
+          });
+      } catch (e) {
+        reject(e.message);
+      }
+    });
+  },
+
+  setAssetSettings(assetId, fee) {
+    return new Promise((resolve, reject) => {
+      try {
+        const settingsData = `00${u.num2fixed8(fee)}`;
+        this.executeContractTransaction('setAssetSettings',
+          [
+            u.reverseHex(assetId),
+            settingsData,
+          ])
+          .then((res) => {
+            if (res.success) {
+              resolve(res.tx);
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(e);
+          });
+      } catch (e) {
+        reject(e.message);
+      }
+    });
+  },
 };

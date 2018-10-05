@@ -82,10 +82,10 @@
           </p>
           <p v-if="$store.state.orderToConfirm.feeDeposit && $store.state.orderToConfirm.feeDeposit.quantityToDeposit > 0">
             {{$t('thisOrderRequires', {
-                quantity: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityRequired),
-                symbol: $store.state.orderToConfirm.feeDeposit.symbol,
-                balance: $formatNumber($store.state.orderToConfirm.feeDeposit.currentQuantity),
-                deposit: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityToDeposit),
+                quantity: $formatNumber(this.$store.state.orderToConfirm.feeDeposit.quantityRequired),
+                symbol: this.$store.state.orderToConfirm.feeDeposit.symbol,
+                balance: $formatNumber(this.$store.state.orderToConfirm.feeDeposit.currentQuantity),
+                deposit: $formatNumber(this.$store.state.orderToConfirm.feeDeposit.quantityToDeposit),
               })
             }}
           </p>
@@ -149,6 +149,9 @@ export default {
     quantityToPullFromWallet() {
       let quantityToDeposit = this.$store.state.orderToConfirm.expectedQuantityToGive
         .minus(this.holdingForAssetToGive.contractBalance);
+      if (this.holdingForAssetToGive.assetId === this.$services.assets.APH) {
+        quantityToDeposit = quantityToDeposit.plus(this.$store.state.orderToConfirm.totalFees);
+      }
       if (this.holdingForAssetToGive.decimals < 8) {
         const toDepositTruncated = new BigNumber(quantityToDeposit.toFixed(this.holdingForAssetToGive.decimals));
         if (toDepositTruncated.isGreaterThanOrEqualTo(quantityToDeposit)) {
