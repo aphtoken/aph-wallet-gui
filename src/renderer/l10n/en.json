@@ -168,6 +168,7 @@
   "noDataAvailable": "No Data Available",
   "noLedgerDeviceFound": "No Ledger device found. Please plugin your Ledger in, unlock it and open the NEO application.",
   "noOptionSelected": "No Option Selected",
+  "notEnoughForFee": "You Don't Have Enough APH for Fee",
   "notRightNow": "No, Not Now",
   "noSavedWallets": "You do not have any saved wallets. Create one?",
   "noTransactions": "No transactions",

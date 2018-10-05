@@ -102,6 +102,9 @@
             {{$t('thisWillBeAMakerOrderLeftOnTheBook')}}
           </div>
         </div>
+        <div class="fee-not-covered" v-if="isFeeCovered">
+          {{$t('notEnoughForFee')}}
+        </div>
       </div>
       <div class="footer">
         <div class="cancel-btn" @click="onCancel">{{$t('cancel')}}</div>
@@ -165,6 +168,10 @@ export default {
         return offer.isBackupOffer === true;
       });
     },
+
+    isFeeCovered() {
+      return true; // INSERT LOGIC HERE
+    }
   },
 
   props: {
@@ -232,6 +239,10 @@ export default {
     .taking > div:first-child {
       overflow-y:auto;
       max-height: toRem(400px);
+    }
+
+    .fee-not-covered {
+      color: $red;
     }
   }
 
