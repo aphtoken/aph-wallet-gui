@@ -73,7 +73,7 @@
         <div v-if="$store.state.orderToConfirm.assetIdToSell">
           <p v-if="quantityToPullFromWallet > 0">
             {{$t('thisOrderRequires', {
-                quantity: $formatNumber(this.$store.state.orderToConfirm.expectedQuantityToGive),
+                quantity: $formatNumber(expectedQuantityToGive),
                 symbol: holdingForAssetToGive.symbol,
                 balance: $formatNumber(holdingForAssetToGive.contractBalance),
                 deposit: $formatNumber(quantityToPullFromWallet),
@@ -146,10 +146,20 @@ export default {
       return _.find(this.$store.state.holdings, { assetId: this.$store.state.orderToConfirm.assetIdToSell });
     },
 
+    expectedQuantityToGive() {
+      let quantityNeeded = this.$store.state.orderToConfirm.expectedQuantityToGive;
+      if ((this.holdingForAssetToGive.assetId === this.$services.assets.APH)
+        && this.$store.state.orderToConfirm.totalFees) {
+        quantityNeeded = quantityNeeded.plus(this.$store.state.orderToConfirm.totalFees);
+      }
+      return quantityNeeded;
+    },
+
     quantityToPullFromWallet() {
       let quantityToDeposit = this.$store.state.orderToConfirm.expectedQuantityToGive
         .minus(this.holdingForAssetToGive.contractBalance);
-      if (this.holdingForAssetToGive.assetId === this.$services.assets.APH) {
+      if (this.holdingForAssetToGive.assetId === this.$services.assets.APH
+        && this.$store.state.orderToConfirm.totalFees) {
         quantityToDeposit = quantityToDeposit.plus(this.$store.state.orderToConfirm.totalFees);
       }
       if (this.holdingForAssetToGive.decimals < 8) {

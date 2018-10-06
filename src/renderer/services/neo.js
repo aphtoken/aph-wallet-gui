@@ -764,7 +764,7 @@ export default {
   /**
    * @return Promise
    */
-  sendFunds(toAddress, assetId, amount, isNep5, callback) {
+  sendFunds(toAddress, assetId, amount, isNep5, callback, checkRpcForDetails) {
     return new Promise((resolve, reject) => {
       let sendPromise = null;
       try {
@@ -819,7 +819,7 @@ export default {
             }
 
             res.tx.lastBroadcasted = moment().utc();
-            return this.monitorTransactionConfirmation(res.tx)
+            return this.monitorTransactionConfirmation(res.tx, checkRpcForDetails)
               .then(() => {
                 return resolve(res.tx);
               })

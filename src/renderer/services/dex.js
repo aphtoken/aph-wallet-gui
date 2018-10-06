@@ -997,6 +997,7 @@ export default {
                 alerts.success('Deposit relayed, waiting for confirmation...');
                 neo.monitorTransactionConfirmation(res.tx, true)
                   .then(() => {
+                    // TODO: verify this is the correct behavior to always reset here; seems not quite right
                     neo.resetSystemAssetBalanceCache();
                     resolve(res.tx);
                   })
@@ -1014,7 +1015,7 @@ export default {
           const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
           neo.sendFunds(dexAddress, assetId, quantity, true, () => {
             alerts.success('Deposit relayed, waiting for confirmation...');
-          })
+          }, true)
             .then((tx) => {
               resolve(tx);
             })
@@ -1340,8 +1341,8 @@ export default {
             config.tx.inputs = config.tx.inputs.concat(pickedInputs);
 
             if (inputTotal.isLessThan(quantity)) {
-              // console.log('Contract does not have enough balance for withdraw.');
-              reject('Contract does not have enough balance for withdraw.');
+              // TODO: we should prompt the user possibly if they want to withdraw the inputTotal currently available instead
+              reject('Contract UTXOs currently waiting for settlement, please wait a few blocks and retry your withdraw.');
               return;
             }
 
@@ -1898,8 +1899,8 @@ export default {
               alerts.success('Commit relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  resolve(res.tx);
                   this.fetchCommitState(wallets.getCurrentWallet().address);
+                  resolve(res.tx);
                 })
                 .catch((e) => {
                   reject(`Commit Failed. ${e}`);
@@ -1927,13 +1928,11 @@ export default {
               alerts.success('Claim relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
+                  this.fetchCommitState(wallets.getCurrentWallet().address);
                   resolve(res.tx);
                 })
                 .catch((e) => {
                   reject(`Failed to monitor transaction confirmation. ${e}`);
-                })
-                .then(() => {
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
                 });
             } else {
               reject('Transaction rejected');
@@ -1959,7 +1958,7 @@ export default {
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
                   // Note: Compound doesn't change wallet nep5 balance; no need to require refresh of APH balance here.
-
+                  this.fetchCommitState(wallets.getCurrentWallet().address);
                   resolve(res.tx);
                 })
                 .catch((e) => {
@@ -2250,7 +2249,6 @@ export default {
           ])
           .then((res) => {
             if (res.success) {
-              console.log('sent tx');
               resolve(res.tx);
             } else {
               reject('Transaction rejected');
@@ -2276,7 +2274,10 @@ export default {
           ])
           .then((res) => {
             if (res.success) {
-              resolve(res.tx);
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  resolve(res.tx);
+                });
             } else {
               reject('Transaction rejected');
             }
