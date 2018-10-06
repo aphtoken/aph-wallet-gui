@@ -835,7 +835,7 @@ export default {
         if (order.assetIdToSell === assets.NEO) {
           const neoHolding = neo.getHolding(assets.NEO);
           if (neoHolding.contractBalance < order.quantityToSell) {
-            neoToSend = new BigNumber(order.quantityToSell - neoHolding.contractBalance);
+            neoToSend = toBigNumber(order.quantityToSell).minus(neoHolding.contractBalance);
 
             const toDepositTruncated = new BigNumber(neoToSend.toFixed(0));
             if (toDepositTruncated.isGreaterThanOrEqualTo(neoToSend)) {
@@ -854,7 +854,7 @@ export default {
         if (order.assetIdToSell === assets.GAS) {
           const gasHolding = neo.getHolding(assets.GAS);
           if (gasHolding.contractBalance < order.quantityToSell) {
-            gasToSend = new BigNumber(order.quantityToSell - gasHolding.contractBalance);
+            gasToSend = toBigNumber(order.quantityToSell).minus(gasHolding.contractBalance);
             if (gasToSend.isGreaterThan(gasHolding.balance)) {
               reject('Insufficient GAS.');
               return;
