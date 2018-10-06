@@ -29,6 +29,13 @@
           <aph-select :light="true" :options="networkFees" :initialValue="selectedNetworkFee" v-model="selectedNetworkFee" :allow-empty-value="false"></aph-select>
         </div>
       </div>
+      <div class="row">
+        <div class="column fracture-gas" @click="toggleGasFracture">
+          <aph-icon name="radio-on" v-if="$store.state.gasFracture"></aph-icon>
+          <aph-icon name="radio-off" v-else></aph-icon>
+          <label>{{ $t('fractureGas') }}</label>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -79,6 +86,12 @@ export default {
       selectedNetwork: null,
       selectedNetworkFee: 0,
     };
+  },
+
+  methods: {
+    toggleGasFracture() {
+      this.$services.settings.toggleGasFracture();
+    },
   },
 
   watch: {
@@ -140,6 +153,31 @@ export default {
       .column {
         flex: 1;
         margin-right: $space;
+
+        &.fracture-gas {
+          align-items: center;
+          cursor: pointer;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+
+          > label {
+            cursor: pointer;
+            font-family: GilroySemibold;
+            font-size: toRem(16px);
+            margin-left: $space;
+          }
+
+          > .aph-icon {
+            svg {
+              height: toRem(20px);
+            }
+
+            .fill {
+              fill: $dark-grey;
+            }
+          }
+        }
 
         &:last-child {
           margin-right: 0;
