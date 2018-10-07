@@ -73,7 +73,7 @@
         <div v-if="$store.state.orderToConfirm.assetIdToSell">
           <p v-if="quantityToPullFromWallet > 0">
             {{$t('thisOrderRequires', {
-                quantity: $formatNumber(this.$store.state.orderToConfirm.expectedQuantityToGive),
+                quantity: $formatNumber(expectedQuantityToGive),
                 symbol: holdingForAssetToGive.symbol,
                 balance: $formatNumber(holdingForAssetToGive.contractBalance),
                 deposit: $formatNumber(quantityToPullFromWallet),
@@ -82,10 +82,10 @@
           </p>
           <p v-if="$store.state.orderToConfirm.feeDeposit && $store.state.orderToConfirm.feeDeposit.quantityToDeposit > 0">
             {{$t('thisOrderRequires', {
-                quantity: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityRequired),
-                symbol: $store.state.orderToConfirm.feeDeposit.symbol,
-                balance: $formatNumber($store.state.orderToConfirm.feeDeposit.currentQuantity),
-                deposit: $formatNumber($store.state.orderToConfirm.feeDeposit.quantityToDeposit),
+                quantity: $formatNumber(this.$store.state.orderToConfirm.feeDeposit.quantityRequired),
+                symbol: this.$store.state.orderToConfirm.feeDeposit.symbol,
+                balance: $formatNumber(this.$store.state.orderToConfirm.feeDeposit.currentQuantity),
+                deposit: $formatNumber(this.$store.state.orderToConfirm.feeDeposit.quantityToDeposit),
               })
             }}
           </p>
@@ -146,9 +146,22 @@ export default {
       return _.find(this.$store.state.holdings, { assetId: this.$store.state.orderToConfirm.assetIdToSell });
     },
 
+    expectedQuantityToGive() {
+      let quantityNeeded = this.$store.state.orderToConfirm.expectedQuantityToGive;
+      if ((this.holdingForAssetToGive.assetId === this.$services.assets.APH)
+        && this.$store.state.orderToConfirm.totalFees) {
+        quantityNeeded = quantityNeeded.plus(this.$store.state.orderToConfirm.totalFees);
+      }
+      return quantityNeeded;
+    },
+
     quantityToPullFromWallet() {
       let quantityToDeposit = this.$store.state.orderToConfirm.expectedQuantityToGive
         .minus(this.holdingForAssetToGive.contractBalance);
+      if (this.holdingForAssetToGive.assetId === this.$services.assets.APH
+        && this.$store.state.orderToConfirm.totalFees) {
+        quantityToDeposit = quantityToDeposit.plus(this.$store.state.orderToConfirm.totalFees);
+      }
       if (this.holdingForAssetToGive.decimals < 8) {
         const toDepositTruncated = new BigNumber(quantityToDeposit.toFixed(this.holdingForAssetToGive.decimals));
         if (toDepositTruncated.isGreaterThanOrEqualTo(quantityToDeposit)) {

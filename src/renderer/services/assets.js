@@ -10,7 +10,7 @@ export default {
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
 
   // TODO: these different per network
-  DEX_SCRIPT_HASH: '4066b92f3ef198445807177937e98a81fb730d6b',
+  DEX_SCRIPT_HASH: '1317c59949c2546b76f11956d5081df619ba5317',
   APH: '591eedcd379a8981edeefe04ef26207e1391904a',
   ATI: '155153854ed377549a72cc1643e481bf25b48390',
 

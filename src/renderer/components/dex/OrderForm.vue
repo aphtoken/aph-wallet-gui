@@ -75,15 +75,16 @@
           <!-- Only the contract owner or manager can do this.
               <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button>
               <button @click="setMarket" class="footer-btn">Setup Market</button>
-              <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button> -->
+              <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button>
+              <button @click="reclaimOrhphanFunds" class="footer-btn">Reclaim Orphan Funds</button> -->
           </div>
        </div>
       </aph-spinner-wrapper>
     </section>
     <aph-order-confirmation-modal v-if="$store.state.showOrderConfirmationModal"
-      :onConfirmed="orderConfirmed" :onCancel="hideOrderConfirmationModal"></aph-order-confirmation-modal>
+      :onConfirmed="orderConfirmed" :onCancel="hideOrderConfirmationModal" />
     <aph-deposit-withdraw-modal v-if="$store.state.depositWithdrawModalModel"
-      :onConfirmed="depositWithdrawConfirmed" :onCancel="hideDepositWithdrawModal"></aph-deposit-withdraw-modal>
+      :onConfirmed="depositWithdrawConfirmed" :onCancel="hideDepositWithdrawModal" />
   </div>
 </template>
 
@@ -630,72 +631,74 @@ export default {
     },
 
     async setMarket() {
-      await this.$services.dex.setMarket(this.$services.assets.APH,
-        this.$services.assets.GAS,
-        100, 0.00001, 0.0000, 0.25)
-        .then(() => {
-          this.$services.alerts.success(this.$t('setMarketRelayed'));
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
-      await this.$services.dex.setMarket(this.$services.assets.ATI,
-        this.$services.assets.APH,
-        200, 0.00001, 0.25, 0)
-        .then(() => {
-          this.$services.alerts.success(this.$t('setMarketRelayed'));
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
-      await this.$services.dex.setMarket(this.$services.assets.NEO,
-        this.$services.assets.GAS,
-        0.5, 0.000001, 0.30946428, 0.30946428)
-        .then(() => {
-          this.$services.alerts.success(this.$t('setMarketRelayed'));
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
-      await this.$services.dex.setMarket(this.$services.assets.ATI,
-        this.$services.assets.NEO,
-        200, 0.00001, 0.25, 0.25)
-        .then(() => {
-          this.$services.alerts.success(this.$t('setMarketRelayed'));
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
-      await this.$services.dex.setMarket(this.$services.assets.ATI,
-        this.$services.assets.GAS,
-        200, 0.00001, 0.25, 0.25)
-        .then(() => {
-          this.$services.alerts.success(this.$t('setMarketRelayed'));
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
-      await this.$services.dex.setMarket(this.$services.assets.APH,
-        this.$services.assets.NEO,
-        100, 0.0000001, 0, 0.25)
-        .then(() => {
-          this.$services.alerts.success(this.$t('setMarketRelayed'));
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
-      /*
-      this.$services.dex.setMarket('9aff1e08aea2048a26a3d2ddbb3df495b932b1e7',
-        this.$constants.assets.APH,
-        1, 0.00001, 0.01, 0.01)
-        .then(() => {
-          this.$services.alerts.success(this.$t('setMarketRelayed'));
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
-      */
+      this.$services.alerts.info('Add assets');
+
+      try {
+        await this.$services.dex.setAssetSettings(this.$services.assets.APH, 0, true);
+        this.$services.alerts.success('Setup asset APH');
+
+        await this.$services.dex.setAssetSettings(this.$services.assets.ATI, 0, true);
+        this.$services.alerts.success('Setup asset ATI');
+
+        await this.$services.dex.setAssetSettings(this.$services.assets.GAS, 0, true);
+        this.$services.alerts.success('Setup asset GAS');
+
+        await this.$services.dex.setAssetSettings(this.$services.assets.NEO, 0, true);
+        this.$services.alerts.success('Setup asset NEO');
+
+        // await this.$services.dex.setAssetSettings('a3640dd3c560c75528e5f861da5da98958d0d713', 0);
+        // this.$services.alerts.success('Setup asset NXT2');
+        await this.$services.dex.setMarket(this.$services.assets.APH,
+          this.$services.assets.NEO,
+          100, 0.0000001, 0, 0.25, true);
+        this.$services.alerts.success('Setup Market NEO-APH');
+
+        await this.$services.dex.setMarket(this.$services.assets.GAS,
+          this.$services.assets.NEO,
+          2, 0.000001, 0.30946428, 0.30946428, true);
+        this.$services.alerts.success('Setup Market NEO-GAS');
+
+        await this.$services.dex.setMarket(this.$services.assets.APH,
+          this.$services.assets.GAS,
+          100, 0.00001, 0.0000, 0.25, true);
+        this.$services.alerts.success('Setup Market GAS-APH');
+
+        await this.$services.dex.setMarket(this.$services.assets.ATI,
+          this.$services.assets.GAS,
+          200, 0.00001, 0.25, 0.25);
+        this.$services.alerts.success('Setup Market GAS-ATI');
+
+        await this.$services.dex.setMarket(this.$services.assets.ATI,
+          this.$services.assets.NEO,
+          200, 0.00001, 0.25, 0.25);
+        this.$services.alerts.success('Setup Market NEO-ATI');
+
+        await this.$services.dex.setMarket(this.$services.assets.ATI,
+          this.$services.assets.APH,
+          200, 0.00001, 0.25, 0);
+        this.$services.alerts.success('Setup Market APH-ATI');
+
+        /*
+        await this.$services.dex.setMarket('a3640dd3c560c75528e5f861da5da98958d0d713',
+          this.$services.assets.APH,
+          10, 0.000001, 0.025, 0)
+        */
+
+        /* CTX
+        await this.$services.dex.setMarket('9aff1e08aea2048a26a3d2ddbb3df495b932b1e7',
+          this.$services.assets.APH,
+          1, 0.00001, 0.01, 0.01)
+        */
+      } catch (e) {
+        this.$services.alerts.exception(e);
+      }
     },
+
+    async reclaimOrhphanFunds() {
+      this.$services.alerts.info('Start reclaim of orphaned GAS');
+      await this.$services.dex.reclaimOrphanFundsToOwner(this.$services.assets.GAS);
+    },
+
     setMinimumClaimBlocks() {
       this.$services.dex.setMinimumClaimBlocks(180)
         .then(() => {

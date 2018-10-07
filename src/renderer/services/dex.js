@@ -288,7 +288,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
-        axios.get(`${currentNetwork.aph}/trades/bucketed/${marketName}?binSize=${binSize}`)
+        axios.get(`${currentNetwork.aph}/trades/bucketed/${marketName}?binSize=${binSize}?binCount=1440`)
           .then((res) => {
             resolve(res.data.buckets);
           })
@@ -738,14 +738,16 @@ export default {
       const aphAssetHolding = neo.getHolding(assets.APH);
       if (order.assetIdToSell === assets.APH) {
         totalQuantityToSell = totalQuantityToSell.plus(totalFees);
+        order.totalFees = totalFees;
       } else if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
-        order.deposits.push({
+        order.feeDeposit = {
           symbol: aphAssetHolding.symbol,
           assetId: assets.APH,
           currentQuantity: new BigNumber(aphAssetHolding.contractBalance),
           quantityRequired: new BigNumber(totalFees),
           quantityToDeposit: new BigNumber(totalFees).minus(aphAssetHolding.contractBalance),
-        });
+        };
+        order.deposits.push(order.feeDeposit);
       }
     }
 
@@ -833,7 +835,7 @@ export default {
         if (order.assetIdToSell === assets.NEO) {
           const neoHolding = neo.getHolding(assets.NEO);
           if (neoHolding.contractBalance < order.quantityToSell) {
-            neoToSend = new BigNumber(order.quantityToSell - neoHolding.contractBalance);
+            neoToSend = toBigNumber(order.quantityToSell).minus(neoHolding.contractBalance);
 
             const toDepositTruncated = new BigNumber(neoToSend.toFixed(0));
             if (toDepositTruncated.isGreaterThanOrEqualTo(neoToSend)) {
@@ -852,7 +854,7 @@ export default {
         if (order.assetIdToSell === assets.GAS) {
           const gasHolding = neo.getHolding(assets.GAS);
           if (gasHolding.contractBalance < order.quantityToSell) {
-            gasToSend = new BigNumber(order.quantityToSell - gasHolding.contractBalance);
+            gasToSend = toBigNumber(order.quantityToSell).minus(gasHolding.contractBalance);
             if (gasToSend.isGreaterThan(gasHolding.balance)) {
               reject('Insufficient GAS.');
               return;
@@ -995,6 +997,7 @@ export default {
                 alerts.success('Deposit relayed, waiting for confirmation...');
                 neo.monitorTransactionConfirmation(res.tx, true)
                   .then(() => {
+                    // TODO: verify this is the correct behavior to always reset here; seems not quite right
                     neo.resetSystemAssetBalanceCache();
                     resolve(res.tx);
                   })
@@ -1012,7 +1015,7 @@ export default {
           const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
           neo.sendFunds(dexAddress, assetId, quantity, true, () => {
             alerts.success('Deposit relayed, waiting for confirmation...');
-          })
+          }, true)
             .then((tx) => {
               resolve(tx);
             })
@@ -1338,8 +1341,8 @@ export default {
             config.tx.inputs = config.tx.inputs.concat(pickedInputs);
 
             if (inputTotal.isLessThan(quantity)) {
-              // console.log('Contract does not have enough balance for withdraw.');
-              reject('Contract does not have enough balance for withdraw.');
+              // TODO: we should prompt the user possibly if they want to withdraw the inputTotal currently available instead
+              reject('Contract UTXOs currently waiting for settlement, please wait a few blocks and retry your withdraw.');
               return;
             }
 
@@ -1698,10 +1701,9 @@ export default {
         const prevTxHash = input.prevHash ? input.prevHash : input.txid;
         const prevTxIndex = input.prevIndex ? input.prevIndex : input.index;
 
-        let utxoParam = u.reverseHex(prevTxHash);
-        if (prevTxIndex > 0) {
-          utxoParam = `${utxoParam}${u.num2hexstring(prevTxIndex)}`; // todo: support > 8bit indexes
-        }
+        const utxoParam = `${u.reverseHex(prevTxHash)}${u.num2hexstring(prevTxIndex, 2, true)}`;
+
+        console.log(`utxoParam: ${utxoParam}`);
 
         const rpcClient = network.getRpcClient();
         rpcClient.query({
@@ -1897,6 +1899,7 @@ export default {
               alerts.success('Commit relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
+                  this.fetchCommitState(wallets.getCurrentWallet().address);
                   resolve(res.tx);
                 })
                 .catch((e) => {
@@ -1925,6 +1928,7 @@ export default {
               alerts.success('Claim relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
+                  this.fetchCommitState(wallets.getCurrentWallet().address);
                   resolve(res.tx);
                 })
                 .catch((e) => {
@@ -1954,7 +1958,7 @@ export default {
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
                   // Note: Compound doesn't change wallet nep5 balance; no need to require refresh of APH balance here.
-
+                  this.fetchCommitState(wallets.getCurrentWallet().address);
                   resolve(res.tx);
                 })
                 .catch((e) => {
@@ -1973,7 +1977,7 @@ export default {
     });
   },
 
-  setMarket(quoteAssetId, baseAssetId, minimumSize, minimumTickSize, buyFee, sellFee) {
+  setMarket(quoteAssetId, baseAssetId, minimumSize, minimumTickSize, buyFee, sellFee, waitForTx) {
     return new Promise((resolve, reject) => {
       try {
         this.executeContractTransaction('setMarket',
@@ -1987,7 +1991,14 @@ export default {
           ])
           .then((res) => {
             if (res.success) {
-              resolve(res.tx);
+              if (waitForTx) {
+                neo.monitorTransactionConfirmation(res.tx, true)
+                  .then(() => {
+                    resolve(res.tx);
+                  });
+              } else {
+                resolve(res.tx);
+              }
             } else {
               reject('Transaction rejected');
             }
@@ -2235,4 +2246,59 @@ export default {
     });
   },
 
+  reclaimOrphanFundsToOwner(assetId) {
+    return new Promise((resolve, reject) => {
+      try {
+        console.log('reclaiming orphaned funds');
+        this.executeContractTransaction('reclaimOrphanFunds',
+          [
+            u.reverseHex(assetId),
+          ])
+          .then((res) => {
+            if (res.success) {
+              resolve(res.tx);
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(e);
+          });
+      } catch (e) {
+        reject(e.message);
+      }
+    });
+  },
+
+  setAssetSettings(assetId, fee, waitForTx) {
+    return new Promise((resolve, reject) => {
+      try {
+        const settingsData = `00${u.num2fixed8(fee)}`;
+        this.executeContractTransaction('setAssetSettings',
+          [
+            u.reverseHex(assetId),
+            settingsData,
+          ])
+          .then((res) => {
+            if (res.success) {
+              if (waitForTx) {
+                neo.monitorTransactionConfirmation(res.tx, true)
+                  .then(() => {
+                    resolve(res.tx);
+                  });
+              } else {
+                resolve(res.tx);
+              }
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(e);
+          });
+      } catch (e) {
+        reject(e.message);
+      }
+    });
+  },
 };

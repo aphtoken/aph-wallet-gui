@@ -46,7 +46,7 @@ const charts = {
 };
 
 const claiming = {
-  DEFAULT_CLAIM_BLOCKS: 180,
+  DEFAULT_CLAIM_BLOCKS: 4800,
 };
 
 const database = {

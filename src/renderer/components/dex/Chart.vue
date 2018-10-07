@@ -213,8 +213,8 @@ export default {
               if (!this.tradingView || !this.tradingView._options) {
                 return;
               }
-              const to = parseInt((new Date().valueOf()) / 1000, 10)
-              const from = to - 120
+              const to = Math.round(new Date().valueOf() / 1000);
+              const from = to - 120;
 
               this.tradingView._options.datafeed.getBars(_symbolInfo, resolution, from, to, (bars) => {
                 if (bars.length === 0) {
@@ -230,8 +230,8 @@ export default {
                 const isNewBar = !Number.isNaN(lastBarTime) && lastBar.time > lastBarTime
 
                 if (isNewBar && bars.length >= 2) {
-                  const previousBar = bars[bars.length - 2]
-                  onRealtimeCallback(previousBar)
+                  const previousBar = bars[bars.length - 2];
+                  onRealtimeCallback(previousBar);
                 }
 
                 lastBarTime = lastBar.time;
@@ -247,7 +247,7 @@ export default {
                   throw err;
                 }
               })
-            }, 20000)
+            }, 10000)
           },
 
           unsubscribeBars: (subscriberUID) => {
