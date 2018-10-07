@@ -1204,6 +1204,7 @@ export default {
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
+            // TODO: refactor this using await and try catch
             if (!configResponse.response.result && tryCount < 3) {
               setTimeout(() => {
                 this.ignoreWithdrawInputs(config);
@@ -1225,7 +1226,7 @@ export default {
             }
           })
           .catch((e) => {
-            // console.log(`failure to mark returned from sendTx ${e}`);
+            console.log(`failure to mark returned from sendTx ${e}`);
             if (tryCount < 3) {
               setTimeout(() => {
                 this.ignoreWithdrawInputs(config);
@@ -1267,8 +1268,10 @@ export default {
       return;
     }
 
+    const currentNetwork = network.getSelectedNetwork();
+
     config.tx.inputs.forEach((input) => {
-      _.set(assetUTXOsToIgnore, input.prevHash, input.prevIndex);
+      _.set(assetUTXOsToIgnore, `${input.prevHash}-${input.prevIndex}-${currentNetwork.net}`, currentNetwork.bestBlock.index);
     });
   },
 
@@ -1276,6 +1279,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
+        const currentNetwork = network.getSelectedNetwork();
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
         const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
@@ -1299,9 +1303,11 @@ export default {
                 // reserved for someone else
                 return false;
               }
-              if (_.has(assetUTXOsToIgnore, currentUnspent.txid)
-                && _.get(assetUTXOsToIgnore, currentUnspent.txid) === currentUnspent.index) {
+              const utxoKey = `${currentUnspent.txid}-${currentUnspent.index}-${currentNetwork.net}`;
+              if (_.has(assetUTXOsToIgnore, utxoKey)
+                && _.get(assetUTXOsToIgnore, utxoKey) >= currentNetwork.bestBlock.index) {
                 // we've tried to use this UTXO before and failed, skip it
+                // console.log(`We've tried to use this UTXO before and failed, skip it. unspent: ${JSON.stringify(currentUnspent)} `);
                 return false;
               }
 
@@ -1313,9 +1319,9 @@ export default {
                     .isGreaterThanOrEqualTo(quantity)) {
                     // remove pickedInput and use the current one.
                     pickedInputs.splice(i, 1);
-                    /* const removedUnspent = */ pickedUnspents.splice(i, 1);
+                    pickedUnspents.splice(i, 1);
                     quantitySumOfPickedInputs = quantitySumOfPickedInputs.minus(pickedUnspent.value);
-                    // console.log(`-$ removed input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(removedUnspent)}`);
+                    // console.log(`-$ removed input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(pickedUnspent)}`);
                     isDonePicking = false;
                     return true;
                   }
@@ -1703,7 +1709,7 @@ export default {
 
         const utxoParam = `${u.reverseHex(prevTxHash)}${u.num2hexstring(prevTxIndex, 2, true)}`;
 
-        console.log(`utxoParam: ${utxoParam}`);
+        // console.log(`utxoParam: ${utxoParam}`);
 
         const rpcClient = network.getRpcClient();
         rpcClient.query({
