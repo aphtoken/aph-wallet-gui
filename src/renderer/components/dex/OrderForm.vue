@@ -633,16 +633,18 @@ export default {
     async setMarket() {
       this.$services.alerts.info('Add assets');
 
-      await this.$services.dex.setAssetSettings(this.$services.assets.APH, 0)
+      await this.$services.dex.setAssetSettings(this.$services.assets.APH, 0, true)
         .then(async () => {
           this.$services.alerts.success('Setup asset APH');
-          this.$services.dex.setAssetSettings(this.$services.assets.ATI, 0)
+          /*
+          await this.$services.dex.setAssetSettings(this.$services.assets.ATI, 0)
             .then(() => {
               this.$services.alerts.success('Setup asset ATI');
             })
             .catch((e) => {
               this.$services.alerts.exception(e);
             });
+            */
           /* NXT2
           await this.$services.dex.setAssetSettings('a3640dd3c560c75528e5f861da5da98958d0d713', 0)
             .then(() => {
@@ -652,17 +654,53 @@ export default {
               this.$services.alerts.exception(e);
             }); */
           // try setting a 1.5 APH fee for withdraw of GAS
-          await this.$services.dex.setAssetSettings(this.$services.assets.GAS, 1.5)
+          await this.$services.dex.setAssetSettings(this.$services.assets.GAS, 0, true)
             .then(async () => {
               this.$services.alerts.success('Set fee for withdraw for GAS');
-              await this.$services.dex.setAssetSettings(this.$services.assets.NEO, 0)
+              await this.$services.dex.setAssetSettings(this.$services.assets.NEO, 0, true)
                 .then(async () => {
                   this.$services.alerts.success('Set fee for withdraw for NEO');
 
+                  await this.$services.dex.setMarket(this.$services.assets.APH,
+                    this.$services.assets.NEO,
+                    100, 0.0000001, 0, 0.25, true)
+                    .then(() => {
+                      this.$services.alerts.success(this.$t('setMarketRelayed'));
+                    })
+                    .catch((e) => {
+                      this.$services.alerts.exception(e);
+                    });
+                  await this.$services.dex.setMarket(this.$services.assets.GAS,
+                    this.$services.assets.NEO,
+                    2, 0.000001, 0.30946428, 0.30946428, true)
+                    .then(() => {
+                      this.$services.alerts.success(this.$t('setMarketRelayed'));
+                    })
+                    .catch((e) => {
+                      this.$services.alerts.exception(e);
+                    });
                   // Set up all the markets after asset settings have been set.
                   await this.$services.dex.setMarket(this.$services.assets.APH,
                     this.$services.assets.GAS,
-                    100, 0.00001, 0.0000, 0.25)
+                    100, 0.00001, 0.0000, 0.25, true)
+                    .then(() => {
+                      this.$services.alerts.success(this.$t('setMarketRelayed'));
+                    })
+                    .catch((e) => {
+                      this.$services.alerts.exception(e);
+                    });
+                  await this.$services.dex.setMarket(this.$services.assets.ATI,
+                    this.$services.assets.GAS,
+                    200, 0.00001, 0.25, 0.25)
+                    .then(() => {
+                      this.$services.alerts.success(this.$t('setMarketRelayed'));
+                    })
+                    .catch((e) => {
+                      this.$services.alerts.exception(e);
+                    });
+                  await this.$services.dex.setMarket(this.$services.assets.ATI,
+                    this.$services.assets.NEO,
+                    200, 0.00001, 0.25, 0.25)
                     .then(() => {
                       this.$services.alerts.success(this.$t('setMarketRelayed'));
                     })
@@ -678,42 +716,8 @@ export default {
                     .catch((e) => {
                       this.$services.alerts.exception(e);
                     });
-                  await this.$services.dex.setMarket(this.$services.assets.GAS,
-                    this.$services.assets.NEO,
-                    2, 0.000001, 0.30946428, 0.30946428)
-                    .then(() => {
-                      this.$services.alerts.success(this.$t('setMarketRelayed'));
-                    })
-                    .catch((e) => {
-                      this.$services.alerts.exception(e);
-                    });
-                  await this.$services.dex.setMarket(this.$services.assets.ATI,
-                    this.$services.assets.NEO,
-                    200, 0.00001, 0.25, 0.25)
-                    .then(() => {
-                      this.$services.alerts.success(this.$t('setMarketRelayed'));
-                    })
-                    .catch((e) => {
-                      this.$services.alerts.exception(e);
-                    });
-                  await this.$services.dex.setMarket(this.$services.assets.ATI,
-                    this.$services.assets.GAS,
-                    200, 0.00001, 0.25, 0.25)
-                    .then(() => {
-                      this.$services.alerts.success(this.$t('setMarketRelayed'));
-                    })
-                    .catch((e) => {
-                      this.$services.alerts.exception(e);
-                    });
-                  await this.$services.dex.setMarket(this.$services.assets.APH,
-                    this.$services.assets.NEO,
-                    100, 0.0000001, 0, 0.25)
-                    .then(() => {
-                      this.$services.alerts.success(this.$t('setMarketRelayed'));
-                    })
-                    .catch((e) => {
-                      this.$services.alerts.exception(e);
-                    });
+
+
                   /* NXT2
                   await this.$services.dex.setMarket('a3640dd3c560c75528e5f861da5da98958d0d713',
                     this.$services.assets.APH,
@@ -725,9 +729,8 @@ export default {
                       this.$services.alerts.exception(e);
                     });
                     */
-
                   /*
-                  this.$services.dex.setMarket('9aff1e08aea2048a26a3d2ddbb3df495b932b1e7',
+                  await this.$services.dex.setMarket('9aff1e08aea2048a26a3d2ddbb3df495b932b1e7',
                     this.$services.assets.APH,
                     1, 0.00001, 0.01, 0.01)
                     .then(() => {
@@ -736,7 +739,7 @@ export default {
                     .catch((e) => {
                       this.$services.alerts.exception(e);
                     });
-                  */
+                    */
                 })
                 .catch((e) => {
                   this.$services.alerts.exception(e);

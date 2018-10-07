@@ -1977,7 +1977,7 @@ export default {
     });
   },
 
-  setMarket(quoteAssetId, baseAssetId, minimumSize, minimumTickSize, buyFee, sellFee) {
+  setMarket(quoteAssetId, baseAssetId, minimumSize, minimumTickSize, buyFee, sellFee, waitForTx) {
     return new Promise((resolve, reject) => {
       try {
         this.executeContractTransaction('setMarket',
@@ -1991,7 +1991,14 @@ export default {
           ])
           .then((res) => {
             if (res.success) {
-              resolve(res.tx);
+              if (waitForTx) {
+                neo.monitorTransactionConfirmation(res.tx, true)
+                  .then(() => {
+                    resolve(res.tx);
+                  });
+              } else {
+                resolve(res.tx);
+              }
             } else {
               reject('Transaction rejected');
             }
@@ -2263,7 +2270,7 @@ export default {
     });
   },
 
-  setAssetSettings(assetId, fee) {
+  setAssetSettings(assetId, fee, waitForTx) {
     return new Promise((resolve, reject) => {
       try {
         const settingsData = `00${u.num2fixed8(fee)}`;
@@ -2274,10 +2281,14 @@ export default {
           ])
           .then((res) => {
             if (res.success) {
-              neo.monitorTransactionConfirmation(res.tx, true)
-                .then(() => {
-                  resolve(res.tx);
-                });
+              if (waitForTx) {
+                neo.monitorTransactionConfirmation(res.tx, true)
+                  .then(() => {
+                    resolve(res.tx);
+                  });
+              } else {
+                resolve(res.tx);
+              }
             } else {
               reject('Transaction rejected');
             }
