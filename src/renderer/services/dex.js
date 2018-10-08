@@ -38,7 +38,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
-        axios.get(`${currentNetwork.aph}/markets?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
+        axios.get(`${currentNetwork.aph}/markets?contractScriptHash=${store.state.currentNetwork.dex_hash}`)
           .then((res) => {
             resolve(res.data.markets);
           })
@@ -149,7 +149,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
-        axios.get(`${currentNetwork.aph}/trades/${marketName}?contractScriptHash=${assets.DEX_SCRIPT_HASH}`)
+        axios.get(`${currentNetwork.aph}/trades/${marketName}?contractScriptHash=${currentNetwork.dex_hash}`)
           .then((res) => {
             if (!res || !res.data || !res.data.trades) {
               resolve({
@@ -309,7 +309,7 @@ export default {
         const ordersPageSize = 100;
 
         axios.get(`${currentNetwork.aph}/orders/${currentWallet.address}
-?contractScriptHash=${assets.DEX_SCRIPT_HASH}&pageSize=${ordersPageSize}&before=${before}&after=${after}&sort=${sort}`)
+?contractScriptHash=${currentNetwork.dex_hash}&pageSize=${ordersPageSize}&before=${before}&after=${after}&sort=${sort}`)
           .then((res) => {
             const orders = res.data.orders;
 
@@ -520,7 +520,7 @@ export default {
             }
 
             if (order.maxTakerFees > 0) {
-              const aphHolding = neo.getHolding(assets.APH);
+              const aphHolding = neo.getHolding(store.state.currentNetwork.aph_hash);
               if (aphHolding.totalBalance.isLessThan(order.maxTakerFees)) {
                 reject(`Order may require up to ${order.maxTakerFees} APH to be processed. Your current APH Balance is ${aphHolding.totalBalance}`);
                 return;
@@ -735,14 +735,14 @@ export default {
     order.deposits = [];
 
     if (totalFees.isGreaterThan(0)) {
-      const aphAssetHolding = neo.getHolding(assets.APH);
-      if (order.assetIdToSell === assets.APH) {
+      const aphAssetHolding = neo.getHolding(store.state.currentNetwork.aph_hash);
+      if (order.assetIdToSell === store.state.currentNetwork.aph_hash) {
         totalQuantityToSell = totalQuantityToSell.plus(totalFees);
         order.totalFees = totalFees;
       } else if (aphAssetHolding.contractBalance.isLessThan(new BigNumber(totalFees))) {
         order.feeDeposit = {
           symbol: aphAssetHolding.symbol,
-          assetId: assets.APH,
+          assetId: store.state.currentNetwork.aph_hash,
           currentQuantity: new BigNumber(aphAssetHolding.contractBalance),
           quantityRequired: new BigNumber(totalFees),
           quantityToDeposit: new BigNumber(totalFees).minus(aphAssetHolding.contractBalance),
@@ -803,7 +803,6 @@ export default {
           done: () => {
             clearInterval(watchInterval);
             setTimeout(() => {
-              neo.resetSystemAssetBalanceCache();
               resolve(order);
             }, 5000);
           },
@@ -997,8 +996,7 @@ export default {
                 alerts.success('Deposit relayed, waiting for confirmation...');
                 neo.monitorTransactionConfirmation(res.tx, true)
                   .then(() => {
-                    // TODO: verify this is the correct behavior to always reset here; seems not quite right
-                    neo.resetSystemAssetBalanceCache();
+                    neo.applyTxToAddressSystemAssetBalance(wallets.getCurrentWallet().address, res.tx, true);
                     resolve(res.tx);
                   })
                   .catch((e) => {
@@ -1012,7 +1010,7 @@ export default {
               reject(`Deposit Failed. ${e}`);
             });
         } else {
-          const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+          const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
           neo.sendFunds(dexAddress, assetId, quantity, true, () => {
             alerts.success('Deposit relayed, waiting for confirmation...');
           }, true)
@@ -1095,7 +1093,7 @@ export default {
         net: currentNetwork.net,
         url: currentNetwork.rpc,
         script: {
-          scriptHash: assets.DEX_SCRIPT_HASH,
+          scriptHash: currentNetwork.dex_hash,
           operation: 'withdraw',
           args: [
           ],
@@ -1126,7 +1124,7 @@ export default {
         api.fillKeys(config)
           .then((configResponse) => {
             return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(currentWallet.address, null, false)
+              neo.fetchSystemAssetBalance(currentWallet.address, null)
                 .then((balance) => {
                   configResponse.balance = balance;
                   resolveBalance(configResponse);
@@ -1178,7 +1176,7 @@ export default {
 
             // We need to order this for the VM.
             const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-            if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+            if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
               configResponse.tx.scripts.push(attachInvokedContract);
             } else {
               configResponse.tx.scripts.unshift(attachInvokedContract);
@@ -1282,7 +1280,7 @@ export default {
         const currentNetwork = network.getSelectedNetwork();
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
-        const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+        const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
         neo.fetchSystemAssetBalance(dexAddress, null, false)
           .then(async (balance) => {
             // console.log(`calculateWithdrawInputsAndOutputs fetched system asset balance to calculate withdraw inputs / outputs. ${JSON.stringify(balance)}`);
@@ -1348,13 +1346,13 @@ export default {
 
             if (inputTotal.isLessThan(quantity)) {
               // TODO: we should prompt the user possibly if they want to withdraw the inputTotal currently available instead
-              reject('Contract UTXOs currently waiting for settlement, please wait a few blocks and retry your withdraw.');
+              reject(`Contract UTXOs busy, only ${quantity} available, wait a few blocks and retry your withdraw.`);
               return;
             }
 
             config.tx.outputs.push({
               assetId,
-              scriptHash: assets.DEX_SCRIPT_HASH,
+              scriptHash: currentNetwork.dex_hash,
               value: quantity,
             });
 
@@ -1362,7 +1360,7 @@ export default {
               // change output
               config.tx.outputs.push({
                 assetId,
-                scriptHash: assets.DEX_SCRIPT_HASH,
+                scriptHash: currentNetwork.dex_hash,
                 value: inputTotal.minus(quantity),
               });
             }
@@ -1388,7 +1386,7 @@ export default {
           net: currentNetwork.net,
           url: currentNetwork.rpc,
           script: {
-            scriptHash: assets.DEX_SCRIPT_HASH,
+            scriptHash: currentNetwork.dex_hash,
             operation: 'withdraw',
             args: [
             ],
@@ -1437,7 +1435,7 @@ export default {
             configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
 
             if (token.canPull !== false) {
-              configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(assets.DEX_SCRIPT_HASH));
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(currentNetwork.dex_hash));
             }
 
             configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
@@ -1450,9 +1448,10 @@ export default {
                 invocationScript: ('00').repeat(2),
                 verificationScript: '',
               };
-              // We need to order this for the VM.
               const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-              if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+              // We need to order this for the VM.
+              // TODO: Revisit this, it shouldn't be needed and if it is, is this correct?
+              if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
                 configResponse.tx.scripts.push(attachInvokedContract);
               } else {
                 configResponse.tx.scripts.unshift(attachInvokedContract);
@@ -1486,7 +1485,7 @@ export default {
           net: currentNetwork.net,
           url: currentNetwork.rpc,
           script: {
-            scriptHash: assets.DEX_SCRIPT_HASH,
+            scriptHash: currentNetwork.dex_hash,
             operation: 'withdraw',
             args: [
             ],
@@ -1495,7 +1494,7 @@ export default {
           gas: 0,
         };
 
-        const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+        const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
         if (assetId === assets.NEO) {
           config.intents = api.makeIntent({ NEO: quantity }, currentWallet.address);
         } else if (assetId === assets.GAS) {
@@ -1588,7 +1587,7 @@ export default {
 
             // We need to order this for the VM.
             const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-            if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+            if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
               configResponse.tx.scripts.push(attachInvokedContract);
             } else {
               configResponse.tx.scripts.unshift(attachInvokedContract);
@@ -1647,7 +1646,7 @@ export default {
   completeSystemAssetWithdrawals() {
     return new Promise((resolve, reject) => {
       try {
-        const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+        const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
 
         neo.fetchSystemAssetBalance(dexAddress, null, false)
           .then((balance) => {
@@ -1714,7 +1713,7 @@ export default {
         const rpcClient = network.getRpcClient();
         rpcClient.query({
           method: 'getstorage',
-          params: [assets.DEX_SCRIPT_HASH, utxoParam],
+          params: [store.state.currentNetwork.dex_hash, utxoParam],
         })
           .then((res) => {
             if (!!res.result && res.result.length > 0) {
@@ -1784,12 +1783,13 @@ export default {
   fetchCommitUserState(address) {
     return new Promise((resolve, reject) => {
       try {
-        const contributionKey = `${u.reverseHex(wallet.getScriptHashFromAddress(address))}${u.reverseHex(assets.APH)}d0`;
+        const contributionKey = `${u.reverseHex(wallet.getScriptHashFromAddress(address))}`
+          + `${u.reverseHex(store.state.currentNetwork.aph_hash)}d0`;
 
         const rpcClient = network.getRpcClient();
         rpcClient.query({
           method: 'getstorage',
-          params: [assets.DEX_SCRIPT_HASH, contributionKey],
+          params: [store.state.currentNetwork.dex_hash, contributionKey],
         })
           .then((res) => {
             const commitState = {
@@ -1835,7 +1835,7 @@ export default {
         const rpcClient = network.getRpcClient();
         rpcClient.query({
           method: 'getstorage',
-          params: [assets.DEX_SCRIPT_HASH, `${u.reverseHex(assets.APH)}fa`],
+          params: [store.state.currentNetwork.dex_hash, `${u.reverseHex(store.state.currentNetwork.aph_hash)}fa`],
         })
           .then((res) => {
             const dexState = {
@@ -1852,7 +1852,7 @@ export default {
 
             rpcClient.query({
               method: 'getstorage',
-              params: [assets.DEX_SCRIPT_HASH, `${u.reverseHex(assets.APH)}fc`],
+              params: [store.state.currentNetwork.dex_hash, `${u.reverseHex(store.state.currentNetwork.aph_hash)}fc`],
             })
               .then((res) => {
                 dexState.totalFeesCollected = 0;
@@ -1864,7 +1864,7 @@ export default {
 
                 rpcClient.query({
                   method: 'getstorage',
-                  params: [assets.DEX_SCRIPT_HASH, u.str2hexstring('claimMinimumBlocks')],
+                  params: [store.state.currentNetwork.dex_hash, u.str2hexstring('claimMinimumBlocks')],
                 })
                   .then((res) => {
                     dexState.minimumClaimBlocks = claiming.DEFAULT_CLAIM_BLOCKS;
@@ -2047,7 +2047,7 @@ export default {
         const rpcClient = network.getRpcClient();
 
         const scriptBuilder = new sc.ScriptBuilder();
-        scriptBuilder.emitAppCall(assets.DEX_SCRIPT_HASH, operation, parameters);
+        scriptBuilder.emitAppCall(store.state.currentNetwork.dex_hash, operation, parameters);
         const script = scriptBuilder.str;
 
         rpcClient.query({
@@ -2079,7 +2079,7 @@ export default {
           net: currentNetwork.net,
           url: currentNetwork.rpc,
           script: {
-            scriptHash: assets.DEX_SCRIPT_HASH,
+            scriptHash: currentNetwork.dex_hash,
             operation,
             args: parameters,
           },
@@ -2095,7 +2095,7 @@ export default {
           if (gasToSend > 0) {
             assetsForIntent.GAS = gasToSend;
           }
-          config.intents = api.makeIntent(assetsForIntent, assets.DEX_SCRIPT_HASH);
+          config.intents = api.makeIntent(assetsForIntent, currentNetwork.dex_hash);
         }
 
         if (currentWallet.isLedger === true) {
@@ -2172,7 +2172,7 @@ export default {
     return new Promise((resolve, reject) => {
       const currentWallet = wallets.getCurrentWallet();
       const currentNetwork = network.getSelectedNetwork();
-      const dexAddress = wallet.getAddressFromScriptHash(assets.DEX_SCRIPT_HASH);
+      const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
 
       const config = {
         net: currentNetwork.net,
@@ -2212,7 +2212,7 @@ export default {
                 u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
 
               configResponse.tx.outputs.forEach((output) => {
-                output.scriptHash = assets.DEX_SCRIPT_HASH;
+                output.scriptHash = currentNetwork.dex_hash;
               });
 
               return api.signTx(configResponse);
@@ -2225,7 +2225,7 @@ export default {
 
               // We need to order this for the VM.
               const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-              if (parseInt(assets.DEX_SCRIPT_HASH, 16) > parseInt(acct.scriptHash, 16)) {
+              if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
                 configResponse.tx.scripts.push(attachInvokedContract);
               } else {
                 configResponse.tx.scripts.unshift(attachInvokedContract);

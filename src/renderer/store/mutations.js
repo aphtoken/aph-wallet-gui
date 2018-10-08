@@ -3,7 +3,7 @@ import Vue from 'vue';
 import moment from 'moment';
 
 import { requests } from '../constants';
-import { alerts, assets, db, neo, dex } from '../services';
+import { alerts, db, neo, dex } from '../services';
 
 export {
   addToOrderHistory,
@@ -274,7 +274,6 @@ function setRecentTransactions(state, transactions) {
     state.recentTransactions.unshift(transaction);
     if (existingIsEmpty === false) {
       alerts.success(`New Transaction Found. TX: ${transaction.hash}`);
-      neo.resetSystemAssetBalanceCache();
     }
   });
 
@@ -481,7 +480,7 @@ function setOrderHistory(state, orders) {
   state.orderHistory = orders;
 
   const orderHistoryStorageKey
-    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${state.currentNetwork.dex_hash}`;
   db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 function addToOrderHistory(state, newOrders) {
@@ -504,7 +503,7 @@ function addToOrderHistory(state, newOrders) {
   }
 
   const orderHistoryStorageKey
-    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${state.currentNetwork.dex_hash}`;
   db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 

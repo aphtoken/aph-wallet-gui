@@ -813,7 +813,23 @@ export default {
               setTimeout(() => callback(), timeouts.NEO_API_CALL);
             }
 
+            let allowSendAgain;
             if (isNep5) {
+              allowSendAgain = true;
+            } /* else {
+              const existingBalance = _.get(addressBalances, wallets.getCurrentWallet().address);
+              if (existingBalance) {
+                if (existingBalance.balance.balance.assets.GAS.unspent.length === 0
+                  || (assetId === GAS_ASSET_ID && existingBalance.balance.balance.assets.NEO.unspent.length === 0)) {
+                  allowSendAgain = false;
+                }
+              }
+            } */
+            // TODO: We could enable the above for sending GAS and NEO again without waiting on the explorer now,
+            // TODO: but in that case we need to support waiting for unconfirmed balance to confirm upon initiating a
+            // TODO: new send that doesn't have enough unspent balance available.
+
+            if (allowSendAgain) {
               // don't wait for confirmation to be able to send again
               store.commit('setSendInProgress', false);
             }
@@ -821,6 +837,10 @@ export default {
             res.tx.lastBroadcasted = moment().utc();
             return this.monitorTransactionConfirmation(res.tx, checkRpcForDetails)
               .then(() => {
+                if (isNep5 === false) {
+                  // Make change immediately available to spend.
+                  this.applyTxToAddressSystemAssetBalance(store.state.currentWallet.address, res.tx, true);
+                }
                 return resolve(res.tx);
               })
               .catch((e) => {
@@ -928,7 +948,7 @@ export default {
       });
   },
 
-  fetchSystemAssetBalance(forAddress, intents, useCache) {
+  fetchSystemAssetBalance(forAddress, intents) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -938,58 +958,61 @@ export default {
           forAddress = currentWallet.address;
         }
 
-        if (useCache !== false && _.has(addressBalances, forAddress)) {
-          const existingBalance = _.get(addressBalances, forAddress);
-          if (existingBalance && existingBalance.pulled
-            && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
-            if (intents || currentNetwork.fee > 0) {
-              // ensure that we have valid unspent UTXOs in the in memory balance to use
-              // if not pull from block explorer again
-              let unspentNEOTotal = new BigNumber(0);
-              let unspentGASTotal = new BigNumber(0);
-              let requiredNEO = new BigNumber(0);
-              let requiredGAS = new BigNumber(0);
+        // Get the current balances for this address
+        const existingBalance = _.get(addressBalances, forAddress);
 
-              if (existingBalance.balance.balance.assets.NEO) {
-                existingBalance.balance.balance.assets.NEO.unspent.forEach((unspent) => {
-                  unspentNEOTotal = unspentNEOTotal.plus(unspent.value);
-                });
-              }
+        if (existingBalance && intents && existingBalance.pulled
+          && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
+          // ensure that we have valid unspent UTXOs in the in memory balance to use
+          // if not pull from block explorer again
+          let unspentNEOTotal = new BigNumber(0);
+          let unspentGASTotal = new BigNumber(0);
+          let requiredNEO = new BigNumber(0);
+          let requiredGAS = new BigNumber(0);
 
-              if (existingBalance.balance.balance.assets.GAS) {
-                existingBalance.balance.balance.assets.GAS.unspent.forEach((unspent) => {
-                  unspentGASTotal = unspentGASTotal.plus(unspent.value);
-                });
-              }
-
-              if (intents && intents.length > 0) {
-                intents.forEach((intent) => {
-                  if (intent.assetId === assets.NEO) {
-                    requiredNEO = requiredNEO.plus(intent.value);
-                  } else if (intent.assetId === assets.GAS) {
-                    requiredGAS = requiredGAS.plus(intent.value);
-                  }
-                });
-              }
-              requiredGAS = requiredGAS.plus(currentNetwork.fee);
-
-              let intentsHaveUnspents = true;
-              if (requiredNEO && requiredNEO.isGreaterThan(unspentNEOTotal)) {
-                intentsHaveUnspents = false;
-              }
-              if (requiredGAS && requiredGAS.isGreaterThan(unspentGASTotal)) {
-                intentsHaveUnspents = false;
-              }
-
-              if (intentsHaveUnspents) {
-                resolve(existingBalance.balance.balance);
-                return;
-              }
-            } else {
-              resolve(existingBalance.balance.balance);
-              return;
-            }
+          if (existingBalance.balance.balance.assets.NEO) {
+            existingBalance.balance.balance.assets.NEO.unspent.forEach((unspent) => {
+              unspentNEOTotal = unspentNEOTotal.plus(unspent.value);
+            });
           }
+
+          if (existingBalance.balance.balance.assets.GAS) {
+            existingBalance.balance.balance.assets.GAS.unspent.forEach((unspent) => {
+              unspentGASTotal = unspentGASTotal.plus(unspent.value);
+            });
+          }
+
+          if (intents && intents.length > 0) {
+            intents.forEach((intent) => {
+              if (intent.assetId === assets.NEO) {
+                requiredNEO = requiredNEO.plus(intent.value);
+              } else if (intent.assetId === assets.GAS) {
+                requiredGAS = requiredGAS.plus(intent.value);
+              }
+            });
+          }
+          requiredGAS = requiredGAS.plus(currentNetwork.fee);
+
+          let intentsHaveUnspents = true;
+          if (requiredNEO && requiredNEO.isGreaterThan(unspentNEOTotal)) {
+            intentsHaveUnspents = false;
+          }
+          if (requiredGAS && requiredGAS.isGreaterThan(unspentGASTotal)) {
+            intentsHaveUnspents = false;
+          }
+
+          if (intentsHaveUnspents) {
+            resolve(existingBalance.balance.balance);
+            return;
+          }
+        }
+
+        if (existingBalance && (existingBalance.lastBlockForFetchSystemAssetBalance &&
+          store.state.currentNetwork.bestBlock && store.state.currentNetwork.bestBlock.index
+          && existingBalance.lastBlockForFetchSystemAssetBalance === store.state.currentNetwork.bestBlock.index)) {
+          // Don't fetch information about unspent system balances if on the same block, just use the current cached.
+          resolve(existingBalance.balance.balance);
+          return;
         }
 
         api.getBalanceFrom({
@@ -1003,15 +1026,53 @@ export default {
               return;
             }
 
+            // need to merge into balance
+            if (existingBalance) {
+              const prevBalance = existingBalance.balance.balance;
+              const newBalance = balance.balance;
+
+              // Note: We could carry across prevBalance.assets.NEO.unconfirmed that are not in
+              //       newBalance.assets.NEO.unspent, but there is little benefit since, since they
+              //       will get picked up by the explorer again.
+
+              // Any spent inputs that are in prevBalance that are in newBalance.unspent need to move to spent if not
+              // expired.
+              const symbols = prevBalance.assetSymbols;
+              for (let symIndex = 0; symIndex < symbols.length; symIndex += 1) {
+                const sym = symbols[symIndex];
+                const prevAssetBalance = prevBalance.assets[sym];
+                for (let prevSpentIndex = 0; prevSpentIndex < prevAssetBalance.spent.length; prevSpentIndex += 1) {
+                  const prevSpent = prevAssetBalance.spent[prevSpentIndex];
+                  const assetBalance = newBalance.assets[sym];
+                  const ind = assetBalance.unspent.findIndex(
+                    newUnspent => prevSpent.txid === newUnspent.txid && prevSpent.index === newUnspent.index);
+                  if (ind >= 0) {
+                    const spentCoin = assetBalance.unspent.splice(ind, 1);
+                    assetBalance.spent = assetBalance.spent.concat(spentCoin);
+                    // console.log(`Moved spent tx across to new balance ${spentCoin[0].txid} ${spentCoin[0].index}`);
+                    // TODO: Store block index we first move a UTXO to spent, so if something fails to confirm we won't
+                    // TODO: keep the UTXO tied up until the wallet is restarted.
+                  }
+                }
+              }
+              // TODO: Perhaps if the number of unspent GAS inputs here is low we should detect the scenario and error.
+              // console.log(`GAS Unspents after new fetch: ${prevBalance.assets.GAS.unspent.length}`);
+              // prevBalance.assets.GAS.unspent.forEach((input) => {
+              //  console.log(` txid: ${input.txid} index: ${input.index} value: ${input.value}`);
+              // });
+            }
+
             _.set(addressBalances, forAddress, {
               balance,
               isExpired: false,
               pulled: moment().utc(),
+              lastBlockForFetchSystemAssetBalance: store.state.currentNetwork.bestBlock.index,
             });
 
             resolve(balance.balance);
           })
           .catch((e) => {
+            // console.log(`Unable to fetch system asset balances. Error: ${e}`);
             reject(`Unable to fetch system asset balances. Error: ${e}`);
           });
       } catch (e) {
@@ -1020,14 +1081,19 @@ export default {
     });
   },
 
-  applyTxToAddressSystemAssetBalance(address, tx) {
+  applyTxToAddressSystemAssetBalance(address, tx, confirmed) {
     if (_.has(addressBalances, address)) {
       const existingBalance = _.get(addressBalances, address);
-      if (existingBalance && existingBalance.pulled
-        && existingBalance.isExpired !== true
-        && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
-        existingBalance.balance.balance.applyTx(tx);
-      }
+      existingBalance.balance.balance.applyTx(tx, confirmed);
+      // if (!confirmed) {
+      //   tx.inputs.forEach((input) => {
+      //     console.log(`Applying tx inputs to move balances to spent: ${input.prevHash} ${input.prevIndex}`);
+      //   });
+      // } else {
+      //   tx.outputs.forEach((output) => {
+      //     console.log(`Moving outputs from tx back to unspent: ${output.txid} ${output.index}`);
+      //   });
+      // }
     }
   },
 
@@ -1040,9 +1106,11 @@ export default {
     const currentWallet = wallets.getCurrentWallet();
 
     let recommendedUTXOs = 16;
+    let checkUTXOs = 8;
     if (currentWallet.isLedger === true) {
       // ledger has limitations on tx size
       recommendedUTXOs = 5;
+      checkUTXOs = 3;
     }
 
     if (!currentNetwork || currentNetwork.fee <= 0) {
@@ -1074,7 +1142,7 @@ export default {
           }
         });
 
-        if (outputsAboveFee < recommendedUTXOs) {
+        if (outputsAboveFee < checkUTXOs) {
           store.commit('setFractureGasModalModel', {
             walletBalance: balance.assets.GAS.balance.toString(),
             currentOutputsAboveFee: outputsAboveFee,

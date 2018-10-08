@@ -148,7 +148,7 @@ export default {
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
-          !== this.$services.assets.DEX_SCRIPT_HASH;
+          !== this.$store.state.currentNetwork.dex_hash;
     },
 
     isMarketClosed() {
@@ -189,7 +189,7 @@ export default {
     },
     aphHolding() {
       if (this.currentMarket && this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, { assetId: this.$services.assets.APH });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.$store.state.currentNetwork.aph_hash });
 
         if (holding) {
           return holding;
@@ -428,7 +428,7 @@ export default {
           const levelCost = level.quantity.multipliedBy(level.price);
 
           let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
-          if (this.baseHolding.assetId === this.$services.assets.APH) {
+          if (this.baseHolding.assetId === this.$store.state.currentNetwork.aph_hash) {
             const maxLots = spendAtThisLevel.dividedBy(level.price).dividedBy(this.currentMarket.minimumSize);
             leftToSpend = leftToSpend.minus(maxLots.multipliedBy(this.currentMarket.buyFee));
           }
@@ -491,7 +491,7 @@ export default {
           const levelCost = level.quantity;
 
           let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
-          if (this.quoteHolding.assetId === this.$services.assets.APH) {
+          if (this.quoteHolding.assetId === this.$store.state.currentNetwork.aph_hash) {
             const maxLots = spendAtThisLevel.dividedBy(this.currentMarket.minimumSize);
             leftToSpend = leftToSpend.minus(maxLots.multipliedBy(this.currentMarket.sellFee));
           }
@@ -634,10 +634,10 @@ export default {
       this.$services.alerts.info('Add assets');
 
       try {
-        await this.$services.dex.setAssetSettings(this.$services.assets.APH, 0, true);
+        await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.aph_hash, 0, true);
         this.$services.alerts.success('Setup asset APH');
 
-        await this.$services.dex.setAssetSettings(this.$services.assets.ATI, 0, true);
+        await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.ati_hash, 0, true);
         this.$services.alerts.success('Setup asset ATI');
 
         await this.$services.dex.setAssetSettings(this.$services.assets.GAS, 0, true);
@@ -648,7 +648,7 @@ export default {
 
         // await this.$services.dex.setAssetSettings('a3640dd3c560c75528e5f861da5da98958d0d713', 0);
         // this.$services.alerts.success('Setup asset NXT2');
-        await this.$services.dex.setMarket(this.$services.assets.APH,
+        await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
           this.$services.assets.NEO,
           100, 0.0000001, 0, 0.25, true);
         this.$services.alerts.success('Setup Market NEO-APH');
@@ -658,23 +658,23 @@ export default {
           2, 0.000001, 0.30946428, 0.30946428, true);
         this.$services.alerts.success('Setup Market NEO-GAS');
 
-        await this.$services.dex.setMarket(this.$services.assets.APH,
+        await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
           this.$services.assets.GAS,
           100, 0.00001, 0.0000, 0.25, true);
         this.$services.alerts.success('Setup Market GAS-APH');
 
-        await this.$services.dex.setMarket(this.$services.assets.ATI,
+        await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
           this.$services.assets.GAS,
           200, 0.00001, 0.25, 0.25);
         this.$services.alerts.success('Setup Market GAS-ATI');
 
-        await this.$services.dex.setMarket(this.$services.assets.ATI,
+        await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
           this.$services.assets.NEO,
           200, 0.00001, 0.25, 0.25);
         this.$services.alerts.success('Setup Market NEO-ATI');
 
-        await this.$services.dex.setMarket(this.$services.assets.ATI,
-          this.$services.assets.APH,
+        await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
+          this.$store.state.currentNetwork.aph_hash,
           200, 0.00001, 0.25, 0);
         this.$services.alerts.success('Setup Market APH-ATI');
 
