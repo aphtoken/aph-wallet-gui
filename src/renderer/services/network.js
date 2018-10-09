@@ -11,7 +11,7 @@ const NETWORKS = [
     label: 'MainNet',
     value: {
       aph_hash: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
-      dex_hash: '1c6115f9ba9400f153bbe541f50d5781c30de443',
+      dex_hash: '48895f797620bf4eec876745a450b92ff49df2cb',
       aph: 'https://mainnet.aphelion-neo.com:62443/api',
       net: 'MainNet',
       rpc: 'https://mainneo.aphelion-neo.com:10331',

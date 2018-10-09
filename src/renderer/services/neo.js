@@ -1009,9 +1009,14 @@ export default {
           }
         }
 
-        if (existingBalance && (existingBalance.lastBlockForFetchSystemAssetBalance &&
-          store.state.currentNetwork.bestBlock && store.state.currentNetwork.bestBlock.index
-          && existingBalance.lastBlockForFetchSystemAssetBalance === store.state.currentNetwork.bestBlock.index)) {
+        let bestBlockIndex;
+        if (store.state.currentNetwork.bestBlock) {
+          bestBlockIndex = store.state.currentNetwork.bestBlock.index;
+        } else {
+          bestBlockIndex = 0;
+        }
+        if (existingBalance && (existingBalance.lastBlockForFetchSystemAssetBalance
+          && existingBalance.lastBlockForFetchSystemAssetBalance === bestBlockIndex)) {
           // Don't fetch information about unspent system balances if on the same block, just use the current cached.
           resolve(existingBalance.balance.balance);
           return;
@@ -1113,7 +1118,7 @@ export default {
               balance,
               isExpired: false,
               pulled: moment().utc(),
-              lastBlockForFetchSystemAssetBalance: store.state.currentNetwork.bestBlock.index,
+              lastBlockForFetchSystemAssetBalance: bestBlockIndex,
             });
 
             resolve(balance.balance);

@@ -146,8 +146,8 @@ export default {
     },
 
     isOutOfDate() {
-      return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
-        && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
+      return this.$store.state.latestVersion && this.$store.state.latestVersion.prodExchangeScriptHash
+        && this.$store.state.latestVersion.prodExchangeScriptHash.replace('0x', '')
           !== this.$store.state.currentNetwork.dex_hash;
     },
 
@@ -645,8 +645,8 @@ export default {
         await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.aph_hash, 0, true);
         this.$services.alerts.success('Setup asset APH');
 
-        await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.ati_hash, 0, true);
-        this.$services.alerts.success('Setup asset ATI');
+        // await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.ati_hash, 0, true);
+        // this.$services.alerts.success('Setup asset ATI');
 
         await this.$services.dex.setAssetSettings(this.$services.assets.GAS, 0, true);
         this.$services.alerts.success('Setup asset GAS');
@@ -663,14 +663,15 @@ export default {
 
         await this.$services.dex.setMarket(this.$services.assets.GAS,
           this.$services.assets.NEO,
-          2, 0.000001, 0.30946428, 0.30946428, true);
+          1, 0.0000001, 0.2, 0.2, true);
         this.$services.alerts.success('Setup Market NEO-GAS');
 
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
           this.$services.assets.GAS,
-          100, 0.00001, 0.0000, 0.25, true);
+          100, 0.0001, 0.0000, 0.25, true);
         this.$services.alerts.success('Setup Market GAS-APH');
 
+        /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
           this.$services.assets.GAS,
           200, 0.00001, 0.25, 0.25);
@@ -685,6 +686,7 @@ export default {
           this.$store.state.currentNetwork.aph_hash,
           200, 0.00001, 0.25, 0);
         this.$services.alerts.success('Setup Market APH-ATI');
+        */
 
         /*
         await this.$services.dex.setMarket('a3640dd3c560c75528e5f861da5da98958d0d713',

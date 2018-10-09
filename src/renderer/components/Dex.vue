@@ -127,8 +127,8 @@ export default {
 
   computed: {
     isOutOfDate() {
-      return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
-        && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
+      return this.$store.state.latestVersion && this.$store.state.latestVersion.prodExchangeScriptHash
+        && this.$store.state.latestVersion.prodExchangeScriptHash.replace('0x', '')
           !== this.$store.state.currentNetwork.dex_hash;
     },
   },
