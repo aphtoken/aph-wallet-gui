@@ -1003,6 +1003,10 @@ export default {
       }
     }
   }
+
+  ::-webkit-scrollbar {
+    width: $border-width-thick;
+  }
 }
 
 .Night {
