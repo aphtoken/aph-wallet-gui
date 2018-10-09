@@ -29,7 +29,7 @@ const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
 const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
-const DBG_LOG = false
+const DBG_LOG = false;
 const assetUTXOsToIgnore = {};
 const contractUTXOsReservedFor = {};
 
