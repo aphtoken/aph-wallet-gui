@@ -29,7 +29,7 @@ const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
 const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
-const DBG_LOG = false;
+const DBG_LOG = false
 const assetUTXOsToIgnore = {};
 const contractUTXOsReservedFor = {};
 
@@ -1709,7 +1709,7 @@ export default {
 
         const utxoParam = `${u.reverseHex(prevTxHash)}${u.num2hexstring(prevTxIndex, 2, true)}`;
 
-        console.log(`utxoParam: ${utxoParam}`);
+        if (DBG_LOG) console.log(`utxoParam: ${utxoParam}`);
 
         const rpcClient = network.getRpcClient();
         rpcClient.query({
@@ -2263,6 +2263,29 @@ export default {
         this.executeContractTransaction('reclaimOrphanFunds',
           [
             u.reverseHex(assetId),
+          ])
+          .then((res) => {
+            if (res.success) {
+              resolve(res.tx);
+            } else {
+              reject('Transaction rejected');
+            }
+          })
+          .catch((e) => {
+            reject(e);
+          });
+      } catch (e) {
+        reject(e.message);
+      }
+    });
+  },
+
+  setManager(managerScriptHash) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.executeContractTransaction('setManager',
+          [
+            u.reverseHex(managerScriptHash),
           ])
           .then((res) => {
             if (res.success) {
