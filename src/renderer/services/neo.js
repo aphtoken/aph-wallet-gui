@@ -329,7 +329,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const inMemory = _.get(store.state.transactionDetails, hash.replace('0x', ''));
-        if (inMemory) {
+        if (inMemory && inMemory.confirmed) {
           if (network.getSelectedNetwork().bestBlock) {
             inMemory.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
             inMemory.confirmations = inMemory.currentBlockHeight - inMemory.block;
@@ -1321,10 +1321,13 @@ export default {
               return;
             }
 
+            if (DBG_LOG) console.log(`Checking for tx ${tx.hash} to complete`);
+
             const txInHistory = _.find(store.state.recentTransactions, { hash: tx.hash });
             if (txInHistory) {
               alerts.success(`TX: ${tx.hash} CONFIRMED`);
               clearInterval(interval);
+              if (DBG_LOG) console.log(`Found tx ${tx.hash} in recent transactions, resolving.`);
               resolve(txInHistory);
               return;
             }
@@ -1340,7 +1343,8 @@ export default {
                   }
                 })
                 .catch(() => {
-                  if (moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK * 2) {
+                  if (moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK * 10) {
+                    if (DBG_LOG) console.log(`Failing monitoring for tx ${tx.hash} to complete.`);
                     reject('Transaction confirmation failed.');
                   }
                 });
@@ -1348,6 +1352,7 @@ export default {
             }
 
             if (moment().utc().diff(tx.lastBroadcasted, 'milliseconds') > intervals.REBROADCAST_TRANSACTIONS) {
+              if (DBG_LOG) console.log(`Rebroadcasting tx ${tx.hash} in case it was lost.`);
               tx.lastBroadcasted = moment().utc();
               api.sendTx({
                 tx,
@@ -1361,8 +1366,8 @@ export default {
                 }
               });
             }
-          }, 1000);
-        }, 15 * 1000); // wait a block for propagation
+          }, 3000);
+        }, 12 * 1000); // wait a block for propagation
         return null;
       } catch (e) {
         return reject(e.message);

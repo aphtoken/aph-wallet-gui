@@ -1074,7 +1074,14 @@ export default {
         this.withdrawNEP5(assetId, quantity)
           .then((res) => {
             if (res.success) {
-              resolve(res.tx);
+              alerts.success('Withdraw Relayed.');
+              neo.monitorTransactionConfirmation(res.tx, true)
+                .then(() => {
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(`Failed to monitor transaction for confirmation. ${e}`);
+                });
             } else {
               reject('Withdraw rejected');
             }
@@ -1416,10 +1423,8 @@ export default {
           reject(`Failed to fetch address balance. ${e}`);
         }
 
-        await new Promise(() => {
-          configResponse.sendingFromSmartContract = true;
-          return api.createTx(configResponse, 'invocation');
-        })
+        configResponse.sendingFromSmartContract = true;
+        api.createTx(configResponse, 'invocation')
           .then((configResponse) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
@@ -2172,8 +2177,13 @@ export default {
         net: currentNetwork.net,
         url: currentNetwork.rpc,
         address: currentWallet.address,
-        account: new wallet.Account(currentWallet.wif),
       };
+
+      if (currentWallet.isLedger === true) {
+        config.signingFunction = ledger.signWithLedger;
+      } else {
+        config.account = new wallet.Account(currentWallet.wif);
+      }
 
       api.getClaimsFrom({
         net: network.getSelectedNetwork().net,
@@ -2195,6 +2205,8 @@ export default {
             })
             .then((configResponse) => {
               configResponse.claims = claimsResponse.claims;
+              // TODO: for now we just take the first 6, but we could do something better.
+              configResponse.claims.ClaimItem = configResponse.claims.slice(0, 1);
               return api.createTx(configResponse, 'claim');
             })
             .then((configResponse) => {
