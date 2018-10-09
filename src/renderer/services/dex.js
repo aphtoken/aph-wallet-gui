@@ -29,7 +29,7 @@ const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
 const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
-let lastUTXOWithdrawn;
+const DBG_LOG = false;
 const assetUTXOsToIgnore = {};
 const contractUTXOsReservedFor = {};
 
@@ -670,7 +670,7 @@ export default {
             }
           })
           .catch((e) => {
-            // console.log(e);
+            if (DBG_LOG) console.log(e);
             reject(`APH API Error: ${e}`);
           });
       } catch (e) {
@@ -1042,6 +1042,10 @@ export default {
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
                   setTimeout(() => {
+                    const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
+                    // Must allow funds to be sent again by applying unconfirmed back to spent.
+                    neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, true);
+
                     this.withdrawSystemAsset(assetId, quantity, res.tx.hash, res.utxoIndex)
                       .then((res) => {
                         if (res.success) {
@@ -1088,7 +1092,7 @@ export default {
     return new Promise((resolve, reject) => {
       const currentNetwork = network.getSelectedNetwork();
       const currentWallet = wallets.getCurrentWallet();
-      // console.log(`markWithdraw assetId ${assetId} quantity ${quantity} tryCount ${tryCount}`);
+      if (DBG_LOG) console.log(`markWithdraw assetId ${assetId} quantity ${quantity} tryCount ${tryCount}`);
       const config = {
         net: currentNetwork.net,
         url: currentNetwork.rpc,
@@ -1123,15 +1127,14 @@ export default {
 
         api.fillKeys(config)
           .then((configResponse) => {
-            return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(currentWallet.address, null)
-                .then((balance) => {
-                  configResponse.balance = balance;
-                  resolveBalance(configResponse);
-                })
-                .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e}`);
-                });
+            return new Promise(async (resolveBalance) => {
+              try {
+                configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
+                  { forAddress: currentWallet.address });
+                resolveBalance(configResponse);
+              } catch (e) {
+                reject(`Failed to fetch address balance. ${e}`);
+              }
             });
           })
           .then((configResponse) => {
@@ -1156,10 +1159,10 @@ export default {
                 })
                 .catch((e) => {
                   if (tryCount <= 1) {
-                    // console.log(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
+                    if (DBG_LOG) console.log(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
                     reject(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
                   } else {
-                    // console.log('Failed to Mark Withdraw.');
+                    if (DBG_LOG) console.log('Failed to Mark Withdraw.');
                     reject('Failed to Mark Withdraw.');
                   }
                 });
@@ -1192,13 +1195,13 @@ export default {
             });
 
             if (utxoIndex === -1) {
-              // console.log('Unable to generate valid UTXO');
+              if (DBG_LOG) console.log('Unable to generate valid UTXO');
               throw new Error('Unable to generate valid UTXO');
             }
             return configResponse;
           })
           .then((configResponse) => {
-            // console.log(`sendTx to mark withdraw ${JSON.stringify(configResponse)}`);
+            if (DBG_LOG) console.log(`sendTx to mark withdraw ${JSON.stringify(configResponse)}`);
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
@@ -1206,7 +1209,6 @@ export default {
             if (!configResponse.response.result && tryCount < 3) {
               setTimeout(() => {
                 this.ignoreWithdrawInputs(config);
-                neo.resetSystemAssetBalanceCache();
                 this.markWithdraw(assetId, quantity, tryCount + 1)
                   .then((res) => {
                     resolve(res);
@@ -1224,11 +1226,10 @@ export default {
             }
           })
           .catch((e) => {
-            console.log(`failure to mark returned from sendTx ${e}`);
+            if (DBG_LOG) console.log(`failure to mark returned from sendTx ${e}`);
             if (tryCount < 3) {
               setTimeout(() => {
                 this.ignoreWithdrawInputs(config);
-                neo.resetSystemAssetBalanceCache();
                 this.markWithdraw(assetId, quantity, tryCount + 1)
                   .then((res) => {
                     resolve(res);
@@ -1245,7 +1246,6 @@ export default {
         if (tryCount < 3) {
           setTimeout(() => {
             this.ignoreWithdrawInputs(config);
-            neo.resetSystemAssetBalanceCache();
             this.markWithdraw(assetId, quantity, tryCount + 1)
               .then((res) => {
                 resolve(res);
@@ -1274,102 +1274,102 @@ export default {
   },
 
   calculateWithdrawInputsAndOutputs(config, assetId, quantity) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         const currentWallet = wallets.getCurrentWallet();
         const currentNetwork = network.getSelectedNetwork();
         const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
 
         const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
-        neo.fetchSystemAssetBalance(dexAddress, null, false)
-          .then(async (balance) => {
-            // console.log(`calculateWithdrawInputsAndOutputs fetched system asset balance to calculate withdraw inputs / outputs. ${JSON.stringify(balance)}`);
-            config.balance = balance;
-            const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
-            await this.checkUnspentsReservedState(assetId, unspents);
 
-            const pickedInputs = [];
-            const pickedUnspents = [];
-            let quantitySumOfPickedInputs = new BigNumber(0);
-            _.orderBy(unspents, [unspent => parseFloat(unspent.value.toString())], ['desc']).some((currentUnspent) => {
-              if (currentUnspent.reservedFor === currentWalletScriptHash) {
-                this.completeSystemAssetWithdrawals();
-                reject('Already have a UTXO reserved for your address. Completing open withdraw.');
-                return false;
-              }
-              if (currentUnspent.reservedFor && currentUnspent.reservedFor.length >= 40) {
-                // reserved for someone else
-                return false;
-              }
-              const utxoKey = `${currentUnspent.txid}-${currentUnspent.index}-${currentNetwork.net}`;
-              if (_.has(assetUTXOsToIgnore, utxoKey)
-                && _.get(assetUTXOsToIgnore, utxoKey) >= currentNetwork.bestBlock.index) {
-                // we've tried to use this UTXO before and failed, skip it
-                // console.log(`We've tried to use this UTXO before and failed, skip it. unspent: ${JSON.stringify(currentUnspent)} `);
-                return false;
-              }
+        try {
+          config.balance = await store.dispatch('fetchSystemAssetBalances', { forAddress: dexAddress });
+        } catch (e) {
+          reject(`Failed to fetch address balance. ${e}`);
+          return;
+        }
 
-              if (quantitySumOfPickedInputs.isGreaterThanOrEqualTo(quantity)) {
-                let isDonePicking = true;
-                let i = 0;
-                pickedUnspents.some((pickedUnspent) => {
-                  if (quantitySumOfPickedInputs.minus(pickedUnspent.value).plus(currentUnspent.value)
-                    .isGreaterThanOrEqualTo(quantity)) {
-                    // remove pickedInput and use the current one.
-                    pickedInputs.splice(i, 1);
-                    pickedUnspents.splice(i, 1);
-                    quantitySumOfPickedInputs = quantitySumOfPickedInputs.minus(pickedUnspent.value);
-                    // console.log(`-$ removed input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(pickedUnspent)}`);
-                    isDonePicking = false;
-                    return true;
-                  }
-                  i += 1;
-                  return false;
-                });
-                if (isDonePicking) {
-                  return true;
-                }
+        const unspents = assetId === assets.GAS ? config.balance.assets.GAS.unspent : config.balance.assets.NEO.unspent;
+        await this.decorateWithUnspentsReservedState(assetId, unspents);
+
+        const pickedInputs = [];
+        const pickedUnspents = [];
+        let quantitySumOfPickedInputs = new BigNumber(0);
+        _.orderBy(unspents, [unspent => parseFloat(unspent.value.toString())], ['desc']).some((currentUnspent) => {
+          if (currentUnspent.reservedFor === currentWalletScriptHash) {
+            this.completeSystemAssetWithdrawals();
+            reject('Already have a UTXO reserved for your address. Completing open withdraw.');
+            return false;
+          }
+          if (currentUnspent.reservedFor && currentUnspent.reservedFor.length >= 40) {
+            // reserved for someone else
+            return false;
+          }
+          const utxoKey = `${currentUnspent.txid}-${currentUnspent.index}-${currentNetwork.net}`;
+          if (_.has(assetUTXOsToIgnore, utxoKey)
+            && _.get(assetUTXOsToIgnore, utxoKey) >= currentNetwork.bestBlock.index) {
+            // we've tried to use this UTXO before and failed, skip it
+            if (DBG_LOG) console.log(`We've tried to use this UTXO before and failed, skip it. unspent: ${JSON.stringify(currentUnspent)} `);
+            return false;
+          }
+
+          if (quantitySumOfPickedInputs.isGreaterThanOrEqualTo(quantity)) {
+            let isDonePicking = true;
+            let i = 0;
+            pickedUnspents.some((pickedUnspent) => {
+              if (quantitySumOfPickedInputs.minus(pickedUnspent.value).plus(currentUnspent.value)
+                .isGreaterThanOrEqualTo(quantity)) {
+                // remove pickedInput and use the current one.
+                pickedInputs.splice(i, 1);
+                pickedUnspents.splice(i, 1);
+                quantitySumOfPickedInputs = quantitySumOfPickedInputs.minus(pickedUnspent.value);
+                if (DBG_LOG) console.log(`-$ removed input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(pickedUnspent)}`);
+                isDonePicking = false;
+                return true;
               }
-              quantitySumOfPickedInputs = quantitySumOfPickedInputs.plus(currentUnspent.value);
-              pickedUnspents.push(currentUnspent);
-              pickedInputs.push({
-                prevHash: currentUnspent.txid,
-                prevIndex: currentUnspent.index,
-              });
-              // console.log(`$ added input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(currentUnspent)}`);
+              i += 1;
               return false;
             });
-
-            // console.log(`pickedInputs.length: ${pickedInputs.length} quantitySumOfPickedInputs: ${quantitySumOfPickedInputs}`);
-            const inputTotal = quantitySumOfPickedInputs;
-            config.tx.inputs = config.tx.inputs.concat(pickedInputs);
-
-            if (inputTotal.isLessThan(quantity)) {
-              // TODO: we should prompt the user possibly if they want to withdraw the inputTotal currently available instead
-              reject(`Contract UTXOs busy, only ${quantity} available, wait a few blocks and retry your withdraw.`);
-              return;
+            if (isDonePicking) {
+              return true;
             }
-
-            config.tx.outputs.push({
-              assetId,
-              scriptHash: currentNetwork.dex_hash,
-              value: quantity,
-            });
-
-            if (inputTotal.isGreaterThan(quantity)) {
-              // change output
-              config.tx.outputs.push({
-                assetId,
-                scriptHash: currentNetwork.dex_hash,
-                value: inputTotal.minus(quantity),
-              });
-            }
-
-            resolve(config);
-          })
-          .catch((e) => {
-            reject(`Failed to fetch address balance. ${e}`);
+          }
+          quantitySumOfPickedInputs = quantitySumOfPickedInputs.plus(currentUnspent.value);
+          pickedUnspents.push(currentUnspent);
+          pickedInputs.push({
+            prevHash: currentUnspent.txid,
+            prevIndex: currentUnspent.index,
           });
+          if (DBG_LOG) console.log(`$ added input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(currentUnspent)}`);
+          return false;
+        });
+
+        if (DBG_LOG) console.log(`pickedInputs.length: ${pickedInputs.length} quantitySumOfPickedInputs: ${quantitySumOfPickedInputs}`);
+        const inputTotal = quantitySumOfPickedInputs;
+        config.tx.inputs = config.tx.inputs.concat(pickedInputs);
+
+        if (inputTotal.isLessThan(quantity)) {
+          // TODO: we should prompt the user possibly if they want to withdraw the inputTotal currently available instead
+          reject(`Contract UTXOs busy, only ${quantity} available, wait a few blocks and retry your withdraw.`);
+          return;
+        }
+
+        config.tx.outputs.push({
+          assetId,
+          scriptHash: currentNetwork.dex_hash,
+          value: quantity,
+        });
+
+        if (inputTotal.isGreaterThan(quantity)) {
+          // change output
+          config.tx.outputs.push({
+            assetId,
+            scriptHash: currentNetwork.dex_hash,
+            value: inputTotal.minus(quantity),
+          });
+        }
+
+        resolve(config);
       } catch (e) {
         reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
       }
@@ -1377,7 +1377,7 @@ export default {
   },
 
   withdrawNEP5(assetId, quantity) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
@@ -1406,23 +1406,20 @@ export default {
 
         const token = assets.getNetworkAsset(assetId);
 
-        api.fillKeys(config)
-          .then((configResponse) => {
-            return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(currentWallet.address)
-                .then((balance) => {
-                  configResponse.balance = balance;
-                  resolveBalance(configResponse);
-                })
-                .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e}`);
-                });
-            });
-          })
-          .then((configResponse) => {
-            configResponse.sendingFromSmartContract = true;
-            return api.createTx(configResponse, 'invocation');
-          })
+        const configResponse = await api.fillKeys(config);
+
+        // Fetch system asset balances in order to have UTXOs for GAS.
+        try {
+          configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
+            { forAddress: currentWallet.address });
+        } catch (e) {
+          reject(`Failed to fetch address balance. ${e}`);
+        }
+
+        await new Promise(() => {
+          configResponse.sendingFromSmartContract = true;
+          return api.createTx(configResponse, 'invocation');
+        })
           .then((configResponse) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
@@ -1476,7 +1473,7 @@ export default {
   },
 
   withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount = 1) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
@@ -1494,13 +1491,6 @@ export default {
           gas: 0,
         };
 
-        const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
-        if (assetId === assets.NEO) {
-          config.intents = api.makeIntent({ NEO: quantity }, currentWallet.address);
-        } else if (assetId === assets.GAS) {
-          config.intents = api.makeIntent({ GAS: quantity }, currentWallet.address);
-        }
-
         // console.log(`withdrawSystemAsset ${assetId} quantity: ${quantity} utxoTxHash ${utxoTxHash} utxoIndex ${utxoIndex} intents ${JSON.stringify(config.intents)}`);
         if (currentWallet.isLedger === true) {
           config.signingFunction = ledger.signWithLedger;
@@ -1509,131 +1499,119 @@ export default {
           config.account = new wallet.Account(currentWallet.wif);
         }
 
-        api.fillKeys(config)
-          .then((configResponse) => {
-            return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
-                .then((balance) => {
-                  configResponse.balance = balance;
-                  resolveBalance(configResponse);
-                })
-                .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e}`);
-                });
-            });
-          })
-          .then((configResponse) => {
-            return api.createTx(configResponse, 'invocation');
-          })
-          .then((configResponse) => {
-            return new Promise((resolveInputs) => {
-              neo.fetchSystemAssetBalance(dexAddress, config.intents, false)
-                .then((balance) => {
-                  const unspents = assetId === assets.GAS ? balance.assets.GAS.unspent : balance.assets.NEO.unspent;
-                  const input = _.find(unspents, { txid: utxoTxHash, index: utxoIndex });
+        let configResponse = await api.fillKeys(config);
 
-                  if (!input) {
-                    // skip displaying this error if we've already relayed this withdraw utxo, retry in case the explorer hasn't picked up the utxo yet
-                    if (lastUTXOWithdrawn !== `${utxoTxHash}${utxoIndex}`) {
-                      if (tryCount < 3) {
-                        setTimeout(() => {
-                          this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1);
-                        }, 10000);
-                        return;
-                      }
-                      // console.log(`Unable to find marked input ${utxoTxHash} ${utxoIndex}`);
-                      reject('Unable to find marked input.');
-                    }
-                    return;
-                  }
+        try {
+          configResponse.balance
+            = await store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address });
+        } catch (e) {
+          reject(`Failed to fetch address balance. ${e}`);
+          return;
+        }
 
-                  configResponse.tx.inputs = [{
-                    prevHash: input.txid,
-                    prevIndex: input.index,
-                  }];
+        const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
 
-                  configResponse.tx.outputs = [{
-                    assetId,
-                    scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),
-                    value: input.value,
-                  }];
+        let dexIntents;
+        // Can't do this above because createTx would pick inputs for these and move them into spent.
+        if (assetId === assets.NEO) {
+          dexIntents = api.makeIntent({ NEO: quantity }, currentWallet.address);
+        } else if (assetId === assets.GAS) {
+          dexIntents = api.makeIntent({ GAS: quantity }, currentWallet.address);
+        }
 
-                  resolveInputs(configResponse);
-                })
-                .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e}`);
-                });
-            });
-          })
-          .then((configResponse) => {
-            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
+        let dexBalance;
+        try {
+          dexBalance = await store.dispatch('fetchSystemAssetBalances',
+            { forAddress: dexAddress, intents: dexIntents });
+        } catch (e) {
+          reject(`Failed to fetch address balance. ${e}`);
+          return;
+        }
 
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
-            return api.signTx(configResponse);
-          })
-          .then((configResponse) => {
-            const attachInvokedContract = {
-              invocationScript: ('00').repeat(2),
-              verificationScript: '',
-            };
+        const unspents = assetId === assets.GAS ? dexBalance.assets.GAS.unspent : dexBalance.assets.NEO.unspent;
+        const input = _.find(unspents, { txid: utxoTxHash, index: utxoIndex });
 
-            // We need to order this for the VM.
-            const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-            if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
-              configResponse.tx.scripts.push(attachInvokedContract);
-            } else {
-              configResponse.tx.scripts.unshift(attachInvokedContract);
-            }
+        if (!input) {
+          if (DBG_LOG) console.log(`Unable to find marked input ${utxoTxHash} ${utxoIndex}`);
+          throw new Error('Unable to find marked input.');
+        }
 
-            return configResponse;
-          })
-          .then((configResponse) => {
-            // console.log(`sending withdraw for utxo ${utxoTxHash} ${utxoIndex}`);
-            return api.sendTx(configResponse);
-          })
-          .then((configResponse) => {
-            if (configResponse.response.result !== true && tryCount < 3) {
-              alerts.error('Withdraw rejected by the network. Retrying...');
-              setTimeout(() => {
-                this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1);
-              }, 10000);
-              return;
-            }
+        // This is going to calculate inputs for gas fee and apply them moving them into spent
+        configResponse = await api.createTx(configResponse, 'invocation');
+        if (DBG_LOG) console.log(`withdraw inputs: ${JSON.stringify(configResponse.tx.inputs)} outputs: ${configResponse.tx.outputs}`);
 
-            if (configResponse.response.result === true) {
-              alerts.success('Withdraw relayed, waiting for confirmation...');
-              lastUTXOWithdrawn = `${utxoTxHash}${utxoIndex}`;
-            }
+        // Can't set this above because createTx would try to pick inputs for these from the wallet balance instead of
+        // the dex balance.
+        config.intents = dexIntents;
 
-            resolve({
-              success: configResponse.response.result,
-              tx: configResponse.tx,
-            });
-          })
-          .catch((e) => {
-            if (tryCount < 3) {
-              alerts.error('Withdraw failed. Retrying...');
-              setTimeout(() => {
-                this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1);
-              }, 10000);
-              return;
-            }
+        // We push the additional input and output for the marked dex utxo to be withdrawn
+        configResponse.tx.inputs.push({
+          prevHash: input.txid,
+          prevIndex: input.index,
+        });
 
-            reject(`Failed to send asset withdraw transaction. ${e}`);
-          });
+        configResponse.tx.outputs.push({
+          assetId,
+          scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),
+          value: input.value,
+        });
+
+        // Apply this to the dex's balance so it won't get picked again for an immediate subsequent withdraw
+        neo.applyTxToAddressSystemAssetBalance(dexAddress, configResponse.tx, false);
+
+        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+          u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
+
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+          u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
+
+        configResponse = await api.signTx(configResponse);
+
+        const attachInvokedContract = {
+          invocationScript: ('00').repeat(2),
+          verificationScript: '',
+        };
+
+        // We need to order this for the VM.
+        const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
+        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+          configResponse.tx.scripts.push(attachInvokedContract);
+        } else {
+          configResponse.tx.scripts.unshift(attachInvokedContract);
+        }
+
+        if (DBG_LOG) console.log(`sending withdraw for utxo ${utxoTxHash} ${utxoIndex}`);
+        configResponse = await api.sendTx(configResponse);
+
+        if (configResponse.response.result !== true && tryCount < 3) {
+          throw new Error('Withdraw rejected by the network. Retrying...');
+        }
+
+        if (configResponse.response.result === true) {
+          alerts.success('Withdraw relayed, waiting for confirmation...');
+        }
+
+        resolve({
+          success: configResponse.response.result,
+          tx: configResponse.tx,
+        });
       } catch (e) {
         if (tryCount < 3) {
           alerts.error(`Withdraw failed. Error: ${e.message} Retrying...`);
           setTimeout(() => {
-            this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1);
+            this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1)
+              .then((res) => {
+                resolve(res);
+              })
+              .catch((e) => {
+                reject(e);
+              });
           }, 10000);
           return;
         }
@@ -1643,33 +1621,54 @@ export default {
     });
   },
 
+  async completeUnspentWithdraws(assetId, unspents) {
+    /* eslint-disable no-await-in-loop */
+    for (let i = 0; i < unspents.length; i += 1) {
+      const unspent = unspents[i];
+      const currentWallet = wallets.getCurrentWallet();
+      const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
+      if (unspent.reservedFor === currentWalletScriptHash) {
+        if (DBG_LOG) console.log(`Completing withdraw for ${JSON.stringify(unspent)}`);
+        try {
+          await this.withdrawSystemAsset(assetId, unspent.value.toNumber(), unspent.txid, unspent.index);
+        } catch (e) {
+          throw new Error(`Attempt to complete previous withdraw failed. ${e}`);
+        }
+      }
+    }
+    /* eslint-enable no-await-in-loop */
+  },
+
   completeSystemAssetWithdrawals() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
 
-        neo.fetchSystemAssetBalance(dexAddress, null, false)
-          .then((balance) => {
-            if (balance.assets.GAS) {
-              this.checkUnspentsReservedState(assets.GAS, balance.assets.GAS.unspent);
-            }
-            if (balance.assets.NEO) {
-              this.checkUnspentsReservedState(assets.NEO, balance.assets.NEO.unspent);
-            }
-          })
-          .catch((e) => {
-            reject(`Failed to fetch address balance. ${e}`);
-          });
+        let dexBalance;
+        try {
+          dexBalance = await store.dispatch('fetchSystemAssetBalances', { forAddress: dexAddress });
+        } catch (e) {
+          reject(`Failed to fetch address balance. ${e}`);
+          return;
+        }
+
+        if (dexBalance.assets.GAS) {
+          await this.decorateWithUnspentsReservedState(assets.GAS, dexBalance.assets.GAS.unspent);
+          if (DBG_LOG) console.log(`Checking for GAS unspents ${JSON.stringify(dexBalance.assets.GAS.unspent)}`);
+          await this.completeUnspentWithdraws(assets.GAS, dexBalance.assets.GAS.unspent);
+        }
+        if (dexBalance.assets.NEO) {
+          await this.decorateWithUnspentsReservedState(assets.NEO, dexBalance.assets.NEO.unspent);
+          if (DBG_LOG) console.log(`Checking for NEO unspents ${JSON.stringify(dexBalance.assets.NEO.unspent)}`);
+          await this.completeUnspentWithdraws(assets.NEO, dexBalance.assets.NEO.unspent);
+        }
       } catch (e) {
-        reject(`Failed to fetch reserved UTXOs. ${e.message}`);
+        alerts.error(`Failed to fetch reserved UTXOs. ${e.message}`);
       }
     });
   },
 
-  async checkUnspentsReservedState(assetId, unspents) {
-    const currentWallet = wallets.getCurrentWallet();
-    const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
-
+  async decorateWithUnspentsReservedState(assetId, unspents) {
     for (let i = 0; i < unspents.length; i += 1) {
       const unspent = unspents[i];
       const utxoKey = `${unspent.txid}_${unspent.index}`;
@@ -1682,19 +1681,16 @@ export default {
       if (!unspent.reservedFor) {
         await this.fetchSystemAssetUTXOReserved(unspent);
       }
-
-      if (unspent.reservedFor === currentWalletScriptHash) {
-        // console.log(`unspent: ${JSON.stringify(unspent)}  is already reserved for us, attempting to withdraw.`);
-        await this.withdrawSystemAsset(assetId, unspent.value.toNumber(), unspent.txid, unspent.index);
-      }
       /* eslint-enable no-await-in-loop */
 
       if (unspent.reservedFor) {
-        // if (unspent.reservedFor.length >= 40) {
-        //   console.log(`Tracking reserved for someone else ${JSON.stringify(unspent)}`);
-        // } else {
-        //   console.log(`!! checkUnspentsReservedState found available UTXO ${JSON.stringify(unspent)}`);
-        // }
+        if (DBG_LOG) {
+          if (unspent.reservedFor.length >= 40) {
+            console.log(`Tracking reserved utxo ${JSON.stringify(unspent)}`);
+          } else {
+            console.log(`!! decorateWithUnspentsReservedState found available UTXO ${JSON.stringify(unspent)}`);
+          }
+        }
         _.set(contractUTXOsReservedFor, utxoKey, unspent.reservedFor);
       }
     }
@@ -1708,7 +1704,7 @@ export default {
 
         const utxoParam = `${u.reverseHex(prevTxHash)}${u.num2hexstring(prevTxIndex, 2, true)}`;
 
-        // console.log(`utxoParam: ${utxoParam}`);
+        console.log(`utxoParam: ${utxoParam}`);
 
         const rpcClient = network.getRpcClient();
         rpcClient.query({
@@ -2114,15 +2110,14 @@ export default {
               });
             }
 
-            return new Promise((resolveBalance) => {
-              neo.fetchSystemAssetBalance(currentWallet.address, config.intents)
-                .then((balance) => {
-                  configResponse.balance = balance;
-                  resolveBalance(configResponse);
-                })
-                .catch((e) => {
-                  reject(`Failed to fetch address balance. ${e}`);
-                });
+            return new Promise(async (resolveBalance) => {
+              try {
+                configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
+                  { forAddress: currentWallet.address, intents: config.intents });
+                resolveBalance(configResponse);
+              } catch (e) {
+                reject(`Failed to fetch address balance. ${e}`);
+              }
             });
           })
           .then((configResponse) => {
@@ -2136,7 +2131,6 @@ export default {
             return api.signTx(configResponse);
           })
           .then((configResponse) => {
-            neo.applyTxToAddressSystemAssetBalance(currentWallet.address, configResponse.tx);
             resolve(configResponse);
           })
           .catch((e) => {
@@ -2189,15 +2183,14 @@ export default {
         .then((claimsResponse) => {
           api.fillKeys(config)
             .then((configResponse) => {
-              return new Promise((resolveBalance) => {
-                neo.fetchSystemAssetBalance()
-                  .then((balance) => {
-                    configResponse.balance = balance;
-                    resolveBalance(configResponse);
-                  })
-                  .catch((e) => {
-                    reject(`Failed to fetch address balance. ${e}`);
-                  });
+              return new Promise(async (resolveBalance) => {
+                try {
+                  configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
+                    { forAddress: currentWallet.address, intents: config.intents });
+                  resolveBalance(configResponse);
+                } catch (e) {
+                  reject(`Failed to fetch address balance. ${e}`);
+                }
               });
             })
             .then((configResponse) => {
@@ -2255,7 +2248,6 @@ export default {
   reclaimOrphanFundsToOwner(assetId) {
     return new Promise((resolve, reject) => {
       try {
-        console.log('reclaiming orphaned funds');
         this.executeContractTransaction('reclaimOrphanFunds',
           [
             u.reverseHex(assetId),
