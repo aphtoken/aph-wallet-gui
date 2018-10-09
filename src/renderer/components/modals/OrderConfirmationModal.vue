@@ -148,7 +148,7 @@ export default {
 
     expectedQuantityToGive() {
       let quantityNeeded = this.$store.state.orderToConfirm.expectedQuantityToGive;
-      if ((this.holdingForAssetToGive.assetId === this.$services.assets.APH)
+      if ((this.holdingForAssetToGive.assetId === this.$store.state.currentNetwork.aph_hash)
         && this.$store.state.orderToConfirm.totalFees) {
         quantityNeeded = quantityNeeded.plus(this.$store.state.orderToConfirm.totalFees);
       }
@@ -158,7 +158,7 @@ export default {
     quantityToPullFromWallet() {
       let quantityToDeposit = this.$store.state.orderToConfirm.expectedQuantityToGive
         .minus(this.holdingForAssetToGive.contractBalance);
-      if (this.holdingForAssetToGive.assetId === this.$services.assets.APH
+      if (this.holdingForAssetToGive.assetId === this.$store.state.currentNetwork.aph_hash
         && this.$store.state.orderToConfirm.totalFees) {
         quantityToDeposit = quantityToDeposit.plus(this.$store.state.orderToConfirm.totalFees);
       }

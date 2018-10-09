@@ -25,6 +25,7 @@ export {
   fetchMarkets,
   fetchTradeHistory,
   fetchOrderHistory,
+  fetchSystemAssetBalances,
   formOrder,
   placeOrder,
   pingSocket,
@@ -240,6 +241,7 @@ async function fetchHoldings({ commit }, { done, isRequestSilent } = {}) {
 
   return holdings;
 }
+
 async function fetchRecentTransactions({ commit }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
@@ -270,6 +272,19 @@ async function fetchRecentTransactions({ commit }) {
     alerts.exception(message);
     commit('failRequest', { identifier: 'fetchRecentTransactions', message });
   }
+}
+
+async function fetchSystemAssetBalances({ commit }, { forAddress, intents }) {
+  commit('startRequest', { identifier: 'fetchSystemAssetBalances' });
+  let balances;
+  try {
+    balances = await neo.fetchSystemAssetBalance(forAddress, intents);
+  } catch (message) {
+    commit('failRequest', { identifier: 'fetchSystemAssetBalances', message });
+    throw message;
+  }
+
+  return balances;
 }
 
 function findTransactions({ state, commit }) {

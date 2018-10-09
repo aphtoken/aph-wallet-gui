@@ -19,12 +19,14 @@ import { store } from '../store';
 import { timeouts, intervals } from '../constants';
 import { toBigNumber } from './formatting.js';
 
+const DBG_LOG = false;
+
 const GAS_ASSET_ID = '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
 const NEO_ASSET_ID = 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b';
 
 let lastClaimSent;
 let lastGasFractureNotification;
-let addressBalances = {};
+const addressBalances = {};
 
 const calculateHoldingTotalBalance = (holding) => {
   return toBigNumber(_.get(holding, 'balance', toBigNumber(0)))
@@ -116,7 +118,7 @@ export default {
                   promises.push(this.fetchTransactionDetails(fetchedTransaction.txid)
                     .then((transactionDetails) => {
                       if (!transactionDetails) {
-                        // console.log(`failed fetching details for ${fetchedTransaction.txid}`);
+                        if (DBG_LOG) console.log(`failed fetching details for ${fetchedTransaction.txid}`);
                         return;
                       }
 
@@ -277,7 +279,7 @@ export default {
               });
           })
           .catch((e) => {
-            console.log(e);
+            if (DBG_LOG) console.log(e);
             resolve([]);
             if (e.message === 'Cannot read property \'length\' of null') {
               // absorb this error from neoscan,
@@ -306,7 +308,7 @@ export default {
             resolve(res);
           })
           .catch((e) => {
-            console.log(e);
+            if (DBG_LOG) console.log(e);
             resolve([]);
             if (e.message === 'Cannot read property \'length\' of null') {
               // absorb this error from neoscan,
@@ -327,7 +329,7 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         const inMemory = _.get(store.state.transactionDetails, hash.replace('0x', ''));
-        if (inMemory) {
+        if (inMemory && inMemory.confirmed) {
           if (network.getSelectedNetwork().bestBlock) {
             inMemory.currentBlockHeight = network.getSelectedNetwork().bestBlock.index;
             inMemory.confirmations = inMemory.currentBlockHeight - inMemory.block;
@@ -570,7 +572,7 @@ export default {
               .catch((e) => {
                 const msg = `Couldn't get available to claim for ${holding.symbol}: ${e.message}`;
                 alerts.networkException(msg);
-                // console.log(msg);
+                if (DBG_LOG) console.log(msg);
               }));
           }
         });
@@ -589,8 +591,7 @@ export default {
                   // Add to user's assets so it will stay there until explicitly removed.
                   holding.isUserAsset = true;
                   assets.addUserAsset(holding.assetId);
-                  // console.log(`adding user asset ${holding.symbol} ${holding.assetId}
-                  //   + balance: ${holding.balance}`);
+                  // console.log(`adding user asset ${holding.symbol} ${holding.assetId} balance: ${holding.balance}`);
                 }
               }
 
@@ -789,7 +790,7 @@ export default {
           return reject('Unable to send transaction.');
         }
       } catch (e) {
-        console.log(e);
+        if (DBG_LOG) console.log(e);
         return reject('Unable to send transaction.');
       }
 
@@ -813,7 +814,24 @@ export default {
               setTimeout(() => callback(), timeouts.NEO_API_CALL);
             }
 
+            let allowSendAgain;
             if (isNep5) {
+              allowSendAgain = true;
+            } /* else {
+              allowSendAgain = true;
+              const existingBalance = _.get(addressBalances, wallets.getCurrentWallet().address);
+              if (existingBalance) {
+                if (existingBalance.balance.balance.assets.GAS.unspent.length === 0
+                  || (assetId === GAS_ASSET_ID && existingBalance.balance.balance.assets.NEO.unspent.length === 0)) {
+                  allowSendAgain = false;
+                }
+              }
+            } */
+            // TODO: We could enable the above for sending GAS and NEO again without waiting on the explorer now,
+            // TODO: but in that case we need to support waiting for unconfirmed balance to confirm upon initiating a
+            // TODO: new send that doesn't have enough unspent balance available.
+
+            if (allowSendAgain) {
               // don't wait for confirmation to be able to send again
               store.commit('setSendInProgress', false);
             }
@@ -821,6 +839,10 @@ export default {
             res.tx.lastBroadcasted = moment().utc();
             return this.monitorTransactionConfirmation(res.tx, checkRpcForDetails)
               .then(() => {
+                if (isNep5 === false) {
+                  // Make change immediately available to spend.
+                  this.applyTxToAddressSystemAssetBalance(store.state.currentWallet.address, res.tx, true);
+                }
                 return resolve(res.tx);
               })
               .catch((e) => {
@@ -851,7 +873,7 @@ export default {
       intentAmounts.GAS = gasAmount;
     }
 
-    return this.fetchSystemAssetBalance()
+    return store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address })
       .then((balance) => {
         const config = {
           net: currentNetwork.net,
@@ -928,7 +950,7 @@ export default {
       });
   },
 
-  fetchSystemAssetBalance(forAddress, intents, useCache) {
+  fetchSystemAssetBalance(forAddress, intents) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -938,58 +960,61 @@ export default {
           forAddress = currentWallet.address;
         }
 
-        if (useCache !== false && _.has(addressBalances, forAddress)) {
-          const existingBalance = _.get(addressBalances, forAddress);
-          if (existingBalance && existingBalance.pulled
-            && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
-            if (intents || currentNetwork.fee > 0) {
-              // ensure that we have valid unspent UTXOs in the in memory balance to use
-              // if not pull from block explorer again
-              let unspentNEOTotal = new BigNumber(0);
-              let unspentGASTotal = new BigNumber(0);
-              let requiredNEO = new BigNumber(0);
-              let requiredGAS = new BigNumber(0);
+        // Get the current balances for this address
+        const existingBalance = _.get(addressBalances, forAddress);
 
-              if (existingBalance.balance.balance.assets.NEO) {
-                existingBalance.balance.balance.assets.NEO.unspent.forEach((unspent) => {
-                  unspentNEOTotal = unspentNEOTotal.plus(unspent.value);
-                });
-              }
+        if (existingBalance && intents && existingBalance.pulled
+          && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
+          // ensure that we have valid unspent UTXOs in the in memory balance to use
+          // if not pull from block explorer again
+          let unspentNEOTotal = new BigNumber(0);
+          let unspentGASTotal = new BigNumber(0);
+          let requiredNEO = new BigNumber(0);
+          let requiredGAS = new BigNumber(0);
 
-              if (existingBalance.balance.balance.assets.GAS) {
-                existingBalance.balance.balance.assets.GAS.unspent.forEach((unspent) => {
-                  unspentGASTotal = unspentGASTotal.plus(unspent.value);
-                });
-              }
-
-              if (intents && intents.length > 0) {
-                intents.forEach((intent) => {
-                  if (intent.assetId === assets.NEO) {
-                    requiredNEO = requiredNEO.plus(intent.value);
-                  } else if (intent.assetId === assets.GAS) {
-                    requiredGAS = requiredGAS.plus(intent.value);
-                  }
-                });
-              }
-              requiredGAS = requiredGAS.plus(currentNetwork.fee);
-
-              let intentsHaveUnspents = true;
-              if (requiredNEO && requiredNEO.isGreaterThan(unspentNEOTotal)) {
-                intentsHaveUnspents = false;
-              }
-              if (requiredGAS && requiredGAS.isGreaterThan(unspentGASTotal)) {
-                intentsHaveUnspents = false;
-              }
-
-              if (intentsHaveUnspents) {
-                resolve(existingBalance.balance.balance);
-                return;
-              }
-            } else {
-              resolve(existingBalance.balance.balance);
-              return;
-            }
+          if (existingBalance.balance.balance.assets.NEO) {
+            existingBalance.balance.balance.assets.NEO.unspent.forEach((unspent) => {
+              unspentNEOTotal = unspentNEOTotal.plus(unspent.value);
+            });
           }
+
+          if (existingBalance.balance.balance.assets.GAS) {
+            existingBalance.balance.balance.assets.GAS.unspent.forEach((unspent) => {
+              unspentGASTotal = unspentGASTotal.plus(unspent.value);
+            });
+          }
+
+          if (intents && intents.length > 0) {
+            intents.forEach((intent) => {
+              if (intent.assetId === assets.NEO) {
+                requiredNEO = requiredNEO.plus(intent.value);
+              } else if (intent.assetId === assets.GAS) {
+                requiredGAS = requiredGAS.plus(intent.value);
+              }
+            });
+          }
+          requiredGAS = requiredGAS.plus(currentNetwork.fee);
+
+          let intentsHaveUnspents = true;
+          if (requiredNEO && requiredNEO.isGreaterThan(unspentNEOTotal)) {
+            intentsHaveUnspents = false;
+          }
+          if (requiredGAS && requiredGAS.isGreaterThan(unspentGASTotal)) {
+            intentsHaveUnspents = false;
+          }
+
+          if (intentsHaveUnspents) {
+            resolve(existingBalance.balance.balance);
+            return;
+          }
+        }
+
+        if (existingBalance && (existingBalance.lastBlockForFetchSystemAssetBalance &&
+          store.state.currentNetwork.bestBlock && store.state.currentNetwork.bestBlock.index
+          && existingBalance.lastBlockForFetchSystemAssetBalance === store.state.currentNetwork.bestBlock.index)) {
+          // Don't fetch information about unspent system balances if on the same block, just use the current cached.
+          resolve(existingBalance.balance.balance);
+          return;
         }
 
         api.getBalanceFrom({
@@ -998,20 +1023,103 @@ export default {
           address: forAddress,
         }, api.neoscan)
           .then((balance) => {
-            if (balance.net !== currentNetwork.net) {
+            if (balance.net !== currentNetwork.net || balance.address === 'not found') {
               reject('Unable to read address balance from block explorer.');
               return;
+            }
+
+            const newBalance = balance.balance;
+            // need to merge into balance
+            if (existingBalance && existingBalance.balance.balance.assetSymbols) {
+              const prevBalance = existingBalance.balance.balance;
+              const symbols = prevBalance.assetSymbols;
+              for (let symIndex = 0; symIndex < symbols.length; symIndex += 1) {
+                const sym = symbols[symIndex];
+                const prevAssetBalance = prevBalance.assets[sym];
+                let newAssetBalance = newBalance.assets[sym];
+                if (!newAssetBalance) {
+                  newBalance.addAsset(sym);
+                  newAssetBalance = newBalance.assets[sym];
+                }
+                if (newAssetBalance) {
+                  if (DBG_LOG) console.log(`Address '${forAddress}' Merging old balance for asset ${sym}`);
+
+                  // Carry across unconfirmed balances that are not yet unspent into our new balance, so they can be
+                  // moved directly to unspent once confirmed instead of needing another call to the explorer.
+                  for (let prevUnconfirmedIndex = 0; prevUnconfirmedIndex <
+                    prevAssetBalance.unconfirmed.length; prevUnconfirmedIndex += 1) {
+                    const prevUnconfirmed = prevAssetBalance.unconfirmed[prevUnconfirmedIndex];
+                    const index = newAssetBalance.unspent.findIndex(
+                      newUnspent => prevUnconfirmed.txid === newUnspent.txid
+                        && prevUnconfirmed.index === newUnspent.index);
+                    if (index < 0) {
+                      const existingIndex = newAssetBalance.unconfirmed.findIndex(
+                        newUnconfirmed => prevUnconfirmed.txid === newUnconfirmed.txid
+                          && prevUnconfirmed.index === newUnconfirmed.index);
+                      // Verify it isn't already in our unconfirmed array.
+                      if (existingIndex < 0) {
+                        if (DBG_LOG) {
+                          console.log(` Adding balance for asset ${sym}: ${prevUnconfirmed.value}`
+                            + ` txid: ${prevUnconfirmed.txid} index: ${prevUnconfirmed.index}`);
+                        }
+                        newAssetBalance.balance.add(prevUnconfirmed.value);
+                        newAssetBalance.unconfirmed.push(prevUnconfirmed);
+                      }
+                    }
+                  }
+
+                  // Move spent inputs from prevBalance that are unspent in newBalance to spent in newBalance
+                  for (let prevSpentIndex = 0; prevSpentIndex < prevAssetBalance.spent.length; prevSpentIndex += 1) {
+                    const prevSpent = prevAssetBalance.spent[prevSpentIndex];
+                    const index = newAssetBalance.unspent.findIndex(
+                      newUnspent => prevSpent.txid === newUnspent.txid && prevSpent.index === newUnspent.index);
+                    if (index >= 0) {
+                      const spentCoin = newAssetBalance.unspent.splice(index, 1);
+                      newAssetBalance.spent = newAssetBalance.spent.concat(spentCoin);
+                      if (DBG_LOG) {
+                        console.log(` Moved spent tx across to new balance ${spentCoin[0].txid} ${spentCoin[0].index}`);
+                      }
+                      // TODO: Store block index we first move a UTXO to spent, so if something fails to confirm we
+                      // TODO: won't keep the UTXO tied up until the wallet is restarted.
+                    }
+                  }
+                }
+              }
+            } else if (DBG_LOG) {
+              console.log(`Address '${forAddress}' Initial balance fetch`);
+            }
+
+            // Need to ensure we have GAS and NEO both in place in case new balance needs to be added.
+            if (!newBalance.assets.GAS) newBalance.addAsset('GAS');
+
+            if (!newBalance.assets.NEO) newBalance.addAsset('NEO');
+
+            const symbols = newBalance.assetSymbols;
+            if (symbols && DBG_LOG) {
+              for (let symIndex = 0; symIndex < symbols.length; symIndex += 1) {
+                const sym = symbols[symIndex];
+                const newAssetBalance = newBalance.assets[sym];
+                console.log(` New Balance for asset ${sym}: ${newAssetBalance.balance}`
+                  + ` unspentCount: ${newBalance.assets[sym].unspent.length}`);
+                // TODO: if the number of unspent GAS inputs here is low perhaps detect the scenario and notify user.
+                console.log(` ${sym} unspent after new fetch: ${newBalance.assets[sym].unspent.length}`);
+                newBalance.assets[sym].unspent.forEach((input) => {
+                  console.log(` txid: ${input.txid} index: ${input.index} value: ${input.value}`);
+                });
+              }
             }
 
             _.set(addressBalances, forAddress, {
               balance,
               isExpired: false,
               pulled: moment().utc(),
+              lastBlockForFetchSystemAssetBalance: store.state.currentNetwork.bestBlock.index,
             });
 
             resolve(balance.balance);
           })
           .catch((e) => {
+            if (DBG_LOG) console.log(`Unable to fetch system asset balances. Error: ${e}`);
             reject(`Unable to fetch system asset balances. Error: ${e}`);
           });
       } catch (e) {
@@ -1020,29 +1128,41 @@ export default {
     });
   },
 
-  applyTxToAddressSystemAssetBalance(address, tx) {
+  applyTxToAddressSystemAssetBalance(address, tx, confirmed) {
     if (_.has(addressBalances, address)) {
       const existingBalance = _.get(addressBalances, address);
-      if (existingBalance && existingBalance.pulled
-        && existingBalance.isExpired !== true
-        && moment().utc().diff(existingBalance.pulled, 'milliseconds') < timeouts.BALANCE_PERSIST_FOR) {
-        existingBalance.balance.balance.applyTx(tx);
+      existingBalance.balance.balance.applyTx(tx, confirmed);
+      if (DBG_LOG) {
+        if (!confirmed) {
+          tx.inputs.forEach((input) => {
+            console.log(`Applying tx inputs to move balances to spent: ${input.prevHash} ${input.prevIndex}`);
+          });
+        } else {
+          let index = 0;
+          tx.outputs.forEach(() => {
+            console.log(`Moving outputs from tx back to unspent: ${tx.hash} ${index}`);
+            index += 1;
+          });
+        }
       }
     }
   },
 
-  resetSystemAssetBalanceCache() {
-    addressBalances = {};
-  },
+  // There should be no need to reset this.
+  // resetSystemAssetBalanceCache() {
+  //   addressBalances = {};
+  // },
 
   promptGASFractureIfNecessary() {
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
     let recommendedUTXOs = 16;
+    let checkUTXOs = 8;
     if (currentWallet.isLedger === true) {
       // ledger has limitations on tx size
       recommendedUTXOs = 5;
+      checkUTXOs = 3;
     }
 
     if (!currentNetwork || currentNetwork.fee <= 0) {
@@ -1057,7 +1177,7 @@ export default {
       return;
     }
 
-    this.fetchSystemAssetBalance()
+    store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address })
       .then((balance) => {
         if (!balance
           || !balance.assets.GAS
@@ -1074,7 +1194,7 @@ export default {
           }
         });
 
-        if (outputsAboveFee < recommendedUTXOs) {
+        if (outputsAboveFee < checkUTXOs) {
           store.commit('setFractureGasModalModel', {
             walletBalance: balance.assets.GAS.balance.toString(),
             currentOutputsAboveFee: outputsAboveFee,
@@ -1096,7 +1216,7 @@ export default {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
 
-        this.fetchSystemAssetBalance(currentWallet.address)
+        store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address })
           .then((balance) => {
             const config = {
               net: currentNetwork.net,
@@ -1201,10 +1321,13 @@ export default {
               return;
             }
 
+            if (DBG_LOG) console.log(`Checking for tx ${tx.hash} to complete`);
+
             const txInHistory = _.find(store.state.recentTransactions, { hash: tx.hash });
             if (txInHistory) {
               alerts.success(`TX: ${tx.hash} CONFIRMED`);
               clearInterval(interval);
+              if (DBG_LOG) console.log(`Found tx ${tx.hash} in recent transactions, resolving.`);
               resolve(txInHistory);
               return;
             }
@@ -1220,7 +1343,8 @@ export default {
                   }
                 })
                 .catch(() => {
-                  if (moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK * 2) {
+                  if (moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK * 10) {
+                    if (DBG_LOG) console.log(`Failing monitoring for tx ${tx.hash} to complete.`);
                     reject('Transaction confirmation failed.');
                   }
                 });
@@ -1228,6 +1352,7 @@ export default {
             }
 
             if (moment().utc().diff(tx.lastBroadcasted, 'milliseconds') > intervals.REBROADCAST_TRANSACTIONS) {
+              if (DBG_LOG) console.log(`Rebroadcasting tx ${tx.hash} in case it was lost.`);
               tx.lastBroadcasted = moment().utc();
               api.sendTx({
                 tx,
@@ -1241,8 +1366,8 @@ export default {
                 }
               });
             }
-          }, 1000);
-        }, 15 * 1000); // wait a block for propagation
+          }, 3000);
+        }, 12 * 1000); // wait a block for propagation
         return null;
       } catch (e) {
         return reject(e.message);

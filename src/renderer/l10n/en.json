@@ -211,7 +211,7 @@
   "recentTransactions": "Recent Transactions",
   "recipient": "Recipient",
   "regressionTrend": "Regression Trend",
-  "relayedToNetwork": "{amount} {symbol} {action} Relayed to Network.",
+  "relayedToNetwork": "{amount} {symbol} {action} Completed.",
   "remove": "Remove",
   "repeatYourPassphrase": "Repeat your passphrase here",
   "save": "Save",

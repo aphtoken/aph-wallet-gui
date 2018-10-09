@@ -10,6 +10,8 @@ const NETWORKS = [
   {
     label: 'MainNet',
     value: {
+      aph_hash: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
+      dex_hash: '1c6115f9ba9400f153bbe541f50d5781c30de443',
       aph: 'https://mainnet.aphelion-neo.com:62443/api',
       net: 'MainNet',
       rpc: 'https://mainneo.aphelion-neo.com:10331',
@@ -19,15 +21,22 @@ const NETWORKS = [
   {
     label: 'TestNet',
     value: {
+      aph_hash: '591eedcd379a8981edeefe04ef26207e1391904a',
+      ati_hash: '155153854ed377549a72cc1643e481bf25b48390',
+      dex_hash: '1c6115f9ba9400f153bbe541f50d5781c30de443',
       aph: 'https://testnet.aphelion-neo.com:62443/api',
       net: 'TestNet',
       rpc: 'https://testneo.aphelion-neo.com:20331',
       fee: 0,
     },
   },
-  /* {
+  /*
+  {
     label: 'PrivNet',
     value: {
+      aph_hash: 'fe8ad8a261b171fb313cbfb0d4a974e269d11061',
+      ati_hash: 'a9ffe1c85f55d0545898a9e749cde53c05151760',
+      dex_hash: '3f5b75d9a9e46442dbad53b3eb36e083cf63a604',
       aph: 'http://localhost:62433/api',
       net: 'PrivNet',
       rpc: 'http://localhost:30338',
@@ -65,9 +74,7 @@ export default {
 
   getSelectedNetwork() {
     const network = storage.get(NETWORK_STORAGE_KEY, _.first(NETWORKS).value);
-    if (!network.fee) {
-      network.fee = 0;
-    }
+    this.normalize(network);
     return network;
   },
 
@@ -103,8 +110,13 @@ export default {
 
         store.dispatch('fetchBlockHeaderByHash', { blockHash,
           done: ((data) => {
+            // Make sure network didn't change and that we aren't operating off a state copy of network.
+            if (network.net !== this.getSelectedNetwork().net) {
+              return;
+            }
             store.commit('setLastReceivedBlock');
             store.commit('setLastSuccessfulRequest');
+
             this.normalizeAndStore(_.set(network, 'bestBlock', data)).sync();
           }),
           failed: ((e) => {
@@ -116,7 +128,28 @@ export default {
       });
   },
 
+  normalize(network) {
+    let defaultForNetwork = _.find(NETWORKS, ({ value }) => {
+      return value.net === network.net;
+    });
+
+    if (!defaultForNetwork) return this;
+    defaultForNetwork = defaultForNetwork.value;
+
+    if (!network.fee) {
+      network.fee = defaultForNetwork.fee;
+    }
+    if (!network.dex_hash) {
+      network.dex_hash = defaultForNetwork.dex_hash;
+    }
+    if (!network.aph_hash) {
+      network.aph_hash = defaultForNetwork.aph_hash;
+    }
+    return this;
+  },
+
   normalizeAndStore(network) {
+    this.normalize(network);
     storage.set(NETWORK_STORAGE_KEY, network);
 
     return this;

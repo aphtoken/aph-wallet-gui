@@ -328,7 +328,7 @@ export default {
     isOutOfDate() {
       return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
         && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
-          !== this.$services.assets.DEX_SCRIPT_HASH;
+          !== this.$store.state.currentNetwork.dex_hash;
     },
 
     isMarketClosed() {
