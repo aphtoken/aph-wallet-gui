@@ -631,17 +631,19 @@ export default {
     },
 
     async setMarket() {
-      await this.$services.dex.setManager('1693d806f67bdd67f9b2f347aabc6ef4a9f81a1a')
+      /*
+      await this.$services.dex.setManager('')
         .then(() => {
           this.$services.alerts.success('Set Manager');
         })
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-
+      */
       this.$services.alerts.info('Add assets');
 
       try {
+        /*
         await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.aph_hash, 0, true);
         this.$services.alerts.success('Setup asset APH');
 
@@ -653,14 +655,35 @@ export default {
 
         await this.$services.dex.setAssetSettings(this.$services.assets.NEO, 0, true);
         this.$services.alerts.success('Setup asset NEO');
+        */
+
+        // await this.$services.dex.setAssetSettings('b951ecbbc5fe37a9c280a76cb0ce0014827294cf', 0, true);
+        // this.$services.alerts.success('Setup asset DBC');
 
         // await this.$services.dex.setAssetSettings('a3640dd3c560c75528e5f861da5da98958d0d713', 0);
         // this.$services.alerts.success('Setup asset NXT2');
+
+        /*
+        await this.$services.dex.setAssetSettings('c36aee199dbba6c3f439983657558cfb67629599', 0);
+        this.$services.alerts.success('Setup asset NKN');
+
+        await this.$services.dex.setAssetSettings('1578103c13e39df15d0d29826d957e85d770d8c9', 0);
+        this.$services.alerts.success('Setup asset PHX');
+
+        await this.$services.dex.setAssetSettings('ed07cffad18f1308db51920d99a2af60ac66a7b3', 0);
+        this.$services.alerts.success('Setup asset SOUL');
+
+        await this.$services.dex.setAssetSettings('132947096727c84c7f9e076c90f08fec3bc17f18', 0);
+        this.$services.alerts.success('Setup asset TKY');
+        */
+
+        /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
           this.$services.assets.NEO,
           100, 0.0000001, 0, 0.25, true);
         this.$services.alerts.success('Setup Market NEO-APH');
-
+        */
+        /*
         await this.$services.dex.setMarket(this.$services.assets.GAS,
           this.$services.assets.NEO,
           1, 0.0000001, 0.2, 0.2, true);
@@ -670,6 +693,70 @@ export default {
           this.$services.assets.GAS,
           100, 0.0001, 0.0000, 0.25, true);
         this.$services.alerts.success('Setup Market GAS-APH');
+        */
+
+        /*
+        await this.$services.dex.setMarket('b951ecbbc5fe37a9c280a76cb0ce0014827294cf',
+          this.$services.assets.NEO,
+          1000, 0.0001, 0.27, 0.27, true);
+        this.$services.alerts.success('Setup Market NEO-DBC');
+
+        await this.$services.dex.setMarket('b951ecbbc5fe37a9c280a76cb0ce0014827294cf',
+          this.$services.assets.GAS,
+          1000, 0.0001, 0.27, 0.27, true);
+        this.$services.alerts.success('Setup Market GAS-DBC');
+        */
+
+        /*
+        await this.$services.dex.setMarket('c36aee199dbba6c3f439983657558cfb67629599',
+          this.$services.assets.NEO,
+          200, 0.0001, 0.35, 0.35, true);
+        this.$services.alerts.success('Setup Market NEO-NKN');
+
+        await this.$services.dex.setMarket('c36aee199dbba6c3f439983657558cfb67629599',
+          this.$services.assets.GAS,
+          1000, 0.0001, 0.35, 0.35, true);
+        this.$services.alerts.success('Setup Market GAS-NKN');
+        */
+
+        /*
+        await this.$services.dex.setMarket('1578103c13e39df15d0d29826d957e85d770d8c9',
+          this.$services.assets.NEO,
+          1000, 0.0001, 0.47, 0.47, true);
+        this.$services.alerts.success('Setup Market NEO-PHX');
+        */
+        /*
+        await this.$services.dex.setMarket('1578103c13e39df15d0d29826d957e85d770d8c9',
+          this.$services.assets.GAS,
+          1000, 0.0001, 0.47, 0.47, true);
+        this.$services.alerts.success('Setup Market GAS-PHX');
+
+
+        await this.$services.dex.setMarket('ed07cffad18f1308db51920d99a2af60ac66a7b3',
+          this.$services.assets.NEO,
+          1000, 0.0001, 0.47, 0.47, true);
+        this.$services.alerts.success('Setup Market NEO-SOUL');
+
+        await this.$services.dex.setMarket('ed07cffad18f1308db51920d99a2af60ac66a7b3',
+          this.$services.assets.GAS,
+          2000, 0.0001, 0.44, 0.44, true);
+        this.$services.alerts.success('Setup Market GAS-SOUL');
+
+        await this.$services.dex.setMarket('132947096727c84c7f9e076c90f08fec3bc17f18',
+          this.$services.assets.NEO,
+          2000, 0.0001, 0.44, 0.44, true);
+        this.$services.alerts.success('Setup Market NEO-TKY');
+
+        await this.$services.dex.setMarket('132947096727c84c7f9e076c90f08fec3bc17f18',
+          this.$services.assets.GAS,
+          2000, 0.0001, 0.44, 0.44, true);
+        this.$services.alerts.success('Setup Market GAS-TKY');
+        */
+
+        // NKN c36aee199dbba6c3f439983657558cfb67629599
+        // PHX 1578103c13e39df15d0d29826d957e85d770d8c9
+        // SOUL ed07cffad18f1308db51920d99a2af60ac66a7b3
+        // TKY 132947096727c84c7f9e076c90f08fec3bc17f18
 
         /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,

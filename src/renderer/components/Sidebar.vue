@@ -29,12 +29,14 @@
           </span>
           <span class="label">{{$t('commit')}} APH</span>
         </router-link>
+        <!--
         <router-link to="/authenticated/buy-aph">
           <span class="icon">
             <aph-icon name="dex"></aph-icon>
           </span>
           <span class="label">{{ $t('buyAph') }}</span>
         </router-link>
+        -->
         <router-link to="/authenticated/assets">
           <span class="icon">
             <aph-icon name="wallet"></aph-icon>

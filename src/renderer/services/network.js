@@ -11,7 +11,7 @@ const NETWORKS = [
     label: 'MainNet',
     value: {
       aph_hash: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
-      dex_hash: '48895f797620bf4eec876745a450b92ff49df2cb',
+      dex_hash: '52d15c9e6a71e6094d735bac06c7c0b701aa2ab5',
       aph: 'https://mainnet.aphelion-neo.com:62443/api',
       net: 'MainNet',
       rpc: 'https://mainneo.aphelion-neo.com:10331',
@@ -139,12 +139,13 @@ export default {
     if (!network.fee) {
       network.fee = defaultForNetwork.fee;
     }
-    if (!network.dex_hash) {
-      network.dex_hash = defaultForNetwork.dex_hash;
-    }
-    if (!network.aph_hash) {
-      network.aph_hash = defaultForNetwork.aph_hash;
-    }
+
+    // Force the dex and aph hash to match the network setting even if what is saved doesn't match.
+    // TODO: Not really sure what's the value saving the settings instead of just the network name in persistent store
+    // TODO: I guess if we are going to allow them to enter custom values in the future it makes sense.
+    network.dex_hash = defaultForNetwork.dex_hash;
+    network.aph_hash = defaultForNetwork.aph_hash;
+
     return this;
   },
 

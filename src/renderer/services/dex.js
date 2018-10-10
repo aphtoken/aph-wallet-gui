@@ -1440,8 +1440,10 @@ export default {
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(currentNetwork.dex_hash));
             }
 
+            if (DBG_LOG) console.log(`block index; ${currentNetwork.bestBlock.index}`);
             configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
               u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
+
             return api.signTx(configResponse);
           })
           .then((configResponse) => {
@@ -1460,6 +1462,7 @@ export default {
               }
             }
 
+            if (DBG_LOG) console.log(`withdraw NEP5 tx: ${JSON.stringify(configResponse)}`);
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
@@ -2151,7 +2154,10 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         this.buildContractTransaction(operation, parameters, neoToSend, gasToSend)
-          .then(configResponse => api.sendTx(configResponse))
+          .then((configResponse) => {
+            if (DBG_LOG) console.log(`executeContractTransaction ${JSON.stringify(configResponse)}`);
+            return api.sendTx(configResponse);
+          })
           .then((configResponse) => {
             resolve({
               success: configResponse.response.result,
