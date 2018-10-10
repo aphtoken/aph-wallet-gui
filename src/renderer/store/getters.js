@@ -45,3 +45,4 @@ export const tradeHistory = state => state.tradeHistory;
 export const transactionDetails = state => state.transactionDetails;
 export const version = state => state.version;
 export const wallets = state => state.wallets;
+export const websocketUri = state => _.get(state.currentNetwork, 'websocketUri');
