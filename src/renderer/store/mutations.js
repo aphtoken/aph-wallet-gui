@@ -71,6 +71,7 @@ export {
   setSocketOrderMatchFailed,
   setStatsToken,
   setStyleMode,
+  setTickerDataByMarket,
   setTradeHistory,
   setWallets,
   startRequest,
@@ -453,6 +454,10 @@ function setOrderPrice(state, price) {
 
 function setOrderQuantity(state, quantity) {
   state.orderQuantity = quantity;
+}
+
+function setTickerDataByMarket(state, tickerDataByMarket) {
+  state.tickerDataByMarket = tickerDataByMarket;
 }
 
 function orderBookSnapshotReceived(state, res) {

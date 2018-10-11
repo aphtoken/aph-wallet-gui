@@ -21,19 +21,19 @@
         <div class="day-values">
           <div class="row">
             <div class="label">{{$t('vol')}}</div>
-            <div class="value">{{ $formatNumber($store.state.tradeHistory ? $store.state.tradeHistory.volume24Hour : 0) }}</div>
+            <div class="value">{{ tickerData.quoteVolume }}</div>
           </div>
           <div class="row">
             <div class="label">{{$t('OPEN')}}</div>
-            <div class="value">{{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.open24Hour : 0) }}</div>
+            <div class="value">{{ $formatTokenAmount(tickerData.open24hr) }}</div>
           </div>
-          <div class="row">
+          <div class="row"> 
             <div class="label">{{$t('HIGH')}}</div>
-            <div class="value">{{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.high24Hour : 0) }}</div>
+            <div class="value">{{ $formatTokenAmount(tickerData.high24hr) }}</div>
           </div>
           <div class="row">
             <div class="label">{{$t('LOW')}}</div>
-            <div class="value">{{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.low24Hour : 0) }}</div>
+            <div class="value">{{ $formatTokenAmount(tickerData.low24hr) }}</div>
           </div>
         </div>
         <div class="token-details">
@@ -45,8 +45,8 @@
             {{ $formatMoney($store.state.tradeHistory ? $store.state.tradeHistory.close24Hour * baseCurrencyUnitPrice : 0) }}
           </div>
           <span class="label">{{ $t('change24H') }} ({{ $store.state.currentMarket ? $store.state.currentMarket.quoteCurrency : '' }})</span>
-          <div :class="['change', {decrease: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour < 0 : false, increase: $store.state.tradeHistory ? $store.state.tradeHistory.change24Hour > 0 : false}]">
-            {{ $formatNumber($store.state.tradeHistory ? $store.state.tradeHistory.change24Hour : 0) }}
+          <div :class="['change', {decrease: change24Hour < 0, increase: change24Hour > 0 }]">
+            {{ $formatNumber(change24Hour) }}
             ({{ $formatNumber(percentChangeAbsolute) }}%)
           </div>
         </div>
@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import MarketMegaSelector from './MarketMegaSelector';
 
 export default {
@@ -72,9 +73,16 @@ export default {
         this.$services.neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue : 0;
     },
     percentChangeAbsolute() {
-      return this.$store.state.tradeHistory ?
-        Math.abs(this.$store.state.tradeHistory.change24HourPercent) : 0;
+      return Math.round(((this.change24Hour)
+        / this.tickerData.open24hr) * 10000) / 100;
     },
+    change24Hour() {
+      return this.$store.state.tradeHistory ?
+        (this.$store.state.tradeHistory.close24Hour - this.tickerData.open24hr) : 0;
+    },
+    ...mapGetters([
+      'tickerData',
+    ]),
   },
 
   methods: {

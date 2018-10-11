@@ -2340,4 +2340,21 @@ export default {
       }
     });
   },
+
+  fetchTickerData() {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+        axios.get(`${currentNetwork.aph}/ticker`)
+          .then((res) => {
+            resolve(res.data);
+          })
+          .catch((e) => {
+            alerts.exception(`APH API Error: ${e}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch ticker data. ${e.message}`);
+      }
+    });
+  },
 };
