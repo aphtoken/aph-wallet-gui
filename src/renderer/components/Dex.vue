@@ -52,15 +52,9 @@ export default {
   mounted() {
     this.$store.state.showPortfolioHeader = false;
     this.loadMarkets();
+    this.loadTickerData();
 
     this.$services.dex.completeSystemAssetWithdrawals();
-
-    this.tickerRefreshInterval = setInterval(() => {
-      this.$services.dex.fetchTickerData()
-        .then((tickerData) => {
-          this.$store.commit('setTickerDataByMarket', tickerData);
-        });
-    }, this.$constants.intervals.TICKER_POLLING);
 
     this.$store.commit('setSocketOrderCreated', (message) => {
       /* eslint-disable max-len */
@@ -125,6 +119,9 @@ export default {
     this.completeSystemAssetWithdrawalsInterval = setInterval(() => {
       this.$services.dex.completeSystemAssetWithdrawals();
     }, this.$constants.intervals.COMPLETE_SYSTEM_WITHDRAWALS);
+    this.tickerRefreshInterval = setInterval(() => {
+      this.loadTickerData();
+    }, this.$constants.intervals.TICKER_POLLING);
   },
 
   data() {
@@ -170,6 +167,12 @@ export default {
           }
         },
       });
+    },
+    loadTickerData() {
+      this.$services.dex.fetchTickerData()
+        .then((tickerData) => {
+          this.$store.commit('setTickerDataByMarket', tickerData);
+        });
     },
   },
 };
