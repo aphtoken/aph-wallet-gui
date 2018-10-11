@@ -46,6 +46,7 @@ export default {
     clearInterval(this.connectionStatusInterval);
     clearInterval(this.marketsRefreshInterval);
     clearInterval(this.completeSystemAssetWithdrawalsInterval);
+    clearInterval(this.tickerRefreshInterval);
   },
 
   mounted() {
@@ -53,6 +54,13 @@ export default {
     this.loadMarkets();
 
     this.$services.dex.completeSystemAssetWithdrawals();
+
+    this.tickerRefreshInterval = setInterval(() => {
+      this.$services.dex.fetchTickerData()
+        .then((tickerData) => {
+          this.$store.commit('setTickerDataByMarket', tickerData);
+        });
+    }, this.$constants.intervals.TICKER_POLLING);
 
     this.$store.commit('setSocketOrderCreated', (message) => {
       /* eslint-disable max-len */

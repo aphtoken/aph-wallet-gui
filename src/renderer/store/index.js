@@ -76,6 +76,7 @@ const state = {
   styleMode: 'Night',
   tradeHistory: null,
   transactionDetails: {},
+  tickerDataByMarket: {},
   version: pjson.version,
   wallets: [],
 };
