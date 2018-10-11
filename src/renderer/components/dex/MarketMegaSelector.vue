@@ -12,7 +12,7 @@
       </div>
       <div class="table">
         <div class="body">
-          <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null" 
+          <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null"
             :class="['row', {selected: $store.state.currentMarket && market.marketName === $store.state.currentMarket.marketName }]"
                v-for="market in filteredMarkets" :key="market.marketName">
             <div class="cell">{{ market.marketName }}</div>
@@ -107,7 +107,7 @@ export default {
       white-space: nowrap;
       font-size: toRem(20px);
     }
-    
+
     .disabled {
       font-size: toRem(12px);
     }
@@ -154,10 +154,6 @@ export default {
         &:hover, &.active {
           border-color: $purple;
         }
-
-        & + .currency {
-          margin-left: $space;
-        }
       }
     }
 
@@ -180,7 +176,7 @@ export default {
 
           .cell {
             font-size: toRem(16px);
-            
+
             &.disabled {
               font-size: toRem(11px);
               text-align: right;

@@ -10,10 +10,10 @@
         {{$t('nightMode')}}
       </template>
     </div>
-    <div class="header">
-        <h1 class="underlined">{{ $t('marketPairs') }}</h1>
-    </div>
     <div class="selection">
+      <div class="header">
+          <h1 class="underlined">{{ $t('marketPairs') }}</h1>
+      </div>
       <market-mega-selector></market-mega-selector>
     </div>
     <aph-spinner-wrapper size="small" identifier="fetchTradeHistory">
@@ -87,19 +87,6 @@ export default {
 
 <style lang="scss">
 #dex--marketselection {
-  .header {
-    @extend %tile-light;
-    
-    flex: none;
-    padding: $space $space 0;
-
-    h1.underlined {
-      @extend %underlined-header-sm;
-
-      margin-bottom: 0;
-    }
-  }
-
   .color-mode-btn {
     @include transition(color);
 
@@ -136,7 +123,20 @@ export default {
   }
 
   .selection {
+    @extend %tile-light;
+
     margin-bottom: $space;
+
+    .header {
+      flex: none;
+      padding: $space $space 0;
+
+      h1.underlined {
+        @extend %underlined-header-sm;
+
+        margin-bottom: 0;
+      }
+    }
   }
 
   .market {
