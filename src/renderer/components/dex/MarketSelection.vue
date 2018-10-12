@@ -39,10 +39,10 @@
         <div class="token-details">
           <aph-token-icon v-if="$store.state.currentMarket && $store.state.currentMarket.quoteCurrency" :symbol="$store.state.currentMarket.quoteCurrency"></aph-token-icon>
           <div class="base-price">
-            {{ $formatTokenAmount($store.state.tradeHistory ? $store.state.tradeHistory.close24Hour : 0) }}
+            {{ $formatTokenAmount(close24Hour) }}
           </div>
           <div class="base-price-converted">
-            {{ $formatMoney($store.state.tradeHistory ? $store.state.tradeHistory.close24Hour * baseCurrencyUnitPrice : 0) }}
+            {{ $formatMoney(close24Hour * baseCurrencyUnitPrice) }}
           </div>
           <span class="label">{{ $t('change24H') }} ({{ $store.state.currentMarket ? $store.state.currentMarket.quoteCurrency : '' }})</span>
           <div :class="['change', {decrease: change24Hour < 0, increase: change24Hour > 0 }]">
@@ -72,13 +72,18 @@ export default {
       return this.storeStateCurrentMarket && this.$store.state.holdings.length ?
         this.$services.neo.getHolding(this.storeStateCurrentMarket.baseAssetId).unitValue : 0;
     },
+    close24Hour() {
+      return this.$store.state.tradeHistory &&
+        this.$store.state.tradeHistory.trades &&
+        this.$store.state.tradeHistory.trades.length ?
+        this.$store.state.tradeHistory.trades[0].price : 0;
+    },
     percentChangeAbsolute() {
       return Math.round(((this.change24Hour)
         / this.tickerData.open24hr) * 10000) / 100;
     },
     change24Hour() {
-      return this.$store.state.tradeHistory ?
-        (this.$store.state.tradeHistory.close24Hour - this.tickerData.open24hr) : 0;
+      return this.close24Hour - this.tickerData.open24hr;
     },
     ...mapGetters([
       'tickerData',
