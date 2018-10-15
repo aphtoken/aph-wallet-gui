@@ -1,8 +1,11 @@
 <template>
   <section id="dex--chart">
     <div class="header tab">
-      <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
-      <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
+      <button class="learn-more" @click="showLearnMore()">{{ $t('learnMore') }}</button>
+      <span>
+        <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
+        <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
+      </span>
     </div>
     <div class="body" v-if="isTradingDisabled">
       <p v-if="isOutOfDate">
@@ -120,6 +123,10 @@ export default {
       } else {
         this.removeChart();
       }
+    },
+
+    showLearnMore() {
+      this.$store.commit('setShowLearnMore', true);
     },
 
     removeChart() {
@@ -471,7 +478,7 @@ export default {
 
     &.tab {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
 
       h1 {
         @extend %underlined-header-sm;
@@ -490,6 +497,10 @@ export default {
             background: transparent;
           }
         }
+      }
+
+      > span {
+        display: inherit;
       }
     }
   }
@@ -648,7 +659,6 @@ export default {
         .asks {
           flex-direction: row-reverse;
         }
-
       }
     }
   }

@@ -60,6 +60,7 @@ export {
   setShowClaimGasModal,
   setShowEditContactModal,
   setShowImportAWalletModal,
+  setShowLearnMore,
   setShowLoginToWalletModal,
   setShowSendAddressModal,
   setShowSendRequestLedgerSignature,
@@ -527,6 +528,10 @@ function setMenuToggleable(state, menuToggleable) {
 
 function setMenuCollapsed(state, menuCollapsed) {
   state.menuCollapsed = menuCollapsed;
+}
+
+function setShowLearnMore(state, value) {
+  state.showLearnMore = value;
 }
 
 function SOCKET_ONOPEN(state, event) {

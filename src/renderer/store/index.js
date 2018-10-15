@@ -58,6 +58,7 @@ const state = {
   showAddTokenModal: false,
   showClaimGasModal: false,
   showImportAWalletModal: false,
+  showLearnMore: false,
   showLoginToWalletModal: false,
   showOrderConfirmationModal: false,
   showPortfolioHeader: true,
