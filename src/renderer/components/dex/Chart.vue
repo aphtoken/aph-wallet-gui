@@ -1,6 +1,9 @@
 <template>
   <section id="dex--chart">
     <div class="header tab">
+      <div class="learn-more-container">
+        <button class="learn-more" @click="showLearnMore">{{ $t('learnMore') }}</button>
+      </div>
       <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
       <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
     </div>
@@ -120,6 +123,10 @@ export default {
       } else {
         this.removeChart();
       }
+    },
+
+    showLearnMore() {
+      this.$store.commit('setShowLearnMore', true);
     },
 
     removeChart() {
@@ -470,6 +477,7 @@ export default {
     }
 
     &.tab {
+      position: relative;
       display: flex;
       justify-content: flex-end;
 
@@ -648,7 +656,6 @@ export default {
         .asks {
           flex-direction: row-reverse;
         }
-
       }
     }
   }

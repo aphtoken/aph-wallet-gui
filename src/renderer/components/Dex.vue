@@ -30,12 +30,13 @@
       <aph-icon name="no-transactions"></aph-icon>
       <div class="label">{{$t('unableToReachTradingServer')}}</div>
     </div>
-    <dex-demo-confirmation v-if="!$store.state.acceptDexDemoVersion && !isOutOfDate"></dex-demo-confirmation>
+    <dex-demo-confirmation v-if="(!$store.state.acceptDexDemoVersion && !isOutOfDate) || showLearnMore"></dex-demo-confirmation>
     <dex-out-of-date v-if="isOutOfDate && !this.$store.state.acceptDexOutOfDate"></dex-out-of-date>
   </section>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import DexDemoConfirmation from './modals/DexDemoConfirmation';
 import DexOutOfDate from './modals/DexOutOfDate';
 import assets from '../services/assets';
@@ -136,6 +137,10 @@ export default {
         && this.$store.state.latestVersion.prodExchangeScriptHash.replace('0x', '')
           !== this.$store.state.currentNetwork.dex_hash;
     },
+
+    ...mapGetters([
+      'showLearnMore',
+    ]),
   },
 
   methods: {
@@ -185,7 +190,6 @@ export default {
   flex-direction: row;
   flex: 1;
   justify-content: center;
-  padding-top: toRem(30px);
   width: 100%;
 
   .grid {
@@ -259,31 +263,48 @@ export default {
   }
 
   > .zero-state {
-      @extend %tile-light;
+    @extend %tile-light;
 
-      align-items: center;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      justify-content: center;
-      width: 100%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
 
-      .aph-icon {
-        svg {
-          height: toRem(52px);
+    .aph-icon {
+      svg {
+        height: toRem(52px);
 
-          .fill {
-            fill: $purple;
-          }
+        .fill {
+          fill: $purple;
         }
-      }
-
-      .label {
-        color: $purple;
-        font-weight: GilroyMedium;
-        margin-top: $space-lg;
       }
     }
 
+    .label {
+      color: $purple;
+      font-weight: GilroyMedium;
+      margin-top: $space-lg;
+    }
+  }
+
+  .learn-more-container {
+    width: 100%;
+    position: absolute;
+    text-align: center;
+
+    .learn-more {
+      @extend %btn;
+      margin: 0 $space;
+      padding: 0 $space;
+      height: toRem(32px);
+      width: auto;
+
+      &:hover {
+        box-shadow: $box-shadow-sm;
+      }
+    }
+  }
 }
 </style>

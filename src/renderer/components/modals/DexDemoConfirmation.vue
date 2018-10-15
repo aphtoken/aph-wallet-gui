@@ -21,6 +21,7 @@ export default {
   methods: {
     accept() {
       this.$store.commit('setAcceptDexDemoVersion', true);
+      this.$store.commit('setShowLearnMore', false);
     },
   },
 };
