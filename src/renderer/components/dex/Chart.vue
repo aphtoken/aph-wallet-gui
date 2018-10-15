@@ -1,11 +1,11 @@
 <template>
   <section id="dex--chart">
     <div class="header tab">
-      <button class="learn-more" @click="showLearnMore()">{{ $t('learnMore') }}</button>
-      <span>
-        <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
-        <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
-      </span>
+      <div class="learn-more-container">
+        <button class="learn-more" @click="showLearnMore">{{ $t('learnMore') }}</button>
+      </div>
+      <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
+      <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
     </div>
     <div class="body" v-if="isTradingDisabled">
       <p v-if="isOutOfDate">
@@ -477,8 +477,9 @@ export default {
     }
 
     &.tab {
+      position: relative;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
 
       h1 {
         @extend %underlined-header-sm;
@@ -497,10 +498,6 @@ export default {
             background: transparent;
           }
         }
-      }
-
-      > span {
-        display: inherit;
       }
     }
   }

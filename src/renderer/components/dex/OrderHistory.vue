@@ -59,7 +59,11 @@
       <div class="footer">
         <div :class="['option', {active: $store.state.ordersToShow === $constants.orders.ALL_SWITCH}]" @click="$store.commit('setOrdersToShow', $constants.orders.ALL_SWITCH)">All</div>
         <div :class="['option', {active: $store.state.currentMarket && $store.state.ordersToShow === $store.state.currentMarket.marketName}]" @click="$store.commit('setOrdersToShow', $store.state.currentMarket.marketName)">{{ $store.state.currentMarket ? $store.state.currentMarket.marketName : '' }}</div>
+        <div class="learn-more-container">
+          <button class="learn-more" @click="showLearnMore">{{ $t('learnMore') }}</button>
+        </div>
       </div>
+      
     </aph-spinner-wrapper>
   </section>
 </template>
@@ -176,6 +180,9 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
+    },
+    showLearnMore() {
+      this.$store.commit('setShowLearnMore', true);
     },
   },
 };
@@ -298,7 +305,8 @@ export default {
   .footer {
     display: flex;
     flex: none;
-    justify-content: space-evenly;
+    justify-content: flex-start;
+    position: relative;
 
     .option {
       border-bottom: $border-width-thick solid transparent;

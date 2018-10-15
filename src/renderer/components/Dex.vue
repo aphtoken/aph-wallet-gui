@@ -289,15 +289,21 @@ export default {
     }
   }
 
-  .learn-more {
-    @extend %btn;
-    margin: 0 $space;
-    padding: 0 $space;
-    height: toRem(32px);
-    width: auto;
+  .learn-more-container {
+    width: 100%;
+    position: absolute;
+    text-align: center;
 
-    &:hover {
-      box-shadow: $box-shadow-sm;
+    .learn-more {
+      @extend %btn;
+      margin: 0 $space;
+      padding: 0 $space;
+      height: toRem(32px);
+      width: auto;
+
+      &:hover {
+        box-shadow: $box-shadow-sm;
+      }
     }
   }
 }
