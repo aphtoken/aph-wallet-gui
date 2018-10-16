@@ -1064,12 +1064,27 @@ export default {
                       // Verify it isn't already in our unconfirmed array.
                       if (existingIndex < 0) {
                         if (DBG_LOG) {
-                          console.log(` Adding balance for asset ${sym}: ${prevUnconfirmed.value}`
+                          console.log(` Adding unconfirmed balance for asset ${sym}: ${prevUnconfirmed.value}`
                             + ` txid: ${prevUnconfirmed.txid} index: ${prevUnconfirmed.index}`);
                         }
                         newAssetBalance.balance.add(prevUnconfirmed.value);
                         newAssetBalance.unconfirmed.push(prevUnconfirmed);
                       }
+                    }
+                  }
+
+                  // Carry across unspent balances that are not yet unspent from explorer's view into our new balance.
+                  for (let prevUnspentIndex = 0; prevUnspentIndex <
+                    prevAssetBalance.unspent.length; prevUnspentIndex += 1) {
+                    const prevUnspent = prevAssetBalance.unspent[prevUnspentIndex];
+                    const index = newAssetBalance.unspent.findIndex(
+                      newUnspent => prevUnspent.txid === newUnspent.txid
+                        && prevUnspent.index === newUnspent.index);
+                    if (index < 0) {
+                      console.log(` Adding unspent balance for asset ${sym}: ${prevUnspent.value}`
+                        + ` txid: ${prevUnspent.txid} index: ${prevUnspent.index}`);
+                      newAssetBalance.balance.add(prevUnspent.value);
+                      newAssetBalance.unspent.push(prevUnspent);
                     }
                   }
 

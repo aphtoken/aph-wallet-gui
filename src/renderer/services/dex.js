@@ -1038,7 +1038,7 @@ export default {
                 .then(() => {
                   store.commit('setSystemWithdrawStep', 3);
                   const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
-                  // Must allow funds to be sent again by applying unconfirmed back to spent.
+                  // Must allow funds to be sent again by moving tx outputs to unspent.
                   neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, true);
 
                   setTimeout(() => {
@@ -1538,6 +1538,7 @@ export default {
         const unspents = assetId === assets.GAS ? dexBalance.assets.GAS.unspent : dexBalance.assets.NEO.unspent;
         const input = _.find(unspents, { txid: utxoTxHash, index: utxoIndex });
 
+        // TODO: need to retry a couple times if this happens
         if (!input) {
           if (DBG_LOG) console.log(`Unable to find marked input ${utxoTxHash} ${utxoIndex}`);
           throw new Error('Unable to find marked input.');
