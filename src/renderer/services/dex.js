@@ -29,7 +29,7 @@ const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
 const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
 
-const DBG_LOG = false;
+const DBG_LOG = true;
 const assetUTXOsToIgnore = {};
 const contractUTXOsReservedFor = {};
 
@@ -1008,27 +1008,56 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         if (assetId === assets.NEO || assetId === assets.GAS) {
+          const systemWithdraw = {
+            step: 0,
+            asset: assetId === assets.NEO ? 'NEO' : 'GAS',
+            amount: quantity.toString(),
+          };
+
+          store.commit('setSystemWithdraw', systemWithdraw);
+
+          store.commit('setWithdrawInProgressModalModel', {
+          });
+
+          const rejectWithError = (errorMsg) => {
+            systemWithdraw.error = errorMsg;
+            store.commit('setSystemWithdraw', systemWithdraw);
+            reject(errorMsg);
+          };
+
           this.markWithdraw(assetId, quantity)
             .then((res) => {
               if (res.success !== true) {
                 reject('Withdraw Mark Step rejected');
                 return;
               }
+              store.commit('setSystemWithdrawStep', 2);
 
               alerts.success('Withdraw Mark Step Relayed. Waiting for confirmation.');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  setTimeout(() => {
-                    const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
-                    // Must allow funds to be sent again by applying unconfirmed back to spent.
-                    neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, true);
+                  store.commit('setSystemWithdrawStep', 3);
+                  const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
+                  // Must allow funds to be sent again by applying unconfirmed back to spent.
+                  neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, true);
 
+                  setTimeout(() => {
                     this.withdrawSystemAsset(assetId, quantity, res.tx.hash, res.utxoIndex)
                       .then((res) => {
                         if (res.success) {
+                          store.commit('setSystemWithdrawStep', 4);
+
+                          neo.monitorTransactionConfirmation(res.tx, true)
+                            .then(() => {
+                              store.commit('setSystemWithdrawStep', 5);
+                              resolve(res.tx);
+                            })
+                            .catch(() => {
+                              rejectWithError('Timed out waiting for withdraw to complete.');
+                            });
                           resolve(res.tx);
                         } else {
-                          reject('Withdraw rejected');
+                          rejectWithError('Withdraw rejected');
                         }
                       })
                       .catch((e) => {
@@ -1090,6 +1119,19 @@ export default {
         gas: 0,
       };
 
+      const handleRetry = () => {
+        setTimeout(() => {
+          this.ignoreWithdrawInputs(config);
+          this.markWithdraw(assetId, quantity, tryCount + 1)
+            .then((res) => {
+              resolve(res);
+            })
+            .catch((e) => {
+              reject(e);
+            });
+        }, 10000);
+      };
+
       try {
         quantity = toBigNumber(quantity);
 
@@ -1126,15 +1168,19 @@ export default {
           })
           .then((configResponse) => {
             return new Promise((resolveTx) => {
+              const inputsFromGasFee = configResponse.tx.inputs.length;
               this.calculateWithdrawInputsAndOutputs(configResponse, assetId, quantity)
                 .then(() => {
+                  store.commit('setSystemWithdrawMergeState', { utxoCount: configResponse.tx.inputs.length - inputsFromGasFee, step: 1 });
                   const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
                   configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
                   configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
                   configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
                   configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
+                  const validUntilBlockIndex = currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0;
+                  if (DBG_LOG) console.log(`*Valid until block index: ${validUntilBlockIndex}`);
                   configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
+                    u.num2fixed8(validUntilBlockIndex).padEnd(64, '0'));
 
                   configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
                   configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
@@ -1189,55 +1235,32 @@ export default {
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
-            // TODO: refactor this using await and try catch
-            if (!configResponse.response.result && tryCount < 3) {
-              setTimeout(() => {
-                this.ignoreWithdrawInputs(config);
-                this.markWithdraw(assetId, quantity, tryCount + 1)
-                  .then((res) => {
-                    resolve(res);
-                  })
-                  .catch((e) => {
-                    reject(e);
-                  });
-              }, 10000);
-            } else {
+            if (configResponse.response.result) {
               resolve({
                 success: configResponse.response.result,
                 tx: configResponse.tx,
                 utxoIndex,
               });
+              return;
+            }
+            // TODO: refactor this using await and try catch
+            if (tryCount < 3) {
+              handleRetry();
+            } else {
+              reject('Failed to Mark Withdraw. Empty result from sendTX. Exhausted Retries.');
             }
           })
           .catch((e) => {
             if (DBG_LOG) console.log(`failure to mark returned from sendTx ${e}`);
             if (tryCount < 3) {
-              setTimeout(() => {
-                this.ignoreWithdrawInputs(config);
-                this.markWithdraw(assetId, quantity, tryCount + 1)
-                  .then((res) => {
-                    resolve(res);
-                  })
-                  .catch((e) => {
-                    reject(e);
-                  });
-              }, 10000);
+              handleRetry();
             } else {
               reject(`Failed to Mark Withdraw. ${e}`);
             }
           });
       } catch (e) {
         if (tryCount < 3) {
-          setTimeout(() => {
-            this.ignoreWithdrawInputs(config);
-            this.markWithdraw(assetId, quantity, tryCount + 1)
-              .then((res) => {
-                resolve(res);
-              })
-              .catch((e) => {
-                reject(e);
-              });
-          }, 10000);
+          handleRetry();
         } else {
           reject(`Failed to Mark Withdraw. ${e.message}`);
         }
@@ -1497,7 +1520,6 @@ export default {
         const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
 
         let dexIntents;
-        // Can't do this above because createTx would pick inputs for these and move them into spent.
         if (assetId === assets.NEO) {
           dexIntents = api.makeIntent({ NEO: quantity }, currentWallet.address);
         } else if (assetId === assets.GAS) {
@@ -1574,7 +1596,7 @@ export default {
         if (DBG_LOG) console.log(`sending withdraw for utxo ${utxoTxHash} ${utxoIndex}`);
         configResponse = await api.sendTx(configResponse);
 
-        if (configResponse.response.result !== true && tryCount < 3) {
+        if (!configResponse || !configResponse.response || (configResponse.response.result !== true && tryCount < 3)) {
           throw new Error('Withdraw rejected by the network. Retrying...');
         }
 

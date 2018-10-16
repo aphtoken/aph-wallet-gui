@@ -688,75 +688,71 @@ export default {
           this.$services.assets.NEO,
           1, 0.0000001, 0.2, 0.2, true);
         this.$services.alerts.success('Setup Market NEO-GAS');
-
-        await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
-          this.$services.assets.GAS,
-          100, 0.0001, 0.0000, 0.25, true);
-        this.$services.alerts.success('Setup Market GAS-APH');
         */
 
         /*
+        await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
+          this.$services.assets.GAS,
+          100, 0.00001, 0.0000, 0.25, true);
+        this.$services.alerts.success('Setup Market GAS-APH');
+
+
         await this.$services.dex.setMarket('b951ecbbc5fe37a9c280a76cb0ce0014827294cf',
           this.$services.assets.NEO,
-          1000, 0.0001, 0.27, 0.27, true);
+          1000, 0.00001, 0.27, 0.27, true);
         this.$services.alerts.success('Setup Market NEO-DBC');
 
         await this.$services.dex.setMarket('b951ecbbc5fe37a9c280a76cb0ce0014827294cf',
           this.$services.assets.GAS,
-          1000, 0.0001, 0.27, 0.27, true);
+          1000, 0.00001, 0.27, 0.27, true);
         this.$services.alerts.success('Setup Market GAS-DBC');
-        */
 
-        /*
+
+        // NKN c36aee199dbba6c3f439983657558cfb67629599
         await this.$services.dex.setMarket('c36aee199dbba6c3f439983657558cfb67629599',
           this.$services.assets.NEO,
-          200, 0.0001, 0.35, 0.35, true);
+          200, 0.00001, 0.35, 0.35, true);
         this.$services.alerts.success('Setup Market NEO-NKN');
 
         await this.$services.dex.setMarket('c36aee199dbba6c3f439983657558cfb67629599',
           this.$services.assets.GAS,
-          1000, 0.0001, 0.35, 0.35, true);
+          1000, 0.00001, 0.35, 0.35, true);
         this.$services.alerts.success('Setup Market GAS-NKN');
-        */
 
-        /*
+        // PHX 1578103c13e39df15d0d29826d957e85d770d8c9
         await this.$services.dex.setMarket('1578103c13e39df15d0d29826d957e85d770d8c9',
           this.$services.assets.NEO,
-          1000, 0.0001, 0.47, 0.47, true);
+          1000, 0.00001, 0.47, 0.47, true);
         this.$services.alerts.success('Setup Market NEO-PHX');
-        */
-        /*
+
         await this.$services.dex.setMarket('1578103c13e39df15d0d29826d957e85d770d8c9',
           this.$services.assets.GAS,
-          1000, 0.0001, 0.47, 0.47, true);
+          1000, 0.00001, 0.47, 0.47, true);
         this.$services.alerts.success('Setup Market GAS-PHX');
 
 
+        // SOUL ed07cffad18f1308db51920d99a2af60ac66a7b3
         await this.$services.dex.setMarket('ed07cffad18f1308db51920d99a2af60ac66a7b3',
           this.$services.assets.NEO,
-          1000, 0.0001, 0.47, 0.47, true);
+          100, 0.00001, 0.27, 0.47, true);
         this.$services.alerts.success('Setup Market NEO-SOUL');
 
         await this.$services.dex.setMarket('ed07cffad18f1308db51920d99a2af60ac66a7b3',
           this.$services.assets.GAS,
-          2000, 0.0001, 0.44, 0.44, true);
+          100, 0.00001, 0.27, 0.44, true);
         this.$services.alerts.success('Setup Market GAS-SOUL');
 
+        // TKY 132947096727c84c7f9e076c90f08fec3bc17f18
         await this.$services.dex.setMarket('132947096727c84c7f9e076c90f08fec3bc17f18',
           this.$services.assets.NEO,
-          2000, 0.0001, 0.44, 0.44, true);
+          2000, 0.00001, 0.44, 0.44, true);
         this.$services.alerts.success('Setup Market NEO-TKY');
 
         await this.$services.dex.setMarket('132947096727c84c7f9e076c90f08fec3bc17f18',
           this.$services.assets.GAS,
-          2000, 0.0001, 0.44, 0.44, true);
+          2000, 0.00001, 0.44, 0.44, true);
         this.$services.alerts.success('Setup Market GAS-TKY');
         */
-
-        // NKN c36aee199dbba6c3f439983657558cfb67629599
-        // PHX 1578103c13e39df15d0d29826d957e85d770d8c9
-        // SOUL ed07cffad18f1308db51920d99a2af60ac66a7b3
-        // TKY 132947096727c84c7f9e076c90f08fec3bc17f18
 
         /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
