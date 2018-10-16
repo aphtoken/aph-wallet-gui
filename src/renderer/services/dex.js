@@ -1163,8 +1163,7 @@ export default {
         }
 
         if (!currentNetwork.bestBlock) {
-          reject('Wallet has not obtained a block number yet.');
-          return;
+          throw new Error('Wallet has not obtained a block number yet.');
         }
 
         // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
@@ -1179,8 +1178,9 @@ export default {
           // This decorates the configResponse with the appropriate inputs
           await this.calculateWithdrawInputsAndOutputs(configResponse, assetId, quantity);
         } catch (e) {
-          if (DBG_LOG) console.log(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
-          reject(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
+          const errMsg = `Failed to calculate withdraw inputs and outputs. ${e.message || e}`;
+          if (DBG_LOG) console.log(errMsg);
+          throw new Error(errMsg);
         }
 
         store.commit('setSystemWithdrawMergeState', { utxoCount: configResponse.tx.inputs.length - inputsFromGasFee, step: 1 });
@@ -1237,10 +1237,12 @@ export default {
           utxoIndex,
         });
       } catch (e) {
+        const errMsg = typeof e === 'string' ? e : e.message;
         if (tryCount < 3) {
+          alerts.error(`Withdraw mark failed. Error: ${errMsg} Retrying...`);
           handleRetry();
         } else {
-          reject(`Failed to Mark Withdraw. ${typeof e === 'string' ? e : e.message}`);
+          reject(`Failed to Mark Withdraw. ${errMsg}`);
         }
       }
     });
@@ -1497,8 +1499,7 @@ export default {
           configResponse.balance
             = await store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address });
         } catch (e) {
-          reject(`Failed to fetch address balance. ${e}`);
-          return;
+          throw new Error(`Failed to fetch address balance. ${e}`);
         }
 
         const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
@@ -1515,8 +1516,7 @@ export default {
           dexBalance = await store.dispatch('fetchSystemAssetBalances',
             { forAddress: dexAddress, intents: dexIntents });
         } catch (e) {
-          reject(`Failed to fetch address balance. ${e}`);
-          return;
+          throw new Error(`Failed to fetch address balance. ${e}`);
         }
 
         const unspents = assetId === assets.GAS ? dexBalance.assets.GAS.unspent : dexBalance.assets.NEO.unspent;
@@ -1594,8 +1594,9 @@ export default {
           tx: configResponse.tx,
         });
       } catch (e) {
+        const errMsg = typeof e === 'string' ? e : e.message;
         if (tryCount < 3) {
-          alerts.error(`Withdraw failed. Error: ${e.message} Retrying...`);
+          alerts.error(`Withdraw failed. Error: ${errMsg} Retrying...`);
           setTimeout(() => {
             this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1)
               .then((res) => {
@@ -1607,8 +1608,7 @@ export default {
           }, 10000);
           return;
         }
-
-        reject(`Failed to send asset withdraw transaction. ${e.message}`);
+        reject(`Failed to send asset withdraw transaction. ${errMsg}`);
       }
     });
   },
