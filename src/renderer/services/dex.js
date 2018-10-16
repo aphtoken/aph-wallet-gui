@@ -1024,6 +1024,8 @@ export default {
             store.commit('setSystemWithdraw', systemWithdraw);
             reject(errorMsg);
           };
+          // TODO: should pass this through the whole way instead of getting again in case they switch wallets somehow
+          const currentWallet = wallets.getCurrentWallet();
 
           this.markWithdraw(assetId, quantity)
             .then((res) => {
@@ -1049,6 +1051,7 @@ export default {
 
                           neo.monitorTransactionConfirmation(res.tx, true)
                             .then(() => {
+                              neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
                               store.commit('setSystemWithdrawStep', 5);
                               resolve(res.tx);
                             })
@@ -1063,7 +1066,7 @@ export default {
                       .catch((e) => {
                         reject(`Failed to withdraw system asset. ${e}`);
                       });
-                  }, 10000);
+                  }, 1000);
                 })
                 .catch((e) => {
                   reject(`Failed to monitor transaction for confirmation. ${e}`);
