@@ -1064,17 +1064,17 @@ export default {
                         }
                       })
                       .catch((e) => {
-                        reject(`Failed to withdraw system asset. ${e}`);
+                        rejectWithError(`Failed to withdraw system asset. ${e}`);
                       });
                   }, 1000);
                 })
                 .catch((e) => {
-                  reject(`Failed to monitor transaction for confirmation. ${e}`);
+                  rejectWithError(`Failed to monitor transaction for confirmation. ${e}`);
                   this.completeSystemAssetWithdrawals();
                 });
             })
             .catch((e) => {
-              reject(`Failed to mark system asset for withdrawal. ${e}`);
+              rejectWithError(`Failed to mark system asset for withdraw. ${e}`);
             });
 
           return;
@@ -1471,6 +1471,18 @@ export default {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
+
+        if (!store.state.systemWithdraw) {
+          const systemWithdraw = {
+            step: 0,
+            asset: assetId === assets.NEO ? 'NEO' : 'GAS',
+            amount: quantity.toString(),
+          };
+          store.commit('setSystemWithdraw', systemWithdraw);
+          store.commit('setSystemWithdrawStep', 3);
+          store.commit('setWithdrawInProgressModalModel', {
+          });
+        }
 
         const config = {
           net: currentNetwork.net,
