@@ -1105,7 +1105,7 @@ export default {
   },
 
   markWithdraw(assetId, quantity, tryCount = 1) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const currentNetwork = network.getSelectedNetwork();
       const currentWallet = wallets.getCurrentWallet();
       if (DBG_LOG) console.log(`markWithdraw assetId ${assetId} quantity ${quantity} tryCount ${tryCount}`);
@@ -1154,118 +1154,93 @@ export default {
           alerts.success(`Processing withdraw request for ${quantity.toString()} ${assetHolding.symbol}...`);
         }
 
-        api.fillKeys(config)
-          .then((configResponse) => {
-            return new Promise(async (resolveBalance) => {
-              try {
-                configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
-                  { forAddress: currentWallet.address });
-                resolveBalance(configResponse);
-              } catch (e) {
-                reject(`Failed to fetch address balance. ${e}`);
-              }
-            });
-          })
-          .then((configResponse) => {
-            return api.createTx(configResponse, 'invocation');
-          })
-          .then((configResponse) => {
-            return new Promise((resolveTx) => {
-              const inputsFromGasFee = configResponse.tx.inputs.length;
-              this.calculateWithdrawInputsAndOutputs(configResponse, assetId, quantity)
-                .then(() => {
-                  store.commit('setSystemWithdrawMergeState', { utxoCount: configResponse.tx.inputs.length - inputsFromGasFee, step: 1 });
-                  const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
-                  const validUntilBlockIndex = currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0;
-                  if (DBG_LOG) console.log(`*Valid until block index: ${validUntilBlockIndex}`);
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-                    u.num2fixed8(validUntilBlockIndex).padEnd(64, '0'));
+        let configResponse = await api.fillKeys(config);
 
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
-                  resolveTx(configResponse);
-                })
-                .catch((e) => {
-                  if (tryCount <= 1) {
-                    if (DBG_LOG) console.log(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
-                    reject(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
-                  } else {
-                    if (DBG_LOG) console.log('Failed to Mark Withdraw.');
-                    reject('Failed to Mark Withdraw.');
-                  }
-                });
-            });
-          })
-          .then((configResponse) => {
-            return api.signTx(configResponse);
-          })
-          .then((configResponse) => {
-            const attachInvokedContract = {
-              invocationScript: ('00').repeat(2),
-              verificationScript: '',
-            };
+        try {
+          configResponse.balance = await store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address });
+        } catch (e) {
+          throw new Error(`Failed to fetch address balance. ${e}`);
+        }
 
-            // We need to order this for the VM.
-            const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-            if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
-              configResponse.tx.scripts.push(attachInvokedContract);
-            } else {
-              configResponse.tx.scripts.unshift(attachInvokedContract);
-            }
+        if (!currentNetwork.bestBlock) {
+          reject('Wallet has not obtained a block number yet.');
+          return;
+        }
 
-            let i = 0;
+        // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
+        const blockIndex = currentNetwork.bestBlock.index;
+        const validUntilValue = (blockIndex + 20) * 0.00000001;
 
-            configResponse.tx.outputs.forEach(({ value }) => {
-              if (utxoIndex === -1 && quantity.isEqualTo(value)) {
-                utxoIndex = i;
-              }
-              i += 1;
-            });
+        configResponse = await api.createTx(configResponse, 'invocation');
 
-            if (utxoIndex === -1) {
-              if (DBG_LOG) console.log('Unable to generate valid UTXO');
-              throw new Error('Unable to generate valid UTXO');
-            }
-            return configResponse;
-          })
-          .then((configResponse) => {
-            if (DBG_LOG) console.log(`sendTx to mark withdraw ${JSON.stringify(configResponse)}`);
-            return api.sendTx(configResponse);
-          })
-          .then((configResponse) => {
-            if (configResponse.response.result) {
-              resolve({
-                success: configResponse.response.result,
-                tx: configResponse.tx,
-                utxoIndex,
-              });
-              return;
-            }
-            // TODO: refactor this using await and try catch
-            if (tryCount < 3) {
-              handleRetry();
-            } else {
-              reject('Failed to Mark Withdraw. Empty result from sendTX. Exhausted Retries.');
-            }
-          })
-          .catch((e) => {
-            if (DBG_LOG) console.log(`failure to mark returned from sendTx ${e}`);
-            if (tryCount < 3) {
-              handleRetry();
-            } else {
-              reject(`Failed to Mark Withdraw. ${e}`);
-            }
-          });
+        const inputsFromGasFee = configResponse.tx.inputs.length;
+
+        try {
+          // This decorates the configResponse with the appropriate inputs
+          await this.calculateWithdrawInputsAndOutputs(configResponse, assetId, quantity);
+        } catch (e) {
+          if (DBG_LOG) console.log(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
+          reject(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
+        }
+
+        store.commit('setSystemWithdrawMergeState', { utxoCount: configResponse.tx.inputs.length - inputsFromGasFee, step: 1 });
+        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
+        if (DBG_LOG) console.log(`*block index: ${blockIndex} Valid until: ${validUntilValue}`);
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+          u.num2fixed8(validUntilValue).padEnd(64, '0'));
+
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+
+        configResponse = await api.signTx(configResponse);
+
+        const attachInvokedContract = {
+          invocationScript: ('00').repeat(2),
+          verificationScript: '',
+        };
+
+        // We need to order this for the VM.
+        const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
+        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+          configResponse.tx.scripts.push(attachInvokedContract);
+        } else {
+          configResponse.tx.scripts.unshift(attachInvokedContract);
+        }
+
+        let i = 0;
+
+        configResponse.tx.outputs.forEach(({ value }) => {
+          if (utxoIndex === -1 && quantity.isEqualTo(value)) {
+            utxoIndex = i;
+          }
+          i += 1;
+        });
+
+        if (utxoIndex === -1) {
+          if (DBG_LOG) console.log('Unable to generate valid UTXO');
+          throw new Error('Unable to generate valid UTXO');
+        }
+
+        if (DBG_LOG) console.log(`sendTx to mark withdraw ${JSON.stringify(configResponse)}`);
+        configResponse = await api.sendTx(configResponse);
+
+        if (!configResponse.response.result) {
+          throw new Error('Failed to Mark Withdraw. Empty result from sendTX.');
+        }
+
+        resolve({
+          success: configResponse.response.result,
+          tx: configResponse.tx,
+          utxoIndex,
+        });
       } catch (e) {
         if (tryCount < 3) {
           handleRetry();
         } else {
-          reject(`Failed to Mark Withdraw. ${e.message}`);
+          reject(`Failed to Mark Withdraw. ${typeof e === 'string' ? e : e.message}`);
         }
       }
     });
@@ -1381,7 +1356,7 @@ export default {
 
         resolve(config);
       } catch (e) {
-        reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
+        reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${typeof e === 'string' ? e : e.message}`);
       }
     });
   },
@@ -1426,6 +1401,14 @@ export default {
           reject(`Failed to fetch address balance. ${e}`);
         }
 
+        if (!currentNetwork.bestBlock) {
+          reject('Wallet has not obtained a block number yet.');
+          return;
+        }
+        // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
+        const blockIndex = currentNetwork.bestBlock.index;
+        const validUntilValue = (blockIndex + 20) * 0.00000001;
+
         configResponse.sendingFromSmartContract = true;
         api.createTx(configResponse, 'invocation')
           .then((configResponse) => {
@@ -1434,18 +1417,16 @@ export default {
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
-
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL, u.num2fixed8(validUntilValue).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
 
             if (token.canPull !== false) {
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(currentNetwork.dex_hash));
             }
 
-            if (DBG_LOG) console.log(`block index; ${currentNetwork.bestBlock.index}`);
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
+            if (DBG_LOG) console.log(`block index; ${blockIndex} validUntil: ${validUntilValue}`);
+            // Contract doesn't use this anymore.
+            // configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT, u.num2fixed8(blockIndex).padEnd(64, '0'));
 
             return api.signTx(configResponse);
           })
@@ -1502,7 +1483,7 @@ export default {
           gas: 0,
         };
 
-        // console.log(`withdrawSystemAsset ${assetId} quantity: ${quantity} utxoTxHash ${utxoTxHash} utxoIndex ${utxoIndex} intents ${JSON.stringify(config.intents)}`);
+        if (DBG_LOG) console.log(`withdrawSystemAsset ${assetId} quantity: ${quantity} utxoTxHash ${utxoTxHash} utxoIndex ${utxoIndex} intents ${JSON.stringify(config.intents)}`);
         if (currentWallet.isLedger === true) {
           config.signingFunction = ledger.signWithLedger;
           config.address = currentWallet.address;
@@ -1567,9 +1548,6 @@ export default {
           value: input.value,
         });
 
-        // Apply this to the dex's balance so it won't get picked again for an immediate subsequent withdraw
-        neo.applyTxToAddressSystemAssetBalance(dexAddress, configResponse.tx, false);
-
         const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
@@ -1603,6 +1581,9 @@ export default {
         if (!configResponse || !configResponse.response || (configResponse.response.result !== true && tryCount < 3)) {
           throw new Error('Withdraw rejected by the network. Retrying...');
         }
+
+        // Apply this to the dex's balance so it won't get picked again for an immediate subsequent withdraw
+        neo.applyTxToAddressSystemAssetBalance(dexAddress, configResponse.tx, false);
 
         if (configResponse.response.result === true) {
           alerts.success('Withdraw relayed, waiting for confirmation...');

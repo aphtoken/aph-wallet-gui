@@ -129,7 +129,7 @@
     }
     .checklist {
       margin: 0 auto;
-      max-width: toRem(520px);
+      max-width: toRem(400px);
       text-align: left;
       .checklist-header {
         font-size: toRem(20px);

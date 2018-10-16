@@ -301,7 +301,7 @@
   "weveAlsoMatchedBackupOrders": "We've also matched {count} backup orders that may be matched in the event that any of these orders are taken already.",
   "withdraw": "Withdraw",
   "withdrawAPH": "Withdraw APH",
-  "withdrawSystemAsset": "Withdrawing ({amount} {asset}) in Process",
+  "withdrawSystemAsset": "Withdrawing\n({amount} {asset})",
   "withdrawStepCalculatingWithdrawInputs": "Initiating",
   "withdrawStepMarkSystemAsset": "Sending ({amount} {asset})",
   "withdrawStepWaitForMarkSystemAsset": "Processing",
