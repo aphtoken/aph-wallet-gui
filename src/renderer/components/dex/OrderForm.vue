@@ -676,6 +676,8 @@ export default {
         await this.$services.dex.setAssetSettings('132947096727c84c7f9e076c90f08fec3bc17f18', 0);
         this.$services.alerts.success('Setup asset TKY');
         */
+        // await this.$services.dex.setAssetSettings('a58b56b30425d3d1f8902034996fcac4168ef71d', 0, true);
+        // this.$services.alerts.success('Setup asset ASA');
 
         /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
@@ -753,6 +755,11 @@ export default {
           2000, 0.00001, 0.44, 0.44, true);
         this.$services.alerts.success('Setup Market GAS-TKY');
         */
+
+        await this.$services.dex.setMarket('a58b56b30425d3d1f8902034996fcac4168ef71d',
+          this.$services.assets.NEO, 2000, 0.0000001, 0.1, 0.1, true);
+        await this.$services.dex.setMarket('a58b56b30425d3d1f8902034996fcac4168ef71d',
+          this.$services.assets.GAS, 2000, 0.0000001, 0.1, 0.1, true);
 
         /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
