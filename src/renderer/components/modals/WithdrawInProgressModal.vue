@@ -32,7 +32,12 @@
 </template>
 
 <script>
+    import ModalWrapper from './ModalWrapper';
+
     export default {
+      components: {
+        ModalWrapper,
+      },
       // name: 'WithdrawInProgressModal',
       computed: {
         closeLabel() {
@@ -40,7 +45,7 @@
             && (this.$store.state.systemWithdraw.step >= 5 || this.$store.state.systemWithdraw.error)) {
             return 'Close';
           }
-          return 'Dismiss (Hides dialog, but continues withdraw in the background)';
+          return 'Dismiss (withdraw continues in background)';
         },
         error() {
           if (this.$store.state.systemWithdraw && this.$store.state.systemWithdraw.error !== null) {
@@ -61,9 +66,6 @@
           return this.$t('withdrawStepWaitForMarkSystemAsset', this.$store.state.systemWithdraw);
         },
         step3Label() {
-          if (this.$store.state.systemWithdraw && this.$store.state.systemWithdraw.step >= 3) {
-            return this.$t('withdrawStepSendingWithdrawSystemAsset', this.$store.state.systemWithdraw);
-          }
           return this.$t('withdrawStepWithdrawSystemAsset', this.$store.state.systemWithdraw);
         },
         step4Label() {
@@ -105,12 +107,13 @@
     width: toRem(600px);
   }
   .header {
+    font-size: toRem(30px);
     padding: $space-lg $space-lg 0;
+    text-align: center;
   }
   .body {
     display: block;
     padding: $space-lg;
-    position: relative;
     text-align: center;
     p {
       margin: 0;
@@ -134,7 +137,7 @@
     }
     .checklist {
       margin: 0 auto;
-      max-width: toRem(450px);
+      max-width: toRem(520px);
       text-align: left;
       .checklist-header {
         font-size: toRem(20px);
