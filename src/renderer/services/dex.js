@@ -1933,6 +1933,9 @@ export default {
   claimAPH() {
     return new Promise((resolve, reject) => {
       try {
+        const withdrawAmountAfterClaim = toBigNumber(store.state.commitState.quantityCommitted
+          + store.state.commitState.availableToClaim)
+          .decimalPlaces(8, BigNumber.ROUND_DOWN);
         this.executeContractTransaction('claim',
           [])
           .then((res) => {
@@ -1945,6 +1948,15 @@ export default {
                 })
                 .catch((e) => {
                   reject(`Failed to monitor transaction confirmation. ${e}`);
+                })
+                .then(() => {
+                  this.withdrawAsset(assets.APH, Number(withdrawAmountAfterClaim))
+                    .then(() => {
+                      alerts.success(`Submitted Withdraw of ${withdrawAmountAfterClaim.toString()} APH.`);
+                    })
+                    .catch((e) => {
+                      alerts.exception(e);
+                    });
                 });
             } else {
               reject('Transaction rejected');
@@ -2076,7 +2088,7 @@ export default {
   },
 
   buildContractTransaction(operation, parameters, neoToSend, gasToSend) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
@@ -2111,41 +2123,39 @@ export default {
           config.account = new wallet.Account(currentWallet.wif);
         }
 
-        api.fillKeys(config)
-          .then((configResponse) => {
-            if (!configResponse.intents && currentNetwork.fee === 0) {
-              return new Promise((balanceResolve) => {
-                configResponse.balance = new wallet.Balance({ address: configResponse.address, net: configResponse.net });
-                balanceResolve(configResponse);
-              });
-            }
+        let neededGasUtxos = (gasToSend && BigNumber(gasToSend).isGreaterThan(0)) ? 1 : 0;
+        let configResponse = await api.fillKeys(config);
+        if (!configResponse.intents && currentNetwork.fee === 0 && !neoToSend && !gasToSend) {
+          configResponse.balance = new wallet.Balance({ address: configResponse.address, net: configResponse.net });
+        } else {
+          try {
+            configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
+              { forAddress: currentWallet.address, intents: config.intents });
+          } catch (e) {
+            reject(`Failed to fetch address balance. ${e}`);
+          }
+          neededGasUtxos += 1;
+          if (neededGasUtxos > 0 && configResponse.balance.assets.GAS.unspent.length < neededGasUtxos) {
+            throw new Error('No unspent GAS available to pay network fee.');
+          }
+        }
 
-            return new Promise(async (resolveBalance) => {
-              try {
-                configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
-                  { forAddress: currentWallet.address, intents: config.intents });
-                resolveBalance(configResponse);
-              } catch (e) {
-                reject(`Failed to fetch address balance. ${e}`);
-              }
-            });
-          })
-          .then((configResponse) => {
-            return api.createTx(configResponse, 'invocation');
-          })
-          .then((configResponse) => {
-            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            return api.signTx(configResponse);
-          })
-          .then((configResponse) => {
-            resolve(configResponse);
-          })
-          .catch((e) => {
-            reject(`Failed to build contract transaction. ${e}`);
-          });
+        if (neededGasUtxos > 1 && gasToSend && BigNumber(gasToSend).isGreaterThanOrEqualTo(
+          configResponse.balance.assets.GAS.balance)) {
+          throw new Error('Cannot send max GAS with a fee set, try a smaller amount or remove GAS fee.');
+        }
+
+        configResponse = await api.createTx(configResponse, 'invocation');
+
+        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+
+        configResponse = await api.signTx(configResponse);
+
+        resolve(configResponse);
       } catch (e) {
-        reject(`Failed to build contract transaction. ${e.message}`);
+        const errMsg = typeof e === 'string' ? e : e.message;
+        reject(`Failed to build contract transaction. ${errMsg}`);
       }
     });
   },
