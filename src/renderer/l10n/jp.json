@@ -286,7 +286,7 @@
   "withdraw": "引出す",
   "withdrawAPH": "APHを引き出す",
   "youAlreadyHaveWalletOpen": "すでに {name} 開いています。",
-  "youMayStillClaim": "あなたの契約残高に戻される予定の{balance}の、委託APH残高を請求できます。",
+  "youMayStillClaim": "{balance}の、委託APH残高を請求できます。",
   "youMustSaveAndBackupTheKeys": "以下のキーを保存、バックアップする必要があります。",
   "youWillBeCreatingTheFollowingMakerOrder": "誰かが購入するまで帳簿に残る以下の生産者注文を作成します。この取引に手数料はかかりません。:",
   "youWillBeImmediatelyTaking": "ただちにこれら{count}\n  の売買申し込みを受けます:",

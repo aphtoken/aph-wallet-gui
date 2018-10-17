@@ -158,14 +158,15 @@ export default {
       'currentNetwork',
     ]),
     shouldDisableCommitButton() {
-      return this.$store.state.commitState.quantityCommitted > 0;
+      return this.$store.state.commitState.quantityCommitted > 0 || this.$store.state.commitChangeInProgress;
     },
     shouldDisableClaimButton() {
-      return this.$store.state.commitState.quantityCommitted <= 0;
+      return this.$store.state.commitState.quantityCommitted <= 0 || this.$store.state.commitChangeInProgress;
     },
     shouldDisableCompoundButton() {
       return this.$store.state.commitState.quantityCommitted <= 0
-        || this.$store.state.commitState.ableToCompoundHeight > this.currentBlock;
+        || this.$store.state.commitState.ableToCompoundHeight > this.currentBlock
+        || this.$store.state.commitChangeInProgress;
     },
     currentBlock() {
       return this.currentNetwork && this.currentNetwork.bestBlock ? this.currentNetwork.bestBlock.index : 0;

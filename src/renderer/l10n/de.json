@@ -286,7 +286,7 @@
   "withdraw": "Withdraw",
   "withdrawAPH": "Withdraw APH",
   "youAlreadyHaveWalletOpen": "Du hast bereits {name} geöffnet.",
-  "youMayStillClaim": "Die committed APH Balance von {balance} darf geclaimt werden und wird der Contract Balance gutgeschrieben",
+  "youMayStillClaim": "Die committed APH Balance von {balance} darf geclaimt.",
   "youMustSaveAndBackupTheKeys": "Du musst die unteren Keys (Schlüssel) speichern und sichern.",
   "youWillBeCreatingTheFollowingMakerOrder": "Du wirst ebenfalls die\n  folgende Maker Order erstellen, die solange im Orderbook verbleibt, bis\n  sie von jemanden bedient wird. Du musst für diesen Trade keine Gebühr zahlen:",
   "youWillBeImmediatelyTaking": "Du wirst diese {count}\n Angebote sofort annehmen:",

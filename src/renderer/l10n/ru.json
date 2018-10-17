@@ -287,7 +287,7 @@
   "withdraw": "Вывод",
   "withdrawAPH": "Вывод APH",
   "youAlreadyHaveWalletOpen": "У Вас уже есть открытый {name}.",
-  "youMayStillClaim": "Вы можете по-прежнему заявить о своем выполненном балансе APH {balance}, который будет возвращен на ваш баланс по контракту.",
+  "youMayStillClaim": "Вы можете по-прежнему заявить о своем выполненном балансе APH {balance}.",
   "youMustSaveAndBackupTheKeys": "Вы должны сохранить и создать резервные копии ключей ниже.",
   "youWillBeCreatingTheFollowingMakerOrder": "Вы также создадите следующий заказ\n   производителя, который будет оставлен в книге, пока кто-то не возьмет его.\n    Плата за эту торговлю не взимается:",
   "youWillBeImmediatelyTaking": "Вы будете немедленно принимать эти {count}\n     предложения:",

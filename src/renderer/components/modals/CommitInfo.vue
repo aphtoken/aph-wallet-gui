@@ -6,9 +6,10 @@
         <aph-icon name="commit"></aph-icon>
       </div>
       <h1>{{$t('commitInfoHeader')}}</h1>
-      <p>{{$t('commitInfoBody1')}}</p>
       <p>{{$t('commitInfoBody2', { minClaimBlocks: $store.state.commitState.minimumClaimBlocks})}}</p>
+      <br/>
       <p>{{$t('commitInfoBody3')}}</p>
+      <br/>
       <p>{{$t('commitInfoBody4')}}</p>
     </div>
     <div class="footer">

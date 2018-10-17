@@ -283,7 +283,7 @@
   "withdraw": "Uitbetalen",
   "withdrawAPH": "APH Uitbetalen",
   "youAlreadyHaveWalletOpen": "Je hebt {name} al open.",
-  "youMayStillClaim": "Je kunt nog steeds je gecommitteerde APH-saldo van {balance} claimen die dan wordt teruggestort naar uw contractsaldo.",
+  "youMayStillClaim": "Je kunt nog steeds je gecommitteerde APH-saldo van {balance} claimen.",
   "youMustSaveAndBackupTheKeys": "Je moet onderstaande Sleutel opslaan en een backup maken.",
   "youWillBeCreatingTheFollowingMakerOrder": "Je maakt ook de volgende makerorder aan \n+deze wordt bewaard in het boek totdat iemand deze accepteerd.\n+Er worden geen kosten in rekening gebracht voor deze transactie:",
   "youWillBeImmediatelyTaking": "Je neemt onmiddelijk deze {count}\n   biedingen aan:",

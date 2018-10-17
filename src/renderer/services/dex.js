@@ -1902,6 +1902,7 @@ export default {
   commitAPH(quantity) {
     return new Promise((resolve, reject) => {
       try {
+        store.commit('setCommitChangeInProgress', {});
         this.executeContractTransaction('commit',
           [
             u.num2fixed8(quantity),
@@ -1911,61 +1912,82 @@ export default {
               alerts.success('Commit relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
-                  resolve(res.tx);
+                  setTimeout(async () => {
+                    try {
+                      await this.fetchCommitState(wallets.getCurrentWallet().address);
+                    } catch (e) {
+                      const errMsg = typeof e === 'string' ? e : e.message;
+                      alerts.exception(errMsg);
+                    }
+                    store.commit('setCommitChangeInProgress', null);
+                    resolve(res.tx);
+                  }, 10000);
                 })
                 .catch((e) => {
-                  reject(`Commit Failed. ${e}`);
+                  store.commit('setCommitChangeInProgress', null);
+                  reject(`Failed monitoring for commit complete transaction. ${e}`);
                 });
             } else {
+              store.commit('setCommitChangeInProgress', null);
               reject('Transaction rejected');
             }
           })
           .catch((e) => {
+            store.commit('setCommitChangeInProgress', null);
             reject(`Commit Failed. ${e}`);
           });
       } catch (e) {
+        store.commit('setCommitChangeInProgress', null);
         reject(`Commit Failed. ${e.message}`);
       }
     });
   },
 
   claimAPH() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         const withdrawAmountAfterClaim = toBigNumber(store.state.commitState.quantityCommitted
           + store.state.commitState.availableToClaim)
           .decimalPlaces(8, BigNumber.ROUND_DOWN);
-        this.executeContractTransaction('claim',
-          [])
-          .then((res) => {
-            if (res.success) {
-              alerts.success('Claim relayed, waiting for confirmation...');
-              neo.monitorTransactionConfirmation(res.tx, true)
-                .then(() => {
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
-                  alerts.success(`Claimed ${withdrawAmountAfterClaim.toString()} APH to Contract Balance.`);
-                  this.withdrawAsset(store.state.currentNetwork.aph_hash, Number(withdrawAmountAfterClaim))
-                    .then(() => {
-                      alerts.success(`Submitted Withdraw of ${withdrawAmountAfterClaim.toString()} APH.`);
-                    })
-                    .catch((e) => {
-                      alerts.exception(e);
-                    });
-                  resolve(res.tx);
-                })
-                .catch((e) => {
-                  reject(`Failed to monitor transaction confirmation. ${e}`);
-                });
-            } else {
-              reject('Transaction rejected');
+
+        store.commit('setCommitChangeInProgress', {});
+        const res = await this.executeContractTransaction('claim', []);
+        if (!res.success) {
+          reject('Transaction rejected');
+          return;
+        }
+
+        alerts.success('Claim relayed, waiting for confirmation...');
+        neo.monitorTransactionConfirmation(res.tx, true)
+          .then(async () => {
+            alerts.success(`Claimed ${withdrawAmountAfterClaim.toString()} APH to Contract Balance.`);
+
+            try {
+              await this.withdrawAsset(store.state.currentNetwork.aph_hash, Number(withdrawAmountAfterClaim));
+
+              alerts.success(`Submitted Withdraw of ${withdrawAmountAfterClaim.toString()} APH.`);
+            } catch (e) {
+              const errMsg = typeof e === 'string' ? e : e.message;
+              const alertMsg = `Failed to withdraw claimed APH. It remains in contract balance. Error: ${errMsg}`;
+              alerts.exception(alertMsg);
             }
+            try {
+              await this.fetchCommitState(wallets.getCurrentWallet().address);
+            } catch (e) {
+              const errMsg = typeof e === 'string' ? e : e.message;
+              alerts.exception(errMsg);
+            }
+            store.commit('setCommitChangeInProgress', null);
+            resolve(res.tx);
           })
           .catch((e) => {
-            reject(`Claim Failed. ${e}`);
+            store.commit('setCommitChangeInProgress', null);
+            reject(`Failed to monitor transaction confirmation. ${e}`);
           });
       } catch (e) {
-        reject(`Claim Failed. ${e.message}`);
+        const errMsg = typeof e === 'string' ? e : e.message;
+        reject(`Claim Failed. ${errMsg}`);
+        store.commit('setCommitChangeInProgress', null);
       }
     });
   },
@@ -1973,6 +1995,7 @@ export default {
   compoundAPH() {
     return new Promise((resolve, reject) => {
       try {
+        store.commit('setCommitChangeInProgress', {});
         this.executeContractTransaction('compound',
           [])
           .then((res) => {
@@ -1980,21 +2003,32 @@ export default {
               alerts.success('Compound relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  // Note: Compound doesn't change wallet nep5 balance; no need to require refresh of APH balance here.
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
-                  resolve(res.tx);
+                  setTimeout(async () => {
+                    try {
+                      await this.fetchCommitState(wallets.getCurrentWallet().address);
+                    } catch (e) {
+                      const errMsg = typeof e === 'string' ? e : e.message;
+                      alerts.exception(errMsg);
+                    }
+                    store.commit('setCommitChangeInProgress', null);
+                    resolve(res.tx);
+                  }, 10000);
                 })
                 .catch((e) => {
+                  store.commit('setCommitChangeInProgress', null);
                   reject(`Failed to monitor transaction confirmation. ${e}`);
                 });
             } else {
+              store.commit('setCommitChangeInProgress', null);
               reject('Transaction rejected');
             }
           })
           .catch((e) => {
+            store.commit('setCommitChangeInProgress', null);
             reject(`Compound Failed. ${e}`);
           });
       } catch (e) {
+        store.commit('setCommitChangeInProgress', null);
         reject(`Compound Failed. ${e.message}`);
       }
     });

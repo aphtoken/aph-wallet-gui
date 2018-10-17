@@ -286,7 +286,7 @@
   "withdraw": "인출",
   "withdrawAPH": "APH 인출",
   "youAlreadyHaveWalletOpen": "이미 {name}를 열었습니다.",
-  "youMayStillClaim": "고객님의 계약 잔액으로 반환될 {balance}의 커밋된 APH 잔액을 아직 요청할 수 있습니다.",
+  "youMayStillClaim": "{balance}의 커밋된 APH 잔액을 아직 요청할 수 있습니다.",
   "youMustSaveAndBackupTheKeys": "아래의 키를 저장하고 백업해야합니다..",
   "youWillBeCreatingTheFollowingMakerOrder": "아래의 제조자 주문도 생성해야 하며, 본 주문은\n   누군가가 채택할때까지 남을 것입니다. 본 거래에 대한 수수료는 청구되지 않습니다.:",
   "youWillBeImmediatelyTaking": "본 {count}\n 제안을 즉시 체결해야 합니다:",
