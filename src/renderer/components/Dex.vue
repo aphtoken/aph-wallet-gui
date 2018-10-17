@@ -18,9 +18,6 @@
         </div>
       </div>
       <div class="grid--column column-right">
-        <div class="learn-more">
-          <button class="learn-more-btn" @click="toggleLearnMore">{{ $t('learnMore') }}</button>
-        </div>
         <div class="grid--cell right-top">
           <router-view name="right-top"></router-view>
         </div>
@@ -137,10 +134,6 @@ export default {
       }
 
       this.connected = true;
-    },
-
-    toggleLearnMore() {
-      this.$store.commit('setShowLearnMore', true);
     },
   },
 
@@ -303,12 +296,6 @@ export default {
       color: $purple;
       font-weight: GilroyMedium;
       margin-top: $space-lg;
-    }
-  }
-
-  .learn-more {
-    .learn-more-btn {
-      @extend %btn;
     }
   }
 }
