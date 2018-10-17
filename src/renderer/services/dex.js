@@ -1944,19 +1944,18 @@ export default {
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
                   this.fetchCommitState(wallets.getCurrentWallet().address);
-                  resolve(res.tx);
-                })
-                .catch((e) => {
-                  reject(`Failed to monitor transaction confirmation. ${e}`);
-                })
-                .then(() => {
-                  this.withdrawAsset(assets.APH, Number(withdrawAmountAfterClaim))
+                  alerts.success(`Claimed ${withdrawAmountAfterClaim.toString()} APH to Contract Balance.`);
+                  this.withdrawAsset(store.state.currentNetwork.aph_hash, Number(withdrawAmountAfterClaim))
                     .then(() => {
                       alerts.success(`Submitted Withdraw of ${withdrawAmountAfterClaim.toString()} APH.`);
                     })
                     .catch((e) => {
                       alerts.exception(e);
                     });
+                  resolve(res.tx);
+                })
+                .catch((e) => {
+                  reject(`Failed to monitor transaction confirmation. ${e}`);
                 });
             } else {
               reject('Transaction rejected');
