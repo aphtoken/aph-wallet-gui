@@ -18,6 +18,7 @@ import { toBigNumber } from './formatting.js';
 import { claiming, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SCRIPT = 0x20;
+const TX_ATTR_USAGE_HEIGHT = 0xf0;
 const TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE = 0xA1;
 const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xA2;
 const TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID = 0xA3;
@@ -1914,14 +1915,14 @@ export default {
                 .then(() => {
                   setTimeout(async () => {
                     try {
-                      await this.fetchCommitState(wallets.getCurrentWallet().address);
+                      await store.dispatch('fetchCommitState');
                     } catch (e) {
                       const errMsg = typeof e === 'string' ? e : e.message;
                       alerts.exception(errMsg);
                     }
                     store.commit('setCommitChangeInProgress', null);
                     resolve(res.tx);
-                  }, 10000);
+                  }, 5000);
                 })
                 .catch((e) => {
                   store.commit('setCommitChangeInProgress', null);
@@ -1972,7 +1973,7 @@ export default {
               alerts.exception(alertMsg);
             }
             try {
-              await this.fetchCommitState(wallets.getCurrentWallet().address);
+              await store.dispatch('fetchCommitState');
             } catch (e) {
               const errMsg = typeof e === 'string' ? e : e.message;
               alerts.exception(errMsg);
@@ -2005,14 +2006,14 @@ export default {
                 .then(() => {
                   setTimeout(async () => {
                     try {
-                      await this.fetchCommitState(wallets.getCurrentWallet().address);
+                      await store.dispatch('fetchCommitState');
                     } catch (e) {
                       const errMsg = typeof e === 'string' ? e : e.message;
                       alerts.exception(errMsg);
                     }
                     store.commit('setCommitChangeInProgress', null);
                     resolve(res.tx);
-                  }, 10000);
+                  }, 5000);
                 })
                 .catch((e) => {
                   store.commit('setCommitChangeInProgress', null);
@@ -2183,6 +2184,8 @@ export default {
 
           const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
           configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+          configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+            u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
 
           configResponse = await api.signTx(configResponse);
         } catch (e) {
@@ -2268,6 +2271,9 @@ export default {
               const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+              // TODO: may want to use a different attribute; ledger was having a singing issue and may be due to this attribute.
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+                u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
 
               configResponse.tx.outputs.forEach((output) => {
                 output.scriptHash = currentNetwork.dex_hash;
