@@ -114,6 +114,9 @@ export default {
             new BigNumber(orders[selectedOrderIndex].quantity)).toString());
       }
     },
+    toggleNightMode() {
+      this.$services.settings.setStyleMode(this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
+    },
   },
 };
 </script>

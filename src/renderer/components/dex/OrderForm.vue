@@ -821,9 +821,6 @@ export default {
           this.$services.alerts.exception(e);
         });
     },
-    toggleNightMode() {
-      this.$services.settings.setStyleMode(this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
-    },
   },
 };
 </script>
