@@ -18,7 +18,6 @@ import { toBigNumber } from './formatting.js';
 import { claiming, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SCRIPT = 0x20;
-const TX_ATTR_USAGE_HEIGHT = 0xf0;
 const TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE = 0xA1;
 const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xA2;
 const TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID = 0xA3;
@@ -1014,7 +1013,6 @@ export default {
             amount: quantity.toString(),
           };
 
-          console.log('Resetting state to step 0!!!!');
           store.commit('setSystemWithdraw', systemWithdraw);
 
           store.commit('setWithdrawInProgressModalModel', {
@@ -1427,8 +1425,6 @@ export default {
             }
 
             if (DBG_LOG) console.log(`block index; ${blockIndex} validUntil: ${validUntilValue}`);
-            // Contract doesn't use this anymore.
-            // configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT, u.num2fixed8(blockIndex).padEnd(64, '0'));
 
             return api.signTx(configResponse);
           })
@@ -1547,17 +1543,22 @@ export default {
           value: input.value,
         });
 
+        if (!currentNetwork.bestBlock) {
+          throw new Error('Wallet has not obtained a block number yet.');
+        }
+        // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
+        const blockIndex = currentNetwork.bestBlock.index;
+        const validUntilValue = (blockIndex + 20) * 0.00000001;
+
         const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-          u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
+          u.num2fixed8(validUntilValue).padEnd(64, '0'));
 
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-          u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
 
         configResponse = await api.signTx(configResponse);
 
@@ -2135,8 +2136,6 @@ export default {
           .then((configResponse) => {
             const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
             return api.signTx(configResponse);
           })
           .then((configResponse) => {
@@ -2220,8 +2219,6 @@ export default {
               const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-              configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-                u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
 
               configResponse.tx.outputs.forEach((output) => {
                 output.scriptHash = currentNetwork.dex_hash;
