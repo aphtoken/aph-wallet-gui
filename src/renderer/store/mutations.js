@@ -60,15 +60,17 @@ export {
   setShowClaimGasModal,
   setShowEditContactModal,
   setShowImportAWalletModal,
+  setShowLearnMore,
   setShowLoginToWalletModal,
+  setShowPortfolioHeader,
   setShowSendAddressModal,
   setShowSendRequestLedgerSignature,
   setShowSendWithLedgerModal,
   setShowWalletBackupModal,
   setSocketOrderCreated,
-  setSocketOrderMatched,
   setSocketOrderCreationFailed,
   setSocketOrderMatchFailed,
+  setSocketOrderMatched,
   setStatsToken,
   setStyleMode,
   setSystemWithdraw,
@@ -346,6 +348,10 @@ function setShowLoginToWalletModal(state, wallet) {
   state.currentLoginToWallet = wallet;
 }
 
+function setShowPortfolioHeader(state, value) {
+  state.showPortfolioHeader = value;
+}
+
 function setShowImportAWalletModal(state, value) {
   state.showImportAWalletModal = value;
 }
@@ -544,6 +550,10 @@ function setMenuToggleable(state, menuToggleable) {
 
 function setMenuCollapsed(state, menuCollapsed) {
   state.menuCollapsed = menuCollapsed;
+}
+
+function setShowLearnMore(state, value) {
+  state.showLearnMore = value;
 }
 
 function SOCKET_ONOPEN(state, event) {

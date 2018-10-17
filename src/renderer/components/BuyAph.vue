@@ -28,7 +28,7 @@
 <script>
 export default {
   beforeDestroy() {
-    this.$store.state.showPortfolioHeader = true;
+    this.$store.commit('setShowPortfolioHeader', true);
   },
 
   data() {
@@ -38,7 +38,7 @@ export default {
   },
 
   mounted() {
-    this.$store.state.showPortfolioHeader = false;
+    this.$store.commit('setShowPortfolioHeader', false);
   },
 };
 </script>

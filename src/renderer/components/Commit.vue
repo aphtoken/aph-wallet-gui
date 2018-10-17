@@ -129,12 +129,12 @@ export default {
   },
 
   beforeDestroy() {
-    this.$store.state.showPortfolioHeader = true;
+    this.$store.commit('setShowPortfolioHeader', true);
     clearInterval(loadCommitStateIntervalId);
   },
 
   mounted() {
-    this.$store.state.showPortfolioHeader = false;
+    this.$store.commit('setShowPortfolioHeader', false);
     this.$store.dispatch('fetchCommitState');
 
     loadCommitStateIntervalId = setInterval(() => {

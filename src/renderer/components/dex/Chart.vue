@@ -6,7 +6,7 @@
     </div>
     <div class="body" v-if="isTradingDisabled">
       <p v-if="isOutOfDate">
-        {{$t('outOfDateMessage')}}        
+        {{$t('outOfDateMessage')}}
       </p>
       <p v-if="isMarketClosed">
         {{$t('marketClosedMessage')}}
@@ -191,7 +191,7 @@ export default {
           },
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ? 
+            const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
               this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice) :
               [];
 
@@ -470,6 +470,7 @@ export default {
     }
 
     &.tab {
+      position: relative;
       display: flex;
       justify-content: flex-end;
 
@@ -648,7 +649,6 @@ export default {
         .asks {
           flex-direction: row-reverse;
         }
-
       }
     }
   }
