@@ -3,45 +3,49 @@
     <section id="dex--order-form">
       <aph-spinner-wrapper :hideCondition="!!$store.state.holdings.length" identifier="fetchHoldings">
         <div class="body">
-          <div class="side">
-            <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}} {{ quoteHolding.symbol }}</div>
-            <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}} {{ quoteHolding.symbol }}</div>
-          </div>
-          <div class="order-type">
-            <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
-          </div>
-          <div class="price" v-if="orderType === 'Limit'">
-            <aph-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-input>
-          </div>
-          <div class="quantity">
-            <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
-          </div>
-          <div class="percentages">
-            <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
-            <div @click="setPercent(.50)" :class="['percent-btn', {selected: selectedPercent === .50}]">50%</div>
-            <div @click="setPercent(.75)" :class="['percent-btn', {selected: selectedPercent === .75}]">75%</div>
-            <div @click="setPercent(1)" :class="['percent-btn', {selected: selectedPercent === 1}]">100%</div>
-          </div>
-          <div class="options">
-            <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
-              <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info-question-mark"></aph-icon>
-              <label>{{$t('postOnly')}}</label>
-              <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
-              <aph-icon name="radio-off" v-else></aph-icon>
+          <div class="scroll-wrapper">
+            <div class="side">
+              <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}} {{ quoteHolding.symbol }}</div>
+              <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}} {{ quoteHolding.symbol }}</div>
+            </div>
+            <div class="order-type">
+              <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
+            </div>
+            <div class="price" v-if="orderType === 'Limit'">
+              <aph-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-input>
+            </div>
+            <div class="quantity">
+              <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
+            </div>
+            <div class="percentages">
+              <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
+              <div @click="setPercent(.50)" :class="['percent-btn', {selected: selectedPercent === .50}]">50%</div>
+              <div @click="setPercent(.75)" :class="['percent-btn', {selected: selectedPercent === .75}]">75%</div>
+              <div @click="setPercent(1)" :class="['percent-btn', {selected: selectedPercent === 1}]">100%</div>
+            </div>
+            <div class="options">
+              <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
+                <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info-question-mark"></aph-icon>
+                <label>{{$t('postOnly')}}</label>
+                <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
+                <aph-icon name="radio-off" v-else></aph-icon>
+              </div>
             </div>
           </div>
-          <div class="total">
-            <div class="label">{{$t('total')}} ({{ baseHolding.symbol }})</div>
-            <div class="value">{{ $formatNumber(total) }}</div>
-          </div>
-          <div class="estimate">
-            <div class="label">{{$t('estimate')}} ({{ $services.settings.getCurrency() }})</div>
-            <div class="value">{{ $formatMoney(estimate) }}</div>
-          </div>
-          <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
+          <div class="order-btn-container">
+            <div class="total">
+              <div class="label">{{$t('total')}} ({{ baseHolding.symbol }})</div>
+              <div class="value">{{ $formatNumber(total) }}</div>
+            </div>
+            <div class="estimate">
+              <div class="label">{{$t('estimate')}} ({{ $services.settings.getCurrency() }})</div>
+              <div class="value">{{ $formatMoney(estimate) }}</div>
+            </div>
+            <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
                 :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
-            {{ orderButtonLabel }}
-          </button>
+              {{ orderButtonLabel }}
+            </button>
+          </div>
         </div>
         <div class="footer">
           <div @click="actionableHolding = quoteHolding" :class="['balance', {active: quoteHolding.symbol === actionableHolding.symbol}]" :title="quoteBalanceToolTip">
@@ -817,6 +821,9 @@ export default {
           this.$services.alerts.exception(e);
         });
     },
+    toggleNightMode() {
+      this.$services.settings.setStyleMode(this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
+    },
   },
 };
 </script>
@@ -839,7 +846,17 @@ export default {
     @extend %tile-light;
 
     flex: 1;
-    overflow: auto;
+    display: flex;
+    flex-flow: column;
+
+    .scroll-wrapper {
+      overflow: auto;
+      padding: $space $space 0 $space;
+    }
+
+    .order-btn-container {
+      padding: $space $space $space $space;
+    }
 
     .side {
       display: flex;
@@ -926,6 +943,7 @@ export default {
 
         label {
           cursor: pointer;
+          white-space: nowrap;
         }
 
         .aph-icon {
@@ -953,6 +971,10 @@ export default {
       flex: 1;
       font-family: GilroySemibold;
 
+      height: toRem(38px);
+      line-height: toRem(36px);
+      padding:0;
+
       &:disabled {
         background: transparent !important;
         border-color: $grey;
@@ -978,10 +1000,6 @@ export default {
     .quantity {
       margin-top: $space-sm;
     }
-  }
-
-  .body, .footer {
-    padding: $space;
   }
 
   .footer {
