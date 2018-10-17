@@ -1,15 +1,5 @@
 <template>
   <section id="dex--marketselection">
-    <div class="color-mode-btn" @click="toggleNightMode">
-      <template v-if="$store.state.styleMode === 'Night'">
-        <aph-icon name="sun"></aph-icon>
-        {{$t('dayMode')}}
-      </template>
-      <template v-else>
-        <aph-icon name="moon"></aph-icon>
-        {{$t('nightMode')}}
-      </template>
-    </div>
     <div class="header">
         <h1 class="underlined">{{ $t('marketPairs') }}</h1>
     </div>
@@ -89,12 +79,6 @@ export default {
       'tickerData',
     ]),
   },
-
-  methods: {
-    toggleNightMode() {
-      this.$services.settings.setStyleMode(this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
-    },
-  },
 };
 </script>
 
@@ -110,41 +94,6 @@ export default {
       @extend %underlined-header-sm;
 
       margin-bottom: 0;
-    }
-  }
-
-  .color-mode-btn {
-    @include transition(color);
-
-    align-items: center;
-    border: none;
-    color: $grey;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    font-family: GilroySemibold;
-    padding: $space 0;
-
-    .aph-icon {
-      margin: 0 $space;
-
-      svg {
-        height: toRem(17px);
-      }
-
-      .fill {
-        fill: $grey;
-      }
-    }
-
-    &:hover {
-      color: $purple;
-
-      .aph-icon {
-        .fill {
-          fill: $purple !important;
-        }
-      }
     }
   }
 
@@ -187,7 +136,7 @@ export default {
       }
 
       &.row {
-        margin-top: $space;
+        margin-top: $space-sm;
       }
     }
 
@@ -197,7 +146,7 @@ export default {
       flex-direction: column;
 
       > *:nth-child(n + 2) {
-        margin-top: $space;
+        margin-top: $space-sm;
       }
 
       .market-name {

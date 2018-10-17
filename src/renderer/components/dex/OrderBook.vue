@@ -1,5 +1,15 @@
 <template>
   <section id="dex--order-book">
+    <div class="color-mode-btn" @click="toggleNightMode">
+      <template v-if="$store.state.styleMode === 'Night'">
+        <aph-icon name="sun"></aph-icon>
+        {{$t('dayMode')}}
+      </template>
+      <template v-else>
+        <aph-icon name="moon"></aph-icon>
+        {{$t('nightMode')}}
+      </template>
+    </div>
     <aph-spinner-wrapper ws-message-op="subscribe" ws-message-type="bookSnapshot" ws-message-args="orderBook">
       <div class="header">
         <h1 class="underlined">{{$t('orderBook')}}</h1>
@@ -104,16 +114,23 @@ export default {
             new BigNumber(orders[selectedOrderIndex].quantity)).toString());
       }
     },
+    toggleNightMode() {
+      this.$services.settings.setStyleMode(this.$store.state.styleMode === 'Night' ? 'Day' : 'Night');
+    },
   },
 };
 </script>
 
 <style lang="scss">
 #dex--order-book {
-  @extend %tile-light;
+  
 
   display: flex;
   flex-direction: column;
+
+  .component-wrapper {
+    @extend %tile-light;
+  }
 
   .header {
     flex: none;
@@ -205,6 +222,41 @@ export default {
           .body {
             flex-direction: column-reverse;
           }
+        }
+      }
+    }
+  }
+
+  .color-mode-btn {
+    @include transition(color);
+
+    align-items: center;
+    border: none;
+    color: $grey;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    font-family: GilroySemibold;
+    padding: $space 0;
+
+    .aph-icon {
+      margin: 0 $space;
+
+      svg {
+        height: toRem(17px);
+      }
+
+      .fill {
+        fill: $grey;
+      }
+    }
+
+    &:hover {
+      color: $purple;
+
+      .aph-icon {
+        .fill {
+          fill: $purple !important;
         }
       }
     }

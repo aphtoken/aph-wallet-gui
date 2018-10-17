@@ -74,11 +74,13 @@ const state = {
   },
   statsToken: null,
   styleMode: 'Night',
+  systemWithdraw: null,
   tradeHistory: null,
   transactionDetails: {},
   tickerDataByMarket: {},
   version: pjson.version,
   wallets: [],
+  withdrawInProgressModalModel: null,
 };
 
 const store = new Vuex.Store({

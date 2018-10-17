@@ -38,9 +38,12 @@ export default {
 
   computed: {
     shouldDisableDepositWithdrawButton() {
-      return isNaN(this.amount) ||
-        !this.amount.length ||
-        this.amount <= 0;
+      return isNaN(this.amount)
+        || !this.amount.length
+        || this.amount <= 0
+        || (this.amount > 0 && (this.isDeposit
+          ? this.holding.balance && this.holding.balance.isLessThanOrEqualTo(this.amount)
+          : this.holding.contractBalance && this.holding.contractBalance.isLessThanOrEqualTo(this.amount)));
     },
     holding() {
       return _.find(this.$store.state.holdings, (holding) => {

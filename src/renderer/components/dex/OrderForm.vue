@@ -3,45 +3,49 @@
     <section id="dex--order-form">
       <aph-spinner-wrapper :hideCondition="!!$store.state.holdings.length" identifier="fetchHoldings">
         <div class="body">
-          <div class="side">
-            <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}} {{ quoteHolding.symbol }}</div>
-            <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}} {{ quoteHolding.symbol }}</div>
-          </div>
-          <div class="order-type">
-            <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
-          </div>
-          <div class="price" v-if="orderType === 'Limit'">
-            <aph-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-input>
-          </div>
-          <div class="quantity">
-            <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
-          </div>
-          <div class="percentages">
-            <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
-            <div @click="setPercent(.50)" :class="['percent-btn', {selected: selectedPercent === .50}]">50%</div>
-            <div @click="setPercent(.75)" :class="['percent-btn', {selected: selectedPercent === .75}]">75%</div>
-            <div @click="setPercent(1)" :class="['percent-btn', {selected: selectedPercent === 1}]">100%</div>
-          </div>
-          <div class="options">
-            <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
-              <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info-question-mark"></aph-icon>
-              <label>{{$t('postOnly')}}</label>
-              <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
-              <aph-icon name="radio-off" v-else></aph-icon>
+          <div class="scroll-wrapper">
+            <div class="side">
+              <div @click="setSide('Buy')" :class="['buy-btn', {selected: side === 'Buy'}]">{{$t('buy')}} {{ quoteHolding.symbol }}</div>
+              <div @click="setSide('Sell')" :class="['sell-btn', {selected: side === 'Sell'}]">{{$t('sell')}} {{ quoteHolding.symbol }}</div>
+            </div>
+            <div class="order-type">
+              <aph-select :light="true" :options="orderTypes" v-model="orderType"></aph-select>
+            </div>
+            <div class="price" v-if="orderType === 'Limit'">
+              <aph-input :placeholder="priceLabel" v-model="$store.state.orderPrice"></aph-input>
+            </div>
+            <div class="quantity">
+              <aph-input :placeholder="amountLabel" v-model="$store.state.orderQuantity"></aph-input>
+            </div>
+            <div class="percentages">
+              <div @click="setPercent(.25)" :class="['percent-btn', {selected: selectedPercent === .25}]">25%</div>
+              <div @click="setPercent(.50)" :class="['percent-btn', {selected: selectedPercent === .50}]">50%</div>
+              <div @click="setPercent(.75)" :class="['percent-btn', {selected: selectedPercent === .75}]">75%</div>
+              <div @click="setPercent(1)" :class="['percent-btn', {selected: selectedPercent === 1}]">100%</div>
+            </div>
+            <div class="options">
+              <div @click="postOnly = !postOnly" class="option" v-if="orderType === 'Limit'">
+                <aph-icon :title="postOnlyToolTip" class="post-only-info-icon" name="info-question-mark"></aph-icon>
+                <label>{{$t('postOnly')}}</label>
+                <aph-icon name="radio-on" v-if="postOnly"></aph-icon>
+                <aph-icon name="radio-off" v-else></aph-icon>
+              </div>
             </div>
           </div>
-          <div class="total">
-            <div class="label">{{$t('total')}} ({{ baseHolding.symbol }})</div>
-            <div class="value">{{ $formatNumber(total) }}</div>
-          </div>
-          <div class="estimate">
-            <div class="label">{{$t('estimate')}} ({{ $services.settings.getCurrency() }})</div>
-            <div class="value">{{ $formatMoney(estimate) }}</div>
-          </div>
-          <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
+          <div class="order-btn-container">
+            <div class="total">
+              <div class="label">{{$t('total')}} ({{ baseHolding.symbol }})</div>
+              <div class="value">{{ $formatNumber(total) }}</div>
+            </div>
+            <div class="estimate">
+              <div class="label">{{$t('estimate')}} ({{ $services.settings.getCurrency() }})</div>
+              <div class="value">{{ $formatMoney(estimate) }}</div>
+            </div>
+            <button @click="confirmOrder" :disabled="shouldDisableOrderButton"
                 :class="['order-btn', { 'buy-btn': side === 'Buy', 'sell-btn': side === 'Sell'}]">
-            {{ orderButtonLabel }}
-          </button>
+              {{ orderButtonLabel }}
+            </button>
+          </div>
         </div>
         <div class="footer">
           <div @click="actionableHolding = quoteHolding" :class="['balance', {active: quoteHolding.symbol === actionableHolding.symbol}]" :title="quoteBalanceToolTip">
@@ -676,6 +680,8 @@ export default {
         await this.$services.dex.setAssetSettings('132947096727c84c7f9e076c90f08fec3bc17f18', 0);
         this.$services.alerts.success('Setup asset TKY');
         */
+        // await this.$services.dex.setAssetSettings('a58b56b30425d3d1f8902034996fcac4168ef71d', 0, true);
+        // this.$services.alerts.success('Setup asset ASA');
 
         /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
@@ -688,75 +694,76 @@ export default {
           this.$services.assets.NEO,
           1, 0.0000001, 0.2, 0.2, true);
         this.$services.alerts.success('Setup Market NEO-GAS');
-
-        await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
-          this.$services.assets.GAS,
-          100, 0.0001, 0.0000, 0.25, true);
-        this.$services.alerts.success('Setup Market GAS-APH');
         */
 
         /*
+        await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
+          this.$services.assets.GAS,
+          100, 0.00001, 0.0000, 0.25, true);
+        this.$services.alerts.success('Setup Market GAS-APH');
+
+
         await this.$services.dex.setMarket('b951ecbbc5fe37a9c280a76cb0ce0014827294cf',
           this.$services.assets.NEO,
-          1000, 0.0001, 0.27, 0.27, true);
+          1000, 0.00001, 0.27, 0.27, true);
         this.$services.alerts.success('Setup Market NEO-DBC');
 
         await this.$services.dex.setMarket('b951ecbbc5fe37a9c280a76cb0ce0014827294cf',
           this.$services.assets.GAS,
-          1000, 0.0001, 0.27, 0.27, true);
+          1000, 0.00001, 0.27, 0.27, true);
         this.$services.alerts.success('Setup Market GAS-DBC');
-        */
 
-        /*
+
+        // NKN c36aee199dbba6c3f439983657558cfb67629599
         await this.$services.dex.setMarket('c36aee199dbba6c3f439983657558cfb67629599',
           this.$services.assets.NEO,
-          200, 0.0001, 0.35, 0.35, true);
+          200, 0.00001, 0.35, 0.35, true);
         this.$services.alerts.success('Setup Market NEO-NKN');
 
         await this.$services.dex.setMarket('c36aee199dbba6c3f439983657558cfb67629599',
           this.$services.assets.GAS,
-          1000, 0.0001, 0.35, 0.35, true);
+          1000, 0.00001, 0.35, 0.35, true);
         this.$services.alerts.success('Setup Market GAS-NKN');
-        */
 
-        /*
+        // PHX 1578103c13e39df15d0d29826d957e85d770d8c9
         await this.$services.dex.setMarket('1578103c13e39df15d0d29826d957e85d770d8c9',
           this.$services.assets.NEO,
-          1000, 0.0001, 0.47, 0.47, true);
+          1000, 0.00001, 0.47, 0.47, true);
         this.$services.alerts.success('Setup Market NEO-PHX');
-        */
-        /*
+
         await this.$services.dex.setMarket('1578103c13e39df15d0d29826d957e85d770d8c9',
           this.$services.assets.GAS,
-          1000, 0.0001, 0.47, 0.47, true);
+          1000, 0.00001, 0.47, 0.47, true);
         this.$services.alerts.success('Setup Market GAS-PHX');
 
 
+        // SOUL ed07cffad18f1308db51920d99a2af60ac66a7b3
         await this.$services.dex.setMarket('ed07cffad18f1308db51920d99a2af60ac66a7b3',
           this.$services.assets.NEO,
-          1000, 0.0001, 0.47, 0.47, true);
+          100, 0.00001, 0.27, 0.47, true);
         this.$services.alerts.success('Setup Market NEO-SOUL');
 
         await this.$services.dex.setMarket('ed07cffad18f1308db51920d99a2af60ac66a7b3',
           this.$services.assets.GAS,
-          2000, 0.0001, 0.44, 0.44, true);
+          100, 0.00001, 0.27, 0.44, true);
         this.$services.alerts.success('Setup Market GAS-SOUL');
 
+        // TKY 132947096727c84c7f9e076c90f08fec3bc17f18
         await this.$services.dex.setMarket('132947096727c84c7f9e076c90f08fec3bc17f18',
           this.$services.assets.NEO,
-          2000, 0.0001, 0.44, 0.44, true);
+          2000, 0.00001, 0.44, 0.44, true);
         this.$services.alerts.success('Setup Market NEO-TKY');
 
         await this.$services.dex.setMarket('132947096727c84c7f9e076c90f08fec3bc17f18',
           this.$services.assets.GAS,
-          2000, 0.0001, 0.44, 0.44, true);
+          2000, 0.00001, 0.44, 0.44, true);
         this.$services.alerts.success('Setup Market GAS-TKY');
         */
 
-        // NKN c36aee199dbba6c3f439983657558cfb67629599
-        // PHX 1578103c13e39df15d0d29826d957e85d770d8c9
-        // SOUL ed07cffad18f1308db51920d99a2af60ac66a7b3
-        // TKY 132947096727c84c7f9e076c90f08fec3bc17f18
+        await this.$services.dex.setMarket('a58b56b30425d3d1f8902034996fcac4168ef71d',
+          this.$services.assets.NEO, 2000, 0.0000001, 0.1, 0.1, true);
+        await this.$services.dex.setMarket('a58b56b30425d3d1f8902034996fcac4168ef71d',
+          this.$services.assets.GAS, 2000, 0.0000001, 0.1, 0.1, true);
 
         /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
@@ -836,7 +843,17 @@ export default {
     @extend %tile-light;
 
     flex: 1;
-    overflow: auto;
+    display: flex;
+    flex-flow: column;
+
+    .scroll-wrapper {
+      overflow: auto;
+      padding: $space $space 0 $space;
+    }
+
+    .order-btn-container {
+      padding: $space $space $space $space;
+    }
 
     .side {
       display: flex;
@@ -923,6 +940,7 @@ export default {
 
         label {
           cursor: pointer;
+          white-space: nowrap;
         }
 
         .aph-icon {
@@ -950,6 +968,10 @@ export default {
       flex: 1;
       font-family: GilroySemibold;
 
+      height: toRem(38px);
+      line-height: toRem(36px);
+      padding:0;
+
       &:disabled {
         background: transparent !important;
         border-color: $grey;
@@ -975,10 +997,6 @@ export default {
     .quantity {
       margin-top: $space-sm;
     }
-  }
-
-  .body, .footer {
-    padding: $space;
   }
 
   .footer {

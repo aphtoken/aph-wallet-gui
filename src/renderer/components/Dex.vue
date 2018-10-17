@@ -185,7 +185,6 @@ export default {
   flex-direction: row;
   flex: 1;
   justify-content: center;
-  padding-top: toRem(30px);
   width: 100%;
 
   .grid {
