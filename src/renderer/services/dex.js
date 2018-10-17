@@ -2178,12 +2178,18 @@ export default {
           throw new Error('Cannot send max GAS with a fee set, try a smaller amount or remove GAS fee.');
         }
 
-        configResponse = await api.createTx(configResponse, 'invocation');
+        try {
+          configResponse = await api.createTx(configResponse, 'invocation');
 
-        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+          const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+          configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
 
-        configResponse = await api.signTx(configResponse);
+          configResponse = await api.signTx(configResponse);
+        } catch (e) {
+          if (DBG_LOG) console.log(`Failed creating or signing transaction. Error: ${e}`);
+          // Rip off the actual exception message it is likely something werid we don't want users to see.
+          throw new Error('Failed to create transaction.');
+        }
 
         resolve(configResponse);
       } catch (e) {
