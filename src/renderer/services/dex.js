@@ -1014,14 +1014,14 @@ export default {
             amount: quantity.toString(),
           };
 
+          console.log('Resetting state to step 0!!!!');
           store.commit('setSystemWithdraw', systemWithdraw);
 
           store.commit('setWithdrawInProgressModalModel', {
           });
 
           const rejectWithError = (errorMsg) => {
-            systemWithdraw.error = errorMsg;
-            store.commit('setSystemWithdraw', systemWithdraw);
+            store.commit('setSystemWithdrawMergeState', { error: errorMsg });
             reject(errorMsg);
           };
           // TODO: should pass this through the whole way instead of getting again in case they switch wallets somehow
@@ -1030,15 +1030,15 @@ export default {
           this.markWithdraw(assetId, quantity)
             .then((res) => {
               if (res.success !== true) {
-                reject('Withdraw Mark Step rejected');
+                rejectWithError('Withdraw Mark Step rejected');
                 return;
               }
-              store.commit('setSystemWithdrawStep', 2);
+              store.commit('setSystemWithdrawMergeState', { step: 2 });
 
               alerts.success('Withdraw Mark Step Relayed. Waiting for confirmation.');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  store.commit('setSystemWithdrawStep', 3);
+                  store.commit('setSystemWithdrawMergeState', { step: 3 });
                   const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
                   // Must allow funds to be sent again by moving tx outputs to unspent.
                   neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, true);
@@ -1047,12 +1047,12 @@ export default {
                     this.withdrawSystemAsset(assetId, quantity, res.tx.hash, res.utxoIndex)
                       .then((res) => {
                         if (res.success) {
-                          store.commit('setSystemWithdrawStep', 4);
+                          store.commit('setSystemWithdrawMergeState', { step: 4 });
 
                           neo.monitorTransactionConfirmation(res.tx, true)
                             .then(() => {
                               neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
-                              store.commit('setSystemWithdrawStep', 5);
+                              store.commit('setSystemWithdrawMergeState', { step: 5 });
                               resolve(res.tx);
                             })
                             .catch(() => {
@@ -1472,18 +1472,6 @@ export default {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
 
-        if (!store.state.systemWithdraw) {
-          const systemWithdraw = {
-            step: 0,
-            asset: assetId === assets.NEO ? 'NEO' : 'GAS',
-            amount: quantity.toString(),
-          };
-          store.commit('setSystemWithdraw', systemWithdraw);
-          store.commit('setSystemWithdrawStep', 3);
-          store.commit('setWithdrawInProgressModalModel', {
-          });
-        }
-
         const config = {
           net: currentNetwork.net,
           url: currentNetwork.rpc,
@@ -1506,7 +1494,6 @@ export default {
         }
 
         let configResponse = await api.fillKeys(config);
-
         try {
           configResponse.balance
             = await store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address });
@@ -1634,9 +1621,27 @@ export default {
       if (unspent.reservedFor === currentWalletScriptHash) {
         if (DBG_LOG) console.log(`Completing withdraw for ${JSON.stringify(unspent)}`);
         try {
-          await this.withdrawSystemAsset(assetId, unspent.value.toNumber(), unspent.txid, unspent.index);
+          if (!store.state.systemWithdraw) {
+            const systemWithdraw = {
+              step: 0,
+              asset: assetId === assets.NEO ? 'NEO' : 'GAS',
+              amount: unspent.value.toString(),
+            };
+            store.commit('setSystemWithdraw', systemWithdraw);
+            store.commit('setSystemWithdrawMergeState', { step: 3 });
+            store.commit('setWithdrawInProgressModalModel', {
+            });
+          }
+
+          const res = await this.withdrawSystemAsset(assetId, unspent.value.toNumber(), unspent.txid, unspent.index);
+          store.commit('setSystemWithdrawMergeState', { step: 4 });
+          await neo.monitorTransactionConfirmation(res.tx, true);
+          neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
+          store.commit('setSystemWithdrawMergeState', { step: 5 });
         } catch (e) {
-          throw new Error(`Attempt to complete previous withdraw failed. ${e}`);
+          const errMsg = `Attempt to complete previous withdraw failed. ${e}`;
+          store.commit('setSystemWithdrawMergeState', { error: errMsg });
+          throw new Error(errMsg);
         }
       }
     }

@@ -73,7 +73,6 @@ export {
   setStyleMode,
   setSystemWithdraw,
   setSystemWithdrawMergeState,
-  setSystemWithdrawStep,
   setTickerDataByMarket,
   setTradeHistory,
   setWallets,
@@ -407,13 +406,7 @@ function setSystemWithdraw(state, value) {
 
 function setSystemWithdrawMergeState(state, value) {
   if (state.systemWithdraw && typeof state.systemWithdraw === 'object') {
-    _.merge(state.systemWithdraw, value);
-  }
-}
-
-function setSystemWithdrawStep(state, value) {
-  if (state.systemWithdraw && typeof state.systemWithdraw === 'object') {
-    state.systemWithdraw.step = value;
+    state.systemWithdraw = _.merge(_.cloneDeep(state.systemWithdraw), value);
   }
 }
 

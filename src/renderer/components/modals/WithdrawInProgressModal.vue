@@ -41,7 +41,7 @@
           return 'Close (withdraw continues in background)';
         },
         error() {
-          if (this.$store.state.systemWithdraw && this.$store.state.systemWithdraw.error !== null) {
+          if (this.$store.state.systemWithdraw && this.$store.state.systemWithdraw.error) {
             return this.$store.state.systemWithdraw.error;
           }
           return null;
