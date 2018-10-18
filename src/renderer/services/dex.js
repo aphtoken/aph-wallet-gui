@@ -2168,7 +2168,7 @@ export default {
           } catch (e) {
             reject(`Failed to fetch address balance. ${e}`);
           }
-          if (gasToSend && toBigNumber(gasToSend).isGreaterThan(0)) {
+          if (currentNetwork.fee) {
             neededGasUtxos += 1;
             if (configResponse.balance.assets.GAS.unspent.length < neededGasUtxos) {
               throw new Error('No unspent GAS available to pay network fee.');
