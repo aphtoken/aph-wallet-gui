@@ -1079,7 +1079,7 @@ export default {
                           && prevUnconfirmed.index === newUnconfirmed.index);
                       // Verify it isn't already in our unconfirmed array.
                       if (existingIndex < 0) {
-                        doMigration('unconfrimed', prevUnconfirmed, 10, () => {
+                        doMigration('unconfirmed', prevUnconfirmed, 10, () => {
                           if (DBG_LOG) {
                             console.log(` Adding unconfirmed balance for asset ${sym}: ${prevUnconfirmed.value}`
                               + ` txid: ${prevUnconfirmed.txid} index: ${prevUnconfirmed.index}`);

@@ -24,6 +24,7 @@ export {
   setAcceptDexOutOfDate,
   setActiveTransaction,
   setClaimModalModel,
+  setCommitChangeInProgress,
   setCommitModalModel,
   setCommitState,
   setContacts,
@@ -171,6 +172,10 @@ function setActiveTransaction(state, transaction) {
 
 function setClaimModalModel(state, model) {
   state.claimModalModel = model;
+}
+
+function setCommitChangeInProgress(state, value) {
+  state.commitChangeInProgress = value;
 }
 
 function setCommitModalModel(state, model) {

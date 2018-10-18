@@ -17,6 +17,7 @@ const state = {
   activeTransaction: null,
   blockDetails: {},
   claimModalModel: null,
+  commitChangeInProgress: null,
   commitModalModel: null,
   commitState: null,
   contacts: [],

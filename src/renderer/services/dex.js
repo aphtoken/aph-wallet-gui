@@ -18,6 +18,7 @@ import { toBigNumber } from './formatting.js';
 import { claiming, intervals } from '../constants';
 
 const TX_ATTR_USAGE_SCRIPT = 0x20;
+const TX_ATTR_USAGE_HEIGHT = 0xf0;
 const TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE = 0xA1;
 const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xA2;
 const TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID = 0xA3;
@@ -1902,6 +1903,7 @@ export default {
   commitAPH(quantity) {
     return new Promise((resolve, reject) => {
       try {
+        store.commit('setCommitChangeInProgress', {});
         this.executeContractTransaction('commit',
           [
             u.num2fixed8(quantity),
@@ -1911,50 +1913,82 @@ export default {
               alerts.success('Commit relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
-                  resolve(res.tx);
+                  setTimeout(async () => {
+                    try {
+                      await store.dispatch('fetchCommitState');
+                    } catch (e) {
+                      const errMsg = typeof e === 'string' ? e : e.message;
+                      alerts.exception(errMsg);
+                    }
+                    store.commit('setCommitChangeInProgress', null);
+                    resolve(res.tx);
+                  }, 5000);
                 })
                 .catch((e) => {
-                  reject(`Commit Failed. ${e}`);
+                  store.commit('setCommitChangeInProgress', null);
+                  reject(`Failed monitoring for commit complete transaction. ${e}`);
                 });
             } else {
+              store.commit('setCommitChangeInProgress', null);
               reject('Transaction rejected');
             }
           })
           .catch((e) => {
+            store.commit('setCommitChangeInProgress', null);
             reject(`Commit Failed. ${e}`);
           });
       } catch (e) {
+        store.commit('setCommitChangeInProgress', null);
         reject(`Commit Failed. ${e.message}`);
       }
     });
   },
 
   claimAPH() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
-        this.executeContractTransaction('claim',
-          [])
-          .then((res) => {
-            if (res.success) {
-              alerts.success('Claim relayed, waiting for confirmation...');
-              neo.monitorTransactionConfirmation(res.tx, true)
-                .then(() => {
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
-                  resolve(res.tx);
-                })
-                .catch((e) => {
-                  reject(`Failed to monitor transaction confirmation. ${e}`);
-                });
-            } else {
-              reject('Transaction rejected');
+        const withdrawAmountAfterClaim = toBigNumber(store.state.commitState.quantityCommitted
+          + store.state.commitState.availableToClaim)
+          .decimalPlaces(8, BigNumber.ROUND_DOWN);
+
+        store.commit('setCommitChangeInProgress', {});
+        const res = await this.executeContractTransaction('claim', []);
+        if (!res.success) {
+          reject('Transaction rejected');
+          return;
+        }
+
+        alerts.success('Claim relayed, waiting for confirmation...');
+        neo.monitorTransactionConfirmation(res.tx, true)
+          .then(async () => {
+            alerts.success(`Claimed ${withdrawAmountAfterClaim.toString()} APH to Contract Balance.`);
+
+            try {
+              await this.withdrawAsset(store.state.currentNetwork.aph_hash, Number(withdrawAmountAfterClaim));
+
+              alerts.success(`Submitted Withdraw of ${withdrawAmountAfterClaim.toString()} APH.`);
+            } catch (e) {
+              const errMsg = typeof e === 'string' ? e : e.message;
+              const alertMsg = `Failed to withdraw claimed APH. It remains in contract balance. Error: ${errMsg}`;
+              alerts.exception(alertMsg);
             }
+            try {
+              await store.dispatch('fetchCommitState');
+            } catch (e) {
+              const errMsg = typeof e === 'string' ? e : e.message;
+              alerts.exception(errMsg);
+            }
+            store.commit('setCommitChangeInProgress', null);
+            resolve(res.tx);
           })
           .catch((e) => {
-            reject(`Claim Failed. ${e}`);
+            store.commit('setCommitChangeInProgress', null);
+            reject(`Failed to monitor transaction confirmation. ${e}`);
           });
       } catch (e) {
-        reject(`Claim Failed. ${e.message}`);
+        const errMsg = typeof e === 'string' ? e : e.message;
+        reject(`Claim Failed. ${errMsg}`);
+        store.commit('setCommitChangeInProgress', null);
       }
     });
   },
@@ -1962,6 +1996,7 @@ export default {
   compoundAPH() {
     return new Promise((resolve, reject) => {
       try {
+        store.commit('setCommitChangeInProgress', {});
         this.executeContractTransaction('compound',
           [])
           .then((res) => {
@@ -1969,21 +2004,32 @@ export default {
               alerts.success('Compound relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  // Note: Compound doesn't change wallet nep5 balance; no need to require refresh of APH balance here.
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
-                  resolve(res.tx);
+                  setTimeout(async () => {
+                    try {
+                      await store.dispatch('fetchCommitState');
+                    } catch (e) {
+                      const errMsg = typeof e === 'string' ? e : e.message;
+                      alerts.exception(errMsg);
+                    }
+                    store.commit('setCommitChangeInProgress', null);
+                    resolve(res.tx);
+                  }, 5000);
                 })
                 .catch((e) => {
+                  store.commit('setCommitChangeInProgress', null);
                   reject(`Failed to monitor transaction confirmation. ${e}`);
                 });
             } else {
+              store.commit('setCommitChangeInProgress', null);
               reject('Transaction rejected');
             }
           })
           .catch((e) => {
+            store.commit('setCommitChangeInProgress', null);
             reject(`Compound Failed. ${e}`);
           });
       } catch (e) {
+        store.commit('setCommitChangeInProgress', null);
         reject(`Compound Failed. ${e.message}`);
       }
     });
@@ -2076,7 +2122,7 @@ export default {
   },
 
   buildContractTransaction(operation, parameters, neoToSend, gasToSend) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
@@ -2111,41 +2157,47 @@ export default {
           config.account = new wallet.Account(currentWallet.wif);
         }
 
-        api.fillKeys(config)
-          .then((configResponse) => {
-            if (!configResponse.intents && currentNetwork.fee === 0) {
-              return new Promise((balanceResolve) => {
-                configResponse.balance = new wallet.Balance({ address: configResponse.address, net: configResponse.net });
-                balanceResolve(configResponse);
-              });
-            }
+        let neededGasUtxos = (gasToSend && BigNumber(gasToSend).isGreaterThan(0)) ? 1 : 0;
+        let configResponse = await api.fillKeys(config);
+        if (!configResponse.intents && currentNetwork.fee === 0 && !neoToSend && !gasToSend) {
+          configResponse.balance = new wallet.Balance({ address: configResponse.address, net: configResponse.net });
+        } else {
+          try {
+            configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
+              { forAddress: currentWallet.address, intents: config.intents });
+          } catch (e) {
+            reject(`Failed to fetch address balance. ${e}`);
+          }
+          neededGasUtxos += 1;
+          if (neededGasUtxos > 0 && configResponse.balance.assets.GAS.unspent.length < neededGasUtxos) {
+            throw new Error('No unspent GAS available to pay network fee.');
+          }
+        }
 
-            return new Promise(async (resolveBalance) => {
-              try {
-                configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
-                  { forAddress: currentWallet.address, intents: config.intents });
-                resolveBalance(configResponse);
-              } catch (e) {
-                reject(`Failed to fetch address balance. ${e}`);
-              }
-            });
-          })
-          .then((configResponse) => {
-            return api.createTx(configResponse, 'invocation');
-          })
-          .then((configResponse) => {
-            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            return api.signTx(configResponse);
-          })
-          .then((configResponse) => {
-            resolve(configResponse);
-          })
-          .catch((e) => {
-            reject(`Failed to build contract transaction. ${e}`);
-          });
+        if (neededGasUtxos > 1 && gasToSend && BigNumber(gasToSend).isGreaterThanOrEqualTo(
+          configResponse.balance.assets.GAS.balance)) {
+          throw new Error('Cannot send max GAS with a fee set, try a smaller amount or remove GAS fee.');
+        }
+
+        try {
+          configResponse = await api.createTx(configResponse, 'invocation');
+
+          const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+          configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+          configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+            u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
+
+          configResponse = await api.signTx(configResponse);
+        } catch (e) {
+          if (DBG_LOG) console.log(`Failed creating or signing transaction. Error: ${e}`);
+          // Rip off the actual exception message it is likely something werid we don't want users to see.
+          throw new Error('Failed to create transaction.');
+        }
+
+        resolve(configResponse);
       } catch (e) {
-        reject(`Failed to build contract transaction. ${e.message}`);
+        const errMsg = typeof e === 'string' ? e : e.message;
+        reject(`Failed to build contract transaction. ${errMsg}`);
       }
     });
   },
@@ -2219,6 +2271,9 @@ export default {
               const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+              // TODO: may want to use a different attribute; ledger was having a singing issue and may be due to this attribute.
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+                u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
 
               configResponse.tx.outputs.forEach((output) => {
                 output.scriptHash = currentNetwork.dex_hash;
