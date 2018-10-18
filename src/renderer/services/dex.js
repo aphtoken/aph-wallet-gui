@@ -2157,7 +2157,7 @@ export default {
           config.account = new wallet.Account(currentWallet.wif);
         }
 
-        let neededGasUtxos = (gasToSend && BigNumber(gasToSend).isGreaterThan(0)) ? 1 : 0;
+        let neededGasUtxos = (gasToSend && toBigNumber(gasToSend).isGreaterThan(0)) ? 1 : 0;
         let configResponse = await api.fillKeys(config);
         if (!configResponse.intents && currentNetwork.fee === 0 && !neoToSend && !gasToSend) {
           configResponse.balance = new wallet.Balance({ address: configResponse.address, net: configResponse.net });
@@ -2168,9 +2168,11 @@ export default {
           } catch (e) {
             reject(`Failed to fetch address balance. ${e}`);
           }
-          neededGasUtxos += 1;
-          if (neededGasUtxos > 0 && configResponse.balance.assets.GAS.unspent.length < neededGasUtxos) {
-            throw new Error('No unspent GAS available to pay network fee.');
+          if (gasToSend && toBigNumber(gasToSend).isGreaterThan(0)) {
+            neededGasUtxos += 1;
+            if (configResponse.balance.assets.GAS.unspent.length < neededGasUtxos) {
+              throw new Error('No unspent GAS available to pay network fee.');
+            }
           }
         }
 
