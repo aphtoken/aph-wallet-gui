@@ -7,6 +7,7 @@ import {
 } from '@cityofzion/neon-js';
 import Vue from 'vue';
 import { BigNumber } from 'bignumber.js';
+import _ from 'lodash';
 import assets from './assets';
 import alerts from './alerts';
 import neo from './neo';
@@ -16,6 +17,7 @@ import ledger from './ledger';
 import { store } from '../store';
 import { toBigNumber } from './formatting.js';
 import { claiming, intervals } from '../constants';
+
 
 const TX_ATTR_USAGE_SCRIPT = 0x20;
 const TX_ATTR_USAGE_HEIGHT = 0xf0;
@@ -2315,6 +2317,156 @@ export default {
         .catch((e) => {
           reject(`Failed to Claim Contract GAS. Error: ${e}`);
         });
+    });
+  },
+
+  collapseSmallestContractUTXOs(assetId, numInputsToCollapse, startingAmount = 0) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+        const currentWallet = wallets.getCurrentWallet();
+
+        const config = {
+          net: currentNetwork.net,
+          url: currentNetwork.rpc,
+          script: {
+            scriptHash: currentNetwork.dex_hash,
+            operation: 'withdraw',
+            args: [
+            ],
+          },
+          fees: currentNetwork.fee,
+          intents: [],
+          gas: 0,
+        };
+
+        // Only contract owner will be able to collapse inputs
+        if (currentWallet.isLedger === true) {
+          config.signingFunction = ledger.signWithLedger;
+          config.address = currentWallet.address;
+        } else {
+          config.account = new wallet.Account(currentWallet.wif);
+        }
+
+        let configResponse = await api.fillKeys(config);
+        try {
+          configResponse.balance
+            = await store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address });
+        } catch (e) {
+          throw new Error(`Failed to fetch address balance. ${e}`);
+        }
+
+        const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
+
+        // This is going to calculate inputs for gas fee and apply them moving them into spent
+        configResponse = await api.createTx(configResponse, 'invocation');
+        if (DBG_LOG) console.log(`collapse inputs: ${JSON.stringify(configResponse.tx.inputs)} outputs: ${JSON.stringify(configResponse.tx.outputs)}`);
+
+        let dexBalance;
+        try {
+          dexBalance = await store.dispatch('fetchSystemAssetBalances',
+            { forAddress: dexAddress });
+        } catch (e) {
+          throw new Error(`Failed to fetch address balance. ${e}`);
+        }
+
+        const dexAssets = dexBalance.assets;
+        const unspents = _.cloneDeep(assetId === assets.GAS ? dexAssets.GAS.unspent : dexAssets.NEO.unspent);
+
+        await this.decorateWithUnspentsReservedState(assetId, unspents);
+
+        BigNumber.config({ DECIMAL_PLACES: 8, ROUNDING_MODE: 3 });
+        let totalInputAmount = new BigNumber(0);
+
+        // take the numInputsToCollapse smallest inputs and use them and sum their amounts
+        let inputsCollapsed = 0;
+        _.orderBy(unspents, [unspent => parseFloat(unspent.value.toString())], ['asc']).some((unspent) => {
+          // check if this utxo is marked for someone and if so just skip
+          if (unspent.reservedFor.length >= 40) {
+            return false;
+          }
+
+          if (toBigNumber(startingAmount).isGreaterThan(unspent.value)) {
+            return false;
+          }
+
+          totalInputAmount = totalInputAmount.plus(unspent.value);
+          config.tx.inputs.push({
+            prevHash: unspent.txid,
+            prevIndex: unspent.index,
+          });
+          inputsCollapsed += 1;
+
+          if (inputsCollapsed >= numInputsToCollapse) {
+            return true;
+          }
+          return false;
+        });
+
+        console.log(`total collapsed input amount: ${totalInputAmount}`);
+        // collapse to one output
+        config.tx.outputs.push({
+          assetId,
+          scriptHash: currentNetwork.dex_hash,
+          value: totalInputAmount,
+        });
+
+        if (DBG_LOG) console.log(`collapse inputs: ${JSON.stringify(configResponse.tx.inputs)} outputs: ${JSON.stringify(configResponse.tx.outputs)}`);
+
+        if (!currentNetwork.bestBlock) {
+          throw new Error('Wallet has not obtained a block number yet.');
+        }
+        // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
+        const blockIndex = currentNetwork.bestBlock.index;
+        const validUntilValue = (blockIndex + 20) * 0.00000001;
+
+        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, '93'.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+          u.num2fixed8(validUntilValue).padEnd(64, '0'));
+
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+
+        configResponse = await api.signTx(configResponse);
+
+        const attachInvokedContract = {
+          invocationScript: ('00').repeat(2),
+          verificationScript: '',
+        };
+
+        // We need to order this for the VM.
+        const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
+        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+          configResponse.tx.scripts.push(attachInvokedContract);
+        } else {
+          configResponse.tx.scripts.unshift(attachInvokedContract);
+        }
+
+        if (DBG_LOG) console.log('sending collapse utxos');
+        configResponse = await api.sendTx(configResponse);
+
+        if (!configResponse || !configResponse.response || (configResponse.response.result !== true)) {
+          throw new Error('Collapse inputs rejected by network. Retrying...');
+        }
+
+        // Apply this to the dex's balance
+        neo.applyTxToAddressSystemAssetBalance(dexAddress, configResponse.tx, false);
+
+        if (configResponse.response.result === true) {
+          alerts.success('Collapse inputs relayed, waiting for confirmation...');
+        }
+
+        resolve({
+          success: configResponse.response.result,
+          tx: configResponse.tx,
+        });
+      } catch (e) {
+        const errMsg = typeof e === 'string' ? e : e.message;
+        alerts.error(`Collapse failed. Error: ${errMsg}`);
+        reject(`Failed to send collapse inputs transaction. ${errMsg}`);
+      }
     });
   },
 

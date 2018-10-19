@@ -76,11 +76,12 @@
             </div>
           </div>
           <div class="footer-buttons">
-          <!-- Only the contract owner or manager can do this.
-              <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button>
-              <button @click="setMarket" class="footer-btn">Setup Market</button>
-              <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button>
-              <button @click="reclaimOrhphanFunds" class="footer-btn">Reclaim Orphan Funds</button> -->
+            <!-- Only the contract owner or manager can do this.
+            <button @click="setMinimumClaimBlocks" class="footer-btn">Set Min Claim Blocks</button>
+            <button @click="setMarket" class="footer-btn">Setup Market</button>
+            <button @click="collapseDexUtxos" class="footer-btn">Collapse DEX UTXOs</button>
+            <button @click="claimGasForDexContract" class="footer-btn">Claim DEX Gas</button>
+            <button @click="reclaimOrhphanFunds" class="footer-btn">Reclaim Orphan Funds</button> -->
           </div>
        </div>
       </aph-spinner-wrapper>
@@ -604,6 +605,7 @@ export default {
     },
     showDepositWithdrawModal(isDeposit) {
       this.$store.commit('setDepositWithdrawModalModel', {
+        // NOTE: if whitelisted, adjust assetId to test a new asset that has been whitelisted but market not yet added.
         isDeposit, holdingAssetId: this.actionableHolding.assetId,
       });
     },
@@ -684,6 +686,28 @@ export default {
         // this.$services.alerts.success('Setup asset ASA');
 
         /*
+        await this.$services.dex.setAssetSettings('11dbc2316f35ea031449387f615d9e4b0cbafe8b', 0, true);
+        this.$services.alerts.success('Setup asset FTW');
+        */
+
+        /*
+        await this.$services.dex.setAssetSettings('45d493a6f73fa5f404244a5fb8472fc014ca5885', 0, true);
+        this.$services.alerts.success('Setup asset CPX');
+
+        await this.$services.dex.setAssetSettings('de2ed49b691e76754c20fe619d891b78ef58e537', 0, true);
+        this.$services.alerts.success('Setup asset AVA');
+
+        await this.$services.dex.setAssetSettings('acbc532904b6b51b5ea6d19b803d78af70e7e6f9', 0, true);
+        this.$services.alerts.success('Setup asset EFX');
+
+        await this.$services.dex.setAssetSettings('78fd589f7894bf9642b4a573ec0e6957dfd84c48', 0, true);
+        this.$services.alerts.success('Setup asset TOLL');
+
+        await this.$services.dex.setAssetSettings('a721d5893480260bd28ca1f395f2c465d0b5b1c2', 0, true);
+        this.$services.alerts.success('Setup asset NRVE');
+        */
+
+        /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
           this.$services.assets.NEO,
           100, 0.0000001, 0, 0.25, true);
@@ -727,48 +751,90 @@ export default {
         this.$services.alerts.success('Setup Market GAS-NKN');
         */
 
-        /*
+
         // PHX 1578103c13e39df15d0d29826d957e85d770d8c9
+        /*
         await this.$services.dex.setMarket('1578103c13e39df15d0d29826d957e85d770d8c9',
           this.$services.assets.NEO,
-          1000, 0.00001, 0.47, 0.47, true);
+          250, 0.00001, 0.19, 0.19, true);
         this.$services.alerts.success('Setup Market NEO-PHX');
 
         await this.$services.dex.setMarket('1578103c13e39df15d0d29826d957e85d770d8c9',
           this.$services.assets.GAS,
-          1000, 0.00001, 0.47, 0.47, true);
+          250, 0.00001, 0.19, 0.19, true);
         this.$services.alerts.success('Setup Market GAS-PHX');
-
 
         // SOUL ed07cffad18f1308db51920d99a2af60ac66a7b3
         await this.$services.dex.setMarket('ed07cffad18f1308db51920d99a2af60ac66a7b3',
           this.$services.assets.NEO,
-          100, 0.00001, 0.27, 0.47, true);
+          100, 0.00001, 0.25, 0.25, true);
         this.$services.alerts.success('Setup Market NEO-SOUL');
 
         await this.$services.dex.setMarket('ed07cffad18f1308db51920d99a2af60ac66a7b3',
           this.$services.assets.GAS,
-          100, 0.00001, 0.27, 0.44, true);
+          100, 0.00001, 0.25, 0.25, true);
         this.$services.alerts.success('Setup Market GAS-SOUL');
+        */
 
         // TKY 132947096727c84c7f9e076c90f08fec3bc17f18
+        /*
         await this.$services.dex.setMarket('132947096727c84c7f9e076c90f08fec3bc17f18',
           this.$services.assets.NEO,
-          2000, 0.00001, 0.44, 0.44, true);
+          1000, 0.00001, 0.22, 0.22, true);
         this.$services.alerts.success('Setup Market NEO-TKY');
 
         await this.$services.dex.setMarket('132947096727c84c7f9e076c90f08fec3bc17f18',
           this.$services.assets.GAS,
-          2000, 0.00001, 0.44, 0.44, true);
+          1000, 0.00001, 0.22, 0.22, true);
         this.$services.alerts.success('Setup Market GAS-TKY');
         */
 
         /*
         await this.$services.dex.setMarket('a58b56b30425d3d1f8902034996fcac4168ef71d',
-          this.$services.assets.NEO, 2000, 0.0000001, 0.1, 0.1, true);
+          this.$services.assets.NEO, 1000, 0.0000001, 0.06, 0.06, true);
+        this.$services.alerts.success('Setup Market NEO-ASA');
         await this.$services.dex.setMarket('a58b56b30425d3d1f8902034996fcac4168ef71d',
-          this.$services.assets.GAS, 2000, 0.0000001, 0.1, 0.1, true);
+          this.$services.assets.GAS, 1000, 0.0000001, 0.06, 0.06, true);
+        this.$services.alerts.success('Setup Market GAS-ASA');
         */
+
+
+        /*
+        await this.$services.dex.setMarket('11dbc2316f35ea031449387f615d9e4b0cbafe8b',
+          this.$services.assets.NEO, 100, 0.00001, 0.05, 0.05, true);
+        this.$services.alerts.success('Setup Market NEO-FTW');
+        await this.$services.dex.setMarket('11dbc2316f35ea031449387f615d9e4b0cbafe8b',
+          this.$services.assets.GAS, 100, 0.00001, 0.05, 0.05, true);
+        this.$services.alerts.success('Setup Market GAS-FTW');
+        */
+
+        await this.$services.dex.setMarket('45d493a6f73fa5f404244a5fb8472fc014ca5885',
+          this.$services.assets.NEO, 100, 0.000001, 0.14, 0.14, true);
+        this.$services.alerts.success('Setup Market NEO-CPX');
+        await this.$services.dex.setMarket('45d493a6f73fa5f404244a5fb8472fc014ca5885',
+          this.$services.assets.GAS, 100, 0.000001, 0.14, 0.14, true);
+        this.$services.alerts.success('Setup Market GAS-CPX');
+
+        await this.$services.dex.setMarket('de2ed49b691e76754c20fe619d891b78ef58e537',
+          this.$services.assets.NEO, 50, 0.000001, 0.17, 0.17, true);
+        this.$services.alerts.success('Setup Market NEO-AVA');
+        await this.$services.dex.setMarket('de2ed49b691e76754c20fe619d891b78ef58e537',
+          this.$services.assets.GAS, 50, 0.000001, 0.17, 0.17, true);
+        this.$services.alerts.success('Setup Market GAS-AVA');
+
+        await this.$services.dex.setMarket('acbc532904b6b51b5ea6d19b803d78af70e7e6f9',
+          this.$services.assets.NEO, 100, 0.000001, 0.05653, 0.05773, true);
+        this.$services.alerts.success('Setup Market NEO-EFX');
+        await this.$services.dex.setMarket('acbc532904b6b51b5ea6d19b803d78af70e7e6f9',
+          this.$services.assets.GAS, 100, 0.000001, 0.05653, 0.05773, true);
+        this.$services.alerts.success('Setup Market GAS-EFX');
+
+        await this.$services.dex.setMarket('78fd589f7894bf9642b4a573ec0e6957dfd84c48',
+          this.$services.assets.NEO, 1000, 0.000001, 0.098, 0.098, true);
+        this.$services.alerts.success('Setup Market NEO-TOLL');
+        await this.$services.dex.setMarket('78fd589f7894bf9642b4a573ec0e6957dfd84c48',
+          this.$services.assets.GAS, 1000, 0.000001, 0.098, 0.098, true);
+        this.$services.alerts.success('Setup Market GAS-TOLL');
 
         /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
@@ -817,6 +883,17 @@ export default {
           this.$services.alerts.exception(e);
         });
     },
+
+    collapseDexUtxos() {
+      this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.GAS, 5)
+        .then(() => {
+          this.$services.alerts.success('Sent TX to collapse UTXOs');
+        })
+        .catch((e) => {
+          this.$services.alerts.exception(e);
+        });
+    },
+
     claimGasForDexContract() {
       this.$services.dex.claimGasForDexContract()
         .then(() => {
