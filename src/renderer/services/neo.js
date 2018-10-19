@@ -1376,8 +1376,7 @@ export default {
               return;
             }
 
-            if (checkRpcForDetails === true
-              && moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK) {
+            if (checkRpcForDetails === true) {
               await this.fetchTransactionDetails(tx.hash)
                 .then((transactionDetails) => {
                   if (transactionDetails && transactionDetails.confirmed) {
@@ -1411,7 +1410,7 @@ export default {
               });
             }
           }, 5000);
-        }, 12 * 1000); // wait a block for propagation
+        }, 10 * 1000); // wait a block for propagation
         return null;
       } catch (e) {
         return reject(e.message);
