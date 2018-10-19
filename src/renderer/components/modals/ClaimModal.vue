@@ -13,13 +13,14 @@
     <div class="body">
       <div v-if="$store.state.commitState.ableToClaimHeight <= this.currentBlock">
         <p>
-          {{$t('areYouSureYouWantToClaim')}}
+          {{ $t('areYouSureYouWantToClaim') }}
         </p>
         <p>
           {{$t('committedAPHBalance', {
             balance: $store.state.commitState.quantityCommitted
           })}}
         </p>
+        <p class="note">{{ $t('closingWalletBeforeClaim') }}</p>
       </div>
       <div v-else>
         <p>
@@ -35,6 +36,7 @@
             blocks: $store.state.commitState.ableToClaimHeight - this.currentBlock
           })}}
         </p>
+        <p class="note">{{ $t('closingWalletBeforeClaim') }}</p>
       </div>
       <button class="commit-btn" @click="onConfirmed()">{{$t('claim')}}</button>
     </div>
@@ -62,7 +64,7 @@ export default {
     },
     aphHolding() {
       if (this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, { assetId: this.$services.assets.APH });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.$store.state.currentNetwork.aph_hash });
 
         if (holding) {
           return holding;
@@ -113,9 +115,13 @@ export default {
   .body {
     padding: $space $space-lg $space-lg;
 
+    .note {
+      font-family: Gilroy;
+    }
     p {
       font-family: GilroySemiBold;
       text-align: center;
+
     }
   }
 

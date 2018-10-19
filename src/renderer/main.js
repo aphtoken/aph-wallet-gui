@@ -57,7 +57,7 @@ Vue.use(VueI18n);
 require('vue-flash-message/dist/vue-flash-message.min.css');
 
 // Vue.use(VueNativeSock, 'ws://localhost:62433/ws', {
-Vue.use(VueNativeSock, 'wss://testnet.aphelion-neo.com:62443/ws', {
+Vue.use(VueNativeSock, 'wss://mainnet.aphelion-neo.com:62443/ws', {
   format: 'json',
   store,
   reconnection: true, // (Boolean) whether to reconnect automatically (false)

@@ -3,7 +3,7 @@ import Vue from 'vue';
 import moment from 'moment';
 
 import { requests } from '../constants';
-import { alerts, assets, db, neo, dex } from '../services';
+import { alerts, db, neo, dex } from '../services';
 
 export {
   addToOrderHistory,
@@ -24,6 +24,7 @@ export {
   setAcceptDexOutOfDate,
   setActiveTransaction,
   setClaimModalModel,
+  setCommitChangeInProgress,
   setCommitModalModel,
   setCommitState,
   setContacts,
@@ -60,19 +61,25 @@ export {
   setShowClaimGasModal,
   setShowEditContactModal,
   setShowImportAWalletModal,
+  setShowLearnMore,
   setShowLoginToWalletModal,
+  setShowPortfolioHeader,
   setShowSendAddressModal,
   setShowSendRequestLedgerSignature,
   setShowSendWithLedgerModal,
   setShowWalletBackupModal,
   setSocketOrderCreated,
-  setSocketOrderMatched,
   setSocketOrderCreationFailed,
   setSocketOrderMatchFailed,
+  setSocketOrderMatched,
   setStatsToken,
   setStyleMode,
+  setSystemWithdraw,
+  setSystemWithdrawMergeState,
+  setTickerDataByMarket,
   setTradeHistory,
   setWallets,
+  setWithdrawInProgressModalModel,
   startRequest,
   startSilentRequest,
   SOCKET_ONOPEN,
@@ -113,6 +120,7 @@ function handleLogout(state) {
   state.sendInProgress = {};
   state.currentMarket = null;
   state.menuToggleable = false;
+  state.orderHistory = [];
   neo.fetchNEP5Tokens();
 }
 
@@ -164,6 +172,10 @@ function setActiveTransaction(state, transaction) {
 
 function setClaimModalModel(state, model) {
   state.claimModalModel = model;
+}
+
+function setCommitChangeInProgress(state, value) {
+  state.commitChangeInProgress = value;
 }
 
 function setCommitModalModel(state, model) {
@@ -273,7 +285,6 @@ function setRecentTransactions(state, transactions) {
     state.recentTransactions.unshift(transaction);
     if (existingIsEmpty === false) {
       alerts.success(`New Transaction Found. TX: ${transaction.hash}`);
-      neo.resetSystemAssetBalanceCache();
     }
   });
 
@@ -342,6 +353,10 @@ function setShowLoginToWalletModal(state, wallet) {
   state.currentLoginToWallet = wallet;
 }
 
+function setShowPortfolioHeader(state, value) {
+  state.showPortfolioHeader = value;
+}
+
 function setShowImportAWalletModal(state, value) {
   state.showImportAWalletModal = value;
 }
@@ -390,6 +405,20 @@ function setStatsToken(state, token) {
 
 function setWallets(state, wallets) {
   state.wallets = wallets;
+}
+
+function setWithdrawInProgressModalModel(state, model) {
+  state.withdrawInProgressModalModel = model;
+}
+
+function setSystemWithdraw(state, value) {
+  state.systemWithdraw = value;
+}
+
+function setSystemWithdrawMergeState(state, value) {
+  if (state.systemWithdraw && typeof state.systemWithdraw === 'object') {
+    state.systemWithdraw = _.merge(_.cloneDeep(state.systemWithdraw), value);
+  }
 }
 
 function setGasClaim(state, value) {
@@ -455,6 +484,10 @@ function setOrderQuantity(state, quantity) {
   state.orderQuantity = quantity;
 }
 
+function setTickerDataByMarket(state, tickerDataByMarket) {
+  state.tickerDataByMarket = tickerDataByMarket;
+}
+
 function orderBookSnapshotReceived(state, res) {
   const orderBook = dex.formOrderBook(res.asks, res.bids);
   orderBook.pair = res.pair;
@@ -480,7 +513,7 @@ function setOrderHistory(state, orders) {
   state.orderHistory = orders;
 
   const orderHistoryStorageKey
-    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${state.currentNetwork.dex_hash}`;
   db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 function addToOrderHistory(state, newOrders) {
@@ -503,7 +536,7 @@ function addToOrderHistory(state, newOrders) {
   }
 
   const orderHistoryStorageKey
-    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${assets.DEX_SCRIPT_HASH}`;
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${state.currentNetwork.dex_hash}`;
   db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 
@@ -522,6 +555,10 @@ function setMenuToggleable(state, menuToggleable) {
 
 function setMenuCollapsed(state, menuCollapsed) {
   state.menuCollapsed = menuCollapsed;
+}
+
+function setShowLearnMore(state, value) {
+  state.showLearnMore = value;
 }
 
 function SOCKET_ONOPEN(state, event) {

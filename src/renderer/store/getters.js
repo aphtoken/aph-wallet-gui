@@ -36,6 +36,7 @@ export const sendInProgress = state => state.sendInProgress[state.currentNetwork
 export const sendModel = state => state.sendModel[state.currentNetwork.net];
 export const showAddContactModal = state => state.showAddContactModal;
 export const showAddTokenModal = state => state.showAddTokenModal;
+export const showLearnMore = state => state.showLearnMore;
 export const showOrderConfirmationModal = state => state.showOrderConfirmationModal;
 export const showPortfolioHeader = state => state.showPortfolioHeader;
 export const showSendAddressModal = state => state.showSendAddressModal;
@@ -45,3 +46,6 @@ export const tradeHistory = state => state.tradeHistory;
 export const transactionDetails = state => state.transactionDetails;
 export const version = state => state.version;
 export const wallets = state => state.wallets;
+export const tickerData = (state) => {
+  return state.currentMarket ? state.tickerDataByMarket[state.currentMarket.marketName] : {};
+};

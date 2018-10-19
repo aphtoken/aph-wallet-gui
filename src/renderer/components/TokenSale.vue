@@ -51,7 +51,7 @@ let loadTransactionsIntervalId;
 
 export default {
   beforeDestroy() {
-    this.$store.state.showPortfolioHeader = true;
+    this.$store.commit('setShowPortfolioHeader', true);
     clearInterval(loadTransactionsIntervalId);
   },
 
@@ -233,7 +233,7 @@ export default {
   },
 
   mounted() {
-    this.$store.state.showPortfolioHeader = false;
+    this.$store.commit('setShowPortfolioHeader', false);
   },
 
   watch: {

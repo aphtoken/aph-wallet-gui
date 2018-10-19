@@ -129,12 +129,12 @@ export default {
   },
 
   beforeDestroy() {
-    this.$store.state.showPortfolioHeader = true;
+    this.$store.commit('setShowPortfolioHeader', true);
     clearInterval(loadCommitStateIntervalId);
   },
 
   mounted() {
-    this.$store.state.showPortfolioHeader = false;
+    this.$store.commit('setShowPortfolioHeader', false);
     this.$store.dispatch('fetchCommitState');
 
     loadCommitStateIntervalId = setInterval(() => {
@@ -158,14 +158,15 @@ export default {
       'currentNetwork',
     ]),
     shouldDisableCommitButton() {
-      return this.$store.state.commitState.quantityCommitted > 0;
+      return this.$store.state.commitState.quantityCommitted > 0 || this.$store.state.commitChangeInProgress;
     },
     shouldDisableClaimButton() {
-      return this.$store.state.commitState.quantityCommitted <= 0;
+      return this.$store.state.commitState.quantityCommitted <= 0 || this.$store.state.commitChangeInProgress;
     },
     shouldDisableCompoundButton() {
       return this.$store.state.commitState.quantityCommitted <= 0
-        || this.$store.state.commitState.ableToCompoundHeight > this.currentBlock;
+        || this.$store.state.commitState.ableToCompoundHeight > this.currentBlock
+        || this.$store.state.commitChangeInProgress;
     },
     currentBlock() {
       return this.currentNetwork && this.currentNetwork.bestBlock ? this.currentNetwork.bestBlock.index : 0;
@@ -178,7 +179,7 @@ export default {
     },
     aphHolding() {
       if (this.$store.state.holdings) {
-        const holding = _.find(this.$store.state.holdings, { assetId: this.$services.assets.APH });
+        const holding = _.find(this.$store.state.holdings, { assetId: this.currentNetwork.aph_hash });
 
         if (holding) {
           return holding;

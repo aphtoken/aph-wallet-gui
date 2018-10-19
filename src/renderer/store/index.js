@@ -17,6 +17,7 @@ const state = {
   activeTransaction: null,
   blockDetails: {},
   claimModalModel: null,
+  commitChangeInProgress: null,
   commitModalModel: null,
   commitState: null,
   contacts: [],
@@ -58,6 +59,7 @@ const state = {
   showAddTokenModal: false,
   showClaimGasModal: false,
   showImportAWalletModal: false,
+  showLearnMore: false,
   showLoginToWalletModal: false,
   showOrderConfirmationModal: false,
   showPortfolioHeader: true,
@@ -74,10 +76,13 @@ const state = {
   },
   statsToken: null,
   styleMode: 'Night',
+  systemWithdraw: null,
   tradeHistory: null,
   transactionDetails: {},
+  tickerDataByMarket: {},
   version: pjson.version,
   wallets: [],
+  withdrawInProgressModalModel: null,
 };
 
 const store = new Vuex.Store({

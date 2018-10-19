@@ -25,6 +25,7 @@ export {
   fetchMarkets,
   fetchTradeHistory,
   fetchOrderHistory,
+  fetchSystemAssetBalances,
   formOrder,
   placeOrder,
   pingSocket,
@@ -240,6 +241,7 @@ async function fetchHoldings({ commit }, { done, isRequestSilent } = {}) {
 
   return holdings;
 }
+
 async function fetchRecentTransactions({ commit }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
@@ -270,6 +272,19 @@ async function fetchRecentTransactions({ commit }) {
     alerts.exception(message);
     commit('failRequest', { identifier: 'fetchRecentTransactions', message });
   }
+}
+
+async function fetchSystemAssetBalances({ commit }, { forAddress, intents }) {
+  commit('startRequest', { identifier: 'fetchSystemAssetBalances' });
+  let balances;
+  try {
+    balances = await neo.fetchSystemAssetBalance(forAddress, intents);
+  } catch (message) {
+    commit('failRequest', { identifier: 'fetchSystemAssetBalances', message });
+    throw message;
+  }
+
+  return balances;
 }
 
 function findTransactions({ state, commit }) {
@@ -459,12 +474,18 @@ async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilen
     { identifier: 'fetchTradeHistory' });
 
   try {
-    history = await dex.fetchTradeHistory(marketName);
+    let apiBuckets;
+    let promiseFetchTradesBucketed;
     if (state.tradeHistory && state.tradeHistory.apiBuckets && state.tradeHistory.marketName === marketName) {
-      history.apiBuckets = state.tradeHistory.apiBuckets;
+      apiBuckets = state.tradeHistory.apiBuckets;
     } else {
-      history.apiBuckets = await dex.fetchTradesBucketed(marketName);
+      promiseFetchTradesBucketed = dex.fetchTradesBucketed(marketName);
     }
+    history = await dex.fetchTradeHistory(marketName);
+    if (promiseFetchTradesBucketed) {
+      apiBuckets = await promiseFetchTradesBucketed;
+    }
+    history.apiBuckets = apiBuckets;
     commit('setTradeHistory', history);
     commit('endRequest', { identifier: 'fetchTradeHistory' });
   } catch (message) {

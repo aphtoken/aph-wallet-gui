@@ -3,10 +3,13 @@
     <div class="header tab">
       <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
       <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
+      <div class="learn-more">
+        <button class="learn-more-btn" @click="toggleLearnMore">{{ $t('learnMore') }}</button>
+      </div>
     </div>
     <div class="body" v-if="isTradingDisabled">
       <p v-if="isOutOfDate">
-        {{$t('outOfDateMessage')}}        
+        {{$t('outOfDateMessage')}}
       </p>
       <p v-if="isMarketClosed">
         {{$t('marketClosedMessage')}}
@@ -87,8 +90,10 @@ export default {
     this.tradeHistoryUnwatch = this.$store.watch(
       () => {
         return this.$store.state.tradeHistory;
-      }, () => {
-        this.loadChart();
+      }, (val, oldValue) => {
+        if (!oldValue || val.marketName !== oldValue.marketName) {
+          this.loadChart();
+        }
       });
 
     this.styleMode = this.$store.state.styleMode;
@@ -101,6 +106,7 @@ export default {
         }
         this.styleMode = this.$store.state.styleMode;
       });
+    this.loadChart();
   },
 
   beforeDestroy() {
@@ -110,6 +116,10 @@ export default {
   },
 
   methods: {
+    toggleLearnMore() {
+      this.$store.commit('setShowLearnMore', true);
+    },
+
     selectTab(tab) {
       this.tab = tab;
       if (tab === 'Chart') {
@@ -188,7 +198,7 @@ export default {
           },
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ? 
+            const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
               this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice) :
               [];
 
@@ -210,8 +220,8 @@ export default {
               if (!this.tradingView || !this.tradingView._options) {
                 return;
               }
-              const to = parseInt((new Date().valueOf()) / 1000, 10)
-              const from = to - 120
+              const to = Math.round(new Date().valueOf() / 1000);
+              const from = to - 120;
 
               this.tradingView._options.datafeed.getBars(_symbolInfo, resolution, from, to, (bars) => {
                 if (bars.length === 0) {
@@ -227,8 +237,8 @@ export default {
                 const isNewBar = !Number.isNaN(lastBarTime) && lastBar.time > lastBarTime
 
                 if (isNewBar && bars.length >= 2) {
-                  const previousBar = bars[bars.length - 2]
-                  onRealtimeCallback(previousBar)
+                  const previousBar = bars[bars.length - 2];
+                  onRealtimeCallback(previousBar);
                 }
 
                 lastBarTime = lastBar.time;
@@ -244,7 +254,7 @@ export default {
                   throw err;
                 }
               })
-            }, 20000)
+            }, 10000)
           },
 
           unsubscribeBars: (subscriberUID) => {
@@ -323,9 +333,9 @@ export default {
     },
 
     isOutOfDate() {
-      return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
-        && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
-          !== this.$services.assets.DEX_SCRIPT_HASH;
+      return this.$store.state.latestVersion && this.$store.state.latestVersion.prodExchangeScriptHash
+        && this.$store.state.latestVersion.prodExchangeScriptHash.replace('0x', '')
+          !== this.$store.state.currentNetwork.dex_hash;
     },
 
     isMarketClosed() {
@@ -461,12 +471,14 @@ export default {
 
   .header {
     padding: $space $space 0;
+    position: relative;
 
     h1 {
       @extend %underlined-header-sm;
     }
 
     &.tab {
+      position: relative;
       display: flex;
       justify-content: flex-end;
 
@@ -487,6 +499,21 @@ export default {
             background: transparent;
           }
         }
+      }
+    }
+
+    .learn-more {
+      bottom: 0;
+      left: 50%;
+      position: absolute;
+      transform: translateX(-50%);
+
+      .learn-more-btn {
+        @extend %btn;
+
+        height: toRem(32px);
+        line-height: toRem(32px);
+        padding: 0 $space;
       }
     }
   }
@@ -645,7 +672,6 @@ export default {
         .asks {
           flex-direction: row-reverse;
         }
-
       }
     }
   }
