@@ -12,10 +12,10 @@ const NETWORKS = [
     value: {
       aph: 'https://mainnet.aphelion-neo.com:62443/api',
       aph_hash: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
-      dex_hash: '1c6115f9ba9400f153bbe541f50d5781c30de443',
-      fee: 0,
+      dex_hash: '52d15c9e6a71e6094d735bac06c7c0b701aa2ab5',
       net: 'MainNet',
       rpc: 'https://mainneo.aphelion-neo.com:10331',
+      fee: 0,
       websocketUri: 'wss://mainnet.aphelion-neo.com:62443/ws',
     },
   },
@@ -26,9 +26,9 @@ const NETWORKS = [
       aph_hash: '591eedcd379a8981edeefe04ef26207e1391904a',
       ati_hash: '155153854ed377549a72cc1643e481bf25b48390',
       dex_hash: '1c6115f9ba9400f153bbe541f50d5781c30de443',
-      fee: 0,
       net: 'TestNet',
       rpc: 'https://testneo.aphelion-neo.com:20331',
+      fee: 0,
       websocketUri: 'wss://testnet.aphelion-neo.com:62443/ws',
     },
   },
@@ -43,6 +43,7 @@ const NETWORKS = [
       net: 'PrivNet',
       rpc: 'http://localhost:30338',
       fee: 0,
+      websocketUri: 'ws://localhost:62433/ws',
     },
   }, */
 ];
@@ -141,12 +142,13 @@ export default {
     if (!network.fee) {
       network.fee = defaultForNetwork.fee;
     }
-    if (!network.dex_hash) {
-      network.dex_hash = defaultForNetwork.dex_hash;
-    }
-    if (!network.aph_hash) {
-      network.aph_hash = defaultForNetwork.aph_hash;
-    }
+
+    // Force the dex and aph hash to match the network setting even if what is saved doesn't match.
+    // TODO: Not really sure what's the value saving the settings instead of just the network name in persistent store
+    // TODO: I guess if we are going to allow them to enter custom values in the future it makes sense.
+    network.dex_hash = defaultForNetwork.dex_hash;
+    network.aph_hash = defaultForNetwork.aph_hash;
+
     return this;
   },
 

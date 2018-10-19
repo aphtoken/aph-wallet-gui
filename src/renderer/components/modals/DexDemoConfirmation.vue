@@ -1,8 +1,9 @@
 <template>
   <modal-wrapper id="dex-demo-confirmation-modal">
     <div class="body">
-      <h1>{{$t('aphelionDexTest')}}</h1>
-      <p>{{$t('thisIsAPreliminaryDemo')}}</p>
+      <!-- TODO: Remove tech debt added here since we are hijacking this DexDemoConfirmation.vue to show MainNet. -->
+      <h1>{{$t('aphelionDexMain')}}</h1>
+      <p>{{$t('aphelionDexIntro')}}</p>
     </div>
     <div class="footer">
       <div class="accept-btn" @click="accept">{{$t('accept')}}</div>
@@ -20,6 +21,7 @@ export default {
   methods: {
     accept() {
       this.$store.commit('setAcceptDexDemoVersion', true);
+      this.$store.commit('setShowLearnMore', false);
     },
   },
 };

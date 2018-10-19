@@ -41,7 +41,7 @@ export default {
     },
 
     shouldShowAddTokenButton() {
-      return this.$store.state.holdings.length === 0 && this.$isDone('fetchHoldings');
+      return this.holdings === 0 && this.$isDone('fetchHoldings');
     },
 
     ...mapGetters([

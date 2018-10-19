@@ -30,27 +30,117 @@
       <aph-icon name="no-transactions"></aph-icon>
       <div class="label">{{$t('unableToReachTradingServer')}}</div>
     </div>
-    <dex-demo-confirmation v-if="!$store.state.acceptDexDemoVersion && !isOutOfDate"></dex-demo-confirmation>
-    <dex-out-of-date v-if="isOutOfDate && !this.$store.state.acceptDexOutOfDate"></dex-out-of-date>
+    <dex-demo-confirmation v-if="shouldShowDemoConfirmation"></dex-demo-confirmation>
+    <dex-out-of-date v-if="shouldShowOutOfDate"></dex-out-of-date>
   </section>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import DexDemoConfirmation from './modals/DexDemoConfirmation';
 import DexOutOfDate from './modals/DexOutOfDate';
 import assets from '../services/assets';
 
 export default {
   beforeDestroy() {
-    this.$store.state.showPortfolioHeader = true;
+    this.$store.commit('setShowPortfolioHeader', true);
     clearInterval(this.connectionStatusInterval);
     clearInterval(this.marketsRefreshInterval);
     clearInterval(this.completeSystemAssetWithdrawalsInterval);
+    clearInterval(this.tickerRefreshInterval);
+  },
+
+  components: {
+    DexDemoConfirmation,
+    DexOutOfDate,
+  },
+
+  computed: {
+    isOutOfDate() {
+      return this.$store.state.latestVersion && this.$store.state.latestVersion.prodExchangeScriptHash
+        && this.$store.state.latestVersion.prodExchangeScriptHash.replace('0x', '')
+          !== this.$store.state.currentNetwork.dex_hash;
+    },
+
+    shouldShowDemoConfirmation() {
+      return (!this.$store.state.acceptDexDemoVersion && !this.isOutOfDate) || this.showLearnMore;
+    },
+
+    shouldShowOutOfDate() {
+      return this.isOutOfDate && !this.$store.state.acceptDexOutOfDate;
+    },
+
+    ...mapGetters([
+      'showLearnMore',
+    ]),
+  },
+
+  created() {
+    this.setConnected();
+    this.connectionStatusInterval = setInterval(() => {
+      this.setConnected();
+    }, 1000);
+    this.marketsRefreshInterval = setInterval(() => {
+      this.loadMarkets();
+    }, this.$constants.intervals.MARKETS_POLLING);
+    this.completeSystemAssetWithdrawalsInterval = setInterval(() => {
+      this.$services.dex.completeSystemAssetWithdrawals();
+    }, this.$constants.intervals.COMPLETE_SYSTEM_WITHDRAWALS);
+    this.tickerRefreshInterval = setInterval(() => {
+      this.loadTickerData();
+    }, this.$constants.intervals.TICKER_POLLING);
+  },
+
+  data() {
+    return {
+      connected: false,
+    };
+  },
+
+  methods: {
+    loadMarkets() {
+      this.$store.dispatch('fetchMarkets', {
+        done: () => {
+          if (!this.$store.state.currentMarket) {
+            this.$store.commit('setCurrentMarket', this.$store.state.markets[0]);
+          }
+        },
+      });
+    },
+
+    loadTickerData() {
+      this.$services.dex.fetchTickerData()
+        .then((tickerData) => {
+          this.$store.commit('setTickerDataByMarket', tickerData);
+        });
+    },
+
+    setConnected() {
+      if (!this.$store.state.socket || this.$store.state.socket.isConnected !== true) {
+        if (moment().utc().diff(this.$store.state.socket.connectionClosed, 'milliseconds')
+          > this.$constants.timeouts.WEBSOCKET_CONNECTION) {
+          this.connected = false;
+          return;
+        }
+      }
+
+      if (this.$store.state.currentMarket) {
+        if (!this.$store.state.socket.subscribedMarket
+          || this.$store.state.socket.subscribedMarket !== this.$store.state.currentMarket.marketName) {
+          this.$store.dispatch('subscribeToMarket', {
+            market: this.$store.state.currentMarket,
+          });
+        }
+      }
+
+      this.connected = true;
+    },
   },
 
   mounted() {
-    this.$store.state.showPortfolioHeader = false;
+    this.$store.commit('setShowPortfolioHeader', false);
     this.loadMarkets();
+    this.loadTickerData();
 
     this.$services.dex.completeSystemAssetWithdrawals();
 
@@ -100,70 +190,6 @@ export default {
 
     services.neo.promptGASFractureIfNecessary();
   },
-
-  components: {
-    DexDemoConfirmation,
-    DexOutOfDate,
-  },
-
-  created() {
-    this.setConnected();
-    this.connectionStatusInterval = setInterval(() => {
-      this.setConnected();
-    }, 1000);
-    this.marketsRefreshInterval = setInterval(() => {
-      this.loadMarkets();
-    }, this.$constants.intervals.MARKETS_POLLING);
-    this.completeSystemAssetWithdrawalsInterval = setInterval(() => {
-      this.$services.dex.completeSystemAssetWithdrawals();
-    }, this.$constants.intervals.COMPLETE_SYSTEM_WITHDRAWALS);
-  },
-
-  data() {
-    return {
-      connected: false,
-    };
-  },
-
-  computed: {
-    isOutOfDate() {
-      return this.$store.state.latestVersion && this.$store.state.latestVersion.testExchangeScriptHash
-        && this.$store.state.latestVersion.testExchangeScriptHash.replace('0x', '')
-          !== this.$store.state.currentNetwork.dex_hash;
-    },
-  },
-
-  methods: {
-    setConnected() {
-      if (!this.$store.state.socket || this.$store.state.socket.isConnected !== true) {
-        if (moment().utc().diff(this.$store.state.socket.connectionClosed, 'milliseconds')
-          > this.$constants.timeouts.WEBSOCKET_CONNECTION) {
-          this.connected = false;
-          return;
-        }
-      }
-
-      if (this.$store.state.currentMarket) {
-        if (!this.$store.state.socket.subscribedMarket
-          || this.$store.state.socket.subscribedMarket !== this.$store.state.currentMarket.marketName) {
-          this.$store.dispatch('subscribeToMarket', {
-            market: this.$store.state.currentMarket,
-          });
-        }
-      }
-
-      this.connected = true;
-    },
-    loadMarkets() {
-      this.$store.dispatch('fetchMarkets', {
-        done: () => {
-          if (!this.$store.state.currentMarket) {
-            this.$store.commit('setCurrentMarket', this.$store.state.markets[0]);
-          }
-        },
-      });
-    },
-  },
 };
 </script>
 
@@ -174,7 +200,6 @@ export default {
   flex-direction: row;
   flex: 1;
   justify-content: center;
-  padding-top: toRem(30px);
   width: 100%;
 
   .grid {
@@ -248,31 +273,30 @@ export default {
   }
 
   > .zero-state {
-      @extend %tile-light;
+    @extend %tile-light;
 
-      align-items: center;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      justify-content: center;
-      width: 100%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
 
-      .aph-icon {
-        svg {
-          height: toRem(52px);
+    .aph-icon {
+      svg {
+        height: toRem(52px);
 
-          .fill {
-            fill: $purple;
-          }
+        .fill {
+          fill: $purple;
         }
-      }
-
-      .label {
-        color: $purple;
-        font-weight: GilroyMedium;
-        margin-top: $space-lg;
       }
     }
 
+    .label {
+      color: $purple;
+      font-weight: GilroyMedium;
+      margin-top: $space-lg;
+    }
+  }
 }
 </style>

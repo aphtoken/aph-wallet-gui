@@ -7,6 +7,7 @@ import {
 } from '@cityofzion/neon-js';
 import Vue from 'vue';
 import { BigNumber } from 'bignumber.js';
+import _ from 'lodash';
 import assets from './assets';
 import alerts from './alerts';
 import neo from './neo';
@@ -16,6 +17,7 @@ import ledger from './ledger';
 import { store } from '../store';
 import { toBigNumber } from './formatting.js';
 import { claiming, intervals } from '../constants';
+
 
 const TX_ATTR_USAGE_SCRIPT = 0x20;
 const TX_ATTR_USAGE_HEIGHT = 0xf0;
@@ -167,30 +169,7 @@ export default {
               trades: res.data.trades,
               getBars: this.getTradeHistoryBars,
             };
-            const todayCutoff = moment().startOf('day').unix();
-            const todayTrades = _.filter(history.trades, (trade) => {
-              return trade.tradeTime >= todayCutoff;
-            });
-            if (todayTrades.length > 0) {
-              history.close24Hour = todayTrades[0].price;
-              history.open24Hour = todayTrades[todayTrades.length - 1].price;
-              history.low24Hour = _.minBy(todayTrades, 'price').price;
-              history.high24Hour = _.maxBy(todayTrades, 'price').price;
-              history.volume24Hour = _.sumBy(todayTrades, 'quantity');
-              history.change24HourPercent = Math.round(((history.close24Hour - history.open24Hour)
-                / history.open24Hour) * 10000) / 100;
-              history.change24Hour = history.close24Hour - history.open24Hour;
-            } else {
-              if (history.trades.length > 0) {
-                history.close24Hour = history.trades[0].price;
-                history.open24Hour = history.trades[0].price;
-                history.low24Hour = history.trades[0].price;
-                history.high24Hour = history.trades[0].price;
-              }
-              history.volume24Hour = 0;
-              history.change24Hour = 0;
-              history.change24HourPercent = 0;
-            }
+
             resolve(history);
           })
           .catch((e) => {
@@ -1031,41 +1010,72 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         if (assetId === assets.NEO || assetId === assets.GAS) {
+          const systemWithdraw = {
+            step: 0,
+            asset: assetId === assets.NEO ? 'NEO' : 'GAS',
+            amount: quantity.toString(),
+          };
+
+          store.commit('setSystemWithdraw', systemWithdraw);
+
+          store.commit('setWithdrawInProgressModalModel', {
+          });
+
+          const rejectWithError = (errorMsg) => {
+            store.commit('setSystemWithdrawMergeState', { error: errorMsg });
+            reject(errorMsg);
+          };
+          // TODO: should pass this through the whole way instead of getting again in case they switch wallets somehow
+          const currentWallet = wallets.getCurrentWallet();
+
           this.markWithdraw(assetId, quantity)
             .then((res) => {
               if (res.success !== true) {
-                reject('Withdraw Mark Step rejected');
+                rejectWithError('Withdraw Mark Step rejected');
                 return;
               }
+              store.commit('setSystemWithdrawMergeState', { step: 2 });
 
               alerts.success('Withdraw Mark Step Relayed. Waiting for confirmation.');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  setTimeout(() => {
-                    const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
-                    // Must allow funds to be sent again by applying unconfirmed back to spent.
-                    neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, true);
+                  store.commit('setSystemWithdrawMergeState', { step: 3 });
+                  const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
+                  // Must allow funds to be sent again by moving tx outputs to unspent.
+                  neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, true);
 
+                  setTimeout(() => {
                     this.withdrawSystemAsset(assetId, quantity, res.tx.hash, res.utxoIndex)
                       .then((res) => {
                         if (res.success) {
+                          store.commit('setSystemWithdrawMergeState', { step: 4 });
+
+                          neo.monitorTransactionConfirmation(res.tx, true)
+                            .then(() => {
+                              neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
+                              store.commit('setSystemWithdrawMergeState', { step: 5 });
+                              resolve(res.tx);
+                            })
+                            .catch(() => {
+                              rejectWithError('Timed out waiting for withdraw to complete.');
+                            });
                           resolve(res.tx);
                         } else {
-                          reject('Withdraw rejected');
+                          rejectWithError('Withdraw rejected');
                         }
                       })
                       .catch((e) => {
-                        reject(`Failed to withdraw system asset. ${e}`);
+                        rejectWithError(`Failed to withdraw system asset. ${e}`);
                       });
-                  }, 10000);
+                  }, 1000);
                 })
                 .catch((e) => {
-                  reject(`Failed to monitor transaction for confirmation. ${e}`);
+                  rejectWithError(`Failed to monitor transaction for confirmation. ${e}`);
                   this.completeSystemAssetWithdrawals();
                 });
             })
             .catch((e) => {
-              reject(`Failed to mark system asset for withdrawal. ${e}`);
+              rejectWithError(`Failed to mark system asset for withdraw. ${e}`);
             });
 
           return;
@@ -1096,7 +1106,7 @@ export default {
   },
 
   markWithdraw(assetId, quantity, tryCount = 1) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const currentNetwork = network.getSelectedNetwork();
       const currentWallet = wallets.getCurrentWallet();
       if (DBG_LOG) console.log(`markWithdraw assetId ${assetId} quantity ${quantity} tryCount ${tryCount}`);
@@ -1111,6 +1121,19 @@ export default {
         },
         fees: currentNetwork.fee,
         gas: 0,
+      };
+
+      const handleRetry = () => {
+        setTimeout(() => {
+          this.ignoreWithdrawInputs(config);
+          this.markWithdraw(assetId, quantity, tryCount + 1)
+            .then((res) => {
+              resolve(res);
+            })
+            .catch((e) => {
+              reject(e);
+            });
+        }, 10000);
       };
 
       try {
@@ -1132,137 +1155,95 @@ export default {
           alerts.success(`Processing withdraw request for ${quantity.toString()} ${assetHolding.symbol}...`);
         }
 
-        api.fillKeys(config)
-          .then((configResponse) => {
-            return new Promise(async (resolveBalance) => {
-              try {
-                configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
-                  { forAddress: currentWallet.address });
-                resolveBalance(configResponse);
-              } catch (e) {
-                reject(`Failed to fetch address balance. ${e}`);
-              }
-            });
-          })
-          .then((configResponse) => {
-            return api.createTx(configResponse, 'invocation');
-          })
-          .then((configResponse) => {
-            return new Promise((resolveTx) => {
-              this.calculateWithdrawInputsAndOutputs(configResponse, assetId, quantity)
-                .then(() => {
-                  const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
+        let configResponse = await api.fillKeys(config);
 
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-                  configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-                    u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
-                  resolveTx(configResponse);
-                })
-                .catch((e) => {
-                  if (tryCount <= 1) {
-                    if (DBG_LOG) console.log(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
-                    reject(`Failed to calculate withdraw inputs and outputs. ${e.message || e}`);
-                  } else {
-                    if (DBG_LOG) console.log('Failed to Mark Withdraw.');
-                    reject('Failed to Mark Withdraw.');
-                  }
-                });
-            });
-          })
-          .then((configResponse) => {
-            return api.signTx(configResponse);
-          })
-          .then((configResponse) => {
-            const attachInvokedContract = {
-              invocationScript: ('00').repeat(2),
-              verificationScript: '',
-            };
+        try {
+          configResponse.balance = await store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address });
+        } catch (e) {
+          throw new Error(`Failed to fetch address balance. ${e}`);
+        }
 
-            // We need to order this for the VM.
-            const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-            if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
-              configResponse.tx.scripts.push(attachInvokedContract);
-            } else {
-              configResponse.tx.scripts.unshift(attachInvokedContract);
-            }
+        if (!currentNetwork.bestBlock) {
+          throw new Error('Wallet has not obtained a block number yet.');
+        }
 
-            let i = 0;
+        // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
+        const blockIndex = currentNetwork.bestBlock.index;
+        const validUntilValue = (blockIndex + 20) * 0.00000001;
 
-            configResponse.tx.outputs.forEach(({ value }) => {
-              if (utxoIndex === -1 && quantity.isEqualTo(value)) {
-                utxoIndex = i;
-              }
-              i += 1;
-            });
+        configResponse = await api.createTx(configResponse, 'invocation');
 
-            if (utxoIndex === -1) {
-              if (DBG_LOG) console.log('Unable to generate valid UTXO');
-              throw new Error('Unable to generate valid UTXO');
-            }
-            return configResponse;
-          })
-          .then((configResponse) => {
-            if (DBG_LOG) console.log(`sendTx to mark withdraw ${JSON.stringify(configResponse)}`);
-            return api.sendTx(configResponse);
-          })
-          .then((configResponse) => {
-            // TODO: refactor this using await and try catch
-            if (!configResponse.response.result && tryCount < 3) {
-              setTimeout(() => {
-                this.ignoreWithdrawInputs(config);
-                this.markWithdraw(assetId, quantity, tryCount + 1)
-                  .then((res) => {
-                    resolve(res);
-                  })
-                  .catch((e) => {
-                    reject(e);
-                  });
-              }, 10000);
-            } else {
-              resolve({
-                success: configResponse.response.result,
-                tx: configResponse.tx,
-                utxoIndex,
-              });
-            }
-          })
-          .catch((e) => {
-            if (DBG_LOG) console.log(`failure to mark returned from sendTx ${e}`);
-            if (tryCount < 3) {
-              setTimeout(() => {
-                this.ignoreWithdrawInputs(config);
-                this.markWithdraw(assetId, quantity, tryCount + 1)
-                  .then((res) => {
-                    resolve(res);
-                  })
-                  .catch((e) => {
-                    reject(e);
-                  });
-              }, 10000);
-            } else {
-              reject(`Failed to Mark Withdraw. ${e}`);
-            }
-          });
-      } catch (e) {
-        if (tryCount < 3) {
-          setTimeout(() => {
-            this.ignoreWithdrawInputs(config);
-            this.markWithdraw(assetId, quantity, tryCount + 1)
-              .then((res) => {
-                resolve(res);
-              })
-              .catch((e) => {
-                reject(e);
-              });
-          }, 10000);
+        const inputsFromGasFee = configResponse.tx.inputs.length;
+
+        try {
+          // This decorates the configResponse with the appropriate inputs
+          await this.calculateWithdrawInputsAndOutputs(configResponse, assetId, quantity);
+        } catch (e) {
+          const errMsg = `Failed to calculate withdraw inputs and outputs. ${e.message || e}`;
+          if (DBG_LOG) console.log(errMsg);
+          throw new Error(errMsg);
+        }
+
+        store.commit('setSystemWithdrawMergeState', { utxoCount: configResponse.tx.inputs.length - inputsFromGasFee, step: 1 });
+        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
+        if (DBG_LOG) console.log(`*block index: ${blockIndex} Valid until: ${validUntilValue}`);
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+          u.num2fixed8(validUntilValue).padEnd(64, '0'));
+
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+
+        configResponse = await api.signTx(configResponse);
+
+        const attachInvokedContract = {
+          invocationScript: ('00').repeat(2),
+          verificationScript: '',
+        };
+
+        // We need to order this for the VM.
+        const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
+        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+          configResponse.tx.scripts.push(attachInvokedContract);
         } else {
-          reject(`Failed to Mark Withdraw. ${e.message}`);
+          configResponse.tx.scripts.unshift(attachInvokedContract);
+        }
+
+        let i = 0;
+
+        configResponse.tx.outputs.forEach(({ value }) => {
+          if (utxoIndex === -1 && quantity.isEqualTo(value)) {
+            utxoIndex = i;
+          }
+          i += 1;
+        });
+
+        if (utxoIndex === -1) {
+          if (DBG_LOG) console.log('Unable to generate valid UTXO');
+          throw new Error('Unable to generate valid UTXO');
+        }
+
+        if (DBG_LOG) console.log(`sendTx to mark withdraw ${JSON.stringify(configResponse)}`);
+        configResponse = await api.sendTx(configResponse);
+
+        if (!configResponse.response.result) {
+          throw new Error('Failed to Mark Withdraw. Empty result from sendTX.');
+        }
+
+        resolve({
+          success: configResponse.response.result,
+          tx: configResponse.tx,
+          utxoIndex,
+        });
+      } catch (e) {
+        const errMsg = typeof e === 'string' ? e : e.message;
+        if (tryCount < 3) {
+          alerts.error(`Withdraw mark failed. Error: ${errMsg} Retrying...`);
+          handleRetry();
+        } else {
+          reject(`Failed to Mark Withdraw. ${errMsg}`);
         }
       }
     });
@@ -1378,7 +1359,7 @@ export default {
 
         resolve(config);
       } catch (e) {
-        reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${e.message}`);
+        reject(`Failed to Calculate Inputs and Outputs for Withdraw. ${typeof e === 'string' ? e : e.message}`);
       }
     });
   },
@@ -1423,6 +1404,14 @@ export default {
           reject(`Failed to fetch address balance. ${e}`);
         }
 
+        if (!currentNetwork.bestBlock) {
+          reject('Wallet has not obtained a block number yet.');
+          return;
+        }
+        // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
+        const blockIndex = currentNetwork.bestBlock.index;
+        const validUntilValue = (blockIndex + 20) * 0.00000001;
+
         configResponse.sendingFromSmartContract = true;
         api.createTx(configResponse, 'invocation')
           .then((configResponse) => {
@@ -1431,17 +1420,15 @@ export default {
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
-
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL, u.num2fixed8(validUntilValue).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
 
             if (token.canPull !== false) {
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(currentNetwork.dex_hash));
             }
 
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
+            if (DBG_LOG) console.log(`block index; ${blockIndex} validUntil: ${validUntilValue}`);
+
             return api.signTx(configResponse);
           })
           .then((configResponse) => {
@@ -1460,6 +1447,7 @@ export default {
               }
             }
 
+            if (DBG_LOG) console.log(`withdraw NEP5 tx: ${JSON.stringify(configResponse)}`);
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
@@ -1496,7 +1484,7 @@ export default {
           gas: 0,
         };
 
-        // console.log(`withdrawSystemAsset ${assetId} quantity: ${quantity} utxoTxHash ${utxoTxHash} utxoIndex ${utxoIndex} intents ${JSON.stringify(config.intents)}`);
+        if (DBG_LOG) console.log(`withdrawSystemAsset ${assetId} quantity: ${quantity} utxoTxHash ${utxoTxHash} utxoIndex ${utxoIndex} intents ${JSON.stringify(config.intents)}`);
         if (currentWallet.isLedger === true) {
           config.signingFunction = ledger.signWithLedger;
           config.address = currentWallet.address;
@@ -1505,19 +1493,16 @@ export default {
         }
 
         let configResponse = await api.fillKeys(config);
-
         try {
           configResponse.balance
             = await store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address });
         } catch (e) {
-          reject(`Failed to fetch address balance. ${e}`);
-          return;
+          throw new Error(`Failed to fetch address balance. ${e}`);
         }
 
         const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
 
         let dexIntents;
-        // Can't do this above because createTx would pick inputs for these and move them into spent.
         if (assetId === assets.NEO) {
           dexIntents = api.makeIntent({ NEO: quantity }, currentWallet.address);
         } else if (assetId === assets.GAS) {
@@ -1529,8 +1514,7 @@ export default {
           dexBalance = await store.dispatch('fetchSystemAssetBalances',
             { forAddress: dexAddress, intents: dexIntents });
         } catch (e) {
-          reject(`Failed to fetch address balance. ${e}`);
-          return;
+          throw new Error(`Failed to fetch address balance. ${e}`);
         }
 
         const unspents = assetId === assets.GAS ? dexBalance.assets.GAS.unspent : dexBalance.assets.NEO.unspent;
@@ -1561,8 +1545,12 @@ export default {
           value: input.value,
         });
 
-        // Apply this to the dex's balance so it won't get picked again for an immediate subsequent withdraw
-        neo.applyTxToAddressSystemAssetBalance(dexAddress, configResponse.tx, false);
+        if (!currentNetwork.bestBlock) {
+          throw new Error('Wallet has not obtained a block number yet.');
+        }
+        // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
+        const blockIndex = currentNetwork.bestBlock.index;
+        const validUntilValue = (blockIndex + 20) * 0.00000001;
 
         const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
@@ -1570,11 +1558,9 @@ export default {
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
-          u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index + 20 : 0).padEnd(64, '0'));
+          u.num2fixed8(validUntilValue).padEnd(64, '0'));
 
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-          u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
 
         configResponse = await api.signTx(configResponse);
 
@@ -1594,9 +1580,12 @@ export default {
         if (DBG_LOG) console.log(`sending withdraw for utxo ${utxoTxHash} ${utxoIndex}`);
         configResponse = await api.sendTx(configResponse);
 
-        if (configResponse.response.result !== true && tryCount < 3) {
+        if (!configResponse || !configResponse.response || (configResponse.response.result !== true && tryCount < 3)) {
           throw new Error('Withdraw rejected by the network. Retrying...');
         }
+
+        // Apply this to the dex's balance so it won't get picked again for an immediate subsequent withdraw
+        neo.applyTxToAddressSystemAssetBalance(dexAddress, configResponse.tx, false);
 
         if (configResponse.response.result === true) {
           alerts.success('Withdraw relayed, waiting for confirmation...');
@@ -1607,8 +1596,9 @@ export default {
           tx: configResponse.tx,
         });
       } catch (e) {
+        const errMsg = typeof e === 'string' ? e : e.message;
         if (tryCount < 3) {
-          alerts.error(`Withdraw failed. Error: ${e.message} Retrying...`);
+          alerts.error(`Withdraw failed. Error: ${errMsg} Retrying...`);
           setTimeout(() => {
             this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1)
               .then((res) => {
@@ -1620,8 +1610,7 @@ export default {
           }, 10000);
           return;
         }
-
-        reject(`Failed to send asset withdraw transaction. ${e.message}`);
+        reject(`Failed to send asset withdraw transaction. ${errMsg}`);
       }
     });
   },
@@ -1635,9 +1624,27 @@ export default {
       if (unspent.reservedFor === currentWalletScriptHash) {
         if (DBG_LOG) console.log(`Completing withdraw for ${JSON.stringify(unspent)}`);
         try {
-          await this.withdrawSystemAsset(assetId, unspent.value.toNumber(), unspent.txid, unspent.index);
+          if (!store.state.systemWithdraw) {
+            const systemWithdraw = {
+              step: 0,
+              asset: assetId === assets.NEO ? 'NEO' : 'GAS',
+              amount: unspent.value.toString(),
+            };
+            store.commit('setSystemWithdraw', systemWithdraw);
+            store.commit('setSystemWithdrawMergeState', { step: 3 });
+            store.commit('setWithdrawInProgressModalModel', {
+            });
+          }
+
+          const res = await this.withdrawSystemAsset(assetId, unspent.value.toNumber(), unspent.txid, unspent.index);
+          store.commit('setSystemWithdrawMergeState', { step: 4 });
+          await neo.monitorTransactionConfirmation(res.tx, true);
+          neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
+          store.commit('setSystemWithdrawMergeState', { step: 5 });
         } catch (e) {
-          throw new Error(`Attempt to complete previous withdraw failed. ${e}`);
+          const errMsg = `Attempt to complete previous withdraw failed. ${e}`;
+          store.commit('setSystemWithdrawMergeState', { error: errMsg });
+          throw new Error(errMsg);
         }
       }
     }
@@ -1897,6 +1904,7 @@ export default {
   commitAPH(quantity) {
     return new Promise((resolve, reject) => {
       try {
+        store.commit('setCommitChangeInProgress', {});
         this.executeContractTransaction('commit',
           [
             u.num2fixed8(quantity),
@@ -1906,50 +1914,82 @@ export default {
               alerts.success('Commit relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
-                  resolve(res.tx);
+                  setTimeout(async () => {
+                    try {
+                      await store.dispatch('fetchCommitState');
+                    } catch (e) {
+                      const errMsg = typeof e === 'string' ? e : e.message;
+                      alerts.exception(errMsg);
+                    }
+                    store.commit('setCommitChangeInProgress', null);
+                    resolve(res.tx);
+                  }, 5000);
                 })
                 .catch((e) => {
-                  reject(`Commit Failed. ${e}`);
+                  store.commit('setCommitChangeInProgress', null);
+                  reject(`Failed monitoring for commit complete transaction. ${e}`);
                 });
             } else {
+              store.commit('setCommitChangeInProgress', null);
               reject('Transaction rejected');
             }
           })
           .catch((e) => {
+            store.commit('setCommitChangeInProgress', null);
             reject(`Commit Failed. ${e}`);
           });
       } catch (e) {
+        store.commit('setCommitChangeInProgress', null);
         reject(`Commit Failed. ${e.message}`);
       }
     });
   },
 
   claimAPH() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
-        this.executeContractTransaction('claim',
-          [])
-          .then((res) => {
-            if (res.success) {
-              alerts.success('Claim relayed, waiting for confirmation...');
-              neo.monitorTransactionConfirmation(res.tx, true)
-                .then(() => {
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
-                  resolve(res.tx);
-                })
-                .catch((e) => {
-                  reject(`Failed to monitor transaction confirmation. ${e}`);
-                });
-            } else {
-              reject('Transaction rejected');
+        const withdrawAmountAfterClaim = toBigNumber(store.state.commitState.quantityCommitted
+          + store.state.commitState.availableToClaim)
+          .decimalPlaces(8, BigNumber.ROUND_DOWN);
+
+        store.commit('setCommitChangeInProgress', {});
+        const res = await this.executeContractTransaction('claim', []);
+        if (!res.success) {
+          reject('Transaction rejected');
+          return;
+        }
+
+        alerts.success('Claim relayed, waiting for confirmation...');
+        neo.monitorTransactionConfirmation(res.tx, true)
+          .then(async () => {
+            alerts.success(`Claimed ${withdrawAmountAfterClaim.toString()} APH to Contract Balance.`);
+
+            try {
+              await this.withdrawAsset(store.state.currentNetwork.aph_hash, Number(withdrawAmountAfterClaim));
+
+              alerts.success(`Submitted Withdraw of ${withdrawAmountAfterClaim.toString()} APH.`);
+            } catch (e) {
+              const errMsg = typeof e === 'string' ? e : e.message;
+              const alertMsg = `Failed to withdraw claimed APH. It remains in contract balance. Error: ${errMsg}`;
+              alerts.exception(alertMsg);
             }
+            try {
+              await store.dispatch('fetchCommitState');
+            } catch (e) {
+              const errMsg = typeof e === 'string' ? e : e.message;
+              alerts.exception(errMsg);
+            }
+            store.commit('setCommitChangeInProgress', null);
+            resolve(res.tx);
           })
           .catch((e) => {
-            reject(`Claim Failed. ${e}`);
+            store.commit('setCommitChangeInProgress', null);
+            reject(`Failed to monitor transaction confirmation. ${e}`);
           });
       } catch (e) {
-        reject(`Claim Failed. ${e.message}`);
+        const errMsg = typeof e === 'string' ? e : e.message;
+        reject(`Claim Failed. ${errMsg}`);
+        store.commit('setCommitChangeInProgress', null);
       }
     });
   },
@@ -1957,6 +1997,7 @@ export default {
   compoundAPH() {
     return new Promise((resolve, reject) => {
       try {
+        store.commit('setCommitChangeInProgress', {});
         this.executeContractTransaction('compound',
           [])
           .then((res) => {
@@ -1964,21 +2005,32 @@ export default {
               alerts.success('Compound relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
-                  // Note: Compound doesn't change wallet nep5 balance; no need to require refresh of APH balance here.
-                  this.fetchCommitState(wallets.getCurrentWallet().address);
-                  resolve(res.tx);
+                  setTimeout(async () => {
+                    try {
+                      await store.dispatch('fetchCommitState');
+                    } catch (e) {
+                      const errMsg = typeof e === 'string' ? e : e.message;
+                      alerts.exception(errMsg);
+                    }
+                    store.commit('setCommitChangeInProgress', null);
+                    resolve(res.tx);
+                  }, 5000);
                 })
                 .catch((e) => {
+                  store.commit('setCommitChangeInProgress', null);
                   reject(`Failed to monitor transaction confirmation. ${e}`);
                 });
             } else {
+              store.commit('setCommitChangeInProgress', null);
               reject('Transaction rejected');
             }
           })
           .catch((e) => {
+            store.commit('setCommitChangeInProgress', null);
             reject(`Compound Failed. ${e}`);
           });
       } catch (e) {
+        store.commit('setCommitChangeInProgress', null);
         reject(`Compound Failed. ${e.message}`);
       }
     });
@@ -2071,7 +2123,7 @@ export default {
   },
 
   buildContractTransaction(operation, parameters, neoToSend, gasToSend) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
         const currentWallet = wallets.getCurrentWallet();
@@ -2106,43 +2158,49 @@ export default {
           config.account = new wallet.Account(currentWallet.wif);
         }
 
-        api.fillKeys(config)
-          .then((configResponse) => {
-            if (!configResponse.intents && currentNetwork.fee === 0) {
-              return new Promise((balanceResolve) => {
-                configResponse.balance = new wallet.Balance({ address: configResponse.address, net: configResponse.net });
-                balanceResolve(configResponse);
-              });
+        let neededGasUtxos = (gasToSend && toBigNumber(gasToSend).isGreaterThan(0)) ? 1 : 0;
+        let configResponse = await api.fillKeys(config);
+        if (!configResponse.intents && currentNetwork.fee === 0 && !neoToSend && !gasToSend) {
+          configResponse.balance = new wallet.Balance({ address: configResponse.address, net: configResponse.net });
+        } else {
+          try {
+            configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
+              { forAddress: currentWallet.address, intents: config.intents });
+          } catch (e) {
+            reject(`Failed to fetch address balance. ${e}`);
+          }
+          if (currentNetwork.fee) {
+            neededGasUtxos += 1;
+            if (configResponse.balance.assets.GAS.unspent.length < neededGasUtxos) {
+              throw new Error('No unspent GAS available to pay network fee.');
             }
+          }
+        }
 
-            return new Promise(async (resolveBalance) => {
-              try {
-                configResponse.balance = await store.dispatch('fetchSystemAssetBalances',
-                  { forAddress: currentWallet.address, intents: config.intents });
-                resolveBalance(configResponse);
-              } catch (e) {
-                reject(`Failed to fetch address balance. ${e}`);
-              }
-            });
-          })
-          .then((configResponse) => {
-            return api.createTx(configResponse, 'invocation');
-          })
-          .then((configResponse) => {
-            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
-              u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
-            return api.signTx(configResponse);
-          })
-          .then((configResponse) => {
-            resolve(configResponse);
-          })
-          .catch((e) => {
-            reject(`Failed to build contract transaction. ${e}`);
-          });
+        if (neededGasUtxos > 1 && gasToSend && BigNumber(gasToSend).isGreaterThanOrEqualTo(
+          configResponse.balance.assets.GAS.balance)) {
+          throw new Error('Cannot send max GAS with a fee set, try a smaller amount or remove GAS fee.');
+        }
+
+        try {
+          configResponse = await api.createTx(configResponse, 'invocation');
+
+          const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+          configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+          configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
+            u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
+
+          configResponse = await api.signTx(configResponse);
+        } catch (e) {
+          if (DBG_LOG) console.log(`Failed creating or signing transaction. Error: ${e}`);
+          // Rip off the actual exception message it is likely something werid we don't want users to see.
+          throw new Error('Failed to create transaction.');
+        }
+
+        resolve(configResponse);
       } catch (e) {
-        reject(`Failed to build contract transaction. ${e.message}`);
+        const errMsg = typeof e === 'string' ? e : e.message;
+        reject(`Failed to build contract transaction. ${errMsg}`);
       }
     });
   },
@@ -2151,7 +2209,10 @@ export default {
     return new Promise((resolve, reject) => {
       try {
         this.buildContractTransaction(operation, parameters, neoToSend, gasToSend)
-          .then(configResponse => api.sendTx(configResponse))
+          .then((configResponse) => {
+            if (DBG_LOG) console.log(`executeContractTransaction ${JSON.stringify(configResponse)}`);
+            return api.sendTx(configResponse);
+          })
           .then((configResponse) => {
             resolve({
               success: configResponse.response.result,
@@ -2213,6 +2274,7 @@ export default {
               const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+              // TODO: may want to use a different attribute; ledger was having a singing issue and may be due to this attribute.
               configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
                 u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
 
@@ -2254,6 +2316,163 @@ export default {
         .catch((e) => {
           reject(`Failed to Claim Contract GAS. Error: ${e}`);
         });
+    });
+  },
+
+  collapseSmallestContractUTXOs(assetId, numInputsToCollapse, startingAmount = 0, collapseIncrementally = false) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+        const currentWallet = wallets.getCurrentWallet();
+
+        const config = {
+          net: currentNetwork.net,
+          url: currentNetwork.rpc,
+          script: {
+            scriptHash: currentNetwork.dex_hash,
+            operation: 'withdraw',
+            args: [
+            ],
+          },
+          fees: currentNetwork.fee,
+          intents: [],
+          gas: 0,
+        };
+
+        // Only contract owner will be able to collapse inputs
+        if (currentWallet.isLedger === true) {
+          config.signingFunction = ledger.signWithLedger;
+          config.address = currentWallet.address;
+        } else {
+          config.account = new wallet.Account(currentWallet.wif);
+        }
+
+        let configResponse = await api.fillKeys(config);
+        try {
+          configResponse.balance
+            = await store.dispatch('fetchSystemAssetBalances', { forAddress: currentWallet.address });
+        } catch (e) {
+          throw new Error(`Failed to fetch address balance. ${e}`);
+        }
+
+        const dexAddress = wallet.getAddressFromScriptHash(currentNetwork.dex_hash);
+
+        // This is going to calculate inputs for gas fee and apply them moving them into spent
+        configResponse = await api.createTx(configResponse, 'invocation');
+        if (DBG_LOG) console.log(`collapse inputs: ${JSON.stringify(configResponse.tx.inputs)} outputs: ${JSON.stringify(configResponse.tx.outputs)}`);
+
+        let dexBalance;
+        try {
+          dexBalance = await store.dispatch('fetchSystemAssetBalances',
+            { forAddress: dexAddress });
+        } catch (e) {
+          throw new Error(`Failed to fetch address balance. ${e}`);
+        }
+
+        const dexAssets = dexBalance.assets;
+        const unspents = _.cloneDeep(assetId === assets.GAS ? dexAssets.GAS.unspent : dexAssets.NEO.unspent);
+
+        await this.decorateWithUnspentsReservedState(assetId, unspents);
+
+        BigNumber.config({ DECIMAL_PLACES: 8, ROUNDING_MODE: 3 });
+        let totalInputAmount = toBigNumber(0);
+
+        // take the numInputsToCollapse smallest inputs and use them and sum their amounts
+        let inputsCollapsed = 0;
+        let lastCollapsedAmount = toBigNumber(0);
+        _.orderBy(unspents, [unspent => parseFloat(unspent.value.toString())], ['asc']).some((unspent) => {
+          // check if this utxo is marked for someone and if so just skip
+          if (unspent.reservedFor.length >= 40) {
+            return false;
+          }
+
+          if (toBigNumber(startingAmount).isGreaterThan(unspent.value)) {
+            return false;
+          }
+
+          if (lastCollapsedAmount.plus(1).isGreaterThan(unspent.value) && collapseIncrementally === true) {
+            return false;
+          }
+
+          totalInputAmount = totalInputAmount.plus(unspent.value);
+          config.tx.inputs.push({
+            prevHash: unspent.txid,
+            prevIndex: unspent.index,
+          });
+
+          lastCollapsedAmount = toBigNumber(unspent.value);
+          inputsCollapsed += 1;
+
+          if (inputsCollapsed >= numInputsToCollapse) {
+            return true;
+          }
+          return false;
+        });
+
+        console.log(`total collapsed input amount: ${totalInputAmount}`);
+        // collapse to one output
+        config.tx.outputs.push({
+          assetId,
+          scriptHash: currentNetwork.dex_hash,
+          value: totalInputAmount,
+        });
+
+        if (DBG_LOG) console.log(`collapse inputs: ${JSON.stringify(configResponse.tx.inputs)} outputs: ${JSON.stringify(configResponse.tx.outputs)}`);
+
+        if (!currentNetwork.bestBlock) {
+          throw new Error('Wallet has not obtained a block number yet.');
+        }
+        // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
+        const blockIndex = currentNetwork.bestBlock.index;
+        const validUntilValue = (blockIndex + 20) * 0.00000001;
+
+        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, '93'.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
+          u.num2fixed8(validUntilValue).padEnd(64, '0'));
+
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+
+        configResponse = await api.signTx(configResponse);
+
+        const attachInvokedContract = {
+          invocationScript: ('00').repeat(2),
+          verificationScript: '',
+        };
+
+        // We need to order this for the VM.
+        const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
+        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+          configResponse.tx.scripts.push(attachInvokedContract);
+        } else {
+          configResponse.tx.scripts.unshift(attachInvokedContract);
+        }
+
+        if (DBG_LOG) console.log('sending collapse utxos');
+        configResponse = await api.sendTx(configResponse);
+
+        if (!configResponse || !configResponse.response || (configResponse.response.result !== true)) {
+          throw new Error('Collapse inputs rejected by network. Retrying...');
+        }
+
+        // Apply this to the dex's balance
+        neo.applyTxToAddressSystemAssetBalance(dexAddress, configResponse.tx, false);
+
+        if (configResponse.response.result === true) {
+          alerts.success('Collapse inputs relayed, waiting for confirmation...');
+        }
+
+        resolve({
+          success: configResponse.response.result,
+          tx: configResponse.tx,
+        });
+      } catch (e) {
+        const errMsg = typeof e === 'string' ? e : e.message;
+        alerts.error(`Collapse failed. Error: ${errMsg}`);
+        reject(`Failed to send collapse inputs transaction. ${errMsg}`);
+      }
     });
   },
 
@@ -2331,6 +2550,23 @@ export default {
           });
       } catch (e) {
         reject(e.message);
+      }
+    });
+  },
+
+  fetchTickerData() {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+        axios.get(`${currentNetwork.aph}/ticker`)
+          .then((res) => {
+            resolve(res.data);
+          })
+          .catch((e) => {
+            alerts.exception(`APH API Error: ${e}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch ticker data. ${e.message}`);
       }
     });
   },

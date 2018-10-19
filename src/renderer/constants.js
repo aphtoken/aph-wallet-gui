@@ -81,6 +81,7 @@ const intervals = {
   TOKENS_BALANCES_POLL_ALL: 5 * 60 * 1000,
   TRANSACTIONS_POLLING: 15 * 1000,
   WALLET_VERSION_CHECK: 10 * 60 * 1000,
+  TICKER_POLLING: 2 * 60 * 1000,
 };
 
 const loadStates = {
