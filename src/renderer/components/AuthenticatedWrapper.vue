@@ -70,7 +70,7 @@ export default {
   methods: {
     connectWebsocket() {
       const index = Vue._installedPlugins.indexOf(VueNativeSock);
-
+      // Remove the Websocket plugin if it is already installed, so we can re-init and change the uri.
       if (index > -1) {
         this.$disconnect();
         Vue._installedPlugins.splice(index, 1);
