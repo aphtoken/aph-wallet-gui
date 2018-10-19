@@ -651,18 +651,19 @@ export default {
           this.$services.alerts.exception(e);
         });
       */
-
       this.$services.alerts.info('Add assets');
 
       try {
-        // await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.aph_hash, 0, true);
-        // this.$services.alerts.success('Setup asset APH');
+        /*
+        await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.aph_hash, 0, true);
+        this.$services.alerts.success('Setup asset APH');
 
-        // await this.$services.dex.setAssetSettings(this.$services.assets.GAS, 0, true);
-        // this.$services.alerts.success('Setup asset GAS');
+        await this.$services.dex.setAssetSettings(this.$services.assets.GAS, 0, true);
+        this.$services.alerts.success('Setup asset GAS');
 
-        // await this.$services.dex.setAssetSettings(this.$services.assets.NEO, 0, true);
-        // this.$services.alerts.success('Setup asset NEO');
+        await this.$services.dex.setAssetSettings(this.$services.assets.NEO, 0, true);
+        this.$services.alerts.success('Setup asset NEO');
+        */
 
         // await this.$services.dex.setAssetSettings('b951ecbbc5fe37a9c280a76cb0ce0014827294cf', 0, true);
         // this.$services.alerts.success('Setup asset DBC');
@@ -708,6 +709,7 @@ export default {
         this.$services.alerts.success('Setup asset NRVE');
         */
 
+        /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
           this.$services.assets.NEO,
           100, 0.0000001, 0, 0.25, true);
@@ -722,6 +724,7 @@ export default {
           this.$services.assets.GAS,
           100, 0.00001, 0.0000, 0.25, true);
         this.$services.alerts.success('Setup Market GAS-APH');
+        */
 
         /*
         await this.$services.dex.setMarket('b951ecbbc5fe37a9c280a76cb0ce0014827294cf',
@@ -839,6 +842,7 @@ export default {
         // await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.ati_hash, 0, true);
         // this.$services.alerts.success('Setup asset ATI');
 
+        /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
           this.$services.assets.GAS,
           200, 0.00001, 0.25, 0.25);
@@ -853,6 +857,7 @@ export default {
           this.$store.state.currentNetwork.aph_hash,
           200, 0.00001, 0.25, 0);
         this.$services.alerts.success('Setup Market APH-ATI');
+        */
 
         /*
         await this.$services.dex.setMarket('a3640dd3c560c75528e5f861da5da98958d0d713',
