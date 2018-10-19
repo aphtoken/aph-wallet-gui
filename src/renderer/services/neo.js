@@ -1355,8 +1355,8 @@ export default {
   monitorTransactionConfirmation(tx, checkRpcForDetails) {
     return new Promise((resolve, reject) => {
       try {
+        const startedMonitoring = moment().utc();
         setTimeout(() => {
-          const startedMonitoring = moment().utc();
           const interval = setInterval(async () => {
             if (moment().utc().diff(startedMonitoring, 'milliseconds') > timeouts.MONITOR_TRANSACTIONS
                 && checkRpcForDetails !== true) {
@@ -1376,8 +1376,7 @@ export default {
               return;
             }
 
-            if (checkRpcForDetails === true
-              && moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK) {
+            if (checkRpcForDetails === true) {
               await this.fetchTransactionDetails(tx.hash)
                 .then((transactionDetails) => {
                   if (transactionDetails && transactionDetails.confirmed) {
@@ -1387,7 +1386,7 @@ export default {
                   }
                 })
                 .catch(() => {
-                  if (moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK * 10) {
+                  if (moment().utc().diff(startedMonitoring, 'milliseconds') >= intervals.BLOCK * 20) {
                     if (DBG_LOG) console.log(`Failing monitoring for tx ${tx.hash} to complete.`);
                     reject('Transaction confirmation failed.');
                   }
@@ -1410,8 +1409,8 @@ export default {
                 }
               });
             }
-          }, 3000);
-        }, 12 * 1000); // wait a block for propagation
+          }, 5000);
+        }, 10 * 1000); // wait a block for propagation
         return null;
       } catch (e) {
         return reject(e.message);

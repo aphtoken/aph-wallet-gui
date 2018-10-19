@@ -47,6 +47,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { BigNumber } from 'bignumber.js';
 import MarketMegaSelector from './MarketMegaSelector';
 
 export default {
@@ -73,7 +74,8 @@ export default {
         / this.tickerData.open24hr) * 10000) / 100;
     },
     change24Hour() {
-      return this.close24Hour - this.tickerData.open24hr;
+      return new BigNumber(String(this.close24Hour))
+        .minus(new BigNumber(String(this.tickerData.open24hr)));
     },
     ...mapGetters([
       'tickerData',

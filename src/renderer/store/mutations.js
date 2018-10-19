@@ -129,6 +129,7 @@ function handleNetworkChange(state) {
   state.recentTransactions = [];
   state.searchTransactions = [];
   state.nep5Balances = {};
+  state.orderHistory = null;
   state.currentMarket = null;
   neo.fetchNEP5Tokens(() => {
     // Fast load balances of user assets

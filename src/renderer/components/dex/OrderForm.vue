@@ -95,6 +95,7 @@
 
 <script>
 import { BigNumber } from 'bignumber.js';
+// import { wallet } from '@cityofzion/neon-js';
 import AphOrderConfirmationModal from '../modals/OrderConfirmationModal';
 import AphDepositWithdrawModal from '../modals/DepositWithdrawModal';
 
@@ -151,9 +152,12 @@ export default {
     },
 
     isOutOfDate() {
-      return this.$store.state.latestVersion && this.$store.state.latestVersion.prodExchangeScriptHash
-        && this.$store.state.latestVersion.prodExchangeScriptHash.replace('0x', '')
-          !== this.$store.state.currentNetwork.dex_hash;
+      if (!this.$store.state.latestVersion) {
+        return true;
+      }
+      const currentNetworkLatestDexScriptHash = this.$store.state.currentNetwork.net === 'MainNet' ?
+        this.$store.state.latestVersion.prodExchangeScriptHash : this.$store.state.latestVersion.testExchangeScriptHash;
+      return currentNetworkLatestDexScriptHash.replace('0x', '') !== this.$store.state.currentNetwork.dex_hash;
     },
 
     isMarketClosed() {
@@ -638,7 +642,8 @@ export default {
 
     async setMarket() {
       /*
-      await this.$services.dex.setManager('')
+      await this.$services.dex.setManager(
+        wallet.getScriptHashFromAddress(''))
         .then(() => {
           this.$services.alerts.success('Set Manager');
         })
@@ -652,9 +657,6 @@ export default {
         /*
         await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.aph_hash, 0, true);
         this.$services.alerts.success('Setup asset APH');
-
-        // await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.ati_hash, 0, true);
-        // this.$services.alerts.success('Setup asset ATI');
 
         await this.$services.dex.setAssetSettings(this.$services.assets.GAS, 0, true);
         this.$services.alerts.success('Setup asset GAS');
@@ -712,21 +714,19 @@ export default {
           this.$services.assets.NEO,
           100, 0.0000001, 0, 0.25, true);
         this.$services.alerts.success('Setup Market NEO-APH');
-        */
-        /*
+
         await this.$services.dex.setMarket(this.$services.assets.GAS,
           this.$services.assets.NEO,
           1, 0.0000001, 0.2, 0.2, true);
         this.$services.alerts.success('Setup Market NEO-GAS');
-        */
 
-        /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.aph_hash,
           this.$services.assets.GAS,
           100, 0.00001, 0.0000, 0.25, true);
         this.$services.alerts.success('Setup Market GAS-APH');
+        */
 
-
+        /*
         await this.$services.dex.setMarket('b951ecbbc5fe37a9c280a76cb0ce0014827294cf',
           this.$services.assets.NEO,
           1000, 0.00001, 0.27, 0.27, true);
@@ -808,6 +808,7 @@ export default {
         this.$services.alerts.success('Setup Market GAS-FTW');
         */
 
+        /*
         await this.$services.dex.setMarket('45d493a6f73fa5f404244a5fb8472fc014ca5885',
           this.$services.assets.NEO, 100, 0.000001, 0.14, 0.14, true);
         this.$services.alerts.success('Setup Market NEO-CPX');
@@ -835,6 +836,11 @@ export default {
         await this.$services.dex.setMarket('78fd589f7894bf9642b4a573ec0e6957dfd84c48',
           this.$services.assets.GAS, 1000, 0.000001, 0.098, 0.098, true);
         this.$services.alerts.success('Setup Market GAS-TOLL');
+        */
+
+        // TestNet Markets
+        // await this.$services.dex.setAssetSettings(this.$store.state.currentNetwork.ati_hash, 0, true);
+        // this.$services.alerts.success('Setup asset ATI');
 
         /*
         await this.$services.dex.setMarket(this.$store.state.currentNetwork.ati_hash,
@@ -885,7 +891,8 @@ export default {
     },
 
     collapseDexUtxos() {
-      this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.GAS, 5)
+      // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.GAS, 5)
+      this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 3, 0, true)
         .then(() => {
           this.$services.alerts.success('Sent TX to collapse UTXOs');
         })
