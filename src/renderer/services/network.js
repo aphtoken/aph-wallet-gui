@@ -148,6 +148,7 @@ export default {
     // TODO: I guess if we are going to allow them to enter custom values in the future it makes sense.
     network.dex_hash = defaultForNetwork.dex_hash;
     network.aph_hash = defaultForNetwork.aph_hash;
+    network.websocketUri = defaultForNetwork.websocketUri;
 
     return this;
   },
