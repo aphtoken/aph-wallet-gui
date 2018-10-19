@@ -14,7 +14,10 @@
 </template>
 
 <script>
+import Vue from 'vue';
+import VueNativeSock from 'vue-native-websocket';
 import { mapGetters } from 'vuex';
+import { store } from '@/store';
 
 import AphClaimGasModal from './modals/ClaimGasModal';
 import AphFractureGasModal from './modals/FractureGasModal';
@@ -31,6 +34,66 @@ export default {
   beforeDestroy() {
     clearInterval(loadTokensIntervalId);
     clearInterval(loadHoldingsIntervalId);
+    this.$disconnect(); // Disconnect websocket
+  },
+
+  beforeMount() {
+    this.connectWebsocket();
+  },
+
+  components: {
+    AphClaimGasModal,
+    AphFractureGasModal,
+    AphSendWithLedgerModal,
+    AphWithdrawInProgressModal,
+    PortfolioHeader,
+    Sidebar,
+    TransactionsSidebar,
+  },
+
+  computed: {
+    ...mapGetters([
+      'menuCollapsed',
+      'menuToggleable',
+      'websocketUri',
+    ]),
+  },
+
+  data() {
+    return {
+      latestWalletVersion: '',
+      outOfDate: false,
+      showTransactionsSidebar: false,
+    };
+  },
+
+  methods: {
+    connectWebsocket() {
+      const index = Vue._installedPlugins.indexOf(VueNativeSock);
+      // Remove the Websocket plugin if it is already installed, so we can re-init and change the uri.
+      if (index > -1) {
+        this.$disconnect();
+        Vue._installedPlugins.splice(index, 1);
+      }
+
+      Vue.use(VueNativeSock, this.websocketUri, {
+        connectManually: true,
+        format: 'json',
+        reconnection: true,
+        reconnectionDelay: 3000,
+        store,
+      });
+
+      this.$connect();
+    },
+
+    loadHoldings() {
+      this.$store.dispatch('fetchHoldings');
+    },
+
+    hideFractureGasModal() {
+      this.$store.commit('setFractureGasModalModel', null);
+    },
   },
 
   mounted() {
@@ -50,44 +113,15 @@ export default {
     }, this.$constants.intervals.HOLDINGS_POLLING);
   },
 
-  methods: {
-    loadHoldings() {
-      this.$store.dispatch('fetchHoldings');
-    },
-
-    hideFractureGasModal() {
-      this.$store.commit('setFractureGasModalModel', null);
-    },
-  },
-
-  components: {
-    AphClaimGasModal,
-    AphFractureGasModal,
-    AphSendWithLedgerModal,
-    AphWithdrawInProgressModal,
-    PortfolioHeader,
-    Sidebar,
-    TransactionsSidebar,
-  },
-
-  data() {
-    return {
-      latestWalletVersion: '',
-      outOfDate: false,
-      showTransactionsSidebar: false,
-    };
-  },
-
-  computed: {
-    ...mapGetters([
-      'menuCollapsed',
-      'menuToggleable',
-    ]),
-  },
-
   watch: {
     $route(to) {
       this.showTransactionsSidebar = to.matched.some(record => record.meta.showTransactionsSidebar);
+    },
+
+    websocketUri(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.connectWebsocket();
+      }
     },
   },
 };
