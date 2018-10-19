@@ -1,5 +1,5 @@
 export const acceptCommitInfo = state => state.acceptCommitInfo;
-export const acceptDexDemoVersion = state => state.acceptDexDemoVersion;
+export const acceptDexDemoVersion = state => state.acceptDexDemoVersion[state.currentNetwork.net];
 export const acceptDexOutOfDate = state => state.acceptDexOutOfDate;
 export const activeTransaction = state => state.activeTransaction;
 export const claimModalModel = state => state.claimModalModel;

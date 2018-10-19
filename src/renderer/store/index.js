@@ -12,7 +12,7 @@ const pjson = require('../../../package.json');
 
 const state = {
   acceptCommitInfo: false,
-  acceptDexDemoVersion: false,
+  acceptDexDemoVersion: {},
   acceptDexOutOfDate: false,
   activeTransaction: null,
   blockDetails: {},
