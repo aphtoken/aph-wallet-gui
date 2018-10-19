@@ -1520,7 +1520,6 @@ export default {
         const unspents = assetId === assets.GAS ? dexBalance.assets.GAS.unspent : dexBalance.assets.NEO.unspent;
         const input = _.find(unspents, { txid: utxoTxHash, index: utxoIndex });
 
-        // TODO: need to retry a couple times if this happens
         if (!input) {
           if (DBG_LOG) console.log(`Unable to find marked input ${utxoTxHash} ${utxoIndex}`);
           throw new Error('Unable to find marked input.');
@@ -2320,7 +2319,7 @@ export default {
     });
   },
 
-  collapseSmallestContractUTXOs(assetId, numInputsToCollapse, startingAmount = 0) {
+  collapseSmallestContractUTXOs(assetId, numInputsToCollapse, startingAmount = 0, collapseIncrementally = false) {
     return new Promise(async (resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -2376,10 +2375,11 @@ export default {
         await this.decorateWithUnspentsReservedState(assetId, unspents);
 
         BigNumber.config({ DECIMAL_PLACES: 8, ROUNDING_MODE: 3 });
-        let totalInputAmount = new BigNumber(0);
+        let totalInputAmount = toBigNumber(0);
 
         // take the numInputsToCollapse smallest inputs and use them and sum their amounts
         let inputsCollapsed = 0;
+        let lastCollapsedAmount = toBigNumber(0);
         _.orderBy(unspents, [unspent => parseFloat(unspent.value.toString())], ['asc']).some((unspent) => {
           // check if this utxo is marked for someone and if so just skip
           if (unspent.reservedFor.length >= 40) {
@@ -2390,11 +2390,17 @@ export default {
             return false;
           }
 
+          if (lastCollapsedAmount.plus(1).isGreaterThan(unspent.value) && collapseIncrementally === true) {
+            return false;
+          }
+
           totalInputAmount = totalInputAmount.plus(unspent.value);
           config.tx.inputs.push({
             prevHash: unspent.txid,
             prevIndex: unspent.index,
           });
+
+          lastCollapsedAmount = toBigNumber(unspent.value);
           inputsCollapsed += 1;
 
           if (inputsCollapsed >= numInputsToCollapse) {
