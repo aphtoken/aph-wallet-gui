@@ -25,7 +25,7 @@ const NETWORKS = [
       aph: 'https://testnet.aphelion-neo.com:62443/api',
       aph_hash: '591eedcd379a8981edeefe04ef26207e1391904a',
       ati_hash: '155153854ed377549a72cc1643e481bf25b48390',
-      dex_hash: '1c6115f9ba9400f153bbe541f50d5781c30de443',
+      dex_hash: '762e9d797d8c686350cfcdeac74e535c9f2e0864',
       net: 'TestNet',
       rpc: 'https://testneo.aphelion-neo.com:20331',
       fee: 0,
