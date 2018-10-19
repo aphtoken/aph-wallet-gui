@@ -159,7 +159,7 @@ function setAcceptCommitInfo(state, value) {
 }
 
 function setAcceptDexDemoVersion(state, value) {
-  state.acceptDexDemoVersion = value;
+  Vue.set(state.acceptDexDemoVersion, state.currentNetwork.net, value);
 }
 
 function setAcceptDexOutOfDate(state, value) {

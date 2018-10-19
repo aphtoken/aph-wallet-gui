@@ -66,7 +66,7 @@ export default {
     },
 
     shouldShowDemoConfirmation() {
-      return (!this.$store.state.acceptDexDemoVersion && !this.isOutOfDate) || this.showLearnMore;
+      return (!this.acceptDexDemoVersion && !this.isOutOfDate) || this.showLearnMore;
     },
 
     shouldShowOutOfDate() {
@@ -75,6 +75,7 @@ export default {
 
     ...mapGetters([
       'showLearnMore',
+      'acceptDexDemoVersion',
     ]),
   },
 
