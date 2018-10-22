@@ -17,6 +17,7 @@ export {
   assets,
   contacts,
   db,
+  dex,
   formatting,
   ledger,
   neo,
@@ -25,5 +26,4 @@ export {
   storage,
   valuation,
   wallets,
-  dex,
 };

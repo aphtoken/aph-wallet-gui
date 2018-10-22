@@ -1300,7 +1300,7 @@ export default {
                 });
 
                 let usedInputs = new BigNumber(0);
-                let outputSize = totalInputs.minus(currentNetwork.fee)
+                let outputSize = totalInputs.minus(config.fees)
                   .dividedBy(targetNumberOfOutputs - 1).dividedBy(targetNumberOfOutputs - 1);
                 if (outputSize.isLessThan(minimumSize)) {
                   outputSize = minimumSize;
@@ -1322,7 +1322,7 @@ export default {
                   }
                 }
 
-                const change = totalInputs.minus(usedInputs).minus(currentNetwork.fee);
+                const change = totalInputs.minus(usedInputs).minus(config.fees);
                 config.tx.outputs.push({
                   assetId: assets.GAS,
                   scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),

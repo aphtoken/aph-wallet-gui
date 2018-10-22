@@ -892,7 +892,7 @@ export default {
 
     collapseDexUtxos() {
       // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.GAS, 5)
-      this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 3, 0, true)
+      this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 5, 5)
         .then(() => {
           this.$services.alerts.success('Sent TX to collapse UTXOs');
         })

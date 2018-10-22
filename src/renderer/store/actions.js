@@ -2,7 +2,7 @@
 import moment from 'moment';
 import { BigNumber } from 'bignumber.js';
 
-import { alerts, assets, db, neo, network, wallets, ledger, dex } from '../services';
+import { alerts, assets, db, dex, neo, network, wallets, ledger } from '../services';
 import { timeouts } from '../constants';
 import router from '../router';
 
@@ -11,19 +11,19 @@ export {
   claimGas,
   createWallet,
   deleteWallet,
+  fetchBlockHeaderByHash,
   fetchCommitState,
   fetchHoldings,
   fetchLatestVersion,
+  fetchMarkets,
   fetchRecentTransactions,
-  fetchBlockHeaderByHash,
+  fetchTradeHistory,
   findTransactions,
   importWallet,
   openEncryptedKey,
   openLedger,
   openPrivateKey,
   openSavedWallet,
-  fetchMarkets,
-  fetchTradeHistory,
   fetchOrderHistory,
   fetchSystemAssetBalances,
   formOrder,
@@ -99,6 +99,23 @@ function createWallet({ commit }, { name, passphrase, passphraseConfirm }) {
       })
       .catch((message) => {
         commit('failRequest', { identifier: 'createWallet', message });
+      });
+  }, timeouts.NEO_API_CALL);
+}
+
+function deleteWallet({ commit }, { name, done }) {
+  commit('startRequest', { identifier: 'deleteWallet' });
+
+  setTimeout(() => {
+    wallets.remove(name)
+      .then(() => {
+        wallets.sync();
+        done();
+        commit('endRequest', { identifier: 'deleteWallet' });
+      })
+      .catch((e) => {
+        alerts.exception(e);
+        commit('failRequest', { identifier: 'deleteWallet', message: e });
       });
   }, timeouts.NEO_API_CALL);
 }
@@ -242,6 +259,35 @@ async function fetchHoldings({ commit }, { done, isRequestSilent } = {}) {
   return holdings;
 }
 
+function fetchLatestVersion({ commit }) {
+  commit('startRequest', { identifier: 'fetchLatestVersion' });
+
+  return axios.get(`${network.getSelectedNetwork().aph}/LatestWalletInfo`)
+    .then(({ data }) => {
+      network.setExplorer(data.useAphExplorer);
+      commit('setLatestVersion', data);
+      commit('endRequest', { identifier: 'fetchLatestVersion' });
+    })
+    .catch((e) => {
+      commit('failRequest', { identifier: 'fetchLatestVersion', message: e });
+    });
+}
+
+async function fetchMarkets({ commit }, { done }) {
+  let markets;
+  commit('startRequest', { identifier: 'fetchMarkets' });
+
+  try {
+    markets = await dex.fetchMarkets();
+    commit('setMarkets', markets);
+    done();
+    commit('endRequest', { identifier: 'fetchMarkets' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'fetchMarkets', message });
+  }
+}
+
 async function fetchRecentTransactions({ commit }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
@@ -271,6 +317,32 @@ async function fetchRecentTransactions({ commit }) {
   } catch (message) {
     alerts.exception(message);
     commit('failRequest', { identifier: 'fetchRecentTransactions', message });
+  }
+}
+
+async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilent }) {
+  let history;
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'fetchTradeHistory' });
+
+  try {
+    let apiBuckets;
+    let promiseFetchTradesBucketed;
+    if (state.tradeHistory && state.tradeHistory.apiBuckets && state.tradeHistory.marketName === marketName) {
+      apiBuckets = state.tradeHistory.apiBuckets;
+    } else {
+      promiseFetchTradesBucketed = dex.fetchTradesBucketed(marketName);
+    }
+    history = await dex.fetchTradeHistory(marketName);
+    if (promiseFetchTradesBucketed) {
+      apiBuckets = await promiseFetchTradesBucketed;
+    }
+    history.apiBuckets = apiBuckets;
+    commit('setTradeHistory', history);
+    commit('endRequest', { identifier: 'fetchTradeHistory' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'fetchTradeHistory', message });
   }
 }
 
@@ -306,6 +378,45 @@ function findTransactions({ state, commit }) {
     });
 }
 
+function importWallet({ commit }, { name, wif, passphrase, done }) {
+  commit('startRequest', { identifier: 'importWallet' });
+
+  setTimeout(() => {
+    wallets.importWIF(name, wif, passphrase)
+      .then(() => {
+        wallets.sync();
+        done();
+        commit('endRequest', { identifier: 'importWallet' });
+      })
+      .catch((e) => {
+        commit('failRequest', { identifier: 'importWallet', message: e });
+      });
+  }, timeouts.NEO_API_CALL);
+}
+
+// Local functions
+function normalizeRecentTransactions(transactions) {
+  return transactions.map((transaction) => {
+    const changes = {
+      value: new BigNumber(transaction.value),
+      details: {
+        vin: transaction.details.vin.map(({ value }) => {
+          return {
+            value: new BigNumber(value),
+          };
+        }),
+        vout: transaction.details.vout.map(({ value }) => {
+          return {
+            value: new BigNumber(value),
+          };
+        }),
+      },
+    };
+
+    return _.merge(transaction, changes);
+  });
+}
+
 function openEncryptedKey({ commit }, { encryptedKey, passphrase, done }) {
   commit('startRequest', { identifier: 'openEncryptedKey' });
 
@@ -319,20 +430,6 @@ function openEncryptedKey({ commit }, { encryptedKey, passphrase, done }) {
         commit('failRequest', { identifier: 'openEncryptedKey', message: e });
       });
   }, timeouts.NEO_API_CALL);
-}
-
-function verifyLedgerConnection({ commit }, { done, failed }) {
-  commit('startRequest', { identifier: 'verifyLedgerConnection' });
-
-  ledger.open()
-    .then(() => {
-      done();
-      commit('endRequest', { identifier: 'verifyLedgerConnection' });
-    })
-    .catch((e) => {
-      failed(e);
-      commit('failRequest', { identifier: 'verifyLedgerConnection', message: e });
-    });
 }
 
 function openLedger({ commit }, { done, failed }) {
@@ -404,94 +501,6 @@ function openSavedWallet({ commit }, { name, passphrase, done }) {
         commit('failRequest', { identifier: 'openSavedWallet', message: e });
       });
   }, timeouts.NEO_API_CALL);
-}
-
-function importWallet({ commit }, { name, wif, passphrase, done }) {
-  commit('startRequest', { identifier: 'importWallet' });
-
-  setTimeout(() => {
-    wallets.importWIF(name, wif, passphrase)
-      .then(() => {
-        wallets.sync();
-        done();
-        commit('endRequest', { identifier: 'importWallet' });
-      })
-      .catch((e) => {
-        commit('failRequest', { identifier: 'importWallet', message: e });
-      });
-  }, timeouts.NEO_API_CALL);
-}
-
-function deleteWallet({ commit }, { name, done }) {
-  commit('startRequest', { identifier: 'deleteWallet' });
-
-  setTimeout(() => {
-    wallets.remove(name)
-      .then(() => {
-        wallets.sync();
-        done();
-        commit('endRequest', { identifier: 'deleteWallet' });
-      })
-      .catch((e) => {
-        alerts.exception(e);
-        commit('failRequest', { identifier: 'deleteWallet', message: e });
-      });
-  }, timeouts.NEO_API_CALL);
-}
-
-function fetchLatestVersion({ commit }) {
-  commit('startRequest', { identifier: 'fetchLatestVersion' });
-
-  return axios.get(`${network.getSelectedNetwork().aph}/LatestWalletInfo`)
-    .then(({ data }) => {
-      network.setExplorer(data.useAphExplorer);
-      commit('setLatestVersion', data);
-      commit('endRequest', { identifier: 'fetchLatestVersion' });
-    })
-    .catch((e) => {
-      commit('failRequest', { identifier: 'fetchLatestVersion', message: e });
-    });
-}
-
-async function fetchMarkets({ commit }, { done }) {
-  let markets;
-  commit('startRequest', { identifier: 'fetchMarkets' });
-
-  try {
-    markets = await dex.fetchMarkets();
-    commit('setMarkets', markets);
-    done();
-    commit('endRequest', { identifier: 'fetchMarkets' });
-  } catch (message) {
-    alerts.networkException(message);
-    commit('failRequest', { identifier: 'fetchMarkets', message });
-  }
-}
-
-async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilent }) {
-  let history;
-  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
-    { identifier: 'fetchTradeHistory' });
-
-  try {
-    let apiBuckets;
-    let promiseFetchTradesBucketed;
-    if (state.tradeHistory && state.tradeHistory.apiBuckets && state.tradeHistory.marketName === marketName) {
-      apiBuckets = state.tradeHistory.apiBuckets;
-    } else {
-      promiseFetchTradesBucketed = dex.fetchTradesBucketed(marketName);
-    }
-    history = await dex.fetchTradeHistory(marketName);
-    if (promiseFetchTradesBucketed) {
-      apiBuckets = await promiseFetchTradesBucketed;
-    }
-    history.apiBuckets = apiBuckets;
-    commit('setTradeHistory', history);
-    commit('endRequest', { identifier: 'fetchTradeHistory' });
-  } catch (message) {
-    alerts.networkException(message);
-    commit('failRequest', { identifier: 'fetchTradeHistory', message });
-  }
 }
 
 async function fetchOrderHistory({ state, commit }, { isRequestSilent }) {
@@ -583,6 +592,7 @@ async function subscribeToMarket({ state, commit }, { market, isRequestSilent })
     commit('failRequest', { identifier: 'subscribeToMarket', message });
   }
 }
+
 async function unsubscribeFromMarket({ state, commit }, { market }) {
   if (!market) {
     return;
@@ -606,25 +616,16 @@ async function unsubscribeFromMarket({ state, commit }, { market }) {
   }
 }
 
-// Local functions
-function normalizeRecentTransactions(transactions) {
-  return transactions.map((transaction) => {
-    const changes = {
-      value: new BigNumber(transaction.value),
-      details: {
-        vin: transaction.details.vin.map(({ value }) => {
-          return {
-            value: new BigNumber(value),
-          };
-        }),
-        vout: transaction.details.vout.map(({ value }) => {
-          return {
-            value: new BigNumber(value),
-          };
-        }),
-      },
-    };
+function verifyLedgerConnection({ commit }, { done, failed }) {
+  commit('startRequest', { identifier: 'verifyLedgerConnection' });
 
-    return _.merge(transaction, changes);
-  });
+  ledger.open()
+    .then(() => {
+      done();
+      commit('endRequest', { identifier: 'verifyLedgerConnection' });
+    })
+    .catch((e) => {
+      failed(e);
+      commit('failRequest', { identifier: 'verifyLedgerConnection', message: e });
+    });
 }

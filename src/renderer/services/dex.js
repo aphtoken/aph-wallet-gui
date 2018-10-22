@@ -18,7 +18,6 @@ import { store } from '../store';
 import { toBigNumber } from './formatting.js';
 import { claiming, intervals } from '../constants';
 
-
 const TX_ATTR_USAGE_SCRIPT = 0x20;
 const TX_ATTR_USAGE_HEIGHT = 0xf0;
 const TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE = 0xA1;
@@ -2228,6 +2227,23 @@ export default {
     });
   },
 
+  fetchTickerData() {
+    return new Promise((resolve, reject) => {
+      try {
+        const currentNetwork = network.getSelectedNetwork();
+        axios.get(`${currentNetwork.aph}/ticker`)
+          .then((res) => {
+            resolve(res.data);
+          })
+          .catch((e) => {
+            alerts.exception(`APH API Error: ${e}`);
+          });
+      } catch (e) {
+        reject(`Failed to fetch ticker data. ${e.message}`);
+      }
+    });
+  },
+
   claimGasForDexContract() {
     return new Promise((resolve, reject) => {
       const currentWallet = wallets.getCurrentWallet();
@@ -2267,7 +2283,7 @@ export default {
             .then((configResponse) => {
               configResponse.claims = claimsResponse.claims;
               // TODO: for now we just take the first 6, but we could do something better.
-              configResponse.claims.ClaimItem = configResponse.claims.slice(0, 1);
+              configResponse.claims.ClaimItem = configResponse.claims.slice(0, 6);
               return api.createTx(configResponse, 'claim');
             })
             .then((configResponse) => {
@@ -2550,23 +2566,6 @@ export default {
           });
       } catch (e) {
         reject(e.message);
-      }
-    });
-  },
-
-  fetchTickerData() {
-    return new Promise((resolve, reject) => {
-      try {
-        const currentNetwork = network.getSelectedNetwork();
-        axios.get(`${currentNetwork.aph}/ticker`)
-          .then((res) => {
-            resolve(res.data);
-          })
-          .catch((e) => {
-            alerts.exception(`APH API Error: ${e}`);
-          });
-      } catch (e) {
-        reject(`Failed to fetch ticker data. ${e.message}`);
       }
     });
   },

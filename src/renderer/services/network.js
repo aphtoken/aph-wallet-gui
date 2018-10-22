@@ -63,12 +63,12 @@ const NETWORK_FEE_OPTIONS = [
 let loadNetworkStatusIntervalId;
 
 export default {
-  getNetworks() {
-    return _.sortBy(NETWORKS, 'label');
-  },
-
   getNetworkFees() {
     return NETWORK_FEE_OPTIONS;
+  },
+
+  getNetworks() {
+    return _.sortBy(NETWORKS, 'label');
   },
 
   getRpcClient() {

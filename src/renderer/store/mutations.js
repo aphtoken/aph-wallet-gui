@@ -96,6 +96,22 @@ function clearActiveTransaction(state) {
   state.showPriceTile = true;
 }
 
+function clearLocalNetworkState(state, newNetwork) {
+  state.holdings = [];
+  state.statsToken = null;
+  state.portfolio = {};
+  state.recentTransactions = [];
+
+  const holdingsStorageKey = `holdings.${state.currentWallet.address}.${newNetwork.net}`;
+  db.remove(holdingsStorageKey);
+
+  const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${newNetwork.net}`;
+  db.remove(portfolioStorageKey);
+
+  const transactionsStorageKey = `txs.${state.currentWallet.address}.${newNetwork.net}`;
+  db.remove(transactionsStorageKey);
+}
+
 function clearRecentTransactions(state) {
   state.recentTransactions = [];
 }
@@ -133,12 +149,26 @@ function handleNetworkChange(state) {
   state.currentMarket = null;
   neo.fetchNEP5Tokens(() => {
     // Fast load balances of user assets
-    this.dispatch('fetchHoldings', {
-      onlyFetchUserAssets: true,
-      // force refresh all assets on network change
-      done: () => { this.dispatch('fetchHoldings', { forceRefreshAll: true }); },
-    });
+    this.dispatch('fetchHoldings');
+    this.dispatch('fetchRecentTransactions');
   });
+}
+
+function orderBookSnapshotReceived(state, res) {
+  const orderBook = dex.formOrderBook(res.asks, res.bids);
+  orderBook.pair = res.pair;
+
+  Vue.set(state, 'orderBook', orderBook);
+}
+
+function orderBookUpdateReceived(state, res) {
+  if (!state.orderBook || state.orderBook.pair !== res.pair) {
+    return;
+  }
+
+  const orderBook = dex.updateOrderBook(state.orderBook, res.side, res.changes);
+  const side = res.side === 'ask' ? orderBook.asks : orderBook.bids;
+  Vue.set(state.orderBook, res.side, side);
 }
 
 function putTransactionDetail(state, transactionDetail) {
@@ -214,6 +244,25 @@ function setCurrentWallet(state, currentWallet) {
   state.currentWallet = currentWallet;
 }
 
+function setCurrentMarket(state, market) {
+  if (state.currentMarket) {
+    if (!market || state.currentMarket.marketName !== market.marketName) {
+      this.dispatch('unsubscribeFromMarket', {
+        market: state.currentMarket,
+      });
+    }
+  }
+
+  state.currentMarket = market;
+  state.ordersToShow = market.marketName;
+
+  if (state.currentMarket) {
+    this.dispatch('subscribeToMarket', {
+      market: state.currentMarket,
+    });
+  }
+}
+
 function setCurrentNetwork(state, network) {
   if (state.currentNetwork && state.currentNetwork.net !== network.net) {
     clearLocalNetworkState(state, network);
@@ -224,6 +273,14 @@ function setCurrentNetwork(state, network) {
 
 function setDepositWithdrawModalModel(state, model) {
   state.depositWithdrawModalModel = model;
+}
+
+function setGasClaim(state, value) {
+  state.gasClaim = value;
+}
+
+function setGasFracture(state, facture) {
+  state.gasFracture = facture;
 }
 
 async function setHoldings(state, holdings) {
@@ -256,6 +313,18 @@ function setLastReceivedBlock(state) {
 
 function setLastSuccessfulRequest(state) {
   state.lastSuccessfulRequest = moment().unix();
+}
+
+function setMarkets(state, markets) {
+  state.markets = markets;
+}
+
+function setOrderPrice(state, price) {
+  state.orderPrice = price;
+}
+
+function setOrderQuantity(state, quantity) {
+  state.orderQuantity = quantity;
 }
 
 function setPortfolio(state, portfolio) {
@@ -296,22 +365,6 @@ function setRecentTransactions(state, transactions) {
   const transactionsStorageKey = `txs.${state.currentWallet.address}.${state.currentNetwork.net}`;
 
   db.upsert(transactionsStorageKey, normalizeRecentTransactions(state.recentTransactions));
-}
-
-function clearLocalNetworkState(state, newNetwork) {
-  state.holdings = [];
-  state.statsToken = null;
-  state.portfolio = {};
-  state.recentTransactions = [];
-
-  const holdingsStorageKey = `holdings.${state.currentWallet.address}.${newNetwork.net}`;
-  db.remove(holdingsStorageKey);
-
-  const portfolioStorageKey = `portfolios.${state.currentWallet.address}.${newNetwork.net}`;
-  db.remove(portfolioStorageKey);
-
-  const transactionsStorageKey = `txs.${state.currentWallet.address}.${newNetwork.net}`;
-  db.remove(transactionsStorageKey);
 }
 
 function setLatestVersion(state, version) {
@@ -422,12 +475,12 @@ function setSystemWithdrawMergeState(state, value) {
   }
 }
 
-function setGasClaim(state, value) {
-  state.gasClaim = value;
-}
+function setOrderHistory(state, orders) {
+  state.orderHistory = orders;
 
-function setGasFracture(state, facture) {
-  state.gasFracture = facture;
+  const orderHistoryStorageKey
+    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${state.currentNetwork.dex_hash}`;
+  db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
 }
 
 function setFractureGasModalModel(state, model) {
@@ -438,85 +491,28 @@ function setShowClaimGasModal(state, value) {
   state.showClaimGasModal = value;
 }
 
-function startSilentRequest(state, payload) {
-  updateRequest(state, Object.assign(payload, { isSilent: true }), requests.PENDING);
-}
 
 function startRequest(state, payload) {
   updateRequest(state, payload, requests.PENDING);
 }
 
-function updateRequest(state, { identifier, message, isSilent }, status) {
-  Vue.set(state.requests, identifier, { status, message, isSilent });
+function startSilentRequest(state, payload) {
+  updateRequest(state, Object.assign(payload, { isSilent: true }), requests.PENDING);
 }
+
 
 function setStyleMode(state, style) {
   state.styleMode = style;
-}
-
-function setMarkets(state, markets) {
-  state.markets = markets;
-}
-
-function setCurrentMarket(state, market) {
-  if (state.currentMarket) {
-    if (!market || state.currentMarket.marketName !== market.marketName) {
-      this.dispatch('unsubscribeFromMarket', {
-        market: state.currentMarket,
-      });
-    }
-  }
-
-  state.currentMarket = market;
-  state.ordersToShow = market.marketName;
-
-  if (state.currentMarket) {
-    this.dispatch('subscribeToMarket', {
-      market: state.currentMarket,
-    });
-  }
-}
-
-function setOrderPrice(state, price) {
-  state.orderPrice = price;
-}
-
-function setOrderQuantity(state, quantity) {
-  state.orderQuantity = quantity;
 }
 
 function setTickerDataByMarket(state, tickerDataByMarket) {
   state.tickerDataByMarket = tickerDataByMarket;
 }
 
-function orderBookSnapshotReceived(state, res) {
-  const orderBook = dex.formOrderBook(res.asks, res.bids);
-  orderBook.pair = res.pair;
-
-  Vue.set(state, 'orderBook', orderBook);
+function setTradeHistory(state, tradeHistory) {
+  state.tradeHistory = tradeHistory;
 }
 
-function orderBookUpdateReceived(state, res) {
-  if (!state.orderBook || state.orderBook.pair !== res.pair) {
-    return;
-  }
-
-  const orderBook = dex.updateOrderBook(state.orderBook, res.side, res.changes);
-  const side = res.side === 'ask' ? orderBook.asks : orderBook.bids;
-  Vue.set(state.orderBook, res.side, side);
-}
-
-function setTradeHistory(state, trades) {
-  state.tradeHistory = trades;
-}
-
-function setOrderHistory(state, orders) {
-  state.orderHistory = orders;
-
-  const orderHistoryStorageKey
-    = `orderhistory.${state.currentWallet.address}.${state.currentNetwork.net}.${state.currentNetwork.dex_hash}`;
-  db.upsert(orderHistoryStorageKey, JSON.stringify(state.orderHistory));
-}
 function addToOrderHistory(state, newOrders) {
   if (!state.orderHistory) {
     state.orderHistory = [];
@@ -681,3 +677,6 @@ function normalizeRecentTransactions(transactions) {
   });
 }
 
+function updateRequest(state, { identifier, message, isSilent }, status) {
+  Vue.set(state.requests, identifier, { status, message, isSilent });
+}
