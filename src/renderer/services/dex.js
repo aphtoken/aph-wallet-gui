@@ -934,7 +934,7 @@ export default {
   },
 
   depositAsset(assetId, quantity) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         let neoToSend = 0;
         let gasToSend = 0;
@@ -960,6 +960,14 @@ export default {
           if (holding == null || holding.balance === null || holding.balance.isLessThan(quantity)) {
             reject(`Insufficient balance of asset '${holdingAsset}'.`);
             return;
+          }
+
+          if (assetId === '3a4acd3647086e7c44398aac0349802e6a171129') {
+            const res = await neo.approveNep5Deposit(store.state.currentNetwork.dex_hash,
+              '3a4acd3647086e7c44398aac0349802e6a171129', quantity);
+
+            await neo.monitorTransactionConfirmation(res.tx, true);
+            alerts.info(`Confirmed approval of ${quantity} NEX for deposit.`);
           }
         }
 
@@ -2538,10 +2546,10 @@ export default {
     });
   },
 
-  setAssetSettings(assetId, fee, waitForTx) {
+  setAssetSettings(assetId, fee, waitForTx, assetTxType = '00') {
     return new Promise((resolve, reject) => {
       try {
-        const settingsData = `00${u.num2fixed8(fee)}`;
+        const settingsData = `${assetTxType}${u.num2fixed8(fee)}`;
         this.executeContractTransaction('setAssetSettings',
           [
             u.reverseHex(assetId),

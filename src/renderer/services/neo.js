@@ -950,6 +950,54 @@ export default {
       });
   },
 
+  // TODO: maybe unify code some with sendNep5Transfer
+  approveNep5Deposit(scriptHashToAllow, assetId, amount) {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
+
+    const token = assets.getNetworkAsset(assetId);
+    if (token.decimals >= 0 && token.decimals < 8) {
+      // Adjust for the token's number of decimals.
+      amount = toBigNumber(amount).dividedBy(10 ** (8 - token.decimals));
+    }
+
+    const config = {
+      net: currentNetwork.net,
+      url: currentNetwork.rpc,
+      script: {
+        scriptHash: assetId,
+        operation: 'approve',
+        args: [
+          u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address)),
+          u.reverseHex(scriptHashToAllow),
+          new u.Fixed8(amount).toReverseHex(),
+        ],
+      },
+      fees: currentNetwork.fee,
+      gas: 0,
+    };
+
+    if (currentWallet.isLedger === true) {
+      config.signingFunction = ledger.signWithLedger;
+      config.address = currentWallet.address;
+
+      return api.doInvoke(config)
+        .then(res => res)
+        .catch((e) => {
+          alerts.exception(e);
+        });
+    }
+
+    const account = new wallet.Account(currentWallet.wif);
+    config.account = account;
+
+    return api.doInvoke(config)
+      .then(res => res)
+      .catch((e) => {
+        alerts.exception(e);
+      });
+  },
+
   fetchSystemAssetBalance(forAddress, intents) {
     return new Promise((resolve, reject) => {
       try {

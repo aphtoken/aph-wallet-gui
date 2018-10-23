@@ -378,6 +378,19 @@ function findTransactions({ state, commit }) {
     });
 }
 
+async function formOrder({ commit }, { order }) {
+  commit('startRequest', { identifier: 'placeOrder' });
+
+  try {
+    const res = await dex.formOrder(order);
+    commit('setOrderToConfirm', res);
+    commit('endRequest', { identifier: 'placeOrder' });
+  } catch (message) {
+    alerts.exception(message);
+    commit('failRequest', { identifier: 'placeOrder', message });
+  }
+}
+
 function importWallet({ commit }, { name, wif, passphrase, done }) {
   commit('startRequest', { identifier: 'importWallet' });
 
@@ -525,16 +538,19 @@ async function fetchOrderHistory({ state, commit }, { isRequestSilent }) {
   }
 }
 
-async function formOrder({ commit }, { order }) {
-  commit('startRequest', { identifier: 'placeOrder' });
+async function pingSocket({ state, commit }) {
+  commit('startRequest', { identifier: 'pingSocket' });
 
   try {
-    const res = await dex.formOrder(order);
-    commit('setOrderToConfirm', res);
-    commit('endRequest', { identifier: 'placeOrder' });
+    if (!state.socket || state.socket.isConnected !== true) {
+      return;
+    }
+
+    state.socket.client.sendObj({ op: 'ping' });
+    commit('endRequest', { identifier: 'pingSocket' });
   } catch (message) {
-    alerts.exception(message);
-    commit('failRequest', { identifier: 'placeOrder', message });
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'pingSocket', message });
   }
 }
 
@@ -550,23 +566,6 @@ async function placeOrder({ commit }, { order, done }) {
     alerts.exception(message);
     commit('setOrderToConfirm', null);
     commit('failRequest', { identifier: 'placeOrder', message });
-  }
-}
-
-
-async function pingSocket({ state, commit }) {
-  commit('startRequest', { identifier: 'pingSocket' });
-
-  try {
-    if (!state.socket || state.socket.isConnected !== true) {
-      return;
-    }
-
-    state.socket.client.sendObj({ op: 'ping' });
-    commit('endRequest', { identifier: 'pingSocket' });
-  } catch (message) {
-    alerts.networkException(message);
-    commit('failRequest', { identifier: 'pingSocket', message });
   }
 }
 
