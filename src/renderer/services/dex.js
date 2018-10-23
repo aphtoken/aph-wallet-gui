@@ -688,7 +688,7 @@ export default {
       // limit order
       let depositMakerQuantity = false;
 
-      if (sellAssetHolding.canPull === false && order.quantity.isGreaterThan(0)) {
+      if ((sellAssetHolding.canPull === false || order.assetIdToSell === '3a4acd3647086e7c44398aac0349802e6a171129') && order.quantity.isGreaterThan(0)) {
         // this is an MCT based token that can not be pulled from our DEX contract, have to send a deposit first
         depositMakerQuantity = true;
       } else if (order.offersToTake.length > 0 && order.quantityToMake.isGreaterThan(0)) {
