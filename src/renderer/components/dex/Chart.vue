@@ -71,6 +71,7 @@
 </template>
 <script>
 import { BigNumber } from 'bignumber.js';
+const TradingView = require('../../../../static/charting_library/charting_library.min').TradingView;
 
 export default {
   data() {
@@ -214,7 +215,7 @@ export default {
             let lastBarTime = NaN;
             if (this.barsSubscription) {
               clearInterval(this.barsSubscription);
-            }
+            } 
 
             this.barsSubscription = setInterval(() => {
               if (!this.tradingView || !this.tradingView._options) {
@@ -266,7 +267,7 @@ export default {
           // debug: true,
           fullscreen: false,
           symbol: symbolName,
-          interval: '5',
+          interval: '1',
           container_id: "chart-container",
           datafeed: datafeed,
           library_path: 'static/charting_library/',
@@ -316,6 +317,19 @@ export default {
         }, 1000);
 
         this.tradingView = new TradingView.widget(settings);
+
+        this.tradingView.onChartReady(() => { 
+          this.tradingView.activeChart().onIntervalChanged().subscribe(null, (inteval, obj) => { 
+            console.log('new interval', inteval);
+           })
+        });
+
+        // console.log(this.tradingView.activeChart());
+        
+        // this.tradingView.chart().onIntervalChanged().subscribe(null, (interval, obj) => {
+          //console.log('new interval');
+
+        //})
       } catch (e) {
         console.log(e);
         alert(e);
