@@ -608,6 +608,13 @@ export default {
       });
     },
     showDepositWithdrawModal(isDeposit) {
+      if ((this.actionableHolding.symbol === 'GAS' || this.actionableHolding.symbol === 'NEO') &&
+       !isDeposit && this.$services.dex.isSystemAssetWithdrawInProgress()) {
+        this.$store.commit('setWithdrawInProgressModalModel', {});
+
+        return;
+      }
+
       this.$store.commit('setDepositWithdrawModalModel', {
         // NOTE: if whitelisted, adjust assetId to test a new asset that has been whitelisted but market not yet added.
         isDeposit, holdingAssetId: this.actionableHolding.assetId,
