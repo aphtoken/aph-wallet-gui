@@ -74,6 +74,10 @@ export default {
         / this.tickerData.open24hr) * 10000) / 100;
     },
     change24Hour() {
+      if (this.$isPending('fetchTradeHistory')) {
+        return 0;
+      }
+
       return new BigNumber(String(this.close24Hour))
         .minus(new BigNumber(String(this.tickerData.open24hr)));
     },
