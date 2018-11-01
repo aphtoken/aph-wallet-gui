@@ -608,9 +608,8 @@ export default {
       });
     },
     showDepositWithdrawModal(isDeposit) {
-      if (this.$services.dex.isSystemAssetWithdrawInProgress()) {
-        this.$store.commit('setWithdrawInProgressModalModel', {
-        });
+      if (!isDeposit && this.$services.dex.isSystemAssetWithdrawInProgress()) {
+        this.$store.commit('setWithdrawInProgressModalModel', {});
 
         return;
       }
