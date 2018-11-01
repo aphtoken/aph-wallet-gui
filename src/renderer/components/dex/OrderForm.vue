@@ -608,7 +608,8 @@ export default {
       });
     },
     showDepositWithdrawModal(isDeposit) {
-      if (!isDeposit && this.$services.dex.isSystemAssetWithdrawInProgress()) {
+      if ((this.actionableHolding.symbol === 'GAS' || this.actionableHolding.symbol === 'NEO') &&
+       !isDeposit && this.$services.dex.isSystemAssetWithdrawInProgress()) {
         this.$store.commit('setWithdrawInProgressModalModel', {});
 
         return;

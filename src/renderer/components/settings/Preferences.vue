@@ -22,7 +22,7 @@
       <div class="row">
         <div class="column">
           <div class="label">{{$t('network')}}</div>
-          <aph-select :light="true" :options="networks" :isDisabled="isSystemAssetWithdrawInProgress" :initialValue="selectedNetwork" v-model="selectedNetwork" :allow-empty-value="false"></aph-select>
+          <aph-select :light="true" :options="networks" :isDisabledTooltip="$t('networkSwitchBtnDisabled')" :isDisabled="shouldDisableNetworkSelection" :initialValue="selectedNetwork" v-model="selectedNetwork" :allow-empty-value="false"></aph-select>
         </div>
         <div class="column">
           <div class="label">{{$t('networkFee')}}</div>
@@ -127,7 +127,7 @@ export default {
   },
 
   computed: {
-    isSystemAssetWithdrawInProgress() {
+    shouldDisableNetworkSelection() {
       return this.$services.dex.isSystemAssetWithdrawInProgress();
     },
   },
