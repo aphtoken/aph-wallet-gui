@@ -17,6 +17,7 @@ export {
   fetchLatestVersion,
   fetchMarkets,
   fetchRecentTransactions,
+  fetchTradesBucketed,
   fetchTradeHistory,
   findTransactions,
   importWallet,
@@ -320,24 +321,28 @@ async function fetchRecentTransactions({ commit }) {
   }
 }
 
-async function fetchTradeHistory({ state, commit }, { marketName, isRequestSilent }) {
+async function fetchTradesBucketed({ commit }, { marketName, interval }) {
+  try {
+    commit('startRequest', { identifier: 'fetchTradesBucketed' });
+
+    const apiBuckets = await dex.fetchTradesBucketed(marketName, interval);
+
+    commit('setTradesBucketed', apiBuckets);
+    commit('endRequest', { identifier: 'fetchTradesBucketed' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'fetchTradesBucketed', message });
+  }
+}
+
+async function fetchTradeHistory({ commit }, { marketName, isRequestSilent }) {
   let history;
   commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
     { identifier: 'fetchTradeHistory' });
 
   try {
-    let apiBuckets;
-    let promiseFetchTradesBucketed;
-    if (state.tradeHistory && state.tradeHistory.apiBuckets && state.tradeHistory.marketName === marketName) {
-      apiBuckets = state.tradeHistory.apiBuckets;
-    } else {
-      promiseFetchTradesBucketed = dex.fetchTradesBucketed(marketName);
-    }
     history = await dex.fetchTradeHistory(marketName);
-    if (promiseFetchTradesBucketed) {
-      apiBuckets = await promiseFetchTradesBucketed;
-    }
-    history.apiBuckets = apiBuckets;
+    history.apiBuckets = await dex.fetchTradesBucketed(marketName);
     commit('setTradeHistory', history);
     commit('endRequest', { identifier: 'fetchTradeHistory' });
   } catch (message) {

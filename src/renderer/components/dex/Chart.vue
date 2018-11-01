@@ -319,17 +319,15 @@ export default {
         this.tradingView = new TradingView.widget(settings);
 
         this.tradingView.onChartReady(() => { 
-          this.tradingView.activeChart().onIntervalChanged().subscribe(null, (inteval, obj) => { 
-            console.log('new interval', inteval);
-           })
+          this.tradingView.activeChart().onIntervalChanged().subscribe(null, (interval, obj) => { 
+            this.$store.dispatch('fetchTradesBucketed', {
+              marketName: this.$store.state.currentMarket.marketName,
+              interval: interval === '1D' ? 60 * 24 : 
+                interval === '3D' ? 3 * 60 * 24 : 
+                Number(interval)
+              });
+           });
         });
-
-        // console.log(this.tradingView.activeChart());
-        
-        // this.tradingView.chart().onIntervalChanged().subscribe(null, (interval, obj) => {
-          //console.log('new interval');
-
-        //})
       } catch (e) {
         console.log(e);
         alert(e);
