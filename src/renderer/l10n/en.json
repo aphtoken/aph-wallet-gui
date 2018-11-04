@@ -162,7 +162,6 @@
   "name": "Name",
   "network": "Network",
   "networkFee": "Network Fee",
-  "networkSwitchBtnDisabled": "System operation(s) in progress: Please wait until operations complete before attempting to switching networks",
   "networkWeight": "Network Weight",
   "neverAskAgain": "No, Never",
   "newVersionAvailable": "A new version is available.",
