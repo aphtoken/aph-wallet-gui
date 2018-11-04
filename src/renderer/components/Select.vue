@@ -1,6 +1,6 @@
 <template>
   <div :class="['aph-select', {'is-open': isOpen, 'is-light': light}]">
-    <button type="button" class="aph-select--label" :disabled="isDisabled" :title="disabledTooltip" @click="toggleOpen">{{ label }}</button>
+    <button :title="disabledTooltip" type="button" class="aph-select--label" :disabled="isDisabled" @click="toggleOpen">{{ label }}</button>
     <ul class="aph-select--dropdown" v-if="isOpen">
       <li :class="{selected: isSelected(option)}" v-for="(option, index) in options" :key="index" @click="toggleSelectedOption(option)">{{ option.label }}</li>
     </ul>
