@@ -199,17 +199,7 @@ export default {
             setTimeout(() => { onSymbolResolvedCallback(symbolInfo) }, 0)
           },
 
-          // calculateHistoryDepth: (resolution) => {
-          //   return {
-          //           resolutionBack: 'D',
-          //           intervalBack: 15
-          //       };
-          // },
-
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            console.log(resolution, from, to);
-
-            // Populate apiBuckets with correct interval
             this.$store.dispatch('fetchTradesBucketed', {
               marketName: this.$store.state.currentMarket.marketName,
               interval: resolution === '1D' ? 60 * 24 :
