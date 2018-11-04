@@ -72,7 +72,6 @@
 <script>
 import { BigNumber } from 'bignumber.js';
 import { mapGetters } from 'vuex';
-const TradingView = require('../../../../static/charting_library/charting_library.min').TradingView;
 
 export default {
   data() {

@@ -43,6 +43,7 @@ window._ = _;
 window.accounting = accounting;
 window.axios = axios;
 window.moment = moment;
+window.TradingView = require('../../static/charting_library/charting_library.min').TradingView;
 
 // Setup Vue.
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
