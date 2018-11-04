@@ -71,6 +71,7 @@
 </template>
 <script>
 import { BigNumber } from 'bignumber.js';
+import { mapGetters } from 'vuex';
 const TradingView = require('../../../../static/charting_library/charting_library.min').TradingView;
 
 export default {
@@ -160,7 +161,7 @@ export default {
           has_daily: false,
           has_weekly_and_monthly: false,
           has_intraday: true,
-          intraday_multipliers: ['1'],
+          intraday_multipliers: ['1', '5', '15', '30', '60', '360'],
           has_no_volume: false,
           has_empty_bars: true,
           minmov: 1,
@@ -183,7 +184,7 @@ export default {
                   supports_marks: false,
                   supports_timescale_marks: false,
                   supports_time: false,
-                  supported_resolutions: [1, 5, 15, 30, 60, 360, '1D', '3D'],
+                  supported_resolutions: [1, 5, 15, 30, 60, 360, '1D', '3D', '1W'],
                 },
               )
             }, 0)
@@ -198,64 +199,85 @@ export default {
             setTimeout(() => { onSymbolResolvedCallback(symbolInfo) }, 0)
           },
 
-          getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
-              this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice) :
-              [];
+          // calculateHistoryDepth: (resolution) => {
+          //   return {
+          //           resolutionBack: 'D',
+          //           intervalBack: 15
+          //       };
+          // },
 
-            if (bars.length === 0) {
-              onDataCallback(bars, { noData: true })
-            } else {
-              this.lastPrice = bars[bars.length - 1].close;
-              onDataCallback(bars, { noData: false })
-            }
+          getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
+            console.log(resolution, from, to);
+
+            // Populate apiBuckets with correct interval
+            this.$store.dispatch('fetchTradesBucketed', {
+              marketName: this.$store.state.currentMarket.marketName,
+              interval: resolution === '1D' ? 60 * 24 :
+                resolution === '3D' ? 3 * 60 * 24 : 
+                resolution === '1W' ? 7 * 60 * 24 :
+                Number(resolution),
+              from: from, 
+              to: to,
+              }).then(() => {
+                // Compute and fetch bars on newly populated apiBuckets
+                const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
+                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice > 0 ? this.lastPrice : this.tickerData.last) :
+                  [];
+
+                if (bars.length === 0) {
+                  onDataCallback(bars, { noData: true })
+                } else {
+                  this.lastPrice = bars[bars.length - 1].close;
+                  onDataCallback(bars, { noData: false })
+                }
+              });
           },
 
           subscribeBars: (_symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
-            let lastBarTime = NaN;
-            if (this.barsSubscription) {
-              clearInterval(this.barsSubscription);
-            } 
+            // let lastBarTime = NaN;
+            // if (this.barsSubscription) {
+            //   clearInterval(this.barsSubscription);
+            // } 
 
-            this.barsSubscription = setInterval(() => {
-              if (!this.tradingView || !this.tradingView._options) {
-                return;
-              }
-              const to = Math.round(new Date().valueOf() / 1000);
-              const from = to - 120;
+            // this.barsSubscription = setInterval(() => {
+            //   if (!this.tradingView || !this.tradingView._options) {
+            //     return;
+            //   }
+            //   const to = Math.round(new Date().valueOf() / 1000);
+            //   const from = to - 120;
 
-              this.tradingView._options.datafeed.getBars(_symbolInfo, resolution, from, to, (bars) => {
-                if (bars.length === 0) {
-                  return;
-                }
+            //   this.tradingView._options.datafeed.getBars(_symbolInfo, resolution, from, to, (bars) => {
+            //     if (bars.length === 0) {
+            //       return;
+            //     }
 
-                const lastBar = bars[bars.length - 1];
+            //     const lastBar = bars[bars.length - 1];
 
-                if (!Number.isNaN(lastBarTime) && lastBar.time < lastBarTime) {
-                  return;
-                }
+            //     if (!Number.isNaN(lastBarTime) && lastBar.time < lastBarTime) {
+            //       return;
+            //     }
 
-                const isNewBar = !Number.isNaN(lastBarTime) && lastBar.time > lastBarTime
+            //     const isNewBar = !Number.isNaN(lastBarTime) && lastBar.time > lastBarTime
 
-                if (isNewBar && bars.length >= 2) {
-                  const previousBar = bars[bars.length - 2];
-                  onRealtimeCallback(previousBar);
-                }
+            //     if (isNewBar && bars.length >= 2) {
+            //       const previousBar = bars[bars.length - 2];
+            //       onRealtimeCallback(previousBar);
+            //     }
 
-                lastBarTime = lastBar.time;
+            //     lastBarTime = lastBar.time;
 
-                try {
-                  onRealtimeCallback(lastBar);
-                } catch (err) {
-                  // This is a false positive due to using has_empty_bars
-                  if (err.message.contains('time order violation')) {
-                    return
-                  }
+            //     try {
+            //       onRealtimeCallback(lastBar);
+            //     } catch (err) {
+            //       // This is a false positive due to using has_empty_bars
+            //       if (err.message.contains('time order violation')) {
+            //         return
+            //       }
 
-                  throw err;
-                }
-              })
-            }, 10000)
+            //       throw err;
+            //     }
+            //   })
+            // }, 10000)
           },
 
           unsubscribeBars: (subscriberUID) => {
@@ -267,7 +289,7 @@ export default {
           // debug: true,
           fullscreen: false,
           symbol: symbolName,
-          interval: '1',
+          interval: '15',
           container_id: "chart-container",
           datafeed: datafeed,
           library_path: 'static/charting_library/',
@@ -279,6 +301,7 @@ export default {
           ],
           enabled_features: [],
           autosize: true,
+          custom_css_url: 'styles.css',
 		    };
 
         if (this.$store.state.styleMode === 'Night') {
@@ -303,31 +326,8 @@ export default {
           }, 1000);
         }
 
-        setTimeout(() => {
-          var cssLink = document.createElement("link");
-          cssLink.href = "styles.css";
-          cssLink.rel = "stylesheet";
-          cssLink.type = "text/css";
-          for (var i = 0; i < window.frames.length; i++) {
-            if (window.frames[i].name === container.children[0].id) {
-              window.frames[i].document.body.appendChild(cssLink);
-              break;
-            }
-          }
-        }, 1000);
-
         this.tradingView = new TradingView.widget(settings);
 
-        this.tradingView.onChartReady(() => { 
-          this.tradingView.activeChart().onIntervalChanged().subscribe(null, (interval, obj) => { 
-            this.$store.dispatch('fetchTradesBucketed', {
-              marketName: this.$store.state.currentMarket.marketName,
-              interval: interval === '1D' ? 60 * 24 : 
-                interval === '3D' ? 3 * 60 * 24 : 
-                Number(interval)
-              });
-           });
-        });
       } catch (e) {
         console.log(e);
         alert(e);
@@ -475,9 +475,12 @@ export default {
 
       groupSize = this.roundToDepthPrecision(groupSize).dividedBy(5);
       return groupSize;
-    }
-  },
+    },
 
+    ...mapGetters([
+      'tickerData',
+    ]),
+  },
 };
 </script>
 <style lang="scss">

@@ -321,11 +321,11 @@ async function fetchRecentTransactions({ commit }) {
   }
 }
 
-async function fetchTradesBucketed({ commit }, { marketName, interval }) {
+async function fetchTradesBucketed({ commit }, { marketName, interval, from, to }) {
   try {
     commit('startRequest', { identifier: 'fetchTradesBucketed' });
 
-    const apiBuckets = await dex.fetchTradesBucketed(marketName, interval);
+    const apiBuckets = await dex.fetchTradesBucketed(marketName, interval, from, to);
 
     commit('setTradesBucketed', apiBuckets);
     commit('endRequest', { identifier: 'fetchTradesBucketed' });
