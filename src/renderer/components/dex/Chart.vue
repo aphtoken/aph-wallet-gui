@@ -234,50 +234,52 @@ export default {
           },
 
           subscribeBars: (_symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
-            // let lastBarTime = NaN;
-            // if (this.barsSubscription) {
-            //   clearInterval(this.barsSubscription);
-            // } 
+            let lastBarTime = NaN;
+            if (this.barsSubscription) {
+              clearInterval(this.barsSubscription);
+            } 
 
-            // this.barsSubscription = setInterval(() => {
-            //   if (!this.tradingView || !this.tradingView._options) {
-            //     return;
-            //   }
-            //   const to = Math.round(new Date().valueOf() / 1000);
-            //   const from = to - 120;
+            this.barsSubscription = setInterval(() => {
+              if (!this.tradingView || !this.tradingView._options) {
+                return;
+              }
+              const to = Math.round(new Date().valueOf() / 1000);
+              const from = to - 120;
 
-            //   this.tradingView._options.datafeed.getBars(_symbolInfo, resolution, from, to, (bars) => {
-            //     if (bars.length === 0) {
-            //       return;
-            //     }
+              const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
+                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice > 0 ? this.lastPrice : this.tickerData.last) :
+                  [];
 
-            //     const lastBar = bars[bars.length - 1];
+              if (bars.length === 0) {
+                return;
+              }
 
-            //     if (!Number.isNaN(lastBarTime) && lastBar.time < lastBarTime) {
-            //       return;
-            //     }
+              const lastBar = bars[bars.length - 1];
 
-            //     const isNewBar = !Number.isNaN(lastBarTime) && lastBar.time > lastBarTime
+              if (!Number.isNaN(lastBarTime) && lastBar.time < lastBarTime) {
+                return;
+              }
 
-            //     if (isNewBar && bars.length >= 2) {
-            //       const previousBar = bars[bars.length - 2];
-            //       onRealtimeCallback(previousBar);
-            //     }
+              const isNewBar = !Number.isNaN(lastBarTime) && lastBar.time > lastBarTime
 
-            //     lastBarTime = lastBar.time;
+              if (isNewBar && bars.length >= 2) {
+                const previousBar = bars[bars.length - 2];
+                onRealtimeCallback(previousBar);
+              }
 
-            //     try {
-            //       onRealtimeCallback(lastBar);
-            //     } catch (err) {
-            //       // This is a false positive due to using has_empty_bars
-            //       if (err.message.contains('time order violation')) {
-            //         return
-            //       }
+              lastBarTime = lastBar.time;
 
-            //       throw err;
-            //     }
-            //   })
-            // }, 10000)
+              try {
+                onRealtimeCallback(lastBar);
+              } catch (err) {
+                // This is a false positive due to using has_empty_bars
+                if (err.message.contains('time order violation')) {
+                  return
+                }
+
+                throw err;
+              }
+            }, 10000)
           },
 
           unsubscribeBars: (subscriberUID) => {

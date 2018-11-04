@@ -195,7 +195,6 @@ export default {
     const bars = [];
     const trades = tradeHistory.trades.slice(0);
     const apiBuckets = tradeHistory.apiBuckets;
-    console.log(apiBuckets);
 
     trades.reverse();
 
@@ -242,7 +241,6 @@ export default {
         trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
       }
 
-      // compare which is closer barPointer (use best value)
       if (tradesIndex >= trades.length && trade === null) {
         break;
       }
@@ -254,8 +252,8 @@ export default {
       const tradeDistance = Math.abs((trade.tradeTime * 1000) - barPointer);
       const bucketDistance = Math.abs((bucket.time * 1000) - barPointer);
 
+      // compare which is closer barPointer (use smallest distance as 'best')
       if (bucketDistance <= resolution && tradeDistance > bucketDistance) {
-        console.log('using buckets');
         currentBar = {
           open: bucket.open,
           close: bucket.close,
@@ -267,7 +265,6 @@ export default {
         bars.push(currentBar);
         apiBucketsIndex += 1;
       } else {
-        console.log('using trades');
         while (trade
           && trade.tradeTime * 1000 >= barPointer
           && trade.tradeTime * 1000 < barPointer + resolution) {
@@ -282,36 +279,6 @@ export default {
         }
         bars.push(currentBar);
       }
-
-      // if (bucket && bucket.time * 1000 === barPointer) {
-      //   console.log('using buckets');
-      //   currentBar = {
-      //     open: bucket.open,
-      //     close: bucket.close,
-      //     high: bucket.high,
-      //     low: bucket.low,
-      //     volume: bucket.volume,
-      //     time: barPointer,
-      //   };
-      //   bars.push(currentBar);
-      //   apiBucketsIndex += 1;
-      // } else {
-      //   console.log('using trades');
-      //   while (trade
-      //     && trade.tradeTime * 1000 >= barPointer
-      //     && trade.tradeTime * 1000 < barPointer + resolution) {
-      //     currentBar.volume += trade.quantity;
-      //     currentBar.close = trade.price;
-
-      //     if (currentBar.open === 0) currentBar.open = trade.price;
-      //     if (currentBar.low === 0 || currentBar.low > trade.price) currentBar.low = trade.price;
-      //     if (currentBar.high < trade.price) currentBar.high = trade.price;
-      //     tradesIndex += 1;
-      //     trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
-      //   }
-
-      //   bars.push(currentBar);
-      // }
 
       barPointer += resolution;
     }
