@@ -1,6 +1,6 @@
 <template>
   <div :class="['aph-select', {'is-open': isOpen, 'is-light': light}]">
-    <button class="aph-select--label" :disabled="isDisabled" @click="toggleOpen">{{ label }}</button>
+    <div class="aph-select--label" @click="toggleOpen">{{ label }}</div>
     <ul class="aph-select--dropdown" v-if="isOpen">
       <li :class="{selected: isSelected(option)}" v-for="(option, index) in options" :key="index" @click="toggleSelectedOption(option)">{{ option.label }}</li>
     </ul>
@@ -54,6 +54,10 @@ export default {
     },
 
     toggleOpen() {
+      if (this.isDisabled) {
+        return;
+      }
+
       this.isOpen = !this.isOpen;
     },
 
@@ -169,8 +173,6 @@ export default {
     text-align: center;
     transition: all .1s linear;
     white-space: nowrap;
-    outline:none;
-    width: 100%;
 
     &:hover {
       background: $purple-hover;
