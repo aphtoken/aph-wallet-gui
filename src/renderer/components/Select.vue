@@ -54,10 +54,6 @@ export default {
     },
 
     toggleOpen() {
-      if (this.isDisabled) {
-        return;
-      }
-
       this.isOpen = !this.isOpen;
     },
 
@@ -111,11 +107,6 @@ export default {
         return this.$t('noOptionSelected');
       },
       type: String,
-    },
-
-    isDisabled: {
-      default: false,
-      type: Boolean,
     },
   },
 };

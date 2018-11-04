@@ -2613,9 +2613,4 @@ export default {
       }
     });
   },
-  isSystemAssetWithdrawInProgress() {
-    const systemWithdrawStep = _.get(store.state, 'systemWithdraw.step');
-
-    return systemWithdrawStep > 0 && systemWithdrawStep < 5;
-  },
 };
