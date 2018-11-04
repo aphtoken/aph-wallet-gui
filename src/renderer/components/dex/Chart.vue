@@ -161,7 +161,7 @@ export default {
           has_daily: true,
           has_weekly_and_monthly: true,
           has_intraday: true,
-          intraday_multipliers: ['1', '5', '15', '30', '60', '360', '1440', '10080'],
+          intraday_multipliers: ['1', '5', '15', '30', '60', '360'],
           has_no_volume: false,
           has_empty_bars: true,
           minmov: 1,
@@ -201,7 +201,6 @@ export default {
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
             const resolutionInMinutes = resolution === 'D' ? 60 * 24 :
-                resolution === '3D' ? 3 * 60 * 24 : 
                 resolution === 'W' ? 7 * 60 * 24 :
                 Number(resolution);
 
