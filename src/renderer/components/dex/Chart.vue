@@ -158,10 +158,10 @@ export default {
         const fullName = `${tradedExchange}:${symbolName}`
         const symbolInfo = {
           name: fullName,
-          has_daily: false,
-          has_weekly_and_monthly: false,
+          has_daily: true,
+          has_weekly_and_monthly: true,
           has_intraday: true,
-          intraday_multipliers: ['1', '5', '15', '30', '60', '360'],
+          intraday_multipliers: ['1', '5', '15', '30', '60', '360', '1440', '10080'],
           has_no_volume: false,
           has_empty_bars: true,
           minmov: 1,
@@ -200,18 +200,20 @@ export default {
           },
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
+            const resolutionInMinutes = resolution === 'D' ? 60 * 24 :
+                resolution === '3D' ? 3 * 60 * 24 : 
+                resolution === 'W' ? 7 * 60 * 24 :
+                Number(resolution);
+
             this.$store.dispatch('fetchTradesBucketed', {
               marketName: this.$store.state.currentMarket.marketName,
-              interval: resolution === '1D' ? 60 * 24 :
-                resolution === '3D' ? 3 * 60 * 24 : 
-                resolution === '1W' ? 7 * 60 * 24 :
-                Number(resolution),
+              interval: resolutionInMinutes,
               from: from, 
               to: to,
               }).then(() => {
                 // Compute and fetch bars on newly populated apiBuckets
                 const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
-                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice > 0 ? this.lastPrice : this.tickerData.last) :
+                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolutionInMinutes, from, to, this.lastPrice > 0 ? this.lastPrice : this.tickerData.last) :
                   [];
 
                 if (bars.length === 0) {
