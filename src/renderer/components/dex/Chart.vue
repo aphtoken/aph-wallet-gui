@@ -71,7 +71,6 @@
 </template>
 <script>
 import { BigNumber } from 'bignumber.js';
-import { mapGetters } from 'vuex';
 
 export default {
   data() {
@@ -211,7 +210,7 @@ export default {
               }).then(() => {
                 // Compute and fetch bars on newly populated apiBuckets
                 const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
-                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolutionInMinutes, from, to, this.lastPrice > 0 ? this.lastPrice : this.tickerData.last) :
+                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolutionInMinutes, from, to, this.lastPrice) :
                   [];
 
                 if (bars.length === 0) {
@@ -237,7 +236,7 @@ export default {
               const from = to - 120;
 
               const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
-                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice > 0 ? this.lastPrice : this.tickerData.last) :
+                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice) :
                   [];
 
               if (bars.length === 0) {
@@ -468,10 +467,6 @@ export default {
       groupSize = this.roundToDepthPrecision(groupSize).dividedBy(5);
       return groupSize;
     },
-
-    ...mapGetters([
-      'tickerData',
-    ]),
   },
 };
 </script>

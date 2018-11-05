@@ -38,7 +38,7 @@ const binSizeToBinCountMap = {
   360: 1440, // 6 Hrs ~ 360 days
   1440: 1095, // 1 Day ~ 3 yrs
   4320: 1825, // 3 Days ~ 5 yrs
-  10080: 1825, // 1 Week ~ 5 yrs
+  10080: 520, // 1 Week ~ 10 yrs
 };
 
 const DBG_LOG = false;
