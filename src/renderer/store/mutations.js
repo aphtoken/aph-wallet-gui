@@ -365,7 +365,7 @@ function setRecentTransactions(state, transactions) {
 
   const transactionsStorageKey = `txs.${state.currentWallet.address}.${state.currentNetwork.net}`;
 
-  db.upsert(transactionsStorageKey, normalizeRecentTransactions(state.recentTransactions));
+  db.upsert(transactionsStorageKey, neo.normalizeRecentTransactions(state.recentTransactions));
 }
 
 function setLatestVersion(state, version) {
@@ -657,27 +657,6 @@ function tradeUpdateReceived(state, tradeUpdateMsg) {
       price: trade[0],
       quantity: trade[1],
       tradeTime: moment(trade[2]).unix(),
-    });
-  });
-}
-
-// Local functions
-function normalizeRecentTransactions(transactions) {
-  return transactions.map((transaction) => {
-    return _.merge(transaction, {
-      value: transaction.value.toString(),
-      details: {
-        vin: transaction.details.vin.map((i) => {
-          return {
-            value: i.value.toString(),
-          };
-        }),
-        vout: transaction.details.vout.map(({ value }) => {
-          return {
-            value: value.toString(),
-          };
-        }),
-      },
     });
   });
 }
