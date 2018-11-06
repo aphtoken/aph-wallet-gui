@@ -29,6 +29,17 @@ const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xA6;
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
 const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
+const binSizeToBinCountMap = {
+  1: 1440, //  1 Min ~ 1 day
+  5: 1440, //  5 Min ~ 5 days
+  15: 1440, // 15 Min ~ 15 days
+  30: 1440, // 30 Min ~ 30 days
+  60: 1440, // 1 Hrs ~ 60 days
+  360: 1440, // 6 Hrs ~ 360 days
+  1440: 1095, // 1 Day ~ 3 yrs
+  4320: 1825, // 3 Days ~ 5 yrs
+  10080: 520, // 1 Week ~ 10 yrs
+};
 
 const DBG_LOG = false;
 const assetUTXOsToIgnore = {};
@@ -183,6 +194,8 @@ export default {
   getTradeHistoryBars(tradeHistory, resolution, from, to, last) {
     const bars = [];
     const trades = tradeHistory.trades.slice(0);
+    const apiBuckets = tradeHistory.apiBuckets;
+
     trades.reverse();
 
     // convert resolution to seconds
@@ -203,14 +216,13 @@ export default {
       volume: 0,
     };
 
-    let apiBucketsIndex = tradeHistory.apiBuckets ? tradeHistory.apiBuckets.length - 1 : 0;
+    let apiBucketsIndex = 0;
     let tradesIndex = 0;
-    const barFrom = (from * 1000) + resolution;
-    const barTo = (to * 1000);
+    const barFrom = (from * 1000);
+    const barTo = (to * 1000) + resolution;
     let barPointer = barFrom;
     let bucket = null;
     let trade = null;
-
 
     while (barPointer < barTo) {
       currentBar = {
@@ -222,23 +234,32 @@ export default {
         time: barPointer,
       };
 
-      bucket = apiBucketsIndex < tradeHistory.apiBuckets.length ? tradeHistory.apiBuckets[apiBucketsIndex] : null;
+      bucket = apiBucketsIndex < apiBuckets.length ? apiBuckets[apiBucketsIndex] : null;
       trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
+
       while (trade && trade.tradeTime < from) {
         tradesIndex += 1;
         trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
       }
 
-      if (bucket && bucket.time * 1000 === barPointer) {
+      const bucketTime = bucket ? bucket.time * 1000 : 0;
+      const bucketDistanceToPointer = Math.abs(bucketTime - barPointer);
+
+      if (bucketDistanceToPointer <= resolution) {
         currentBar = {
           open: bucket.open,
           close: bucket.close,
           high: bucket.high,
           low: bucket.low,
           volume: bucket.volume,
-          time: barPointer,
+          time: bucketTime,
         };
-        bars.push(bucket);
+
+        if (bucketDistanceToPointer > 0) {
+          barPointer = bucketTime;
+        }
+
+        bars.push(currentBar);
         apiBucketsIndex += 1;
       } else {
         while (trade
@@ -253,7 +274,6 @@ export default {
           tradesIndex += 1;
           trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
         }
-
         bars.push(currentBar);
       }
 
@@ -262,11 +282,24 @@ export default {
     return bars;
   },
 
-  fetchTradesBucketed(marketName, binSize = 1) {
+  fetchTradesBucketed(marketName, binSize = 1, from = null, to = null) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
-        axios.get(`${currentNetwork.aph}/trades/bucketed/${marketName}?binSize=${binSize}&binCount=1440`)
+        const binCount = binSizeToBinCountMap[binSize];
+        let url = `${currentNetwork.aph}/trades/bucketed/${marketName}?binSize=${binSize}&binCount=${binCount}`;
+
+        if (from) {
+          const fromDate = new Date(from * 1000);
+          url = `${url}&startTime=${fromDate.toISOString()}`;
+        }
+
+        if (to) {
+          const toDate = new Date(to * 1000);
+          url = `${url}&endTime=${toDate.toISOString()}`;
+        }
+
+        axios.get(url)
           .then((res) => {
             resolve(res.data.buckets);
           })

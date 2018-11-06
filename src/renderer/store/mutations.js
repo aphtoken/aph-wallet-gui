@@ -78,6 +78,7 @@ export {
   setSystemWithdrawMergeState,
   setTickerDataByMarket,
   setTradeHistory,
+  setTradesBucketed,
   setWallets,
   setWithdrawInProgressModalModel,
   startRequest,
@@ -511,6 +512,10 @@ function setTickerDataByMarket(state, tickerDataByMarket) {
 
 function setTradeHistory(state, tradeHistory) {
   state.tradeHistory = tradeHistory;
+}
+
+function setTradesBucketed(state, apiBuckets) {
+  state.tradeHistory.apiBuckets = apiBuckets;
 }
 
 function addToOrderHistory(state, newOrders) {

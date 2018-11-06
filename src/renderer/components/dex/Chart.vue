@@ -156,10 +156,10 @@ export default {
         const fullName = `${tradedExchange}:${symbolName}`
         const symbolInfo = {
           name: fullName,
-          has_daily: false,
-          has_weekly_and_monthly: false,
+          has_daily: true,
+          has_weekly_and_monthly: true,
           has_intraday: true,
-          intraday_multipliers: ['1'],
+          intraday_multipliers: ['1', '5', '15', '30', '60', '360'],
           has_no_volume: false,
           has_empty_bars: true,
           minmov: 1,
@@ -182,7 +182,7 @@ export default {
                   supports_marks: false,
                   supports_timescale_marks: false,
                   supports_time: false,
-                  supported_resolutions: [1, 5, 15, 30, 60, 360, '1D', '3D'],
+                  supported_resolutions: [1, 5, 15, 30, 60, 360, '1D', '3D', '1W'],
                 },
               )
             }, 0)
@@ -198,23 +198,35 @@ export default {
           },
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
-              this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice) :
-              [];
+            const resolutionInMinutes = resolution === 'D' ? 60 * 24 :
+                resolution === 'W' ? 7 * 60 * 24 :
+                Number(resolution);
 
-            if (bars.length === 0) {
-              onDataCallback(bars, { noData: true })
-            } else {
-              this.lastPrice = bars[bars.length - 1].close;
-              onDataCallback(bars, { noData: false })
-            }
+            this.$store.dispatch('fetchTradesBucketed', {
+              marketName: this.$store.state.currentMarket.marketName,
+              interval: resolutionInMinutes,
+              from: from, 
+              to: to,
+              }).then(() => {
+                // Compute and fetch bars on newly populated apiBuckets
+                const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
+                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolutionInMinutes, from, to, this.lastPrice) :
+                  [];
+
+                if (bars.length === 0) {
+                  onDataCallback(bars, { noData: true })
+                } else {
+                  this.lastPrice = bars[bars.length - 1].close;
+                  onDataCallback(bars, { noData: false })
+                }
+              });
           },
 
           subscribeBars: (_symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
             let lastBarTime = NaN;
             if (this.barsSubscription) {
               clearInterval(this.barsSubscription);
-            }
+            } 
 
             this.barsSubscription = setInterval(() => {
               if (!this.tradingView || !this.tradingView._options) {
@@ -223,37 +235,39 @@ export default {
               const to = Math.round(new Date().valueOf() / 1000);
               const from = to - 120;
 
-              this.tradingView._options.datafeed.getBars(_symbolInfo, resolution, from, to, (bars) => {
-                if (bars.length === 0) {
-                  return;
+              const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
+                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice) :
+                  [];
+
+              if (bars.length === 0) {
+                return;
+              }
+
+              const lastBar = bars[bars.length - 1];
+
+              if (!Number.isNaN(lastBarTime) && lastBar.time < lastBarTime) {
+                return;
+              }
+
+              const isNewBar = !Number.isNaN(lastBarTime) && lastBar.time > lastBarTime
+
+              if (isNewBar && bars.length >= 2) {
+                const previousBar = bars[bars.length - 2];
+                onRealtimeCallback(previousBar);
+              }
+
+              lastBarTime = lastBar.time;
+
+              try {
+                onRealtimeCallback(lastBar);
+              } catch (err) {
+                // This is a false positive due to using has_empty_bars
+                if (err.message.contains('time order violation')) {
+                  return
                 }
 
-                const lastBar = bars[bars.length - 1];
-
-                if (!Number.isNaN(lastBarTime) && lastBar.time < lastBarTime) {
-                  return;
-                }
-
-                const isNewBar = !Number.isNaN(lastBarTime) && lastBar.time > lastBarTime
-
-                if (isNewBar && bars.length >= 2) {
-                  const previousBar = bars[bars.length - 2];
-                  onRealtimeCallback(previousBar);
-                }
-
-                lastBarTime = lastBar.time;
-
-                try {
-                  onRealtimeCallback(lastBar);
-                } catch (err) {
-                  // This is a false positive due to using has_empty_bars
-                  if (err.message.contains('time order violation')) {
-                    return
-                  }
-
-                  throw err;
-                }
-              })
+                throw err;
+              }
             }, 10000)
           },
 
@@ -266,7 +280,7 @@ export default {
           // debug: true,
           fullscreen: false,
           symbol: symbolName,
-          interval: '5',
+          interval: '15',
           container_id: "chart-container",
           datafeed: datafeed,
           library_path: 'static/charting_library/',
@@ -278,6 +292,7 @@ export default {
           ],
           enabled_features: [],
           autosize: true,
+          custom_css_url: 'styles.css',
 		    };
 
         if (this.$store.state.styleMode === 'Night') {
@@ -302,20 +317,8 @@ export default {
           }, 1000);
         }
 
-        setTimeout(() => {
-          var cssLink = document.createElement("link");
-          cssLink.href = "styles.css";
-          cssLink.rel = "stylesheet";
-          cssLink.type = "text/css";
-          for (var i = 0; i < window.frames.length; i++) {
-            if (window.frames[i].name === container.children[0].id) {
-              window.frames[i].document.body.appendChild(cssLink);
-              break;
-            }
-          }
-        }, 1000);
-
         this.tradingView = new TradingView.widget(settings);
+
       } catch (e) {
         console.log(e);
         alert(e);
@@ -463,9 +466,8 @@ export default {
 
       groupSize = this.roundToDepthPrecision(groupSize).dividedBy(5);
       return groupSize;
-    }
+    },
   },
-
 };
 </script>
 <style lang="scss">
