@@ -84,6 +84,7 @@ export default {
                 const splitTransactions = [];
 
                 nep5.data.transfers.forEach((nep5Transfer) => {
+                  // TODO: Fix this for vin and vout received and sent values.
                   fetchedTransactions.push({
                     txid: nep5Transfer.transactionHash.replace('0x', ''),
                     symbol: nep5Transfer.symbol,
@@ -1664,4 +1665,24 @@ export default {
     });
   },
 
+  normalizeRecentTransactions(transactions) {
+    return transactions.map((transaction) => {
+      return _.merge(transaction, {
+        value: toBigNumber(transaction.value).toString(),
+        details: {
+          vin: transaction.details.vin.map((i) => {
+            const val = i.value || 0;
+            return {
+              value: toBigNumber(val).toString(),
+            };
+          }),
+          vout: transaction.details.vout.map(({ value }) => {
+            return {
+              value: toBigNumber(value).toString(),
+            };
+          }),
+        },
+      });
+    });
+  },
 };

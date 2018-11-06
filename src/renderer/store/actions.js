@@ -1,6 +1,5 @@
 /* eslint-disable no-use-before-define */
 import moment from 'moment';
-import { BigNumber } from 'bignumber.js';
 
 import { alerts, assets, db, dex, neo, network, wallets, ledger } from '../services';
 import { timeouts } from '../constants';
@@ -306,7 +305,7 @@ async function fetchRecentTransactions({ commit }) {
       lastBlockIndex = recentTransactions[0].block_index;
     }
 
-    commit('setRecentTransactions', normalizeRecentTransactions(recentTransactions));
+    commit('setRecentTransactions', neo.normalizeRecentTransactions(recentTransactions));
   } catch (recentTransactions) {
     commit('setRecentTransactions', recentTransactions);
   }
@@ -414,29 +413,6 @@ function importWallet({ commit }, { name, wif, passphrase, done }) {
         commit('failRequest', { identifier: 'importWallet', message: e });
       });
   }, timeouts.NEO_API_CALL);
-}
-
-// Local functions
-function normalizeRecentTransactions(transactions) {
-  return transactions.map((transaction) => {
-    const changes = {
-      value: new BigNumber(transaction.value),
-      details: {
-        vin: transaction.details.vin.map(({ value }) => {
-          return {
-            value: new BigNumber(value),
-          };
-        }),
-        vout: transaction.details.vout.map(({ value }) => {
-          return {
-            value: new BigNumber(value),
-          };
-        }),
-      },
-    };
-
-    return _.merge(transaction, changes);
-  });
 }
 
 function openEncryptedKey({ commit }, { encryptedKey, passphrase, done }) {
