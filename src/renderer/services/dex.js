@@ -236,32 +236,29 @@ export default {
 
       bucket = apiBucketsIndex < apiBuckets.length ? apiBuckets[apiBucketsIndex] : null;
       trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
+
       while (trade && trade.tradeTime < from) {
         tradesIndex += 1;
         trade = tradesIndex < trades.length ? trades[tradesIndex] : null;
       }
 
-      if (tradesIndex >= trades.length && trade === null) {
-        break;
-      }
+      const bucketTime = bucket ? bucket.time * 1000 : 0;
+      const bucketDistanceToPointer = Math.abs(bucketTime - barPointer);
 
-      if (apiBucketsIndex >= apiBuckets.length && bucket === null) {
-        break;
-      }
-
-      const tradeDistance = Math.abs((trade.tradeTime * 1000) - barPointer);
-      const bucketDistance = Math.abs((bucket.time * 1000) - barPointer);
-
-      // compare which is closer barPointer (use smallest distance as 'best')
-      if (bucketDistance <= resolution && tradeDistance > bucketDistance) {
+      if (bucketDistanceToPointer <= resolution) {
         currentBar = {
           open: bucket.open,
           close: bucket.close,
           high: bucket.high,
           low: bucket.low,
           volume: bucket.volume,
-          time: barPointer,
+          time: bucketTime,
         };
+
+        if (bucketDistanceToPointer > 0) {
+          barPointer = bucketTime;
+        }
+
         bars.push(currentBar);
         apiBucketsIndex += 1;
       } else {
