@@ -29,6 +29,8 @@ const TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL = 0xA6;
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK = '91';
 const SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW = '92';
 const SIGNATUREREQUESTTYPE_CLAIM_GAS = '94';
+const POSTFIX_USER_ASSET_WITHDRAWING = 'b0';
+
 const binSizeToBinCountMap = {
   1: 1440, //  1 Min ~ 1 day
   5: 1440, //  5 Min ~ 5 days
@@ -457,6 +459,14 @@ export default {
           order.assetIdToSell = order.market.baseAssetId;
           if (order.price) {
             order.quantityToSell = order.quantity.multipliedBy(order.price).toString();
+          }
+
+          // add token if not already a user asset
+          const userAssets = assets.getUserAssets();
+          if (!_.has(userAssets, order.assetIdToBuy)) {
+            store.dispatch('addToken', {
+              hashOrSymbol: order.assetIdToBuy,
+            });
           }
         }
 
@@ -997,10 +1007,11 @@ export default {
 
           if (assetId === '3a4acd3647086e7c44398aac0349802e6a171129') {
             const res = await neo.approveNep5Deposit(store.state.currentNetwork.dex_hash,
-              '3a4acd3647086e7c44398aac0349802e6a171129', quantity);
-
+              assetId, quantity);
+            if (DBG_LOG) console.log(`Attempting approval of ${assetId}`);
             await neo.monitorTransactionConfirmation(res.tx, true);
-            alerts.info(`Confirmed approval of ${quantity} NEX for deposit.`);
+            alerts.info(`Confirmed approval of ${quantity} ${holding.symbol} for deposit.`);
+            // TODO: wait a few seconds before issuing deposit for UTXOs to settle.
           }
         }
 
@@ -1691,9 +1702,42 @@ export default {
     /* eslint-enable no-await-in-loop */
   },
 
+  async getWithdrawInProgressBalance(assetId) {
+    const currentWallet = wallets.getCurrentWallet();
+    const currentWalletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
+    const assetWithdrawingParam
+      = `${u.reverseHex(currentWalletScriptHash)}${u.reverseHex(assetId)}${POSTFIX_USER_ASSET_WITHDRAWING}`;
+
+    if (DBG_LOG) console.log(`assetWIthdrawingParam: ${assetWithdrawingParam}`);
+
+    const rpcClient = network.getRpcClient();
+    const res = await rpcClient.query({
+      method: 'getstorage',
+      params: [store.state.currentNetwork.dex_hash, assetWithdrawingParam],
+    });
+    if (!!res.result && res.result.length > 0) {
+      return u.fixed82num(res.result);
+    }
+
+    return 0;
+  },
+
   completeSystemAssetWithdrawals() {
     return new Promise(async (resolve, reject) => {
       try {
+        // check if the wallet has an in progress GAS withdraw
+        const markedGasBalance = toBigNumber(await this.getWithdrawInProgressBalance(assets.GAS));
+        // check if the wallet has an in progress NEO withdraw
+        const markedNeoBalance = toBigNumber(await this.getWithdrawInProgressBalance(assets.NEO));
+
+        if (markedGasBalance.plus(markedNeoBalance).isEqualTo(0)) {
+          // nothing in progress to withdraw.
+          if (DBG_LOG) console.log('No NEO or GAS withdraws in progress.');
+          return;
+        }
+
+        if (DBG_LOG) console.log(`Detected marked amounts GAS: ${markedGasBalance} NEO: ${markedNeoBalance}`);
+
         const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
 
         let dexBalance;
@@ -1704,13 +1748,13 @@ export default {
           return;
         }
 
-        if (dexBalance.assets.GAS) {
-          await this.decorateWithUnspentsReservedState(assets.GAS, dexBalance.assets.GAS.unspent);
+        if (dexBalance.assets.GAS && markedGasBalance.isGreaterThan(0)) {
+          await this.decorateWithUnspentsReservedState(assets.GAS, dexBalance.assets.GAS.unspent, markedGasBalance);
           if (DBG_LOG) console.log(`Checking for GAS unspents ${JSON.stringify(dexBalance.assets.GAS.unspent)}`);
           await this.completeUnspentWithdraws(assets.GAS, dexBalance.assets.GAS.unspent);
         }
-        if (dexBalance.assets.NEO) {
-          await this.decorateWithUnspentsReservedState(assets.NEO, dexBalance.assets.NEO.unspent);
+        if (dexBalance.assets.NEO && markedNeoBalance.isGreaterThan(0)) {
+          await this.decorateWithUnspentsReservedState(assets.NEO, dexBalance.assets.NEO.unspent, markedNeoBalance);
           if (DBG_LOG) console.log(`Checking for NEO unspents ${JSON.stringify(dexBalance.assets.NEO.unspent)}`);
           await this.completeUnspentWithdraws(assets.NEO, dexBalance.assets.NEO.unspent);
         }
@@ -1720,7 +1764,7 @@ export default {
     });
   },
 
-  async decorateWithUnspentsReservedState(assetId, unspents) {
+  async decorateWithUnspentsReservedState(assetId, unspents, targetAmount) {
     for (let i = 0; i < unspents.length; i += 1) {
       const unspent = unspents[i];
       const utxoKey = `${unspent.txid}_${unspent.index}`;
@@ -1729,21 +1773,23 @@ export default {
         unspent.reservedFor = _.get(contractUTXOsReservedFor);
       }
 
-      /* eslint-disable no-await-in-loop */
-      if (!unspent.reservedFor) {
-        await this.fetchSystemAssetUTXOReserved(unspent);
-      }
-      /* eslint-enable no-await-in-loop */
-
-      if (unspent.reservedFor) {
-        if (DBG_LOG) {
-          if (unspent.reservedFor.length >= 40) {
-            console.log(`Tracking reserved utxo ${JSON.stringify(unspent)}`);
-          } else {
-            console.log(`!! decorateWithUnspentsReservedState found available UTXO ${JSON.stringify(unspent)}`);
-          }
+      if (!targetAmount || targetAmount.isEqualTo(unspent.value)) {
+        /* eslint-disable no-await-in-loop */
+        if (!unspent.reservedFor) {
+          await this.fetchSystemAssetUTXOReserved(unspent);
         }
-        _.set(contractUTXOsReservedFor, utxoKey, unspent.reservedFor);
+        /* eslint-enable no-await-in-loop */
+
+        if (unspent.reservedFor) {
+          if (DBG_LOG) {
+            if (unspent.reservedFor.length >= 40) {
+              console.log(`Tracking reserved utxo ${JSON.stringify(unspent)}`);
+            } else {
+              console.log(`!! decorateWithUnspentsReservedState found available UTXO ${JSON.stringify(unspent)}`);
+            }
+          }
+          _.set(contractUTXOsReservedFor, utxoKey, unspent.reservedFor);
+        }
       }
     }
   },
@@ -2323,8 +2369,8 @@ export default {
             })
             .then((configResponse) => {
               configResponse.claims = claimsResponse.claims;
-              // TODO: for now we just take the first 6, but we could do something better.
-              configResponse.claims.ClaimItem = configResponse.claims.slice(0, 6);
+              // TODO: for now we just take the first 9, but we could do something better.
+              configResponse.claims.ClaimItem = configResponse.claims.slice(0, 9);
               return api.createTx(configResponse, 'claim');
             })
             .then((configResponse) => {

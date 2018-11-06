@@ -152,8 +152,8 @@ export default {
         this.removeChart();
 
         const symbolName = this.$store.state.currentMarket.marketName;
-        const tradedExchange = 'Aphelion'
-        const fullName = `${tradedExchange}:${symbolName}`
+        const tradedExchange = 'Aphelion';
+        const fullName = `${tradedExchange}:${symbolName}`;
         const symbolInfo = {
           name: fullName,
           has_daily: true,
@@ -168,7 +168,7 @@ export default {
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           session: '24x7',
           volume_precision: 5,
-        }
+        };
 
         const datafeed = {
           onReady: (callback) => {
