@@ -21,7 +21,7 @@
                v-for="market in filteredMarkets" :key="market.marketName">
             <div class="cell flex-horizontal">
               <div class="cell">{{ market.quoteCurrency }}</div>
-              <div class="cell" v-if="market.isOpen === true">{{ $formatMoney(market.usdVolume) }}</div>
+              <div class="cell" v-if="market.isOpen === true">{{ $formatMoney(market.volume) }}</div>
             </div>
             <div class="cell disabled" v-if="market.isOpen === false">[{{$t('tradingDisabled')}}]</div>
           </div>
@@ -56,11 +56,12 @@ export default {
       });
 
       markets.forEach((market) => {
-        const unitValue = this.$services.neo.getHolding(market.baseAssetId).unitValue;
-        market.usdVolume = _.get(this.$store.state.tickerDataByMarket, `${market.marketName}.baseVolume`) * unitValue;
+        const baseAsset = this.$services.neo.getHolding(market.baseAssetId);
+        const unitValue = baseAsset ? baseAsset.unitValue : 0;
+        market.volume = _.get(this.$store.state.tickerDataByMarket, `${market.marketName}.baseVolume`) * unitValue;
       });
 
-      markets = _.orderBy(markets, 'usdVolume', 'desc');
+      markets = _.orderBy(markets, 'volume', 'desc');
 
       return markets;
     },
