@@ -1,6 +1,6 @@
 {
   "name": "aphelion-desktop-wallet",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "author": "Aphelion <info@aphelion.org>",
   "description": "Aphelion Desktop Wallet",
   "license": "LicenseRef-LICENSE",
@@ -83,7 +83,7 @@
     "vue-electron": "^1.0.6",
     "vue-highcharts": "0.0.10",
     "vue-i18n": "^8.1.0",
-    "vue-native-websocket": "^2.0.8",
+    "vue-native-websocket": "^2.0.12",
     "vue-router": "^2.5.3",
     "vue-select": "^2.4.0",
     "vue-websocket": "^0.2.2",

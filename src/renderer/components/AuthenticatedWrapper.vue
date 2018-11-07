@@ -14,10 +14,7 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import VueNativeSock from 'vue-native-websocket';
 import { mapGetters } from 'vuex';
-import { store } from '@/store';
 
 import AphClaimGasModal from './modals/ClaimGasModal';
 import AphFractureGasModal from './modals/FractureGasModal';
@@ -69,22 +66,7 @@ export default {
 
   methods: {
     connectWebsocket() {
-      const index = Vue._installedPlugins.indexOf(VueNativeSock);
-      // Remove the Websocket plugin if it is already installed, so we can re-init and change the uri.
-      if (index > -1) {
-        this.$disconnect();
-        Vue._installedPlugins.splice(index, 1);
-      }
-
-      Vue.use(VueNativeSock, this.websocketUri, {
-        connectManually: true,
-        format: 'json',
-        reconnection: true,
-        reconnectionDelay: 3000,
-        store,
-      });
-
-      this.$connect();
+      this.$connect(this.websocketUri);
     },
 
     loadHoldings() {
