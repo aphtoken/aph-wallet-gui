@@ -69,7 +69,7 @@ export default {
         });
 
         const aphMarket = _.remove(markets, { quoteCurrency: 'APH' });
-        markets = aphMarket.concat(_.orderBy(markets.slice(aphMarket.length), 'volume', 'desc'));
+        markets = aphMarket.concat(_.orderBy(markets, 'volume', 'desc'));
         const marketsToShowByVolume = nonZeroVolumeItems > 10 ? 10 : nonZeroVolumeItems;
         markets = markets.slice(0, marketsToShowByVolume).concat(
           _.orderBy(markets.slice(marketsToShowByVolume), 'quoteCurrency', 'asc'));
