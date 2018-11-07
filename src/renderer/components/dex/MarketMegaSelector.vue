@@ -12,8 +12,8 @@
       </div>
       <div class="table">
         <div class="market-selection-header">
-            <div>Name</div>
-            <div>Volume</div>
+            <div>{{ $t('name') }}</div>
+            <div>{{ $t('volume') }}</div>
         </div>
         <div class="body">
           <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null" 
