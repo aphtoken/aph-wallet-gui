@@ -47,7 +47,6 @@ export default {
 
   computed: {
     baseCurrencies() {
-      console.log(this.$store.state.markets);
       return _.uniq(_.map(this.$store.state.markets, 'baseCurrency'));
     },
 
