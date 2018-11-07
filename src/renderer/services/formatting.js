@@ -63,8 +63,13 @@ export default {
     if (nullOrUndefined(value)) {
       return defaultValue;
     }
+    const val = toBigNumber(value);
 
-    return accounting.formatMoney(toBigNumber(value), symbol || settings.getCurrencySymbol());
+    let precision = 2;
+    if (val.isLessThan(1) && !val.isZero()) {
+      precision = 4;
+    }
+    return accounting.formatMoney(val, symbol || settings.getCurrencySymbol(), precision);
   },
 
   formatMoneyWithoutCents(value, symbol, defaultValue = 'N/A') {
