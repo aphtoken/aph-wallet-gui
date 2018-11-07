@@ -58,13 +58,21 @@ export default {
 
         if (!markets || !markets.length) return markets;
 
+        let nonZeroVolumeItems = 0;
         markets.forEach((market) => {
           const baseAsset = this.$services.neo.getHolding(market.baseAssetId);
           const unitValue = baseAsset ? baseAsset.unitValue : 0;
           market.volume = _.get(this.$store.state.tickerDataByMarket, `${market.marketName}.baseVolume`) * unitValue;
+          if (market.volume > 0) {
+            nonZeroVolumeItems += 1;
+          }
         });
 
-        markets = _.orderBy(markets, 'volume', 'desc');
+        const aphMarket = _.remove(markets, { quoteCurrency: 'APH' });
+        markets = aphMarket.concat(_.orderBy(markets.slice(aphMarket.length), 'volume', 'desc'));
+        const marketsToShowByVolume = nonZeroVolumeItems > 10 ? 10 : nonZeroVolumeItems;
+        markets = markets.slice(0, marketsToShowByVolume).concat(
+          _.orderBy(markets.slice(marketsToShowByVolume), 'quoteCurrency', 'asc'));
 
         return markets;
       } catch (e) {
