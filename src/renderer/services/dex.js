@@ -193,7 +193,7 @@ export default {
     });
   },
 
-  getTradeHistoryBars(tradeHistory, resolution, from, to, last) {
+  getTradeHistoryBars(tradeHistory, resolution, from, to) {
     const bars = [];
     const trades = tradeHistory.trades.slice(0);
     const apiBuckets = tradeHistory.apiBuckets;
@@ -211,10 +211,10 @@ export default {
     resolution *= 1000;
 
     let currentBar = {
-      open: last,
-      close: last,
-      high: last,
-      low: last,
+      open: 0,
+      close: 0,
+      high: 0,
+      low: 0,
       volume: 0,
     };
 
@@ -225,6 +225,47 @@ export default {
     let barPointer = barFrom;
     let bucket = null;
     let trade = null;
+
+    let needCurrentBar = false;
+    if (apiBuckets.length > 0) {
+      bucket = apiBuckets[0];
+      const bucketTime = bucket.time * 1000;
+      // if 'from' is before the first bucket, set currentBar qualt to firstBucket,
+      if (barFrom < bucketTime) {
+        currentBar = {
+          open: bucket.open,
+          close: bucket.close,
+          high: bucket.high,
+          low: bucket.low,
+          volume: bucket.volume,
+          time: bucketTime,
+        };
+      } else {
+        bucket = _.last(apiBuckets);
+        if (from > bucket.time) {
+          // else from is greater than the last bucket, so need to set it form teh trade array
+          needCurrentBar = true;
+        } // else it is somewhere in the middle of the buckets, and will be set first time through the while loop.
+      }
+    } else {
+      needCurrentBar = true;
+    }
+
+    if (needCurrentBar && trades.length) {
+      for (let tradeIndex = trades.length - 1; tradesIndex > 0; tradesIndex -= 1) {
+        trade = trades[tradeIndex];
+        currentBar = {
+          open: trade.close,
+          close: trade.close,
+          high: trade.close,
+          low: trade.close,
+          volume: 0,
+        };
+        if (trade.tradeTime <= from) {
+          break;
+        }
+      }
+    }
 
     while (barPointer < barTo) {
       currentBar = {
@@ -1733,7 +1774,7 @@ export default {
         if (markedGasBalance.plus(markedNeoBalance).isEqualTo(0)) {
           // nothing in progress to withdraw.
           if (DBG_LOG) console.log('No NEO or GAS withdraws in progress.');
-          return;
+          if (!DBG_LOG) return;
         }
 
         if (DBG_LOG) console.log(`Detected marked amounts GAS: ${markedGasBalance} NEO: ${markedNeoBalance}`);
