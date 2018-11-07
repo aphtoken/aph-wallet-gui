@@ -11,11 +11,18 @@
              v-for="currency in baseCurrencies" :key="currency">{{ currency }}</div>
       </div>
       <div class="table">
+        <div class="market-selection-header">
+            <div>{{ $t('name') }}</div>
+            <div>{{ $t('volume') }}</div>
+        </div>
         <div class="body">
           <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null" 
             :class="['row', {selected: $store.state.currentMarket && market.marketName === $store.state.currentMarket.marketName }]"
                v-for="market in filteredMarkets" :key="market.marketName">
-            <div class="cell">{{ market.marketName }}</div>
+            <div class="cell flex-horizontal">
+              <div class="cell">{{ market.quoteCurrency }}</div>
+              <div class="cell" v-if="market.isOpen === true">{{ $formatMoney(market.volume) }}</div>
+            </div>
             <div class="cell disabled" v-if="market.isOpen === false">[{{$t('tradingDisabled')}}]</div>
           </div>
         </div>
@@ -44,9 +51,27 @@ export default {
     },
 
     filteredMarkets() {
-      return this.$store.state.markets.filter((market) => {
-        return market.baseCurrency === this.baseCurrency;
-      });
+      try {
+        let markets = this.$store.state.markets.filter((market) => {
+          return market.baseCurrency === this.baseCurrency;
+        });
+
+        if (!markets || !markets.length) return markets;
+
+        markets.forEach((market) => {
+          const baseAsset = this.$services.neo.getHolding(market.baseAssetId);
+          const unitValue = baseAsset ? baseAsset.unitValue : 0;
+          market.volume = _.get(this.$store.state.tickerDataByMarket, `${market.marketName}.baseVolume`) * unitValue;
+        });
+
+        markets = _.orderBy(markets, 'volume', 'desc');
+
+        return markets;
+      } catch (e) {
+        console.log(e);
+      }
+
+      return null;
     },
 
     iconName() {
@@ -133,6 +158,7 @@ export default {
     margin-top: $space;
     position: absolute;
     width: 100%;
+    border: $border-width solid $background;
 
     .base-currencies {
       display: flex;
@@ -164,9 +190,22 @@ export default {
     .table{
       @extend %dex-table-flex;
 
+      .market-selection-header {
+        display: flex;
+        border-bottom: 1px solid $purple;
+        padding: 0 $space;
+
+        > div {
+          flex: 1;
+          font-size: toRem(16px);
+          line-height: toRem(36px);
+          height: toRem(36px);
+        }
+      }
+
       .body {
         font-size: 0;
-        max-height: toRem(200px);
+        max-height: toRem(540px);
         overflow: auto;
 
         .row {
@@ -174,21 +213,20 @@ export default {
 
           cursor: pointer;
           font-size: 0;
-          height: $button-height;
-          line-height: $button-height;
+          height: toRem(32px);
+          line-height: toRem(34px);
           padding: 0 $space;
+          border: 0;
+          margin-top: 0 !important;
 
           .cell {
+            display: flex;
             font-size: toRem(16px);
             
             &.disabled {
               font-size: toRem(11px);
               text-align: right;
             }
-          }
-
-          & + .row {
-            margin-top: 0;
           }
 
           &:hover,
@@ -233,15 +271,30 @@ export default {
     > .menu {
       @extend %light-background;
 
+      border: $border-width solid $select-border-night !important;
+
       .table {
+        .market-selection-header {
+          > div {
+            color: white;
+          }
+        }
+
         .body {
           .row {
-            background: transparent !important;
+            background: transparent;
             color: white;
 
             &:hover,
             &.selected {
-              color: $grey;
+              background: $purple;
+              color: #FFF;
+            }
+
+            &:last-child {
+              border-bottom-left-radius: $border-radius;
+              border-bottom-right-radius: $border-radius;
+              border-bottom:0;
             }
           }
         }

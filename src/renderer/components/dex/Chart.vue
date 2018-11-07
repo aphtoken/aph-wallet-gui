@@ -303,6 +303,8 @@ export default {
             "symbolWatermarkProperties.transparency": 90,
             "scalesProperties.textColor": "#AAA",
             "scalesProperties.backgroundColor": "#18152c",
+            "paneProperties.topMargin": 15,
+            "paneProperties.bottomMargin": 10,
           };
 
           settings.toolbar_bg = '#18152c';
