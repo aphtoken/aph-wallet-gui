@@ -200,7 +200,7 @@ export default {
 
       .market-selection-header {
         display: flex;
-        border-bottom: 1px solid $purple;
+        border-bottom: 3px solid $purple;
         padding: 0 $space;
 
         > div {
