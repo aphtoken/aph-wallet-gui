@@ -51,19 +51,27 @@ export default {
     },
 
     filteredMarkets() {
-      let markets = this.$store.state.markets.filter((market) => {
-        return market.baseCurrency === this.baseCurrency;
-      });
+      try {
+        let markets = this.$store.state.markets.filter((market) => {
+          return market.baseCurrency === this.baseCurrency;
+        });
 
-      markets.forEach((market) => {
-        const baseAsset = this.$services.neo.getHolding(market.baseAssetId);
-        const unitValue = baseAsset ? baseAsset.unitValue : 0;
-        market.volume = _.get(this.$store.state.tickerDataByMarket, `${market.marketName}.baseVolume`) * unitValue;
-      });
+        if (!markets || !markets.length) return markets;
 
-      markets = _.orderBy(markets, 'volume', 'desc');
+        markets.forEach((market) => {
+          const baseAsset = this.$services.neo.getHolding(market.baseAssetId);
+          const unitValue = baseAsset ? baseAsset.unitValue : 0;
+          market.volume = _.get(this.$store.state.tickerDataByMarket, `${market.marketName}.baseVolume`) * unitValue;
+        });
 
-      return markets;
+        markets = _.orderBy(markets, 'volume', 'desc');
+
+        return markets;
+      } catch (e) {
+        console.log(e);
+      }
+
+      return null;
     },
 
     iconName() {
@@ -276,7 +284,7 @@ export default {
           .row {
             background: transparent;
             color: white;
-            
+
             &:hover,
             &.selected {
               background: $purple;
