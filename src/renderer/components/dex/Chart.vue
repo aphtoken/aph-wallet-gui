@@ -210,13 +210,12 @@ export default {
               }).then(() => {
                 // Compute and fetch bars on newly populated apiBuckets
                 const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
-                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolutionInMinutes, from, to, this.lastPrice) :
+                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolutionInMinutes, from, to) :
                   [];
 
                 if (bars.length === 0) {
-                  onDataCallback(bars, { noData: true })
+                  onDataCallback(bars, { noData: true, nextTime: (to + resolutionInMinutes) * 1000 })
                 } else {
-                  this.lastPrice = bars[bars.length - 1].close;
                   onDataCallback(bars, { noData: false })
                 }
               });
