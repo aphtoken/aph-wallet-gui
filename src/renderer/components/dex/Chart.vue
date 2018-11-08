@@ -106,7 +106,21 @@ export default {
         }
         this.styleMode = this.$store.state.styleMode;
       });
-    this.loadChart();
+
+    const timeout = millis => new Promise(res => setTimeout(res, millis));
+
+    const loadChartPromise = new Promise(async (resolve) => {
+      /* eslint-disable no-await-in-loop */
+      while (!this.$store.state.currentMarket) {
+        await timeout(100);
+      }
+      /* eslint-enable no-await-in-loop */
+      resolve();
+    });
+
+    loadChartPromise.then(() => {
+      this.loadChart();
+    });
   },
 
   beforeDestroy() {
