@@ -245,22 +245,44 @@ export default {
         if (from > bucket.time) {
           // else from is greater than the last bucket, so need to set it form teh trade array
           needCurrentBar = true;
-        } // else it is somewhere in the middle of the buckets, and will be set first time through the while loop.
+        } else if (DBG_LOG) console.log('Not setting current bar price due to in middle of buckets');
+        // else somewhere in the middle of the buckets, and will be set first time through the while loop.
       }
+
+      bucket = apiBuckets[0];
+      while (bucket) {
+        if (bucket.time > from - 240) {
+          if (currentBar.time === undefined) {
+            console.log('Setting need current bar.');
+            needCurrentBar = true;
+          }
+          break;
+        }
+        apiBucketsIndex += 1;
+        bucket = (apiBucketsIndex < apiBuckets.length) ? apiBuckets[apiBucketsIndex] : null;
+      }
+      if (apiBucketsIndex >= apiBuckets.length && currentBar.time === undefined) {
+        if (DBG_LOG) console.log('Setting needCurrentBar.');
+        needCurrentBar = true;
+      } else if (DBG_LOG) console.log(`last bucket has time ${bucket.time}`);
+
+      if (DBG_LOG) console.log(`${from} apiBucketsIndex: ${apiBucketsIndex} ${currentBar.time}`);
     } else {
       needCurrentBar = true;
     }
 
     if (needCurrentBar && trades.length) {
-      for (let tradeIndex = trades.length - 1; tradesIndex > 0; tradesIndex -= 1) {
+      if (DBG_LOG) console.log('Setting current bar from trades');
+      for (let tradeIndex = trades.length - 1; tradeIndex > 0; tradeIndex -= 1) {
         trade = trades[tradeIndex];
         currentBar = {
-          open: trade.close,
-          close: trade.close,
-          high: trade.close,
-          low: trade.close,
+          open: trade.price,
+          close: trade.price,
+          high: trade.price,
+          low: trade.price,
           volume: 0,
         };
+        if (DBG_LOG) console.log(`set current bar price ${currentBar.close}`);
         if (trade.tradeTime <= from) {
           break;
         }
