@@ -251,9 +251,9 @@ export default {
 
       bucket = apiBuckets[0];
       while (bucket) {
-        if (bucket.time > from - 240) {
+        if (bucket.time > from - (resolution * 3)) {
           if (currentBar.time === undefined) {
-            console.log('Setting need current bar.');
+            if (DBG_LOG) console.log('Setting need current bar.');
             needCurrentBar = true;
           }
           break;
