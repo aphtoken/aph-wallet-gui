@@ -184,6 +184,11 @@ export default {
           volume_precision: 5,
         };
 
+        const getResolutionInMinutes = (resolution) => 
+          resolution === 'D' ? 60 * 24 :
+          resolution === 'W' ? 7 * 60 * 24 :
+          Number(resolution);
+
         const datafeed = {
           onReady: (callback) => {
             setTimeout(() => {
@@ -212,9 +217,7 @@ export default {
           },
 
           getBars: (_symbolInfo, resolution, from, to, onDataCallback, onErrorCallback) => {
-            const resolutionInMinutes = resolution === 'D' ? 60 * 24 :
-                resolution === 'W' ? 7 * 60 * 24 :
-                Number(resolution);
+            const resolutionInMinutes = getResolutionInMinutes(resolution);
 
             this.$store.dispatch('fetchTradesBucketed', {
               marketName: this.$store.state.currentMarket.marketName,
@@ -236,6 +239,8 @@ export default {
           },
 
           subscribeBars: (_symbolInfo, resolution, onRealtimeCallback, subscriberUID, onResetCacheNeededCallback) => {
+            const resolutionInMinutes = getResolutionInMinutes(resolution);
+
             let lastBarTime = NaN;
             if (this.barsSubscription) {
               clearInterval(this.barsSubscription);
@@ -246,7 +251,7 @@ export default {
                 return;
               }
               const to = Math.round(new Date().valueOf() / 1000);
-              const from = to - 120;
+              const from = to - (resolutionInMinutes * 60);
 
               const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
                   this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice) :
