@@ -272,7 +272,7 @@ export default {
               if (isNewBar && bars.length >= 2) {
                 const previousBar = bars[bars.length - 2];
                 onRealtimeCallback(previousBar);
-              } 
+              }
 
               lastBarTime = lastBar.time;
 
