@@ -341,10 +341,17 @@ async function fetchTradeHistory({ commit }, { marketName, isRequestSilent }) {
 
   try {
     const tradeHistoryPromise = dex.fetchTradeHistory(marketName);
-    const tradesBucketPromise = dex.fetchTradesBucketed(marketName);
+    let tradesBucketPromise;
+
+    if (!isRequestSilent) {
+      tradesBucketPromise = dex.fetchTradesBucketed(marketName);
+    }
 
     history = await tradeHistoryPromise;
-    history.apiBuckets = await tradesBucketPromise;
+
+    if (tradesBucketPromise) {
+      history.apiBuckets = await tradesBucketPromise;
+    }
 
     commit('setTradeHistory', history);
     commit('endRequest', { identifier: 'fetchTradeHistory' });
