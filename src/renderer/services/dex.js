@@ -221,7 +221,7 @@ export default {
     let apiBucketsIndex = 0;
     let tradesIndex = 0;
     const barFrom = (from * 1000);
-    const barTo = (to * 1000) + resolution;
+    const barTo = (to * 1000);
     let barPointer = barFrom;
     let bucket = null;
     let trade = null;
@@ -330,7 +330,7 @@ export default {
         while (trade
           && trade.tradeTime * 1000 >= barPointer
           && trade.tradeTime * 1000 < barPointer + resolution) {
-          currentBar.volume += trade.quantity;
+          currentBar.volume += Number(trade.quantity);
           currentBar.close = trade.price;
 
           if (currentBar.open === 0) currentBar.open = trade.price;
