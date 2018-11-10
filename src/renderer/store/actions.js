@@ -334,17 +334,23 @@ async function fetchTradesBucketed({ commit }, { marketName, interval, from, to 
   }
 }
 
-async function fetchTradeHistory({ commit }, { marketName, isRequestSilent }) {
+async function fetchTradeHistory({ commit, state }, { marketName, isRequestSilent }) {
   let history;
   commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
     { identifier: 'fetchTradeHistory' });
 
   try {
     const tradeHistoryPromise = dex.fetchTradeHistory(marketName);
-    const tradesBucketPromise = dex.fetchTradesBucketed(marketName);
+    let tradesBucketPromise;
+
+    if (!isRequestSilent) {
+      tradesBucketPromise = dex.fetchTradesBucketed(marketName);
+    }
 
     history = await tradeHistoryPromise;
-    history.apiBuckets = await tradesBucketPromise;
+
+    history.apiBuckets = tradesBucketPromise ?
+      await tradesBucketPromise : state.tradeHistory.apiBuckets;
 
     commit('setTradeHistory', history);
     commit('endRequest', { identifier: 'fetchTradeHistory' });

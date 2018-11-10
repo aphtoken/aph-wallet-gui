@@ -231,7 +231,7 @@ export default {
                   [];
 
                 if (bars.length === 0) {
-                  onDataCallback(bars, { noData: true, nextTime: (to + resolutionInMinutes) * 1000 })
+                  onDataCallback(bars, { noData: true, nextTime: (to + (resolutionInMinutes * 60)) })
                 } else {
                   onDataCallback(bars, { noData: false })
                 }
@@ -251,10 +251,10 @@ export default {
                 return;
               }
               const to = Math.round(new Date().valueOf() / 1000);
-              const from = to - (resolutionInMinutes * 60);
+              const from = to - (resolutionInMinutes * 60 * 2); //  back 2x resolutions
 
               const bars = this.$store.state.tradeHistory && this.$store.state.tradeHistory.getBars ?
-                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to, this.lastPrice) :
+                  this.$store.state.tradeHistory.getBars(this.$store.state.tradeHistory, resolution, from, to) :
                   [];
 
               if (bars.length === 0) {
