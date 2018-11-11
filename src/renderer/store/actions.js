@@ -288,6 +288,29 @@ async function fetchMarkets({ commit }, { done }) {
   }
 }
 
+async function fetchOrderHistory({ state, commit }, { isRequestSilent }) {
+  const orderHistory = state.orderHistory;
+  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
+    { identifier: 'fetchOrderHistory' });
+
+  try {
+    if (orderHistory && orderHistory.length > 0
+      && orderHistory[0].updated) {
+      const newOrders = await dex.fetchOrderHistory(0, orderHistory[0].updated, 'ASC');
+      commit('addToOrderHistory', newOrders);
+    } else {
+      const orders = await dex.fetchOrderHistory();
+      commit('setOrderHistory', orders);
+    }
+
+    commit('endRequest', { identifier: 'fetchOrderHistory' });
+  } catch (message) {
+    alerts.networkException(message);
+    commit('failRequest', { identifier: 'fetchOrderHistory', message });
+  }
+}
+
+
 async function fetchRecentTransactions({ commit }) {
   const currentNetwork = network.getSelectedNetwork();
   const currentWallet = wallets.getCurrentWallet();
@@ -505,28 +528,6 @@ function openSavedWallet({ commit }, { name, passphrase, done }) {
         commit('failRequest', { identifier: 'openSavedWallet', message: e });
       });
   }, timeouts.NEO_API_CALL);
-}
-
-async function fetchOrderHistory({ state, commit }, { isRequestSilent }) {
-  const orderHistory = state.orderHistory;
-  commit(isRequestSilent ? 'startSilentRequest' : 'startRequest',
-    { identifier: 'fetchOrderHistory' });
-
-  try {
-    if (orderHistory && orderHistory.length > 0
-      && orderHistory[0].updated) {
-      const newOrders = await dex.fetchOrderHistory(0, orderHistory[0].updated, 'ASC');
-      commit('addToOrderHistory', newOrders);
-    } else {
-      const orders = await dex.fetchOrderHistory();
-      commit('setOrderHistory', orders);
-    }
-
-    commit('endRequest', { identifier: 'fetchOrderHistory' });
-  } catch (message) {
-    alerts.networkException(message);
-    commit('failRequest', { identifier: 'fetchOrderHistory', message });
-  }
 }
 
 async function pingSocket({ state, commit }) {
