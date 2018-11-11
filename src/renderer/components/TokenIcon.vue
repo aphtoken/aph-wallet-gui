@@ -1,6 +1,6 @@
 <template>
   <div class="aph-token-icon">
-    <img :src="imageUrl" @load="imageLoadOnComplete" class="image-preloader"/>
+    <img :src="imageUrl" v-if="symbolRequiresFetch" @load="imageLoadOnComplete" class="image-preloader"/>
     <img src="~@/assets/img/token-icons/APH.png" v-if="symbol === 'APH'">
     <img src="~@/assets/img/token-icons/GAS.png" v-else-if="symbol === 'GAS'">
     <img src="~@/assets/img/token-icons/NEO.png" v-else-if="symbol === 'NEO'">
@@ -21,6 +21,9 @@ export default {
   computed: {
     imageUrl() {
       return `https://s3.us-east-2.amazonaws.com/aphelion-public-artifacts/TokenLogos/${this.symbol.toLowerCase()}.png`;
+    },
+    symbolRequiresFetch() {
+      return this.symbol !== 'APH' && this.symbol !== 'GAS' && this.symbol !== 'NEO';
     },
   },
 
