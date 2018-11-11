@@ -13,7 +13,8 @@
       <div class="table">
         <div class="market-selection-header">
             <div>{{ $t('name') }}</div>
-            <div>{{ $t('volume') }}</div>
+            <div>{{ $t('vol') }}</div>
+            <div>{{ $t('vol') }} <span class="small">{{ baseCurrency }}</span></div>
         </div>
         <div class="body">
           <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null" 
@@ -21,7 +22,10 @@
                v-for="market in filteredMarkets" :key="market.marketName">
             <div class="cell flex-horizontal">
               <div class="cell">{{ market.quoteCurrency }}</div>
-              <div class="cell" v-if="market.isOpen === true">{{ $formatMoney(market.volume) }}</div>
+              <template v-if="market.isOpen === true">
+                <div class="cell">{{ $formatMoney(market.volume, null, 'N/A', true) }}</div>
+                <div class="cell">{{ $abbreviateNumber(market.baseVolume) }}</div>
+              </template>
             </div>
             <div class="cell disabled" v-if="market.isOpen === false">[{{$t('tradingDisabled')}}]</div>
           </div>
@@ -49,7 +53,9 @@ export default {
     baseCurrencies() {
       return _.uniq(_.map(this.$store.state.markets, 'baseCurrency'));
     },
-
+    currencySymbol() {
+      return this.$services.settings.getCurrencySymbol();
+    },
     filteredMarkets() {
       try {
         let markets = this.$store.state.markets.filter((market) => {
@@ -62,7 +68,8 @@ export default {
         markets.forEach((market) => {
           const baseAsset = this.$services.neo.getHolding(market.baseAssetId);
           const unitValue = baseAsset ? baseAsset.unitValue : 0;
-          market.volume = _.get(this.$store.state.tickerDataByMarket, `${market.marketName}.baseVolume`) * unitValue;
+          market.baseVolume = _.get(this.$store.state.tickerDataByMarket, `${market.marketName}.baseVolume`);
+          market.volume = market.baseVolume * unitValue;
           if (market.volume > 0) {
             nonZeroVolumeItems += 1;
           }
@@ -208,6 +215,10 @@ export default {
           font-size: toRem(16px);
           line-height: toRem(36px);
           height: toRem(36px);
+
+          .small {
+            font-size: 70%;
+          }
         }
       }
 
@@ -234,6 +245,7 @@ export default {
             &.disabled {
               font-size: toRem(11px);
               text-align: right;
+              flex: 2;
             }
           }
 

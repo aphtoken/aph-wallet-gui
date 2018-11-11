@@ -74,7 +74,8 @@ export default {
         / this.tickerData.open24hr) * 10000) / 100;
     },
     change24Hour() {
-      if (this.$isPending('fetchTradeHistory')) {
+      if (this.$isPending('fetchTradeHistory') &&
+        !_.get(this.$store.state.requests, 'fetchTradeHistory').isSilent) {
         return 0;
       }
 
