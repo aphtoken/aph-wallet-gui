@@ -69,10 +69,161 @@
     </div>
   </section>
 </template>
+
 <script>
 import { BigNumber } from 'bignumber.js';
 
 export default {
+  beforeDestroy() {
+    this.storeUnwatch();
+    this.tradeHistoryUnwatch();
+    clearInterval(this.barsSubscription);
+  },
+
+  computed: {
+    askGroups() {
+      try {
+        const groups = [];
+        const size = this.groupSize;
+        let currentUpper = this.middle.plus(size);
+
+        while (groups.length < 5) {
+          const currentGroup = {
+            priceUpper: currentUpper,
+            priceLower: currentUpper.minus(size),
+            priceLabel: this.$formatNumber(currentUpper),
+            quantity: new BigNumber(0),
+          };
+
+          this.$store.state.orderBook.asks.forEach((ask) => {
+            if (ask.price.isGreaterThanOrEqualTo(currentGroup.priceLower)
+              && ask.price.isLessThan(currentGroup.priceUpper)) {
+              currentGroup.quantity = currentGroup.quantity.plus(ask.quantity);
+            }
+          });
+
+          groups.push(currentGroup);
+          currentUpper = this.roundToDepthPrecision(currentUpper.plus(size));
+        }
+
+        let totalQuantity = new BigNumber(0);
+        let runningQuantity = new BigNumber(0);
+        groups.forEach((group) => {
+          totalQuantity = totalQuantity.plus(group.quantity);
+        });
+        groups.forEach((group) => {
+          group.runningQuantity = runningQuantity = runningQuantity.plus(group.quantity);
+          group.quantityRatio = runningQuantity.dividedBy(totalQuantity);
+        });
+
+        return groups.reverse();
+      } catch (e) {
+        console.log(e);
+        return [];
+      }
+    },
+
+    bidGroups() {
+      try {
+        const groups = [];
+        const size = this.groupSize;
+        let currentLower = this.middle.minus(size);
+
+        while (groups.length < 5) {
+          const currentGroup = {
+            priceLabel: this.$formatNumber(currentLower),
+            priceLower: currentLower,
+            priceUpper: currentLower.plus(size),
+            quantity: new BigNumber(0),
+          };
+
+          this.$store.state.orderBook.bids.forEach((bid) => {
+            if (bid.price.isGreaterThan(currentGroup.priceLower)
+              && bid.price.isLessThanOrEqualTo(currentGroup.priceUpper)) {
+              currentGroup.quantity = currentGroup.quantity.plus(bid.quantity);
+            }
+          });
+          groups.push(currentGroup);
+          currentLower = this.roundToDepthPrecision(currentLower.minus(size));
+        }
+
+        let totalQuantity = new BigNumber(0);
+        let runningQuantity = new BigNumber(0);
+        groups.forEach((group) => {
+          totalQuantity = totalQuantity.plus(group.quantity);
+        });
+        groups.forEach((group) => {
+          group.runningQuantity = runningQuantity = runningQuantity.plus(group.quantity);
+          group.quantityRatio = runningQuantity.dividedBy(totalQuantity);
+        });
+
+        return groups.reverse();
+      } catch (e) {
+        console.log(e);
+        return [];
+      }
+    },
+
+    groupSize() {
+      const bids = this.$store.state.orderBook.bids;
+      const asks = this.$store.state.orderBook.asks;
+
+      // TODO: Re-visit math used here for determining the groupSize.
+      let bidRange = 0;
+      if (bids.length > 1 && asks.length > 0) {
+        bidRange = Math.abs(this.middle - bids[bids.length - 1].price);
+      }
+
+      let askRange = 0;
+      if (asks.length > 1 && bids.length > 0) {
+        askRange = Math.abs(asks[asks.length - 1].price - this.middle);
+      }
+
+      let groupSize = bidRange;
+      if (askRange < bidRange) {
+        groupSize = askRange;
+      }
+
+      this.depthPrecision = 4;
+      while (groupSize * (10 ** this.depthPrecision) < 1) {
+        this.depthPrecision += 1;
+      }
+
+      groupSize = this.roundToDepthPrecision(groupSize).dividedBy(5);
+      return groupSize;
+    },
+
+    isMarketClosed() {
+      return this.$store.state.currentMarket && this.$store.state.currentMarket.isOpen === false;
+    },
+
+    isOutOfDate() {
+      if (!this.$store.state.latestVersion) {
+        return true;
+      }
+      const currentNetworkLatestDexScriptHash = this.$store.state.currentNetwork.net === 'MainNet' ?
+        this.$store.state.latestVersion.prodExchangeScriptHash : this.$store.state.latestVersion.testExchangeScriptHash;
+      return currentNetworkLatestDexScriptHash.replace('0x', '') !== this.$store.state.currentNetwork.dex_hash;
+    },
+
+    isTradingDisabled() {
+      return this.isOutOfDate || this.isMarketClosed;
+    },
+
+    middle() {
+      const bids = this.$store.state.orderBook.bids;
+      const asks = this.$store.state.orderBook.asks;
+      if (bids.length > 0 && asks.length > 0) {
+        return bids[0].price.plus(asks[0].price).dividedBy(2);
+      } else if (bids.length > 0) {
+        return bids[0].price;
+      } else if (asks.length > 0) {
+        return asks[0].price;
+      }
+      return new BigNumber(0);
+    },
+  },
+
   data() {
     return {
       tab: 'Chart',
@@ -86,73 +237,15 @@ export default {
     };
   },
 
-  mounted() {
-    this.tradeHistoryUnwatch = this.$store.watch(
-      () => {
-        return this.$store.state.tradeHistory;
-      }, (val, oldValue) => {
-        if (!oldValue || val.marketName !== oldValue.marketName) {
-          this.loadChart();
-        }
-      });
-
-    this.styleMode = this.$store.state.styleMode;
-    this.storeUnwatch = this.$store.watch(
-      () => {
-        return this.$store.state.styleMode;
-      }, () => {
-        if (this.styleMode !== this.$store.state.styleMode) {
-          this.loadChart();
-        }
-        this.styleMode = this.$store.state.styleMode;
-      });
-
-    const timeout = millis => new Promise(res => setTimeout(res, millis));
-
-    const loadChartPromise = new Promise(async (resolve) => {
-      /* eslint-disable no-await-in-loop */
-      while (!this.$store.state.currentMarket) {
-        await timeout(100);
-      }
-      /* eslint-enable no-await-in-loop */
-      resolve();
-    });
-
-    loadChartPromise.then(() => {
-      this.loadChart();
-    });
-  },
-
-  beforeDestroy() {
-    this.storeUnwatch();
-    this.tradeHistoryUnwatch();
-    clearInterval(this.barsSubscription);
-  },
-
   methods: {
     toggleLearnMore() {
       this.$store.commit('setShowLearnMore', true);
     },
 
-    selectTab(tab) {
-      this.tab = tab;
-      if (tab === 'Chart') {
-        this.loadChart();
-      } else {
-        this.removeChart();
-      }
-    },
-
-    removeChart() {
-      const container = document.getElementById('chart-container');
-      while (container && container.hasChildNodes()) {
-        container.removeChild(container.lastChild);
-      }
-      clearInterval(this.barsSubscription);
-    },
-
     loadChart() {
       /* eslint-disable */
+      const regressionTrend = this.$t('regressionTrend'); // Fixes the `Cannot read property '_t' of undefined` error
+
       try {
         const container = document.getElementById('chart-container');
         if (!container) {
@@ -169,18 +262,18 @@ export default {
         const tradedExchange = 'Aphelion';
         const fullName = `${tradedExchange}:${symbolName}`;
         const symbolInfo = {
-          name: fullName,
           has_daily: true,
-          has_weekly_and_monthly: true,
-          has_intraday: true,
-          intraday_multipliers: ['1', '5', '15', '30', '60', '360'],
-          has_no_volume: false,
           has_empty_bars: true,
-          minmov: 1,
-          pricescale: 100000000,
+          has_intraday: true,
+          has_no_volume: false,
+          has_weekly_and_monthly: true,
+          intraday_multipliers: ['1', '5', '15', '30', '60', '360'],
           minmov2: 0,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          minmov: 1,
+          name: fullName,
+          pricescale: 100000000,
           session: '24x7',
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           volume_precision: 5,
         };
 
@@ -195,13 +288,13 @@ export default {
               callback(
                 {
                   exchanges: [],
-                  symbolsTypes: [],
-                  supports_search: false,
+                  supported_resolutions: [1, 5, 15, 30, 60, 360, '1D', '3D', '1W'],
                   supports_group_request: false,
                   supports_marks: false,
-                  supports_timescale_marks: false,
+                  supports_search: false,
                   supports_time: false,
-                  supported_resolutions: [1, 5, 15, 30, 60, 360, '1D', '3D', '1W'],
+                  supports_timescale_marks: false,
+                  symbolsTypes: [],
                 },
               )
             }, 0)
@@ -244,7 +337,7 @@ export default {
             let lastBarTime = NaN;
             if (this.barsSubscription) {
               clearInterval(this.barsSubscription);
-            } 
+            }
 
             this.barsSubscription = setInterval(() => {
               if (!this.tradingView || !this.tradingView._options) {
@@ -295,23 +388,23 @@ export default {
         }
 
         var settings = {
-          // debug: true,
-          fullscreen: false,
-          symbol: symbolName,
-          interval: '15',
+          autosize: true,
           container_id: "chart-container",
+          custom_css_url: 'styles.css',
           datafeed: datafeed,
-          library_path: 'static/charting_library/',
-          locale: "en",
-          drawings_access: { type: 'black', tools: [ { name: this.$t('regressionTrend') } ] },
+          // debug: true,
           disabled_features: [
             "use_localstorage_for_settings","header_symbol_search","header_interval_dialog_button","header_screenshot","header_undo_redo",
             "header_compare","symbol_info","display_market_status","display_market_status",
           ],
+          drawings_access: { type: 'black', tools: [ { name: regressionTrend } ] },
           enabled_features: [],
-          autosize: true,
-          custom_css_url: 'styles.css',
-		    };
+          fullscreen: false,
+          interval: '15',
+          library_path: 'static/charting_library/',
+          locale: "en",
+          symbol: symbolName,
+        };
 
         if (this.$store.state.styleMode === 'Night') {
           settings.overrides = {
@@ -345,148 +438,63 @@ export default {
       }
     },
 
+    removeChart() {
+      const container = document.getElementById('chart-container');
+      while (container && container.hasChildNodes()) {
+        container.removeChild(container.lastChild);
+      }
+      clearInterval(this.barsSubscription);
+    },
+
     roundToDepthPrecision(value) {
-      return new BigNumber(Math.round(value * Math.pow(10, this.depthPrecision)) / Math.pow(10, this.depthPrecision));
+      return new BigNumber(Math.round(value * (10 ** this.depthPrecision)) / (10 ** this.depthPrecision));
+    },
+
+    selectTab(tab) {
+      this.tab = tab;
+      if (tab === 'Chart') {
+        this.loadChart();
+      } else {
+        this.removeChart();
+      }
     },
   },
 
-  computed: {
-    isTradingDisabled() {
-      return this.isOutOfDate || this.isMarketClosed;
-    },
+  mounted() {
+    this.tradeHistoryUnwatch = this.$store.watch(
+      () => {
+        return this.$store.state.tradeHistory;
+      }, (val, oldValue) => {
+        if (!oldValue || val.marketName !== oldValue.marketName) {
+          this.loadChart();
+        }
+      });
 
-    isOutOfDate() {
-      if (!this.$store.state.latestVersion) {
-        return true;
+    this.styleMode = this.$store.state.styleMode;
+    this.storeUnwatch = this.$store.watch(
+      () => {
+        return this.$store.state.styleMode;
+      }, () => {
+        if (this.styleMode !== this.$store.state.styleMode) {
+          this.loadChart();
+        }
+        this.styleMode = this.$store.state.styleMode;
+      });
+
+    const timeout = millis => new Promise(res => setTimeout(res, millis));
+
+    const loadChartPromise = new Promise(async (resolve) => {
+      /* eslint-disable no-await-in-loop */
+      while (!this.$store.state.currentMarket) {
+        await timeout(100);
       }
-      const currentNetworkLatestDexScriptHash = this.$store.state.currentNetwork.net === 'MainNet' ?
-        this.$store.state.latestVersion.prodExchangeScriptHash : this.$store.state.latestVersion.testExchangeScriptHash;
-      return currentNetworkLatestDexScriptHash.replace('0x', '') !== this.$store.state.currentNetwork.dex_hash;
-    },
+      /* eslint-enable no-await-in-loop */
+      resolve();
+    });
 
-    isMarketClosed() {
-      return this.$store.state.currentMarket && this.$store.state.currentMarket.isOpen === false;
-    },
-
-    bidGroups() {
-      try {
-        const groups = [];
-        const size = this.groupSize;
-        let currentLower = this.middle.minus(size);
-
-        while (groups.length < 5) {
-          let currentGroup = {
-            priceUpper: currentLower.plus(size),
-            priceLower: currentLower,
-            priceLabel: this.$formatNumber(currentLower),
-            quantity: new BigNumber(0),
-          };
-
-          this.$store.state.orderBook.bids.forEach((l) => {
-            if (l.price.isGreaterThan(currentGroup.priceLower) && l.price.isLessThanOrEqualTo(currentGroup.priceUpper)) {
-              currentGroup.quantity = currentGroup.quantity.plus(l.quantity);
-            }
-          });
-          groups.push(currentGroup);
-          currentLower = this.roundToDepthPrecision(currentLower.minus(size));
-        };
-
-        let totalQuantity = new BigNumber(0);
-        let runningQuantity = new BigNumber(0);
-        groups.forEach((l) => {
-          totalQuantity = totalQuantity.plus(l.quantity);
-        });
-        groups.forEach((l) => {
-          l.runningQuantity = runningQuantity = runningQuantity.plus(l.quantity);
-          l.quantityRatio = runningQuantity.dividedBy(totalQuantity);
-        });
-
-        return groups.reverse();
-      } catch (e) {
-        console.log(e);
-        return [];
-      }
-    },
-    askGroups() {
-      try {
-        const groups = [];
-        const size = this.groupSize;
-        let currentUpper = this.middle.plus(size);
-
-        while (groups.length < 5) {
-          let currentGroup = {
-            priceUpper: currentUpper,
-            priceLower: currentUpper.minus(size),
-            priceLabel: this.$formatNumber(currentUpper),
-            quantity: new BigNumber(0),
-          };
-
-          this.$store.state.orderBook.asks.forEach((l) => {
-            if (l.price.isGreaterThanOrEqualTo(currentGroup.priceLower) && l.price.isLessThan(currentGroup.priceUpper)) {
-              currentGroup.quantity = currentGroup.quantity.plus(l.quantity);
-            }
-          });
-
-          groups.push(currentGroup);
-          currentUpper = this.roundToDepthPrecision(currentUpper.plus(size));
-        };
-
-        let totalQuantity = new BigNumber(0);
-        let runningQuantity = new BigNumber(0);
-        groups.forEach((l) => {
-          totalQuantity = totalQuantity.plus(l.quantity);
-        });
-        groups.forEach((l) => {
-          l.runningQuantity = runningQuantity = runningQuantity.plus(l.quantity);
-          l.quantityRatio = runningQuantity.dividedBy(totalQuantity);
-        });
-
-        return groups.reverse();
-      } catch (e) {
-        console.log(e);
-        return [];
-      }
-    },
-    middle() {
-      const bids = this.$store.state.orderBook.bids;
-      const asks = this.$store.state.orderBook.asks;
-      if (bids.length > 0 && asks.length > 0) {
-        return bids[0].price.plus(asks[0].price).dividedBy(2);
-      } else if (bids.length > 0) {
-        return bids[0].price;
-      } else if (asks.length > 0)  {
-        return asks[0].price;
-      }
-      return new BigNumber(0);
-    },
-    groupSize() {
-      const bids = this.$store.state.orderBook.bids;
-      const asks = this.$store.state.orderBook.asks;
-
-      // TODO: Re-visit math used here for determining the groupSize.
-      let bidRange = 0;
-      if (bids.length > 1 && asks.length > 0) {
-        bidRange = Math.abs(this.middle - bids[bids.length - 1].price);
-      }
-
-      let askRange = 0;
-      if (asks.length > 1 && bids.length > 0) {
-        askRange = Math.abs(asks[asks.length - 1].price - this.middle);
-      }
-
-      let groupSize = bidRange;
-      if (askRange < bidRange) {
-        groupSize = askRange;
-      }
-
-      this.depthPrecision = 4;
-      while (groupSize * Math.pow(10, this.depthPrecision) < 1) {
-        this.depthPrecision += 1;
-      }
-
-      groupSize = this.roundToDepthPrecision(groupSize).dividedBy(5);
-      return groupSize;
-    },
+    loadChartPromise.then(() => {
+      this.loadChart();
+    });
   },
 };
 </script>
