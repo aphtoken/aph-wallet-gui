@@ -372,7 +372,10 @@ export default {
                 pickedInputs.splice(i, 1);
                 pickedUnspents.splice(i, 1);
                 quantitySumOfPickedInputs = quantitySumOfPickedInputs.minus(pickedUnspent.value);
-                if (DBG_LOG) console.log(`-$ removed input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(pickedUnspent)}`);
+                if (DBG_LOG) {
+                  console.log(`-$ removed input to use for withdraw total: ${quantitySumOfPickedInputs} `
+                    + `unspent: ${JSON.stringify(pickedUnspent)}`);
+                }
                 isDonePicking = false;
                 return true;
               }
@@ -389,7 +392,10 @@ export default {
             prevHash: currentUnspent.txid,
             prevIndex: currentUnspent.index,
           });
-          if (DBG_LOG) console.log(`$ added input to use for withdraw total: ${quantitySumOfPickedInputs} unspent: ${JSON.stringify(currentUnspent)}`);
+          if (DBG_LOG) {
+            console.log(`$ added input to use for withdraw total: ${quantitySumOfPickedInputs} `
+              + `unspent: ${JSON.stringify(currentUnspent)}`);
+          }
           return false;
         });
 
@@ -1122,11 +1128,10 @@ export default {
 
             const history = {
               date: res.data.timestamp,
+              getBars: this.getTradeHistoryBars,
               marketName,
               trades: res.data.trades,
-              getBars: this.getTradeHistoryBars,
             };
-
             resolve(history);
           })
           .catch((e) => {
@@ -1138,7 +1143,7 @@ export default {
     });
   },
 
-  fetchTradesBucketed(marketName, binSize = 1, from = null, to = null) {
+  fetchTradesBucketed(marketName, binSize = 1, from, to) {
     return new Promise((resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -1569,7 +1574,6 @@ export default {
     }
     return bars;
   },
-
 
   async getWithdrawInProgressBalance(assetId) {
     const currentWallet = wallets.getCurrentWallet();
@@ -2723,7 +2727,7 @@ export default {
     });
   },
   isSystemAssetWithdrawInProgress() {
-    const systemWithdrawStep = _.get(store.state, 'systemWithdraw.step');
-    return systemWithdrawStep >= 0 && systemWithdrawStep < 5;
+    const systemWithdraw = store.state.systemWithdraw;
+    return systemWithdraw && systemWithdraw.step >= 0 && systemWithdraw.step < 5 && !systemWithdraw.error;
   },
 };
