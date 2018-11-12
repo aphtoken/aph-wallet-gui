@@ -18,7 +18,7 @@
         </div>
         <div class="body">
           <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null" 
-            :class="['row', {selected: $store.state.currentMarket && market.marketName === $store.state.currentMarket.marketName }]"
+            :class="['row tiled', {selected: $store.state.currentMarket && market.marketName === $store.state.currentMarket.marketName }]"
                v-for="market in filteredMarkets" :key="market.marketName">
             <div class="cell flex-horizontal">
               <div class="cell">{{ market.quoteCurrency }}</div>
@@ -251,11 +251,15 @@ export default {
 
           &:hover,
           &.selected {
-            background: $background;
+            background: $background !important;
           }
 
           &.selected {
             cursor: default;
+          }
+
+          &:nth-child(even) {
+            background: #fdfdfc;
           }
         }
       }
@@ -307,7 +311,7 @@ export default {
 
             &:hover,
             &.selected {
-              background: $purple;
+              background: $purple !important;
               color: #FFF;
             }
 
@@ -315,6 +319,10 @@ export default {
               border-bottom-left-radius: $border-radius;
               border-bottom-right-radius: $border-radius;
               border-bottom:0;
+            }
+
+            &:nth-child(even) {
+              background: $background-night-light;
             }
           }
         }

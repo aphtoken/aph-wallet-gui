@@ -793,6 +793,7 @@ export default {
     }
     .aph-input {
       border-color: $background;
+      margin-top: $space-sm;
 
       &.focused {
         .border {
@@ -890,10 +891,6 @@ export default {
           border-bottom: toRem(2px) solid $purple-hover;
         }
       }
-    }
-
-    .quantity {
-      margin-top: $space-sm;
     }
   }
 

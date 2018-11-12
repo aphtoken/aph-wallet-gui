@@ -13,7 +13,6 @@
         <div class="name">{{ $store.state.statsToken.name }}</div>
         <div class="amount">{{ formattedAmount }}<span class="currency">{{ $store.state.statsToken.symbol }}</span></div>
         <div class="value">{{ $formatMoney($store.state.statsToken.totalValue, null, `${$store.state.currencySymbol }0.00`) }}<span class="currency">{{ $store.state.currency }}</span></div>
-        <claim-gas-button v-if="$store.state.statsToken.availableToClaim"></claim-gas-button>
       </div>
     </div>
     <div class="footer">
@@ -145,10 +144,6 @@ export default {
         }
       }
 
-      .claim-gas-button {
-        margin-top: $space;
-      }
-
       &.small {
         .amount {
           font-size: toRem(22px);
@@ -181,10 +176,6 @@ export default {
           .currency {
             font-size: toRem(16px);
           }
-        }
-
-        .claim-gas-button {
-          margin-top: $space-sm;
         }
       }
     }
