@@ -11,7 +11,10 @@
         <div class="day-values">
           <div class="row">
             <div class="label">{{$t('vol')}}</div>
-            <div class="value">{{ tickerData.quoteVolume }}</div>
+            <div class="value">
+              <div>{{ $formatMoney(tickerData.quoteVolume * basePriceConverted) }}</div>
+              <div class="quote-volume">{{ $abbreviateNumber(tickerData.quoteVolume) }} ({{ storeStateCurrentMarket.baseCurrency }})</div>
+            </div>
           </div>
           <div class="row">
             <div class="label">{{$t('OPEN')}}</div>
@@ -32,7 +35,7 @@
             {{ $formatTokenAmount(close24Hour) }}
           </div>
           <div class="base-price-converted">
-            {{ $formatMoney(close24Hour * baseCurrencyUnitPrice) }}
+            {{ $formatMoney(basePriceConverted) }}
           </div>
           <span class="label">{{ $t('change24H') }} ({{ $store.state.currentMarket ? $store.state.currentMarket.quoteCurrency : '' }})</span>
           <div :class="['change', {decrease: change24Hour < 0, increase: change24Hour > 0 }]">
@@ -56,6 +59,9 @@ export default {
   },
 
   computed: {
+    basePriceConverted() {
+      return this.close24Hour * this.baseCurrencyUnitPrice;
+    },
     storeStateCurrentMarket() {
       return this.$store.state.currentMarket;
     },
@@ -74,7 +80,8 @@ export default {
         / this.tickerData.open24hr) * 10000) / 100;
     },
     change24Hour() {
-      if (this.$isPending('fetchTradeHistory')) {
+      if (this.$isPending('fetchTradeHistory') &&
+        !_.get(this.$store.state.requests, 'fetchTradeHistory').isSilent) {
         return 0;
       }
 
@@ -122,7 +129,7 @@ export default {
     }
 
     .token-details {
-      flex: none
+      flex: none;
     }
 
     .row {
@@ -131,7 +138,6 @@ export default {
 
       .label {
         @extend %small-uppercase-grey-label-dark;
-
         flex: 2;
       }
 
@@ -139,9 +145,11 @@ export default {
         flex: 3;
         font-family: GilroySemibold;
         font-size: toRem(12px);
+        white-space: nowrap;
       }
 
-      &.row {
+      &.row, 
+      .quote-volume {
         margin-top: $space-sm;
       }
     }

@@ -9,15 +9,20 @@ export default {
       return this.$isPending('claimGas') ? this.$t('claiming')
         : this.$t('claimGas', { gas: this.formattedAmountToClaim });
     },
-
     formattedAmountToClaim() {
-      return this.$formatNumber(this.$store.state.statsToken.availableToClaim);
+      return this.neoAsset ?
+        this.$formatNumber(this.neoAsset.availableToClaim) : 0;
+    },
+    neoAsset() {
+      return _.find(this.$store.state.holdings, { symbol: 'NEO' });
     },
   },
 
   methods: {
     claim() {
-      this.$store.dispatch('claimGas');
+      if (this.neoAsset.availableToClaim > 0) {
+        this.$store.dispatch('claimGas');
+      }
     },
   },
 };
@@ -35,6 +40,7 @@ export default {
   height: auto;
   padding: $space-xs $space;
   text-transform: uppercase;
+  width: auto;
 
   &:hover {
     background-color: $purple;

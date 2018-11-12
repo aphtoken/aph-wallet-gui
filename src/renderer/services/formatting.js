@@ -59,7 +59,7 @@ export default {
     return moment.unix(timestamp).format(formats.DATE_SHORT);
   },
 
-  formatMoney(value, symbol, defaultValue = 'N/A') {
+  formatMoney(value, symbol, defaultValue = 'N/A', abbreviate = false) {
     if (nullOrUndefined(value)) {
       return defaultValue;
     }
@@ -69,7 +69,12 @@ export default {
     if (val.isLessThan(1) && !val.isZero()) {
       precision = 4;
     }
-    return accounting.formatMoney(val, symbol || settings.getCurrencySymbol(), precision);
+
+    const displaySymbol = symbol || settings.getCurrencySymbol();
+
+    return abbreviate ?
+      numeral(formatNumberBase(value, formats.WHOLE_NUMBER)).format(`${displaySymbol}0.0a`) :
+      accounting.formatMoney(val, displaySymbol, precision);
   },
 
   formatMoneyWithoutCents(value, symbol, defaultValue = 'N/A') {

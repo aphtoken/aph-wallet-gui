@@ -17,6 +17,16 @@ import { mapGetters } from 'vuex';
 import { BigNumber } from 'bignumber.js';
 
 export default {
+  beforeDestroy() {
+    clearInterval(this.loadTransactionsIntervalId);
+  },
+  beforeMount() {
+    this.loadTransactions();
+
+    this.loadTransactionsIntervalId = setInterval(() => {
+      this.loadTransactions();
+    }, this.$constants.intervals.TRANSACTIONS_POLLING);
+  },
   computed: {
     filteredHoldings() {
       const searchBy = this.searchBy.toLowerCase();
@@ -52,12 +62,17 @@ export default {
   data() {
     return {
       searchBy: '',
+      loadTransactionsIntervalId: null,
     };
   },
 
   methods: {
     loadHoldings() {
       this.$store.dispatch('fetchHoldings');
+    },
+
+    loadTransactions() {
+      this.$store.dispatch('fetchRecentTransactions');
     },
 
     remove(holding) {

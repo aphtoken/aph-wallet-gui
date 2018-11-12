@@ -10,6 +10,7 @@
     <div class="center" v-if="canBeRemoved">
       <div class="remove" @click="handleOnRemove">{{$t('remove')}}</div>
     </div>
+    <claim-gas-button v-if="this.holding.symbol === 'NEO'"></claim-gas-button>
     <div class="right">
       <div class="balance">
         <div class="amount" :title="balanceToolTip">
@@ -24,7 +25,12 @@
 </template>
 
 <script>
+import ClaimGasButton from './dashboard/ClaimGasButton';
+
 export default {
+  components: {
+    ClaimGasButton,
+  },
   computed: {
     canBeRemoved() {
       return this.holding.canRemove;
