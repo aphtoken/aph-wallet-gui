@@ -18,7 +18,7 @@
         </div>
         <div class="body">
           <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null" 
-            :class="['row tiled', {selected: $store.state.currentMarket && market.marketName === $store.state.currentMarket.marketName }]"
+            :class="['row', {selected: $store.state.currentMarket && market.marketName === $store.state.currentMarket.marketName }]"
                v-for="market in filteredMarkets" :key="market.marketName">
             <div class="cell flex-horizontal">
               <div class="cell">{{ market.quoteCurrency }}</div>
