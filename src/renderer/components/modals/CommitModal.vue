@@ -36,7 +36,8 @@ export default {
 
   computed: {
     shouldDisableCommitButton() {
-      return !this.amount.length || this.amount <= 0;
+      return !this.amount.length || this.amount <= 0
+        || this.aphHolding.balance.plus(this.aphHolding.contractBalance).isLessThan(this.amount);
     },
     aphHolding() {
       if (this.$store.state.holdings) {
@@ -66,7 +67,7 @@ export default {
   methods: {
     setAmountToMax() {
       if (this.aphHolding) {
-        this.amount = this.aphHolding.balance.toString();
+        this.amount = this.aphHolding.balance.plus(this.aphHolding.contractBalance).toString();
       }
     },
   },
