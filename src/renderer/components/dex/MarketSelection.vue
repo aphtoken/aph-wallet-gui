@@ -12,8 +12,9 @@
           <div class="row">
             <div class="label">{{$t('vol')}}</div>
             <div class="value">
-              <div>{{ $formatMoney(tickerData.quoteVolume * basePriceConverted) }}</div>
-              <div class="quote-volume">{{ $abbreviateNumber(tickerData.quoteVolume) }} ({{ storeStateCurrentMarket.baseCurrency }})</div>
+              <div>{{ $formatMoney(tickerData.baseVolume * baseCurrencyUnitPrice) }}</div>
+              <div class="quote-volume">{{ $abbreviateNumber(tickerData.baseVolume) }} ({{ storeStateCurrentMarket.baseCurrency }})</div>
+              <div class="quote-volume">{{ $abbreviateNumber(tickerData.quoteVolume) }} ({{ storeStateCurrentMarket.quoteCurrency }})</div>
             </div>
           </div>
           <div class="row">
