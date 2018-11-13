@@ -343,8 +343,6 @@ export default {
             const transactionPromises = [];
 
             if (transaction.confirmations > 0) {
-              transaction.confirmed = true;
-
               // Look up the block from the blockhash
               transactionPromises.push(new Promise((resolve, reject) => {
                 store.dispatch('fetchBlockHeaderByHash', {
@@ -355,9 +353,14 @@ export default {
                   failed: e => reject(e),
                 });
               }).then((blockHeader) => {
+                transaction.confirmed = true;
                 transaction.block = blockHeader.index;
                 transaction.currentBlockHeight = transaction.confirmations + blockHeader.index;
-              }).catch(e => reject(e)));
+              }).catch((e) => {
+                if (DBG_LOG) console.log(`Error fetching block header when fetching tx details: ${e}`);
+                // leave transaction unconfirmed so it will try to determine the block later.
+                transaction.confirmed = false;
+              }));
             } else {
               transaction.confirmed = false;
             }
