@@ -57,7 +57,6 @@ Vue.use(VueHighCharts);
 Vue.use(VueI18n);
 require('vue-flash-message/dist/vue-flash-message.min.css');
 
-// TODO: This might not be needed here anymore; authenticated wrapper does it before mount.
 Vue.use(VueNativeSock, network.getSelectedNetwork().websocketUri, {
   connectManually: true,
   format: 'json',

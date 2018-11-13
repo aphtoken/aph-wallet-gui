@@ -102,6 +102,7 @@ export default {
 
     websocketUri(newVal, oldVal) {
       if (newVal !== oldVal) {
+        this.$disconnect();
         this.connectWebsocket();
       }
     },
