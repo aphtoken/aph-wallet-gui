@@ -1061,8 +1061,8 @@ export default {
     });
   },
 
-  fetchSystemAssetUTXOReserved(input) {
-    return new Promise((resolve, reject) => {
+  fetchSystemAssetUTXOReserved(input, retries = 2) {
+    return new Promise(async (resolve, reject) => {
       try {
         const prevTxHash = input.prevHash ? input.prevHash : input.txid;
         const prevTxIndex = input.prevIndex ? input.prevIndex : input.index;
@@ -1072,23 +1072,31 @@ export default {
         if (DBG_LOG) console.log(`utxoParam: ${utxoParam}`);
 
         const rpcClient = network.getRpcClient();
-        rpcClient.query({
+
+        // Use a shorter timeout to fail fast.
+        const res = await rpcClient.query({
           method: 'getstorage',
           params: [store.state.currentNetwork.dex_hash, utxoParam],
-        })
-          .then((res) => {
-            if (!!res.result && res.result.length > 0) {
-              input.reservedFor = u.reverseHex(res.result);
-            } else {
-              input.reservedFor = 'none';
-            }
-            resolve(input);
-          })
-          .catch((e) => {
-            reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e}`);
-          });
+        }, { timeout: 3000 });
+
+        if (!!res.result && res.result.length > 0) {
+          input.reservedFor = u.reverseHex(res.result);
+        } else {
+          input.reservedFor = 'none';
+        }
+        resolve(input);
       } catch (e) {
-        reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e.message}`);
+        if (retries > 0) {
+          setTimeout(async () => {
+            try {
+              resolve(await this.fetchSystemAssetUTXOReserved(input, retries - 1));
+            } catch (e) {
+              reject(e);
+            }
+          }, 500);
+        } else {
+          reject(`Failed to fetch UTXO Reserved Status from contract storage. ${e}`);
+        }
       }
     });
   },
@@ -1309,9 +1317,9 @@ export default {
               return;
             }
 
-            if (res.data.offersToTake.length > 0
+            if (res.data.offersToTake.length > 2
               && currentWallet.isLedger === true) {
-              reject('Unable to place taker orders with a Ledger');
+              reject('Unable to place taker order with more than 2 matches on Ledger.');
               return;
             }
 
