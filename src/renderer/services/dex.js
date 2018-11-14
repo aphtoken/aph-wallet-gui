@@ -1296,14 +1296,14 @@ export default {
           if (order.price) {
             order.quantityToSell = order.quantity.multipliedBy(order.price).toString();
           }
+        }
 
-          // add token if not already a user asset
-          const userAssets = assets.getUserAssets();
-          if (!_.has(userAssets, order.assetIdToBuy)) {
-            store.dispatch('addToken', {
-              hashOrSymbol: order.assetIdToBuy,
-            });
-          }
+        // add token if not already a user asset
+        const userAssets = assets.getUserAssets();
+        if (!_.has(userAssets, order.assetIdToBuy)) {
+          store.dispatch('addToken', {
+            hashOrSymbol: order.assetIdToBuy,
+          });
         }
 
         const currentNetwork = network.getSelectedNetwork();
