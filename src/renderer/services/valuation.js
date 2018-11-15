@@ -81,7 +81,7 @@ export default {
               dates: [],
               prices: [],
             };
-            if (res.data.Data.length === 0) {
+            if (!Array.isArray(res.data.Data) || res.data.Data.length === 0) {
               resolve({
                 high: null,
                 low: null,
