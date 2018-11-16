@@ -1355,7 +1355,7 @@ export default {
                 let outputSize = totalInputs.minus(config.fees)
                   .dividedBy(targetNumberOfOutputs - 1).dividedBy(targetNumberOfOutputs - 1);
                 if (outputSize.isLessThan(minimumSize)) {
-                  outputSize = minimumSize;
+                  outputSize = toBigNumber(minimumSize);
                 }
 
                 for (let i = 0; i < targetNumberOfOutputs; i += 1) {
