@@ -93,10 +93,22 @@ export default {
 
       flex: 1;
 
-      .cell {
-        &.time {
+      .header {
+        .cell.time {
           text-align: right;
-          white-space: nowrap;
+        }
+      }
+
+      .body {
+        .cell {
+          font-family: FreeMono !important;
+          font-size: toRem(14px) !important;
+          letter-spacing: 0px;
+
+          &.time{
+            text-align: right;
+            white-space: nowrap;
+          }
         }
       }
     }
