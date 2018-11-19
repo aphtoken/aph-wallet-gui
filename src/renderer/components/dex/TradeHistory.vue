@@ -9,12 +9,12 @@
           <div class="header">
             <div class="cell">{{$t('PRICE')}} ({{ $store.state.currentMarket ? $store.state.currentMarket.baseCurrency : '' }})</div>
             <div class="cell">{{$t('VOLUME')}}</div>
-            <div class="cell time">{{$t('TIME')}}</div>
+            <div class="cell">{{$t('TIME')}}</div>
           </div>
           <div class="body">
             <div class="row" v-for="(trade, index) in trades" :key="index">
-              <div :class="['cell', {green: trade.side === 'Buy', red: trade.side === 'Sell'}]">{{ $formatNumber(trade.price) }}</div>
-              <div class="cell">{{ $formatNumber(trade.quantity) }}</div>
+              <div :class="['cell', 'price', {green: trade.side === 'Buy', red: trade.side === 'Sell'}]">{{ getPrice(trade) }}</div>
+              <div class="cell quantity">{{ getQuantity(trade) }}</div>
               <div class="cell time">{{ $formatDateShort(trade.tradeTime) }} {{ $formatTime(trade.tradeTime) }}</div>
             </div>
           </div>
@@ -51,6 +51,39 @@ export default {
   },
 
   methods: {
+    getAllowedQuantityDecimals() {
+      const currentMarket = this.$store.state.currentMarket;
+      const minTickSizeFraction = currentMarket.minimumTickSize
+        - Math.floor(currentMarket.minimumTickSize);
+      if (minTickSizeFraction <= 0.00000001) {
+        return 0;
+      }
+      return Math.log10(minTickSizeFraction * (10 ** 8));
+    },
+
+    addDecimalsToNumString(numString, allowedDecimals) {
+      let result = numString;
+      // count decimals
+      const lastDotIndex = numString.lastIndexOf('.');
+      if (lastDotIndex === -1) {
+        result += '.';
+        result += '0'.repeat(allowedDecimals);
+      } else {
+        const hasDecimals = (result.length - lastDotIndex) - 1;
+        const neededDecimals = allowedDecimals - hasDecimals;
+        result += '0'.repeat(neededDecimals);
+      }
+      return result;
+    },
+    getPrice(trade) {
+      const priceNum = this.$formatNumber(trade.price);
+      const allowedPriceDecimals = 8 - this.getAllowedQuantityDecimals();
+
+      return this.addDecimalsToNumString(priceNum, allowedPriceDecimals);
+    },
+    getQuantity(trade) {
+      return this.addDecimalsToNumString(this.$formatNumber(trade.quantity), this.getAllowedQuantityDecimals());
+    },
     loadTrades() {
       if (!this.$store.state.currentMarket) {
         return;
@@ -74,6 +107,7 @@ export default {
   .header {
     flex: none;
     padding: $space $space 0;
+    text-align: center;
 
     h1.underlined {
       @extend %underlined-header-sm;
@@ -105,7 +139,15 @@ export default {
           font-size: toRem(14px) !important;
           letter-spacing: 0px;
 
-          &.time{
+          &.price {
+            text-align: right;
+            margin-right: toRem(10px);
+          }
+          &.quantity {
+            text-align: right;
+            margin-right: toRem(10px);
+          }
+          &.time {
             text-align: right;
             white-space: nowrap;
           }

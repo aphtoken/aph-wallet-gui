@@ -18,7 +18,7 @@ import { store } from '../store';
 import { toBigNumber } from './formatting.js';
 import { claiming, intervals } from '../constants';
 
-const TX_ATTR_USAGE_SCRIPT = 0x20;
+const TX_ATTR_USAGE_VERIFICATION = 0x20;
 const TX_ATTR_USAGE_HEIGHT = 0xf0;
 const TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE = 0xA1;
 const TX_ATTR_USAGE_WITHDRAW_ADDRESS = 0xA2;
@@ -290,7 +290,7 @@ export default {
           configResponse = await api.createTx(configResponse, 'invocation');
 
           const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-          configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+          configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, senderScriptHash);
           configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
             u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
 
@@ -1656,7 +1656,7 @@ export default {
     });
   },
 
-  markWithdraw(assetId, quantity, tryCount = 1) {
+  markWithdraw(assetId, quantity, overrideAddress, tryCount = 1) {
     return new Promise(async (resolve, reject) => {
       const currentNetwork = network.getSelectedNetwork();
       const currentWallet = wallets.getCurrentWallet();
@@ -1677,7 +1677,7 @@ export default {
       const handleRetry = () => {
         setTimeout(() => {
           this.ignoreWithdrawInputs(config);
-          this.markWithdraw(assetId, quantity, tryCount + 1)
+          this.markWithdraw(assetId, quantity, overrideAddress, tryCount + 1)
             .then((res) => {
               resolve(res);
             })
@@ -1736,7 +1736,8 @@ export default {
         }
 
         store.commit('setSystemWithdrawMergeState', { utxoCount: configResponse.tx.inputs.length - inputsFromGasFee, step: 1 });
-        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address));
+        const verificationScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
@@ -1745,7 +1746,7 @@ export default {
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
           u.num2fixed8(validUntilValue).padEnd(64, '0'));
 
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, verificationScriptHash);
 
         configResponse = await api.signTx(configResponse);
 
@@ -2059,9 +2060,12 @@ export default {
     return book;
   },
 
-  withdrawAsset(assetId, quantity) {
+  withdrawAsset(assetId, quantity, overrideAddress) {
     return new Promise((resolve, reject) => {
       try {
+        // TODO: should pass this through the whole way instead of getting again in case they switch wallets somehow
+        const currentWallet = wallets.getCurrentWallet();
+
         if (assetId === assets.NEO || assetId === assets.GAS) {
           const systemWithdraw = {
             step: 0,
@@ -2078,10 +2082,8 @@ export default {
             store.commit('setSystemWithdrawMergeState', { error: errorMsg });
             reject(errorMsg);
           };
-          // TODO: should pass this through the whole way instead of getting again in case they switch wallets somehow
-          const currentWallet = wallets.getCurrentWallet();
 
-          this.markWithdraw(assetId, quantity)
+          this.markWithdraw(assetId, quantity, overrideAddress)
             .then((res) => {
               if (res.success !== true) {
                 rejectWithError('Withdraw Mark Step rejected');
@@ -2098,14 +2100,14 @@ export default {
                   neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, true);
 
                   setTimeout(() => {
-                    this.withdrawSystemAsset(assetId, quantity, res.tx.hash, res.utxoIndex)
+                    this.withdrawSystemAsset(assetId, quantity, res.tx.hash, res.utxoIndex, overrideAddress)
                       .then((res) => {
                         if (res.success) {
                           store.commit('setSystemWithdrawMergeState', { step: 4 });
 
                           neo.monitorTransactionConfirmation(res.tx, true)
                             .then(() => {
-                              neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
+                              if (!overrideAddress) neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
                               store.commit('setSystemWithdrawMergeState', { step: 5 });
                               resolve(res.tx);
                             })
@@ -2134,12 +2136,13 @@ export default {
           return;
         }
 
-        this.withdrawNEP5(assetId, quantity)
+        this.withdrawNEP5(assetId, quantity, overrideAddress)
           .then((res) => {
             if (res.success) {
               alerts.success('Withdraw Relayed.');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
+                  neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
                   resolve(res.tx);
                 })
                 .catch((e) => {
@@ -2158,7 +2161,7 @@ export default {
     });
   },
 
-  withdrawNEP5(assetId, quantity) {
+  withdrawNEP5(assetId, quantity, overrideAddress) {
     return new Promise(async (resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -2209,16 +2212,17 @@ export default {
         configResponse.sendingFromSmartContract = true;
         api.createTx(configResponse, 'invocation')
           .then((configResponse) => {
-            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address));
+            const verificationScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL, u.num2fixed8(validUntilValue).padEnd(64, '0'));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, verificationScriptHash);
 
             if (token.canPull !== false) {
-              configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, u.reverseHex(currentNetwork.dex_hash));
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, u.reverseHex(currentNetwork.dex_hash));
             }
 
             if (DBG_LOG) console.log(`block index; ${blockIndex} validUntil: ${validUntilValue}`);
@@ -2259,7 +2263,7 @@ export default {
     });
   },
 
-  withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount = 1) {
+  withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, overrideAddress, tryCount = 1) {
     return new Promise(async (resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -2335,7 +2339,7 @@ export default {
 
         configResponse.tx.outputs.push({
           assetId,
-          scriptHash: wallet.getScriptHashFromAddress(currentWallet.address),
+          scriptHash: wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address),
           value: input.value,
         });
 
@@ -2346,7 +2350,8 @@ export default {
         const blockIndex = currentNetwork.bestBlock.index;
         const validUntilValue = (blockIndex + 20) * 0.00000001;
 
-        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address));
+        const verificationScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
@@ -2354,7 +2359,7 @@ export default {
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
           u.num2fixed8(validUntilValue).padEnd(64, '0'));
 
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, verificationScriptHash);
 
         configResponse = await api.signTx(configResponse);
 
@@ -2394,7 +2399,7 @@ export default {
         if (tryCount < 3) {
           alerts.error(`Withdraw failed. Error: ${errMsg} Retrying...`);
           setTimeout(() => {
-            this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, tryCount + 1)
+            this.withdrawSystemAsset(assetId, quantity, utxoTxHash, utxoIndex, overrideAddress, tryCount + 1)
               .then((res) => {
                 resolve(res);
               })
@@ -2454,7 +2459,7 @@ export default {
             .then((configResponse) => {
               const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
-              configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, senderScriptHash);
               // TODO: may want to use a different attribute; ledger was having a singing issue and may be due to this attribute.
               configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
                 u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
@@ -2553,7 +2558,7 @@ export default {
         const dexAssets = dexBalance.assets;
         const unspents = _.cloneDeep(assetId === assets.GAS ? dexAssets.GAS.unspent : dexAssets.NEO.unspent);
 
-        await this.decorateWithUnspentsReservedState(assetId, unspents);
+        // await this.decorateWithUnspentsReservedState(assetId, unspents);
 
         BigNumber.config({ DECIMAL_PLACES: 8, ROUNDING_MODE: 3 });
         let totalInputAmount = toBigNumber(0);
@@ -2561,18 +2566,29 @@ export default {
         // take the numInputsToCollapse smallest inputs and use them and sum their amounts
         let inputsCollapsed = 0;
         let lastCollapsedAmount = toBigNumber(0);
-        _.orderBy(unspents, [unspent => parseFloat(unspent.value.toString())], ['asc']).some((unspent) => {
-          // check if this utxo is marked for someone and if so just skip
-          if (unspent.reservedFor.length >= 40) {
-            return false;
+        const filteredUnspents = [];
+        _.orderBy(unspents, [unspent => parseFloat(unspent.value.toString())], ['asc']).forEach((unspent) => {
+          if (toBigNumber(startingAmount).isGreaterThan(unspent.value)) {
+            return;
           }
 
-          if (toBigNumber(startingAmount).isGreaterThan(unspent.value)) {
-            return false;
-          }
+          filteredUnspents.push(unspent);
+        });
+
+        /* eslint-disable no-continue */
+        for (let i = 0; i < filteredUnspents.length; i += 1) {
+          const unspent = filteredUnspents[i];
 
           if (lastCollapsedAmount.plus(1).isGreaterThan(unspent.value) && collapseIncrementally === true) {
-            return false;
+            continue;
+          }
+
+          /* eslint-disable no-await-in-loop */
+          await this.fetchSystemAssetUTXOReserved(unspent);
+          /* eslint-enavle no-await-in-loop */
+          // check if this utxo is marked for someone and if so just skip
+          if (unspent.reservedFor.length >= 40) {
+            continue;
           }
 
           totalInputAmount = totalInputAmount.plus(unspent.value);
@@ -2585,10 +2601,10 @@ export default {
           inputsCollapsed += 1;
 
           if (inputsCollapsed >= numInputsToCollapse) {
-            return true;
+            break;
           }
-          return false;
-        });
+        }
+        /* eslint-enable no-continue */
 
         console.log(`total collapsed input amount: ${totalInputAmount}`);
         // collapse to one output
@@ -2614,7 +2630,7 @@ export default {
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
           u.num2fixed8(validUntilValue).padEnd(64, '0'));
 
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_SCRIPT, senderScriptHash);
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, senderScriptHash);
 
         configResponse = await api.signTx(configResponse);
 
@@ -2635,7 +2651,7 @@ export default {
         configResponse = await api.sendTx(configResponse);
 
         if (!configResponse || !configResponse.response || (configResponse.response.result !== true)) {
-          throw new Error('Collapse inputs rejected by network. Retrying...');
+          throw new Error('Collapse inputs rejected by network...');
         }
 
         // Apply this to the dex's balance
@@ -2734,6 +2750,29 @@ export default {
       }
     });
   },
+
+  cancelOrderByIdOnly(offerId) {
+    return new Promise((resolve, reject) => {
+      this.executeContractTransaction('cancelOffer',
+        [
+          offerId.replace('0x', ''),
+        ])
+        .then((res) => {
+          if (res.success) {
+            neo.monitorTransactionConfirmation(res.tx, true)
+              .then(() => {
+                resolve(res.tx);
+              });
+          } else {
+            reject('Transaction rejected');
+          }
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    });
+  },
+
   isSystemAssetWithdrawInProgress() {
     const systemWithdraw = store.state.systemWithdraw;
     return systemWithdraw && systemWithdraw.step >= 0 && systemWithdraw.step < 5 && !systemWithdraw.error;

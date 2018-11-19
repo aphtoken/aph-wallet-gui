@@ -24,8 +24,8 @@
             </div>
             <div class="body">
               <div class="row" v-for="(ask, index) in $store.state.orderBook.asks" :key="index">
-                <div class="cell price red" @click="setPrice(ask.price)">{{ $formatNumber(ask.price) }}</div>
-                <div class="cell quantity" @click="setQuantity(index, $store.state.orderBook.asks)">{{ $formatNumber(ask.quantity) }}</div>
+                <div class="cell price red" @click="setPrice(ask.price)">{{ getPrice(ask) }}</div>
+                <div class="cell quantity" @click="setQuantity(index, $store.state.orderBook.asks)">{{ getQuantity(ask) }}</div>
                 <div class="cell graph">
                   <span class="size-bar size-total red" :style="{ width: (ask.quantityTotalRatio * 100) + '%' }"></span>
                   <span class="size-bar red" :style="{ width: (ask.quantityRatio * 100) + '%' }"></span>
@@ -41,8 +41,8 @@
           <div class="order-book-table bids">
             <div class="body">
               <div class="row" v-for="(bid, index) in $store.state.orderBook.bids" :key="index">
-                <div class="cell price green" @click="setPrice(bid.price)">{{ $formatNumber(bid.price) }}</div>
-                <div class="cell quantity" @click="setQuantity(index, $store.state.orderBook.bids)">{{ $formatNumber(bid.quantity) }}</div>
+                <div class="cell price green" @click="setPrice(bid.price)">{{ getPrice(bid) }}</div>
+                <div class="cell quantity" @click="setQuantity(index, $store.state.orderBook.bids)">{{ getQuantity(bid) }}</div>
                 <div class="cell graph" >
                   <span class="size-bar size-total green" :style="{ width: (bid.quantityTotalRatio * 100) + '%' }"></span>
                   <span class="size-bar green" :style="{ width: (bid.quantityRatio * 100) + '%', 'border-right-width': (bid.quantityTotalRatio * 100) + '%' }"></span>
@@ -87,6 +87,42 @@ export default {
   },
 
   methods: {
+    addDecimalsToNumString(numString, allowedDecimals) {
+      let result = numString;
+      // count decimals
+      const lastDotIndex = numString.lastIndexOf('.');
+      if (lastDotIndex === -1) {
+        result += '.';
+        result += '0'.repeat(allowedDecimals);
+      } else {
+        const hasDecimals = (result.length - lastDotIndex) - 1;
+        const neededDecimals = allowedDecimals - hasDecimals;
+        result += '0'.repeat(neededDecimals);
+      }
+      return result;
+    },
+
+    getAllowedQuantityDecimals() {
+      const currentMarket = this.$store.state.currentMarket;
+      const minTickSizeFraction = currentMarket.minimumTickSize
+        - Math.floor(currentMarket.minimumTickSize);
+      if (minTickSizeFraction <= 0.00000001) {
+        return 0;
+      }
+      return Math.log10(minTickSizeFraction * (10 ** 8));
+    },
+
+    getPrice(order) {
+      const priceNum = this.$formatNumber(order.price);
+      const allowedPriceDecimals = 8 - this.getAllowedQuantityDecimals();
+
+      return this.addDecimalsToNumString(priceNum, allowedPriceDecimals);
+    },
+
+    getQuantity(order) {
+      return this.addDecimalsToNumString(this.$formatNumber(order.quantity), this.getAllowedQuantityDecimals());
+    },
+
     loadBook() {
       if (!this.$store.state.currentMarket) {
         return;
@@ -154,6 +190,10 @@ export default {
       flex-direction: column;
       flex: 1;
 
+      .header {
+        text-align: right;
+      }
+
       .spread-divider {
         align-items: center;
         border-bottom: $border-table-header;
@@ -183,7 +223,17 @@ export default {
 
         .cell {
           &.price, &.quantity {
+            font-family: FreeMono !important;
+            font-size: toRem(14px) !important;
+            letter-spacing: 0px;
             cursor: pointer;
+            text-align: right;
+          }
+          &.price {
+            margin-right: toRem(5px);
+          }
+          &.quantity {
+            margin-right: toRem(5px);
           }
 
           &.graph {
