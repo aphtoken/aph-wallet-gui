@@ -308,7 +308,7 @@
   "withdrawStepMarkSystemAsset": "Sending ({amount} {asset})",
   "withdrawStepWaitForMarkSystemAsset": "Processing",
   "withdrawStepWithdrawSystemAsset": "Sending Withdraw {amount} {asset}.",
-  "withdrawStepWaitForWithdrawSystemAsset": "Receiving {amount} {asset}",
+  "withdrawStepWaitForWithdrawSystemAsset": "Receiving ({amount} {asset})",
   "withdrawStepWaitForWithdrawTransaction": "Wait for withdraw TX Confirmaiton.",
   "yesFracture": "Yes, Split GAS",
   "youAlreadyHaveWalletOpen": "You already have {name} open.",

@@ -15,7 +15,7 @@
             <div class="row" v-for="(trade, index) in trades" :key="index">
               <div :class="['cell', 'price', {green: trade.side === 'Buy', red: trade.side === 'Sell'}]">{{ getPrice(trade) }}</div>
               <div class="cell quantity">{{ getQuantity(trade) }}</div>
-              <div class="cell time">{{ $formatDateShort(trade.tradeTime) }} {{ $formatTime(trade.tradeTime) }}</div>
+              <div class="cell time">{{ $formatTime(trade.tradeTime) }}</div>
             </div>
           </div>
         </div>
@@ -107,7 +107,6 @@ export default {
   .header {
     flex: none;
     padding: $space $space 0;
-    text-align: center;
 
     h1.underlined {
       @extend %underlined-header-sm;
@@ -128,6 +127,8 @@ export default {
       flex: 1;
 
       .header {
+        text-align: center;
+        white-space: nowrap;
         .cell.time {
           text-align: right;
         }

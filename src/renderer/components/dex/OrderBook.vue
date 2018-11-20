@@ -191,7 +191,8 @@ export default {
       flex: 1;
 
       .header {
-        text-align: right;
+        text-align: center;
+        white-space: nowrap;
       }
 
       .spread-divider {
