@@ -71,7 +71,9 @@ export default {
       } else {
         const hasDecimals = (result.length - lastDotIndex) - 1;
         const neededDecimals = allowedDecimals - hasDecimals;
-        result += '0'.repeat(neededDecimals);
+        if (neededDecimals >= 0) {
+          result += '0'.repeat(neededDecimals);
+        }
       }
       return result;
     },

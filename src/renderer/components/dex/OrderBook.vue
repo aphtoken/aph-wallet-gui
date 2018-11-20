@@ -97,7 +97,9 @@ export default {
       } else {
         const hasDecimals = (result.length - lastDotIndex) - 1;
         const neededDecimals = allowedDecimals - hasDecimals;
-        result += '0'.repeat(neededDecimals);
+        if (neededDecimals >= 0) {
+          result += '0'.repeat(neededDecimals);
+        }
       }
       return result;
     },
@@ -115,12 +117,21 @@ export default {
     getPrice(order) {
       const priceNum = this.$formatNumber(order.price);
       const allowedPriceDecimals = 8 - this.getAllowedQuantityDecimals();
-
-      return this.addDecimalsToNumString(priceNum, allowedPriceDecimals);
+      try {
+        return this.addDecimalsToNumString(priceNum, allowedPriceDecimals);
+      } catch (e) {
+        console.log(e);
+        throw e;
+      }
     },
 
     getQuantity(order) {
-      return this.addDecimalsToNumString(this.$formatNumber(order.quantity), this.getAllowedQuantityDecimals());
+      try {
+        return this.addDecimalsToNumString(this.$formatNumber(order.quantity), this.getAllowedQuantityDecimals());
+      } catch (e) {
+        console.log(e);
+        throw e;
+      }
     },
 
     loadBook() {
