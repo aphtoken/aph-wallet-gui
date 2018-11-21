@@ -21,7 +21,7 @@
   "amountQuote": "Amount ({quote})",
   "aphelionDexOutOfDate": "Aphelion DEX Out of Date",
   "aphelionDexIntro": "Welcome to the MainNet Aphelion DEX. This release is secure and meets our minimum viable product (MVP) requirements, however, improvements are ongoing to provide the best user experience. Taker trades require APH to pay fees, but there are no fees to purchase APH. Use the GAS-APH and NEO-APH markets to buy APH. It is recommended to set a GAS fee in settings in case of network congestion.",
-  "aphelionDexMain": "MainNet Aphelion DEX",
+  "aphelionDexMain": "MainNet DEX Trading Disabled",
   "aphelionDexTest": "Aphelion DEX Test Version",
   "aphelionIsNotResponsible": "Aphelion is not responsible for loss of funds;",
   "areYouSureYouWantToClaim": "Are you sure you want to claim?",

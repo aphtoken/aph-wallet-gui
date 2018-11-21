@@ -4,18 +4,10 @@
       <h1 :class="[{selected: tab === 'Chart'}]" @click="selectTab('Chart')">{{$t('candlesticks')}}</h1>
       <h1 :class="[{selected: tab === 'Depth'}]" @click="selectTab('Depth')">{{$t('depth')}}</h1>
       <div class="learn-more">
-        <button class="learn-more-btn" @click="toggleLearnMore">{{ $t('learnMore') }}</button>
+        <button class="learn-more-btn" @click="toggleLearnMore">{{ $store.state.currentNetwork.net === 'MainNet' ?  'Trading Disabled': $t('learnMore') }}</button>
       </div>
     </div>
-    <div class="body" v-if="isTradingDisabled">
-      <p v-if="isOutOfDate">
-        {{$t('outOfDateMessage')}}
-      </p>
-      <p v-if="isMarketClosed">
-        {{$t('marketClosedMessage')}}
-      </p>
-    </div>
-    <div class="body" v-else>
+    <div class="body">
       <div id="chart-container" :class="[{visible: tab === 'Chart'}]">
       </div>
       <div id="depth-container" :class="[{visible: tab === 'Depth'}]">
@@ -66,6 +58,14 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="body" v-if="isTradingDisabled">
+      <p v-if="isOutOfDate">
+        {{$t('outOfDateMessage')}}
+      </p>
+      <p v-if="isMarketClosed">
+        {{$t('marketClosedMessage')}}
+      </p>
     </div>
   </section>
 </template>
@@ -555,7 +555,7 @@ export default {
     padding: $space;
 
     #chart-container, #depth-container {
-      height: 500px;
+      height: 400px;
       display: none;
 
       &.visible {
