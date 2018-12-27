@@ -296,7 +296,7 @@
   "waitingForConfirmation": "Waiting for confirmation...",
   "waitingForGasClaim": "Waiting for GAS claim confirmation.",
   "waitingForNEO": "Waiting for NEO transfer confirmation.",
-  "waitingForTransaction": "Waiting for transaction to appear on block explorer...",
+  "waitingForTransaction": "Waiting for transaction...",
   "walletBalance": "Wallet Balance",
   "walletBalanceContractBalance": "Wallet Balance: {walletBalance}\nContract Balance: {contractBalance}\nOpen Orders Balance: {openOrdersBalance}",
   "wallets": "Wallets",

@@ -279,7 +279,7 @@
   "waitingForConfirmation": "Ожидание подтверждения...",
   "waitingForGasClaim": "Ожидание подтверждения сбора GAS.",
   "waitingForNEO": "Ожидание подтверждения перевода NEO.",
-  "waitingForTransaction": "Ожидание появления транзакции в блочном проводнике...",
+  "waitingForTransaction": "Ожидание появления транзакции...",
   "walletBalance": "Баланс Кошелька",
   "walletBalanceContractBalance": "Баланс Кошелька: {walletBalance}\n  Баланс контракта: {contractBalance}\n  Открыть баланс ордеров {openOrdersBalance}",
   "wallets": "Кошельки",

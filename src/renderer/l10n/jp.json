@@ -278,7 +278,6 @@
   "waitingForConfirmation": "確認の待機中..",
   "waitingForGasClaim": "GAS請求の確認待機中",
   "waitingForNEO": "NEO送金の確認待機中",
-  "waitingForTransaction": "取引がブロックエクスプローラー上に現れるのを待機中...",
   "walletBalance": "ウォレット残高",
   "walletBalanceContractBalance": "ウォレット残高: {walletBalance}\n  契約残高: {contractBalance}\n  未払いの注文残高 {openOrdersBalance}",
   "wallets": "ウォレット",

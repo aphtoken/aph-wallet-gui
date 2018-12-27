@@ -275,7 +275,7 @@
   "waitingForConfirmation": "Wachten op bevestiging...",
   "waitingForGasClaim": "Wachten op GAS claim bevestiging.",
   "waitingForNEO": "Wachten op NEO transactie bevestiging.",
-  "waitingForTransaction": "Wachten op de transactie bevestiging van de block explorer...",
+  "waitingForTransaction": "Wachten op de transactie...",
   "walletBalance": "Wallet Balans",
   "walletBalanceContractBalance": "Wallet Balans: {walletBalance}\n  Contract Balans: {contractBalance}\n  Open Orders Saldo {openOrdersBalance}",
   "wallets": "Wallets",

@@ -172,7 +172,7 @@ export default {
 
       setTimeout(() => {
         this.$services.neo.sendFunds(this.address, this.currency.assetId,
-          this.amount, this.currency.isNep5)
+          this.amount, this.currency.isNep5, null, true)
           .then(() => {
             this.end();
           })

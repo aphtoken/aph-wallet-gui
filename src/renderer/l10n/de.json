@@ -278,7 +278,7 @@
   "waitingForConfirmation": "Warte auf die Bestätigung...",
   "waitingForGasClaim": "Warte auf die GAS Claim Bestätigung.",
   "waitingForNEO": "Warte auf die NEO Transferbestätigung.",
-  "waitingForTransaction": "Warte, bis die Transaktion im Blockexplorer erscheint...",
+  "waitingForTransaction": "Warte, bis die Transaktion...",
   "walletBalance": "Wallet Bestand",
   "walletBalanceContractBalance": "Wallet Bestand: {walletBalance}\n  Contract Bestand: {contractBalance}\n  Offene Bestellungen Guthaben {openOrdersBalance}",
   "wallets": "Wallets",

@@ -278,7 +278,6 @@
   "waitingForConfirmation": "正在等待确认......",
   "waitingForGasClaim": "正在等待GAS的索取声明确认。",
   "waitingForNEO": "正在等待NEO转账确认。",
-  "waitingForTransaction": "正在等待交易在区块浏览器中出现......",
   "walletBalance": "钱包余额",
   "walletBalanceContractBalance": "钱包余额：{walletBalance}\n  合同余额: {contractBalance}\n  未结订单余额 {openOrdersBalance}",
   "wallets": "钱包",
