@@ -1287,8 +1287,8 @@ export default {
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
 
-    let recommendedUTXOs = 16;
-    let checkUTXOs = 8;
+    let recommendedUTXOs = 10;
+    let checkUTXOs = 6;
     if (currentWallet.isLedger === true) {
       // ledger has limitations on tx size
       recommendedUTXOs = 5;
@@ -1363,7 +1363,15 @@ export default {
               config.account = new wallet.Account(currentWallet.wif);
             }
 
-            // TODO: transactions are now big; requires .002 fee to split.
+            // Transactions are now big; requires .002 fee to split if splitting to a lot of pieces.
+            // We default to 10 though, so it won't require a large fee for now.
+            let feeForSplit;
+            if (targetNumberOfOutputs > 10 && currentNetwork.fee < 0.002) {
+              feeForSplit = 0.002;
+            } else {
+              feeForSplit = currentNetwork.fee;
+            }
+
             api.fillKeys(config)
               .then((config) => {
                 return api.createTx(config, 'contract');
@@ -1376,7 +1384,7 @@ export default {
                 let totalInputs = new BigNumber(0);
                 config.tx.inputs = [];
                 config.tx.outputs = [];
-                config.fees = currentNetwork.fee;
+                config.fees = feeForSplit;
 
                 sortedUnspents.forEach((unspent) => {
                   totalInputs = totalInputs.plus(unspent.value);
