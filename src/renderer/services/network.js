@@ -25,7 +25,7 @@ const NETWORKS = [
       aph: 'https://testnet.aphelion-neo.com:62443/api',
       aph_hash: '591eedcd379a8981edeefe04ef26207e1391904a',
       ati_hash: '155153854ed377549a72cc1643e481bf25b48390',
-      dex_hash: 'b05656684396d38ba9a8cb567704f06f5008e552',
+      dex_hash: '83b22c76ae0c82f9ae31ea2fb5b94d082225ae64',
       net: 'TestNet',
       rpc: 'https://testneo.aphelion-neo.com:20331',
       fee: 0,
@@ -38,14 +38,15 @@ const NETWORKS = [
     value: {
       aph_hash: 'fe8ad8a261b171fb313cbfb0d4a974e269d11061',
       ati_hash: 'a9ffe1c85f55d0545898a9e749cde53c05151760',
-      dex_hash: '3f5b75d9a9e46442dbad53b3eb36e083cf63a604',
+      dex_hash: '1957b91afa8d261ff8147b8e813df952ca3cce42',
       aph: 'http://localhost:62433/api',
       net: 'PrivNet',
       rpc: 'http://localhost:30338',
       fee: 0,
       websocketUri: 'ws://localhost:62433/ws',
     },
-  }, */
+  },
+  */
 ];
 
 const NETWORK_FEE_OPTIONS = [

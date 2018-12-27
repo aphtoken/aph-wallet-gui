@@ -96,10 +96,13 @@
 </template>
 
 <script>
+// import { ipcRenderer } from 'electron';
 import { BigNumber } from 'bignumber.js';
-// import { wallet } from '@cityofzion/neon-js';
+// import { wallet, u } from '@cityofzion/neon-js';
+import { tx, settings, wallet } from '@cityofzion/neon-js';
 import AphOrderConfirmationModal from '../modals/OrderConfirmationModal';
 import AphDepositWithdrawModal from '../modals/DepositWithdrawModal';
+
 
 const ORDER_TYPES_LIST = [
   {
@@ -110,6 +113,8 @@ const ORDER_TYPES_LIST = [
 
 let loadHoldingsIntervalId;
 let storeUnwatch;
+
+const whitelistedAddresses = {};
 
 export default {
   components: {
@@ -440,8 +445,7 @@ export default {
 
           let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
           if (this.baseHolding.assetId === this.$store.state.currentNetwork.aph_hash) {
-            const maxLots = spendAtThisLevel.dividedBy(level.price).dividedBy(this.currentMarket.minimumSize);
-            leftToSpend = leftToSpend.minus(maxLots.multipliedBy(this.currentMarket.buyFee));
+            leftToSpend = leftToSpend.minus(spendAtThisLevel.multipliedBy(this.currentMarket.buyFee));
           }
 
           spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
@@ -503,8 +507,8 @@ export default {
 
           let spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
           if (this.quoteHolding.assetId === this.$store.state.currentNetwork.aph_hash) {
-            const maxLots = spendAtThisLevel.dividedBy(this.currentMarket.minimumSize);
-            leftToSpend = leftToSpend.minus(maxLots.multipliedBy(this.currentMarket.sellFee));
+            leftToSpend = leftToSpend.minus(
+              spendAtThisLevel.multipliedBy(level.price).multipliedBy(this.currentMarket.sellFee));
           }
 
           spendAtThisLevel = levelCost.isGreaterThan(leftToSpend) ? leftToSpend : levelCost;
@@ -573,7 +577,11 @@ export default {
       }
     },
 
-    confirmOrder() {
+    async confirmOrder() {
+      if (await this.launchKycIfNeeded()) {
+        return;
+      }
+
       this.validateQuantity();
 
       if (this.orderType === 'Market') {
@@ -609,11 +617,36 @@ export default {
         },
       });
     },
-    showDepositWithdrawModal(isDeposit) {
+
+    async launchKycIfNeeded() {
+      const services = this.$services;
+      try {
+        const address = services.wallets.getCurrentWallet().address;
+        if (whitelistedAddresses[address]) return false;
+
+        const kycStatus = await services.dex.getKycStatus(address);
+        if (kycStatus !== 'whitelisted') {
+          this.$store.commit('setKycInProgressModalModel', { kycStatus, address });
+          return true;
+        }
+
+        // Remember that our address is whitelisted.
+        whitelistedAddresses[address] = address;
+      } catch (e) {
+        services.alerts.error("Can't retrieve KYC status.");
+        return true;
+      }
+      return false;
+    },
+
+    async showDepositWithdrawModal(isDeposit) {
+      if (isDeposit && await this.launchKycIfNeeded()) {
+        return;
+      }
+
       if ((this.actionableHolding.symbol === 'GAS' || this.actionableHolding.symbol === 'NEO') &&
        !isDeposit && this.$services.dex.isSystemAssetWithdrawInProgress()) {
         this.$store.commit('setWithdrawInProgressModalModel', {});
-
         return;
       }
 
@@ -649,8 +682,27 @@ export default {
       this.$store.commit('setOrderToConfirm', null);
     },
 
+    async sendGas(address, amount) {
+      // Change the strategy to use the biggest valued output available.
+      settings.defaultCalculationStrategy = tx.calculationStrategy.biggestFirst;
+      const res = await this.$services.neo.sendSystemAsset(address, 0, amount);
+      console.log(`Sending ${amount}`);
+      return res.tx;
+    },
+
+    async waitForTx(tx) {
+      await this.$services.neo.monitorTransactionConfirmation(tx, true, 10);
+      this.$services.neo.applyTxToAddressSystemAssetBalance(this.$store.state.currentWallet.address, tx, true);
+    },
+
+    async waitForTxs(txs) {
+      while (txs.length > 0) {
+        /* eslint-disable no-await-in-loop */
+        await this.waitForTx(txs.pop());
+      }
+    },
+
     async setMarket() {
-      /*
       await this.$services.dex.setManager(
         wallet.getScriptHashFromAddress(''))
         .then(() => {
@@ -659,7 +711,7 @@ export default {
         .catch((e) => {
           this.$services.alerts.exception(e);
         });
-      */
+
       this.$services.alerts.info('Add assets');
 
       try {
@@ -685,9 +737,9 @@ export default {
     },
 
     collapseDexUtxos() {
-      this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.GAS, 10, 0, false)
-      // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 20, 0, true)
-      // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 7, 1, true)
+      // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.GAS, 20, 0, false)
+      // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 1, 1, true)
+      this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 20, 1, false)
         .then(() => {
           this.$services.alerts.success('Sent TX to collapse UTXOs');
         })

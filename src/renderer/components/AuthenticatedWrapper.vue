@@ -6,6 +6,7 @@
       <router-view></router-view>
       <aph-claim-gas-modal v-if="$store.state.showClaimGasModal"></aph-claim-gas-modal>
       <aph-withdraw-in-progress-modal v-if="$store.state.withdrawInProgressModalModel"></aph-withdraw-in-progress-modal>
+      <aph-kyc-modal v-if="$store.state.kycInProgressModalModel"></aph-kyc-modal>
       <aph-send-with-ledger-modal v-if="$store.state.showSendWithLedgerModal"></aph-send-with-ledger-modal>
       <aph-fracture-gas-modal v-if="$store.state.fractureGasModalModel" :onClose="hideFractureGasModal"></aph-fracture-gas-modal>
     </div>
@@ -18,6 +19,7 @@ import { mapGetters } from 'vuex';
 
 import AphClaimGasModal from './modals/ClaimGasModal';
 import AphFractureGasModal from './modals/FractureGasModal';
+import AphKycModal from './modals/KycModal';
 import AphWithdrawInProgressModal from './modals/WithdrawInProgressModal';
 import AphSendWithLedgerModal from './modals/SendWithLedgerModal';
 import PortfolioHeader from './PortfolioHeader';
@@ -41,6 +43,7 @@ export default {
   components: {
     AphClaimGasModal,
     AphFractureGasModal,
+    AphKycModal,
     AphSendWithLedgerModal,
     AphWithdrawInProgressModal,
     PortfolioHeader,

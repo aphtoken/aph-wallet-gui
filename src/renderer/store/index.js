@@ -33,6 +33,7 @@ const state = {
   gasClaim: null,
   gasFracture: null,
   holdings: [],
+  kycInProgressModalModel: null,
   lastReceivedBlock: null,
   lastSuccessfulRequest: null,
   latestVersion: null,

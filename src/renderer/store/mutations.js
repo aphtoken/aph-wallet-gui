@@ -38,6 +38,7 @@ export {
   setGasClaim,
   setGasFracture,
   setHoldings,
+  setKycInProgressModalModel,
   setLastReceivedBlock,
   setLastSuccessfulRequest,
   setLatestVersion,
@@ -306,6 +307,10 @@ async function setHoldings(state, holdings) {
   const holdingsStorageKey = `holdings.${state.currentWallet.address}.${state.currentNetwork.net}`;
   // NOTE: serializing objects that hold BigNumbers need to use JSON.stringify to be able to be de-serialized properly.
   db.upsert(holdingsStorageKey, JSON.stringify(holdings));
+}
+
+function setKycInProgressModalModel(state, model) {
+  state.kycInProgressModalModel = model;
 }
 
 function setLastReceivedBlock(state) {
