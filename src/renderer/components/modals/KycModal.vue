@@ -31,8 +31,10 @@
 </template>
 
 <script>
+import { webFrame } from 'electron';
 import ModalWrapper from './ModalWrapper';
 import AphConfirmDismissKycModal from './ConfirmDismissKycModal';
+
 
 export default {
   components: {
@@ -46,14 +48,14 @@ export default {
       reviewTime: '',
       deniedWaitingMinutes: '',
       deniedRemainingMinutes: '',
+      zoomFactor: 1,
     };
   },
 
   async mounted() {
     const container = document.getElementById('frame-content');
-    if (!container) {
-      return;
-    }
+    this.zoomFactor = webFrame.getZoomFactor();
+    webFrame.setZoomFactor(1);
     const services = this.$services;
     // this.$store.state.kycInProgressModalModel.kycStatus = 'denied|100000|100000';
     // this.$store.state.kycInProgressModalModel.kycStatus = 'manualReview|5oclock';
@@ -108,6 +110,7 @@ export default {
     },
     handleDismiss() {
       this.$store.commit('setKycInProgressModalModel', null);
+      webFrame.setZoomFactor(this.zoomFactor);
     },
     handleKycStatus(kycStatus) {
       console.log(`kycStatus: ${kycStatus}`);
@@ -145,6 +148,7 @@ export default {
         return;
       }
       this.$store.commit('setKycInProgressModalModel', null);
+      webFrame.setZoomFactor(this.zoomFactor);
     },
   },
 };
@@ -161,6 +165,10 @@ export default {
       justify-content: space-between;
       align-content: center;
 
+      #frame-content {
+        flex: auto;
+        width: 100%;
+      }
       .header {
         flex: 1;
         font-family: GilroySemiBold;
