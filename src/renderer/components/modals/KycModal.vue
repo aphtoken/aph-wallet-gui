@@ -1,4 +1,5 @@
 <template>
+  <div>
   <modal-wrapper id="aph-kyc-modal">
   <!-- <div class="aph-kyc-modal" id="aph-kyc-modal"> -->
     <div class="header">{{ getHeader() }}</div>
@@ -24,14 +25,19 @@
     <button class="dismiss-btn" @click="close">Dismiss</button>
   <!-- </div> -->
   </modal-wrapper>
+  <aph-confirm-dismiss-kyc-modal v-if="$store.state.confirmDismissKyc"
+                                 :onContinue="handleContinue" :onDismiss="handleDismiss"/>
+  </div>
 </template>
 
 <script>
 import ModalWrapper from './ModalWrapper';
+import AphConfirmDismissKycModal from './ConfirmDismissKycModal';
 
 export default {
   components: {
     ModalWrapper,
+    AphConfirmDismissKycModal,
   },
   data() {
     return {
@@ -98,6 +104,11 @@ export default {
   },
 
   methods: {
+    handleContinue() {
+    },
+    handleDismiss() {
+      this.$store.commit('setKycInProgressModalModel', null);
+    },
     handleKycStatus(kycStatus) {
       console.log(`kycStatus: ${kycStatus}`);
       this.kycStatus = kycStatus;
@@ -129,6 +140,10 @@ export default {
       return this.title;
     },
     close() {
+      if (this.kycStatus === 'kycneeded') {
+        this.$store.commit('setConfirmDismissKyc', true);
+        return;
+      }
       this.$store.commit('setKycInProgressModalModel', null);
     },
   },

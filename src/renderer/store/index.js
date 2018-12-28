@@ -20,6 +20,7 @@ const state = {
   commitChangeInProgress: null,
   commitModalModel: null,
   commitState: null,
+  confirmDismissKyc: false,
   contacts: [],
   currency: null,
   currencySymbol: null,

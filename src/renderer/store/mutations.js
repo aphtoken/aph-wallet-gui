@@ -27,6 +27,7 @@ export {
   setCommitChangeInProgress,
   setCommitModalModel,
   setCommitState,
+  setConfirmDismissKyc,
   setContacts,
   setCurrency,
   setCurrencySymbol,
@@ -424,6 +425,11 @@ function setShowImportAWalletModal(state, value) {
 function setShowSendWithLedgerModal(state, value) {
   state.showSendWithLedgerModal = value;
 }
+
+function setConfirmDismissKyc(state, value) {
+  state.confirmDismissKyc = value;
+}
+
 
 function setShowSendRequestLedgerSignature(state, value) {
   state.showSendRequestLedgerSignature = value;
