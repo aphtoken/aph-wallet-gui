@@ -17,8 +17,8 @@
     </div>
     <div class="footer">
       <div class="total-supply">
-        <div class="label">{{$t('totalSupply')}}</div>
-        <div class="amount">{{ $formatNumber($store.state.statsToken.totalSupply) }}</div>
+        <div class="label">{{$t('availableSupply')}}</div>
+        <div class="amount">{{ $formatNumber($store.state.statsToken.availableSupply) }}</div>
       </div>
       <div class="market-cap">
         <div class="label">{{$t('marketCap')}}</div>

@@ -7,6 +7,7 @@ const CMC_BASE_URL = 'https://api.coinmarketcap.com/v1/';
 const DEFAULT_APH_TOTAL_SUPPLY = 70000000;
 
 let coinTickerList = [];
+let prices = {};
 let lastCheckedTicker = null;
 
 const defaultValuation = (symbol) => {
@@ -34,6 +35,45 @@ const defaultValuation = (symbol) => {
 };
 
 export default {
+  getValuations(symbols) {
+    return new Promise(async (resolve, reject) => {
+      const currency = settings.getCurrency();
+      if (!lastCheckedTicker || moment.utc().diff(lastCheckedTicker, 'seconds') >= 120) {
+        try {
+          const res = await axios.get(`https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbols.join(',')}`
+            + `&tsyms=${currency}`);
+
+          const rawPrices = res.data.RAW;
+          const priceInfo = {};
+          Object.keys(rawPrices).forEach((symbol) => {
+            const data = rawPrices[symbol][currency];
+            priceInfo[symbol] = {
+              available_supply: data.SUPPLY,
+              id: symbol,
+              last_updated: data.LASTUPDATE,
+              max_supply: symbol === 'APH' ? DEFAULT_APH_TOTAL_SUPPLY : 0,
+              name: symbol,
+              percent_change_1h: 0,
+              percent_change_7d: 0,
+              percent_change_24h: data.CHANGEPCT24HOUR,
+              [`price_${currency.toLowerCase()}`]: data.PRICE,
+              [`market_cap_${currency.toLowerCase()}`]: data.MKTCAP,
+              price_btc: 0,
+              rank: 0,
+              symbol,
+              total_supply: symbol === 'APH' ? DEFAULT_APH_TOTAL_SUPPLY : 0,
+            };
+          });
+          prices = priceInfo;
+          resolve(prices);
+        } catch (e) {
+          reject(e);
+        }
+        return;
+      }
+      resolve(prices);
+    });
+  },
 
   getValuation(symbol) {
     return new Promise((resolve, reject) => {

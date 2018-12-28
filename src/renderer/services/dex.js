@@ -1176,15 +1176,6 @@ export default {
     });
   },
 
-  // Expects a BigNumber
-  flooredLogBase2(number) {
-    let power = new BigNumber(0);
-    for (; number.isGreaterThan(0); number = number.dividedBy(2).decimalPlaces(0, BigNumber.ROUND_DOWN)) {
-      power = power.plus(1);
-    }
-    return power.minus(1);
-  },
-
   formDepositsForOrder(order) {
     let totalQuantityToSell = new BigNumber(0);
     let totalFees = new BigNumber(0);

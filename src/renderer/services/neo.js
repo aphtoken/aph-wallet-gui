@@ -5,7 +5,6 @@ import {
 } from '@cityofzion/neon-js';
 import _ from 'lodash';
 import { BigNumber } from 'bignumber.js';
-import Async from 'async';
 
 import alerts from './alerts';
 import assets from './assets';
@@ -559,6 +558,7 @@ export default {
             });
         };
 
+        const valuationSymbols = [];
         holdings.forEach((holding) => {
           promises.push(fetchHoldingBalanceComponent(dex.fetchContractBalance, 'contractBalance', holding));
           promises.push(fetchHoldingBalanceComponent(dex.fetchOpenOrderBalance, 'openOrdersBalance', holding));
@@ -579,12 +579,19 @@ export default {
                 if (DBG_LOG) console.log(msg);
               }));
           }
+          valuationSymbols.push(holding.symbol);
         });
+        let valuations;
+        try {
+          valuations = await valuation.getValuations(valuationSymbols);
+        } catch (e) {
+          alerts.networkException(e);
+        }
 
         return await Promise.all(promises)
           .then(() => {
-            const valuationsPromises = [];
             const lowercaseCurrency = settings.getCurrency().toLowerCase();
+
 
             holdings.forEach((holding) => {
               if (holding.balance.isGreaterThan(0)
@@ -599,45 +606,35 @@ export default {
                 }
               }
 
-              valuationsPromises.push((done) => {
-                valuation.getValuation(holding.symbol)
-                  .then((val) => {
-                    holding.totalSupply = val.total_supply;
-                    holding.marketCap = val[`market_cap_${lowercaseCurrency}`];
-                    holding.change24hrPercent = val.percent_change_24h;
-                    holding.unitValue = val[`price_${lowercaseCurrency}`]
-                      ? parseFloat(val[`price_${lowercaseCurrency}`]) : 0;
-                    holding.unitValue24hrAgo = holding.unitValue
-                      / (1 + (holding.change24hrPercent / 100.0));
-                    holding.change24hrValue = (holding.unitValue * holding.balance)
-                      - (holding.unitValue24hrAgo * holding.balance);
-                    holding.totalValue = holding.unitValue * holding.balance;
-                    if (holding.unitValue === null || isNaN(holding.unitValue)) {
-                      holding.totalValue = null;
-                      holding.change24hrPercent = null;
-                      holding.change24hrValue = null;
-                    }
-                    done();
-                  })
-                  .catch((e) => {
-                    alerts.networkException(e);
-                    done(e);
-                  });
-              });
-            });
-            return Async.series(valuationsPromises, (e) => {
-              if (e) {
-                return reject(e);
+              const val = valuations[holding.symbol];
+              if (val) {
+                holding.totalSupply = val.total_supply;
+                holding.availableSupply = val.available_supply;
+                holding.marketCap = val[`market_cap_${lowercaseCurrency}`];
+                holding.change24hrPercent = val.percent_change_24h;
+                holding.unitValue = val[`price_${lowercaseCurrency}`]
+                  ? parseFloat(val[`price_${lowercaseCurrency}`]) : 0;
+                holding.unitValue24hrAgo = holding.unitValue
+                  / (1 + (holding.change24hrPercent / 100.0));
+                holding.change24hrValue = (holding.unitValue * holding.balance)
+                  - (holding.unitValue24hrAgo * holding.balance);
+                holding.totalValue = holding.unitValue * holding.balance;
+                if (holding.unitValue === null || isNaN(holding.unitValue)) {
+                  holding.totalValue = null;
+                  holding.change24hrPercent = null;
+                  holding.change24hrValue = null;
+                }
               }
-              const res = {};
-              res.holdings = _.sortBy(holdings, [holding => holding.symbol.toLowerCase()], ['symbol']);
-              res.totalBalance = _.sumBy(holdings, 'totalValue');
-              res.change24hrValue = _.sumBy(holdings, 'change24hrValue');
-              res.change24hrPercent = Math.round(10000 * (res.change24hrValue
-                / (res.totalBalance - res.change24hrValue))) / 100.0;
-
-              return resolve(res);
             });
+
+            const res = {};
+            res.holdings = _.sortBy(holdings, [holding => holding.symbol.toLowerCase()], ['symbol']);
+            res.totalBalance = _.sumBy(holdings, 'totalValue');
+            res.change24hrValue = _.sumBy(holdings, 'change24hrValue');
+            res.change24hrPercent = Math.round(10000 * (res.change24hrValue
+              / (res.totalBalance - res.change24hrValue))) / 100.0;
+
+            return resolve(res);
           })
           .catch(e => reject(e));
       } catch (e) {
