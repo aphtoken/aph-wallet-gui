@@ -7,8 +7,7 @@
       </template>
       <template v-else>
         <h1>{{$t('aphelionDexMain')}}</h1>
-        <!--<p>{{$t('aphelionDexIntro')}}</p> -->
-        <p>Details here:<br/><a :href="tradingDisabledUrl" :title="tradingDisabledTitle" target="_blank">{{tradingDisabledTitle}}</a></p>
+        <p>{{$t('aphelionDexIntro')}}</p>
       </template>
       <!-- TODO: Remove tech debt added here since we are hijacking this DexDemoConfirmation.vue to show MainNet. -->
     </div>
@@ -33,13 +32,6 @@ export default {
   },
 
   computed: {
-    tradingDisabledUrl() {
-      /* eslint-disable max-len */
-      return 'https://medium.com/@ianholtz/aphelion-disables-mainnet-dex-what-it-means-and-where-do-we-go-from-here-953b4dfa6bb7';
-    },
-    tradingDisabledTitle() {
-      return 'Aphelion Disables MainNet DEX - What it means and where do we go from here?';
-    },
     isTestNet() {
       const currentNetwork = this.$services.network.getSelectedNetwork();
       return currentNetwork != null && currentNetwork.net === 'TestNet';
