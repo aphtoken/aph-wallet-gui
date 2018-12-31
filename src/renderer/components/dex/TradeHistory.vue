@@ -140,6 +140,7 @@ export default {
         .cell {
           font-family: FreeMono !important;
           font-size: toRem(14px) !important;
+          font-weight: bold;
           letter-spacing: 0px;
 
           &.price {

@@ -237,6 +237,7 @@ export default {
           &.price, &.quantity {
             font-family: FreeMono !important;
             font-size: toRem(14px) !important;
+            font-weight: bold;
             letter-spacing: 0px;
             cursor: pointer;
             text-align: right;
