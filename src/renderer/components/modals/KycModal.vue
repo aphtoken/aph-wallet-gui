@@ -20,6 +20,10 @@
         <p>Unfortunately your KYC Application was denied.</p>
         <p>You must wait an additional {{ deniedRemainingMinutes }} minutes in order to try again.</p>
       </div>
+      <div v-if="kycStatus.startsWith('disabled')">
+        <p>We are temporarily not accepting KYC applications.</p>
+        <p>This issue should be remedied in the near future. Please be patient and try again later. </p>
+      </div>
     </body>
 
     <button class="dismiss-btn" @click="close">Dismiss</button>
@@ -58,6 +62,8 @@ export default {
     webFrame.setZoomFactor(1);
     const services = this.$services;
     const store = this.$store;
+    // For testing:
+    // this.$store.state.kycInProgressModalModel.kycStatus = 'disabled';
     // this.$store.state.kycInProgressModalModel.kycStatus = 'denied|100000|0';
     // this.$store.state.kycInProgressModalModel.kycStatus = 'denied|100000|100000';
     // this.$store.state.kycInProgressModalModel.kycStatus = 'manualReview|5oclock';
@@ -66,7 +72,6 @@ export default {
     const address = store.state.kycInProgressModalModel.address;
     this.handleKycStatus(store.state.kycInProgressModalModel.kycStatus);
     if (this.kycStatus === 'kycneeded') {
-      this.title = 'Proof of Non-US Resident';
       const webv = document.createElement('webview');
       webv.addEventListener('did-navigate', (event) => {
         const url = event.url;
@@ -116,7 +121,11 @@ export default {
     handleKycStatus(kycStatus) {
       console.log(`kycStatus: ${kycStatus}`);
       this.kycStatus = kycStatus;
-      const content = document.getElementById('aph-kyc-modal').getElementsByClassName('content')[0];
+      const modal = document.getElementById('aph-kyc-modal');
+      if (modal == null) return;
+      const content = modal.getElementsByClassName('content')[0];
+      if (content == null) return;
+
       if (kycStatus.startsWith('accepted')) {
         content.style.height = '300px'; // `${Math.floor(340 / 14)}rem`;
         this.title = 'KYC Accepted (whitelisting in progress...)';
@@ -138,6 +147,13 @@ export default {
         } else {
           this.kycStatus = 'kycneeded';
         }
+      } else if (kycStatus.startsWith('disabled')) {
+        content.style.height = '300px';
+        this.title = 'KYC Temporarily Disabled';
+      }
+
+      if (this.kycStatus === 'kycneeded') {
+        this.title = 'Proof of Non-US Resident';
       }
     },
     getHeader() {
