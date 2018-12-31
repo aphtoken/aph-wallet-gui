@@ -57,12 +57,14 @@ export default {
     this.zoomFactor = webFrame.getZoomFactor();
     webFrame.setZoomFactor(1);
     const services = this.$services;
+    const store = this.$store;
+    // this.$store.state.kycInProgressModalModel.kycStatus = 'denied|100000|0';
     // this.$store.state.kycInProgressModalModel.kycStatus = 'denied|100000|100000';
     // this.$store.state.kycInProgressModalModel.kycStatus = 'manualReview|5oclock';
     // this.$store.state.kycInProgressModalModel.kycStatus = 'accepted|25352352352352';
 
-    const addr = this.$store.state.kycInProgressModalModel.address;
-    this.handleKycStatus(this.$store.state.kycInProgressModalModel.kycStatus);
+    const address = store.state.kycInProgressModalModel.address;
+    this.handleKycStatus(store.state.kycInProgressModalModel.kycStatus);
     if (this.kycStatus === 'kycneeded') {
       this.title = 'Proof of Non-US Resident';
       const webv = document.createElement('webview');
@@ -78,7 +80,7 @@ export default {
               if (!waitingOnStatus) {
                 waitingOnStatus = true;
                 try {
-                  const kycStatus = await services.dex.getKycStatus(addr);
+                  const kycStatus = await services.dex.getKycStatus(address);
                   container.removeChild(webv);
                   this.handleKycStatus(kycStatus);
                   clearInterval(watchInterval);
@@ -97,9 +99,8 @@ export default {
         }
         console.log(url);
       });
-      const address = this.$services.wallets.getCurrentWallet().address;
-      const userId = await this.$services.dex.getKycUserId(address);
-      webv.src = `https://regtech.identitymind.store/viewform/54sde/?user_id=${userId}`;
+      const userId = await services.dex.getKycUserId(address);
+      webv.src = `${this.$store.state.currentNetwork.kycUrl}?user_id=${userId}`;
       webv.classList.add('kyc-webview');
       container.appendChild(webv);
     }
@@ -165,16 +166,17 @@ export default {
       justify-content: space-between;
       align-content: center;
 
-      #frame-content {
-        flex: auto;
-        width: 100%;
-      }
       .header {
         flex: 1;
         font-family: GilroySemiBold;
         font-size: toRem(30px);
         padding: $space-lg $space-lg 0;
         text-align: center;
+      }
+
+      #frame-content {
+        flex: auto;
+        width: 100%;
       }
 
       .kyc-webview {

@@ -592,7 +592,6 @@ export default {
           .then(() => {
             const lowercaseCurrency = settings.getCurrency().toLowerCase();
 
-
             holdings.forEach((holding) => {
               if (holding.balance.isGreaterThan(0)
                 || (holding.totalBalance && holding.totalBalance.isGreaterThan(0))
