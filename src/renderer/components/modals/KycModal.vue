@@ -76,10 +76,10 @@ export default {
       webv.addEventListener('did-navigate', (event) => {
         const url = event.url;
         switch (url) {
-          case 'https://testnet.aphelion-neo.com:62443/api/kyc/accept':
-          case 'https://testnet.aphelion-neo.com:62443/api/kyc/review':
-          case 'https://testnet.aphelion-neo.com:62443/api/kyc/deny':
-          case 'https://testnet.aphelion-neo.com:62443/api/kyc/repeat': {
+          case `${this.$store.state.currentNetwork.aph}/kyc/accept`:
+          case `${this.$store.state.currentNetwork.aph}/kyc/review`:
+          case `${this.$store.state.currentNetwork.aph}/kyc/deny`:
+          case `${this.$store.state.currentNetwork.aph}/kyc/repeat`: {
             let waitingOnStatus = false;
             const watchInterval = setInterval(async () => {
               if (!waitingOnStatus) {
