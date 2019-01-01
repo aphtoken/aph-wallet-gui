@@ -428,6 +428,10 @@ export default {
         const holdings = [];
         const promises = [];
 
+        if (!_.has(userAssets, store.state.currentNetwork.aph_hash)) {
+          this.addUserAsset(store.state.currentNetwork.aph_hash);
+        }
+
         const pushSystemAssetHolding = (assetId, symbol, balance) => {
           const systemAssetHolding = {
             assetId,
