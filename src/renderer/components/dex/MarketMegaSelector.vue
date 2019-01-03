@@ -215,6 +215,7 @@ export default {
           font-size: toRem(16px);
           line-height: toRem(36px);
           height: toRem(36px);
+          white-space: nowrap;
 
           .small {
             font-size: 70%;
