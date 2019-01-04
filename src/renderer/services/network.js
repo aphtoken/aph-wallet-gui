@@ -10,7 +10,7 @@ const NETWORKS = [
   {
     label: 'MainNet',
     value: {
-      aph: 'https://mainnet.aphelion-neo.com:62443/api',
+      aph: 'https://mainnet.aphelion-neo.com/api',
       aph_hash: 'a0777c3ce2b169d4a23bcba4565e3225a0122d95',
       dex_hash: 'dda17ab597c18dfa3401d7f85dae4ee04268c057',
       net: 'MainNet',
