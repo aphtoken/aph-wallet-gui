@@ -301,15 +301,15 @@ export default {
       }
     },
     estimate() {
-      const holding = this.currentMarket ?
-        this.$services.neo.getHolding(this.currentMarket.baseAssetId).unitValue :
-        0;
-
       try {
+        const holding = this.currentMarket ?
+          this.$services.neo.getHolding(this.currentMarket.baseAssetId).unitValue :
+          0;
+
         return new BigNumber(this.total).multipliedBy(
           new BigNumber(holding));
       } catch (e) {
-        console.log(e);
+        // console.log(e);
         return 0;
       }
     },
