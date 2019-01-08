@@ -2630,7 +2630,7 @@ export default {
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
           u.num2fixed8(validUntilValue).padEnd(64, '0'));
 
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, senderScriptHash);
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, u.reverseHex(senderScriptHash).padEnd(40, '0'));
 
         configResponse = await api.signTx(configResponse);
 
@@ -2772,7 +2772,7 @@ export default {
           reject('Transaction rejected');
         }
       } catch (e) {
-        reject(e.message);
+        reject(e);
       }
     });
   },
