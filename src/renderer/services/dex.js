@@ -290,8 +290,10 @@ export default {
         try {
           configResponse = await api.createTx(configResponse, 'invocation');
 
-          const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
-          configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, senderScriptHash);
+          const senderScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
+          configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, u.reverseHex(senderScriptHash).padEnd(40, '0'));
+          // NOTE: claim and compound as the manager need this:
+          // configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, u.reverseHex(senderScriptHash).padEnd(64, '0'));
           configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
             u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
           if (bringDexOnAsWitness) configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, u.reverseHex(currentNetwork.dex_hash));
@@ -303,10 +305,9 @@ export default {
               invocationScript: ('00').repeat(2),
               verificationScript: '',
             };
-            const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
             // We need to order this for the VM. The vm pulls out the verification script hashes added as attributes
             // in order lexicographically and expects the witness verification scripts to match that order.
-            if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+            if (parseInt(currentNetwork.dex_hash, 16) > parseInt(senderScriptHash, 16)) {
               configResponse.tx.scripts.push(attachInvokedContract);
             } else {
               configResponse.tx.scripts.unshift(attachInvokedContract);
@@ -484,7 +485,6 @@ export default {
         neo.monitorTransactionConfirmation(res.tx, true)
           .then(async () => {
             alerts.success(`Claimed ${withdrawAmountAfterClaim.toString()} APH to Wallet Balance.`);
-
             try {
               await store.dispatch('fetchCommitState');
             } catch (e) {
@@ -1721,10 +1721,10 @@ export default {
         }
 
         store.commit('setSystemWithdrawMergeState', { utxoCount: configResponse.tx.inputs.length - inputsFromGasFee, step: 1 });
-        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address));
+        const senderScriptHash = wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address);
         const verificationScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_MARK.padEnd(64, '0'));
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, u.reverseHex(senderScriptHash).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity.toNumber()).padEnd(64, '0'));
         if (DBG_LOG) console.log(`*block index: ${blockIndex} Valid until: ${validUntilValue}`);
@@ -1741,8 +1741,7 @@ export default {
         };
 
         // We need to order this for the VM.
-        const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(senderScriptHash, 16)) {
           configResponse.tx.scripts.push(attachInvokedContract);
         } else {
           configResponse.tx.scripts.unshift(attachInvokedContract);
@@ -2202,14 +2201,14 @@ export default {
         // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
         const blockIndex = currentNetwork.bestBlock.index;
         const validUntilValue = (blockIndex + 20) * 0.00000001;
+        const senderScriptHash = wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address);
 
         configResponse.sendingFromSmartContract = true;
         api.createTx(configResponse, 'invocation')
           .then((configResponse) => {
-            const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address));
             const verificationScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
-            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, u.reverseHex(senderScriptHash).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL, u.num2fixed8(validUntilValue).padEnd(64, '0'));
@@ -2229,9 +2228,8 @@ export default {
                 invocationScript: ('00').repeat(2),
                 verificationScript: '',
               };
-              const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
               // We need to order this for the VM.
-              if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+              if (parseInt(currentNetwork.dex_hash, 16) > parseInt(senderScriptHash, 16)) {
                 configResponse.tx.scripts.push(attachInvokedContract);
               } else {
                 configResponse.tx.scripts.unshift(attachInvokedContract);
@@ -2343,10 +2341,10 @@ export default {
         const blockIndex = currentNetwork.bestBlock.index;
         const validUntilValue = (blockIndex + 20) * 0.00000001;
 
-        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address));
+        const senderScriptHash = wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address);
         const verificationScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, u.reverseHex(senderScriptHash).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_AMOUNT, u.num2fixed8(quantity).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
@@ -2362,8 +2360,7 @@ export default {
         };
 
         // We need to order this for the VM.
-        const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(senderScriptHash, 16)) {
           configResponse.tx.scripts.push(attachInvokedContract);
         } else {
           configResponse.tx.scripts.unshift(attachInvokedContract);
@@ -2425,6 +2422,8 @@ export default {
         config.account = new wallet.Account(currentWallet.wif);
       }
 
+      const senderScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
+
       api.getClaimsFrom({
         net: network.getSelectedNetwork().net,
         url: currentNetwork.rpc,
@@ -2450,9 +2449,8 @@ export default {
               return api.createTx(configResponse, 'claim');
             })
             .then((configResponse) => {
-              const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
               configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_CLAIM_GAS.padEnd(64, '0'));
-              configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, senderScriptHash);
+              configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, u.reverseHex(senderScriptHash).padEnd(40, '0'));
               // TODO: may want to use a different attribute; ledger was having a singing issue and may be due to this attribute.
               configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
                 u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0));
@@ -2470,8 +2468,7 @@ export default {
               };
 
               // We need to order this for the VM.
-              const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-              if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+              if (parseInt(currentNetwork.dex_hash, 16) > parseInt(senderScriptHash, 16)) {
                 configResponse.tx.scripts.push(attachInvokedContract);
               } else {
                 configResponse.tx.scripts.unshift(attachInvokedContract);
@@ -2626,9 +2623,9 @@ export default {
         const blockIndex = currentNetwork.bestBlock.index;
         const validUntilValue = (blockIndex + 20) * 0.00000001;
 
-        const senderScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+        const senderScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
         configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, '93'.padEnd(64, '0'));
-        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, senderScriptHash.padEnd(64, '0'));
+        configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, u.reverseHex(senderScriptHash).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_SYSTEM_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
         configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_VALIDUNTIL,
           u.num2fixed8(validUntilValue).padEnd(64, '0'));
@@ -2643,8 +2640,7 @@ export default {
         };
 
         // We need to order this for the VM.
-        const acct = configResponse.privateKey ? new wallet.Account(configResponse.privateKey) : new wallet.Account(configResponse.publicKey);
-        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(acct.scriptHash, 16)) {
+        if (parseInt(currentNetwork.dex_hash, 16) > parseInt(senderScriptHash, 16)) {
           configResponse.tx.scripts.push(attachInvokedContract);
         } else {
           configResponse.tx.scripts.unshift(attachInvokedContract);
