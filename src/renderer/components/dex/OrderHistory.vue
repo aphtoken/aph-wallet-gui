@@ -24,7 +24,7 @@
                 <tr v-for="(order, index) in filteredOrders" :key="index">
                   <td :class="['side', {green: order.side === 'Buy', red: order.side === 'Sell'}]">{{ order.side }}</td>
                   <td class="market">{{ order.marketName }}</td>
-                  <td class="filled">{{ $formatNumber(order.quantity - order.quantityRemaining) }}</td>
+                  <td class="filled">{{ $formatNumber(filledQuantity(order)) }}</td>
                   <td class="units-total">{{ $formatNumber(order.quantity) }}</td>
                   <td class="price">{{ $formatNumber(order.price) }}</td>
                   <td class="created">{{ $formatDateShort(order.created) }} {{ $formatTime(order.created) }}</td>
@@ -66,6 +66,8 @@
 </template>
 
 <script>
+import { BigNumber } from 'bignumber.js';
+
 let loadOrdersIntervalId;
 let cancelledOrders = {};
 
@@ -165,6 +167,10 @@ export default {
     },
     loadOrdersSilently() {
       this.$store.dispatch('fetchOrderHistory', { isRequestSilent: true });
+    },
+
+    filledQuantity(order) {
+      return BigNumber(order.quantity).minus(order.quantityRemaining);
     },
 
     cancelOrder(order) {
