@@ -1987,8 +1987,9 @@ export default {
     });
 
     if (book.asks.length > 0 && book.bids.length > 0) {
-      book.spread = book.asks[0].price - book.bids[0].price;
-      book.spreadPercentage = Math.round((book.spread / book.asks[0].price) * 10000) / 100;
+      book.spread = book.asks[0].price.minus(book.bids[0].price);
+      book.spreadPercentage = book.spread.dividedBy(book.asks[0].price)
+        .multipliedBy(10000).decimalPlaces(0, BigNumber.ROUND_DOWN) / 100;
     }
 
     let runningAsks = new BigNumber(0);
