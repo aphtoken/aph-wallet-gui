@@ -7,51 +7,32 @@ const VALID_STATUS = 0x9000;
 let currentLedger = null;
 let currentDevice = null;
 export default {
-  open() {
-    return new Promise((resolve, reject) => {
-      try {
-        return LedgerNode.isSupported()
-          .then((supported) => {
-            if (!supported) {
-              return reject('Your computer does not support the ledger!');
-            }
 
-            return LedgerNode.list()
-              .then((paths) => {
-                if (paths.length === 0) {
-                  return reject('No Ledger device found. Please plugin your Ledger in, '
-                    + 'unlock it and open the NEO application.');
-                }
-
-                const path = paths[0];
-                return LedgerNode.open(path)
-                  .then((res) => {
-                    currentDevice = res;
-                    this.getPublicKey()
-                      .then(() => {
-                        currentLedger = this;
-                        resolve(currentDevice);
-                      })
-                      .catch(() => {
-                        return reject('Please plugin your Ledger in, '
-                          + 'unlock it and open the NEO application.');
-                      });
-                  })
-                  .catch(({ message }) => {
-                    return reject(message);
-                  });
-              })
-              .catch(({ message }) => {
-                return reject(message);
-              });
-          })
-          .catch(({ message }) => {
-            return reject(message);
-          });
-      } catch ({ message }) {
-        return reject(message);
+  async open() {
+    try {
+      const supported = await LedgerNode.isSupported();
+      if (!supported) {
+        throw Error('Your computer does not support the ledger!');
       }
-    });
+      const paths = await LedgerNode.list();
+      if (paths.length === 0) {
+        throw Error('No Ledger device found. Please plug your Ledger in, '
+        + 'unlock it and open the NEO application.');
+      }
+
+      const path = paths[0];
+      currentDevice = await LedgerNode.open(path);
+      try {
+        await this.getPublicKey();
+      } catch (e) {
+        throw Error('Please plug your Ledger in, unlock it and open the NEO application.');
+      }
+
+      currentLedger = this;
+      return currentDevice;
+    } catch ({ message }) {
+      throw message;
+    }
   },
 
   close() {

@@ -43,32 +43,40 @@ export default {
   data() {
     return {
       connected: null,
+      verifying: null,
     };
   },
 
   methods: {
-    checkLedgerStatus() {
-      if (this.connected === true) {
+    async checkLedgerStatus() {
+      if (this.connected || this.verifying) {
         return;
       }
 
-      this.$store.dispatch('verifyLedgerConnection', {
-        done: () => {
-          this.connected = true;
-          this.login();
-        },
-        failed: () => {
-          this.connected = false;
-        },
-      });
+      try {
+        this.verifying = true;
+        await new Promise(async (resolve, reject) => {
+          this.$store.dispatch('verifyLedgerConnection', {
+            done: async () => {
+              this.connected = true;
+              await this.login();
+              resolve();
+            },
+            failed: () => reject(),
+          });
+        });
+      } catch (e) {
+        this.connected = false;
+      }
+      this.verifying = false;
     },
 
-    login() {
+    async login() {
       if (!this.connected) {
         return;
       }
 
-      this.$store.dispatch('openLedger', {
+      await this.$store.dispatch('openLedger', {
         done: () => {
           this.$router.push('/authenticated/dashboard');
         },

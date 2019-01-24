@@ -446,9 +446,11 @@ export default {
           .then((transaction) => {
             // send the signed transactions to the api for relay
             const currentNetwork = network.getSelectedNetwork();
+            const currentWallet = wallets.getCurrentWallet();
             axios.delete(`${currentNetwork.aph}/order/${order.marketName}/${order.offerId}/${tx.serializeTransaction(transaction.tx, true)}`)
               .then((res) => {
                 if (res.data.result) {
+                  neo.applyTxToAddressSystemAssetBalance(currentWallet.address, transaction.tx, false);
                   resolve('Order Cancelled');
                 } else {
                   reject('Cancel failed');
@@ -484,6 +486,7 @@ export default {
         alerts.success('Claim relayed, waiting for confirmation...');
         neo.monitorTransactionConfirmation(res.tx, true)
           .then(async () => {
+            neo.applyTxToAddressSystemAssetBalance(wallets.getCurrentWallet().address, res.tx, true);
             alerts.success(`Claimed ${withdrawAmountAfterClaim.toString()} APH to Wallet Balance.`);
             try {
               await store.dispatch('fetchCommitState');
@@ -519,6 +522,7 @@ export default {
               alerts.success('Commit relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
+                  neo.applyTxToAddressSystemAssetBalance(wallets.getCurrentWallet().address, res.tx, true);
                   setTimeout(async () => {
                     try {
                       await store.dispatch('fetchCommitState');
@@ -605,6 +609,7 @@ export default {
               alerts.success('Compound relayed, waiting for confirmation...');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
+                  neo.applyTxToAddressSystemAssetBalance(wallets.getCurrentWallet().address, res.tx, true);
                   setTimeout(async () => {
                     try {
                       await store.dispatch('fetchCommitState');
@@ -642,6 +647,7 @@ export default {
         let neoToSend = 0;
         let gasToSend = 0;
         let holding = null;
+        const currentWallet = wallets.getCurrentWallet();
 
         if (assetId === assets.NEO) {
           holding = neo.getHolding(assets.NEO);
@@ -671,6 +677,7 @@ export default {
               assetId, quantity);
             if (DBG_LOG) console.log(`Attempting approval of ${assetId}`);
             await neo.monitorTransactionConfirmation(res.tx, true);
+            neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
             alerts.info(`Confirmed approval of ${quantity} ${holding.symbol} for deposit.`);
             // TODO: wait a few seconds before issuing deposit for UTXOs to settle.
           }
@@ -687,7 +694,7 @@ export default {
                 alerts.success('Deposit relayed, waiting for confirmation...');
                 neo.monitorTransactionConfirmation(res.tx, true)
                   .then(() => {
-                    neo.applyTxToAddressSystemAssetBalance(wallets.getCurrentWallet().address, res.tx, true);
+                    neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
                     resolve(res.tx);
                   })
                   .catch((e) => {
@@ -727,6 +734,7 @@ export default {
             return api.sendTx(configResponse);
           })
           .then((configResponse) => {
+            neo.applyTxToAddressSystemAssetBalance(wallets.getCurrentWallet().address, configResponse.tx, false);
             resolve({
               success: configResponse.response.result,
               tx: configResponse.tx,
@@ -1832,6 +1840,7 @@ export default {
         }
 
         Vue.set(order, 'status', 'Submitting');
+        const currentWallet = wallets.getCurrentWallet();
 
         // build all the order transactions
         for (let i = 0; i < order.offersToTake.length; i += 1) {
@@ -1840,6 +1849,8 @@ export default {
           // need to ignore this rule, each of these build operations has to happen in order
           // that way they'll each select the right UTXO inputs
           await this.buildAcceptOffer((order.side === 'Buy' ? 'Sell' : 'Buy'), order.orderType, order.market, offer);
+          // TODO: AcceptOffer has to be applied immediately in order to get different UTXO, in future wait to apply...
+          neo.applyTxToAddressSystemAssetBalance(currentWallet.address, offer.tx, false);
           /* eslint-enable no-await-in-loop */
         }
 
@@ -1876,6 +1887,7 @@ export default {
             } else if (res.data.result.error) {
               reject(`Order failed. Error: ${res.data.result.error}`);
             } else {
+              if (order.makerTx) neo.applyTxToAddressSystemAssetBalance(currentWallet.address, order.makerTx, false);
               const responseQuantityToTake = new BigNumber(res.data.quantityToTake);
               const responseQuantityTaken = new BigNumber(res.data.quantityTaken);
 
@@ -2076,12 +2088,14 @@ export default {
                 return;
               }
               store.commit('setSystemWithdrawMergeState', { step: 2 });
+              const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
+              neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, false);
 
               alerts.success('Withdraw Mark Step Relayed. Waiting for confirmation.');
               neo.monitorTransactionConfirmation(res.tx, true)
                 .then(() => {
                   store.commit('setSystemWithdrawMergeState', { step: 3 });
-                  const dexAddress = wallet.getAddressFromScriptHash(store.state.currentNetwork.dex_hash);
+
                   // Must allow funds to be sent again by moving tx outputs to unspent.
                   neo.applyTxToAddressSystemAssetBalance(dexAddress, res.tx, true);
 

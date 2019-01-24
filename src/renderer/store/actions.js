@@ -459,44 +459,21 @@ function openEncryptedKey({ commit }, { encryptedKey, passphrase, done }) {
   }, timeouts.NEO_API_CALL);
 }
 
-function openLedger({ commit }, { done, failed }) {
+async function openLedger({ commit }, { done, failed }) {
   commit('startRequest', { identifier: 'openLedger' });
 
-  ledger.close()
-    .then(() => {
-      ledger.open()
-        .then(() => {
-          ledger.getPublicKey()
-            .then((publicKey) => {
-              wallets.openLedger(publicKey)
-                .then(() => {
-                  done();
-
-                  setTimeout(() => {
-                    ledger.close();
-                  }, 5 * 1000);
-
-                  commit('endRequest', { identifier: 'openLedger' });
-                })
-                .catch((e) => {
-                  failed(e);
-                  commit('failRequest', { identifier: 'openLedger', message: e });
-                });
-            })
-            .catch((e) => {
-              failed(e);
-              commit('failRequest', { identifier: 'openLedger', message: e });
-            });
-        })
-        .catch((e) => {
-          failed(e);
-          commit('failRequest', { identifier: 'openLedger', message: e });
-        });
-    })
-    .catch((e) => {
-      failed(e);
-      commit('failRequest', { identifier: 'openLedger', message: e });
-    });
+  try {
+    await ledger.close();
+    await ledger.open();
+    const publicKey = await ledger.getPublicKey();
+    await wallets.openLedger(publicKey);
+    await ledger.close();
+    done();
+    commit('endRequest', { identifier: 'openLedger' });
+  } catch (e) {
+    failed(e);
+    commit('failRequest', { identifier: 'openLedger', message: e });
+  }
 }
 
 function openPrivateKey({ commit }, { wif, done }) {
@@ -607,16 +584,15 @@ async function unsubscribeFromMarket({ state, commit }, { market }) {
   }
 }
 
-function verifyLedgerConnection({ commit }, { done, failed }) {
+async function verifyLedgerConnection({ commit }, { done, failed }) {
   commit('startRequest', { identifier: 'verifyLedgerConnection' });
 
-  ledger.open()
-    .then(() => {
-      done();
-      commit('endRequest', { identifier: 'verifyLedgerConnection' });
-    })
-    .catch((e) => {
-      failed(e);
-      commit('failRequest', { identifier: 'verifyLedgerConnection', message: e });
-    });
+  try {
+    await ledger.open();
+    done();
+    commit('endRequest', { identifier: 'verifyLedgerConnection' });
+  } catch (e) {
+    failed(e);
+    commit('failRequest', { identifier: 'verifyLedgerConnection', message: e });
+  }
 }

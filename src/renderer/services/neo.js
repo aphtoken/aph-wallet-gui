@@ -2,6 +2,7 @@ import {
   wallet,
   api,
   u,
+  tx,
 } from '@cityofzion/neon-js';
 import _ from 'lodash';
 import { BigNumber } from 'bignumber.js';
@@ -18,6 +19,7 @@ import { store } from '../store';
 import { timeouts, intervals } from '../constants';
 import { toBigNumber } from './formatting.js';
 
+const { Transaction } = tx;
 const DBG_LOG = false;
 
 const GAS_ASSET_ID = '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7';
@@ -844,8 +846,10 @@ export default {
             return this.monitorTransactionConfirmation(res.tx, checkRpcForDetails)
               .then(() => {
                 if (isNep5 === false) {
-                  // Make change immediately available to spend.
-                  this.applyTxToAddressSystemAssetBalance(store.state.currentWallet.address, res.tx, true);
+                  // TODO: verify this only makes the change available to spend and doesn't try to add the other
+                  // TODO: utxo outputs too
+                  // this.applyTxToAddressSystemAssetBalance(store.state.currentWallet.address, res.tx, true);
+                  // Make change immediately available to spend
                 }
                 return resolve(res.tx);
               })
@@ -893,8 +897,11 @@ export default {
           config.signingFunction = ledger.signWithLedger;
         }
 
+        // TODO: this probably should happen as an action to update the balance without chance of race condition
         return api.sendAsset(config)
           .then((res) => {
+            // api.sendAsset already applies the transaction to the balance, but if a block has passed and
+            // fetchSystemAssetBalances() retrieved balance again the cached object changes, so we need to apply again.
             this.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx);
             return res;
           })
@@ -938,7 +945,12 @@ export default {
       config.address = currentWallet.address;
 
       return api.doInvoke(config)
-        .then(res => res)
+        .then((res) => {
+          // api.doInvoke already applies the transaction to the balance, but if a block has passed and
+          // fetchSystemAssetBalances() retrieved balance again the cached object changes, so we need to apply again.
+          this.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, false);
+          return res;
+        })
         .catch((e) => {
           alerts.exception(e);
         });
@@ -948,7 +960,10 @@ export default {
     config.account = account;
 
     return api.doInvoke(config)
-      .then(res => res)
+      .then((res) => {
+        this.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, false);
+        return res;
+      })
       .catch((e) => {
         alerts.exception(e);
       });
@@ -986,7 +1001,10 @@ export default {
       config.address = currentWallet.address;
 
       return api.doInvoke(config)
-        .then(res => res)
+        .then((res) => {
+          this.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, false);
+          return res;
+        })
         .catch((e) => {
           alerts.exception(e);
         });
@@ -996,7 +1014,10 @@ export default {
     config.account = account;
 
     return api.doInvoke(config)
-      .then(res => res)
+      .then((res) => {
+        this.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, false);
+        return res;
+      })
       .catch((e) => {
         alerts.exception(e);
       });
@@ -1259,6 +1280,7 @@ export default {
   },
 
   applyTxToAddressSystemAssetBalance(address, tx, confirmed) {
+    tx = tx instanceof Transaction ? tx : Transaction.deserialize(tx);
     if (_.has(addressBalances, address)) {
       const existingBalance = _.get(addressBalances, address);
       existingBalance.balance.balance.applyTx(tx, confirmed);
@@ -1434,8 +1456,10 @@ export default {
                 return api.sendTx(config);
               })
               .then((config) => {
+                this.applyTxToAddressSystemAssetBalance(currentWallet.address, config.tx, false);
                 this.monitorTransactionConfirmation(config.tx, true)
                   .then(() => {
+                    this.applyTxToAddressSystemAssetBalance(currentWallet.address, config.tx, true);
                     resolve({
                       success: config.response.result,
                       tx: config.tx,
