@@ -43,15 +43,17 @@ export default {
   data() {
     return {
       connected: null,
+      verifying: null,
     };
   },
 
   methods: {
     checkLedgerStatus() {
-      if (this.connected === true) {
+      if (this.connected === true || this.verifying) {
         return;
       }
 
+      this.verifying = true;
       this.$store.dispatch('verifyLedgerConnection', {
         done: () => {
           this.connected = true;
@@ -59,6 +61,7 @@ export default {
         },
         failed: () => {
           this.connected = false;
+          this.verifying = false;
         },
       });
     },
@@ -70,10 +73,12 @@ export default {
 
       this.$store.dispatch('openLedger', {
         done: () => {
+          this.verifying = false;
           this.$router.push('/authenticated/dashboard');
         },
         failed: () => {
           this.connected = false;
+          this.verifying = false;
         },
       });
     },
