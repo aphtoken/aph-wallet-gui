@@ -694,7 +694,11 @@ export default {
                 alerts.success('Deposit relayed, waiting for confirmation...');
                 neo.monitorTransactionConfirmation(res.tx, true)
                   .then(() => {
-                    neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
+                    if (assetId !== assets.NEO && assetId !== assets.GAS) {
+                      // Can't apply for NEO or GAS deposits, because it won't distinguish the new UTXO change from the
+                      // amounts sent.
+                      neo.applyTxToAddressSystemAssetBalance(currentWallet.address, res.tx, true);
+                    }
                     resolve(res.tx);
                   })
                   .catch((e) => {
