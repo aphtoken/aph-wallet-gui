@@ -46,7 +46,7 @@ const binSizeToBinCountMap = {
 const DBG_LOG = false;
 const assetUTXOsToIgnore = {};
 const contractUTXOsReservedFor = {};
-const userIds = { MainNet: { }, TestNet: { } };
+const userIds = { MainNet: { }, TestNet: { }, PrivNet: { } };
 
 /* eslint-disable max-len */
 export default {
@@ -178,7 +178,7 @@ export default {
 
         if (order.assetIdToSell === assets.NEO) {
           const neoHolding = neo.getHolding(assets.NEO);
-          if (neoHolding.contractBalance < order.quantityToSell) {
+          if (neoHolding.contractBalance.isLessThan(order.quantityToSell)) {
             neoToSend = toBigNumber(order.quantityToSell).minus(neoHolding.contractBalance);
 
             const toDepositTruncated = new BigNumber(neoToSend.toFixed(0));
@@ -197,7 +197,7 @@ export default {
 
         if (order.assetIdToSell === assets.GAS) {
           const gasHolding = neo.getHolding(assets.GAS);
-          if (gasHolding.contractBalance < order.quantityToSell) {
+          if (gasHolding.contractBalance.isLessThan(order.quantityToSell)) {
             gasToSend = toBigNumber(order.quantityToSell).minus(gasHolding.contractBalance);
             if (gasToSend.isGreaterThan(gasHolding.balance)) {
               reject('Insufficient GAS.');
