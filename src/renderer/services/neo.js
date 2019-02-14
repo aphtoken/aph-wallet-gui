@@ -1581,7 +1581,7 @@ export default {
               setTimeout(() => {
                 // send the claim gas
                 this.sendClaimGas(gasClaim);
-              }, 30 * 1000);
+              }, 10 * 1000);
             })
             .catch((e) => {
               gasClaim.error = e;

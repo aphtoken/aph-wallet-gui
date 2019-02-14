@@ -73,6 +73,9 @@ export default {
     this.handleKycStatus(store.state.kycInProgressModalModel.kycStatus);
     if (this.kycStatus === 'kycneeded') {
       const webv = document.createElement('webview');
+      // webv.useragent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)' +
+      //   ' Chrome/70.0.3538.77 Safari/537.36';
+      // console.log(`user agent for webview: ${webv.getUserAgent()}`);
       webv.addEventListener('did-navigate', (event) => {
         const url = event.url;
         switch (url) {

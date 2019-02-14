@@ -227,7 +227,8 @@ export default {
     });
   },
 
-  buildContractTransaction(operation, parameters, neoToSend, gasToSend, bringDexOnAsWitness = false) {
+  buildContractTransaction(operation, parameters, neoToSend, gasToSend, bringDexOnAsWitness = false,
+    overrideAddress = null) {
     return new Promise(async (resolve, reject) => {
       try {
         const currentNetwork = network.getSelectedNetwork();
@@ -292,8 +293,9 @@ export default {
 
           const senderScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
           configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, u.reverseHex(senderScriptHash).padEnd(40, '0'));
-          // NOTE: claim and compound as the manager need this:
-          // configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, u.reverseHex(senderScriptHash).padEnd(64, '0'));
+          if (overrideAddress) {
+            configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, u.reverseHex(overrideAddress).padEnd(64, '0'));
+          }
           configResponse.tx.addAttribute(TX_ATTR_USAGE_HEIGHT,
             u.num2fixed8(currentNetwork.bestBlock != null ? currentNetwork.bestBlock.index : 0).padEnd(64, '0'));
           if (bringDexOnAsWitness) configResponse.tx.addAttribute(TX_ATTR_USAGE_VERIFICATION, u.reverseHex(currentNetwork.dex_hash));
@@ -729,10 +731,10 @@ export default {
     });
   },
 
-  executeContractTransaction(operation, parameters, neoToSend, gasToSend, bringDexOnAsWitness = false) {
+  executeContractTransaction(operation, parameters, neoToSend, gasToSend, bringDexOnAsWitness = false, overrideAddress = null) {
     return new Promise((resolve, reject) => {
       try {
-        this.buildContractTransaction(operation, parameters, neoToSend, gasToSend, bringDexOnAsWitness)
+        this.buildContractTransaction(operation, parameters, neoToSend, gasToSend, bringDexOnAsWitness, overrideAddress)
           .then((configResponse) => {
             if (DBG_LOG) console.log(`executeContractTransaction ${JSON.stringify(configResponse)}`);
             return api.sendTx(configResponse);
@@ -2220,12 +2222,13 @@ export default {
         // Valid until amount gets converted to BigInteger so the block number needs to be converted to smallest units.
         const blockIndex = currentNetwork.bestBlock.index;
         const validUntilValue = (blockIndex + 20) * 0.00000001;
+        const walletScriptHash = wallet.getScriptHashFromAddress(currentWallet.address);
         const senderScriptHash = wallet.getScriptHashFromAddress(overrideAddress || currentWallet.address);
 
         configResponse.sendingFromSmartContract = true;
         api.createTx(configResponse, 'invocation')
           .then((configResponse) => {
-            const verificationScriptHash = u.reverseHex(wallet.getScriptHashFromAddress(currentWallet.address));
+            const verificationScriptHash = u.reverseHex(walletScriptHash);
             configResponse.tx.addAttribute(TX_ATTR_USAGE_SIGNATURE_REQUEST_TYPE, SIGNATUREREQUESTTYPE_WITHDRAWSTEP_WITHDRAW.padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_ADDRESS, u.reverseHex(senderScriptHash).padEnd(64, '0'));
             configResponse.tx.addAttribute(TX_ATTR_USAGE_WITHDRAW_NEP5_ASSET_ID, u.reverseHex(assetId).padEnd(64, '0'));
@@ -2248,7 +2251,7 @@ export default {
                 verificationScript: '',
               };
               // We need to order this for the VM.
-              if (parseInt(currentNetwork.dex_hash, 16) > parseInt(senderScriptHash, 16)) {
+              if (parseInt(currentNetwork.dex_hash, 16) > parseInt(walletScriptHash, 16)) {
                 configResponse.tx.scripts.push(attachInvokedContract);
               } else {
                 configResponse.tx.scripts.unshift(attachInvokedContract);
