@@ -216,10 +216,15 @@ export default {
       this.$store.commit('setCommitModalModel', null);
     },
     commitConfirmed(amount) {
-      this.$services.dex.commitAPH(new BigNumber(amount).toNumber());
+      if (!this.$services.dex.isNewerDexContractAvailable()) {
+        this.$services.dex.commitAPH(new BigNumber(amount).toNumber());
+      } else if (!this.$store.state.latestVersion) {
+        this.$services.alerts.error('Commit Failed. Cannot determine latest contract version. Please restart the wallet and try again.');
+      } else {
+        this.$services.alerts.error('Commit Failed. The contract has been updated. You must upgrade to the latest wallet version to commit.');
+      }
       this.hideCommitModal();
     },
-
     showClaimModal() {
       if (this.$store.state.commitState.quantityCommitted <= 0) {
         /* eslint-disable max-len */

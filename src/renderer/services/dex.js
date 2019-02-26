@@ -2428,6 +2428,15 @@ export default {
     });
   },
 
+  isNewerDexContractAvailable() {
+    if (!store.state.latestVersion) {
+      return true;
+    }
+    const currentNetworkLatestDexScriptHash = store.state.currentNetwork.net === 'MainNet' ?
+      store.state.latestVersion.prodExchangeScriptHash : store.state.latestVersion.testExchangeScriptHash;
+    return currentNetworkLatestDexScriptHash.replace('0x', '') !== store.state.currentNetwork.dex_hash;
+  },
+
   claimGasForDexContract() {
     return new Promise((resolve, reject) => {
       const currentWallet = wallets.getCurrentWallet();

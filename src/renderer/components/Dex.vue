@@ -56,21 +56,12 @@ export default {
   },
 
   computed: {
-    isOutOfDate() {
-      if (!this.$store.state.latestVersion) {
-        return true;
-      }
-      const currentNetworkLatestDexScriptHash = this.$store.state.currentNetwork.net === 'MainNet' ?
-        this.$store.state.latestVersion.prodExchangeScriptHash : this.$store.state.latestVersion.testExchangeScriptHash;
-      return currentNetworkLatestDexScriptHash.replace('0x', '') !== this.$store.state.currentNetwork.dex_hash;
-    },
-
     shouldShowDemoConfirmation() {
-      return (!this.acceptDexDemoVersion && !this.isOutOfDate) || this.showLearnMore;
+      return (!this.acceptDexDemoVersion && !this.$services.dex.isNewerDexContractAvailable()) || this.showLearnMore;
     },
 
     shouldShowOutOfDate() {
-      return this.isOutOfDate && !this.$store.state.acceptDexOutOfDate;
+      return this.$services.dex.isNewerDexContractAvailable() && !this.$store.state.acceptDexOutOfDate;
     },
 
     ...mapGetters([

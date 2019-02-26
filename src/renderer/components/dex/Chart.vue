@@ -198,12 +198,7 @@ export default {
     },
 
     isOutOfDate() {
-      if (!this.$store.state.latestVersion) {
-        return true;
-      }
-      const currentNetworkLatestDexScriptHash = this.$store.state.currentNetwork.net === 'MainNet' ?
-        this.$store.state.latestVersion.prodExchangeScriptHash : this.$store.state.latestVersion.testExchangeScriptHash;
-      return currentNetworkLatestDexScriptHash.replace('0x', '') !== this.$store.state.currentNetwork.dex_hash;
+      return this.$services.dex.isNewerDexContractAvailable();
     },
 
     isTradingDisabled() {

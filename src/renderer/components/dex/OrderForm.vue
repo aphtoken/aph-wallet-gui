@@ -114,7 +114,7 @@ const ORDER_TYPES_LIST = [
 let loadHoldingsIntervalId;
 let storeUnwatch;
 
-const whitelistedAddressesByNetwork = { MainNet: { }, TestNet: { } };
+const whitelistedAddressesByNetwork = { MainNet: { }, TestNet: { }, PrivNet: { } };
 
 export default {
   components: {
@@ -155,16 +155,7 @@ export default {
     },
 
     isTradingDisabled() {
-      return this.isOutOfDate || this.isMarketClosed;
-    },
-
-    isOutOfDate() {
-      if (!this.$store.state.latestVersion) {
-        return true;
-      }
-      const currentNetworkLatestDexScriptHash = this.$store.state.currentNetwork.net === 'MainNet' ?
-        this.$store.state.latestVersion.prodExchangeScriptHash : this.$store.state.latestVersion.testExchangeScriptHash;
-      return currentNetworkLatestDexScriptHash.replace('0x', '') !== this.$store.state.currentNetwork.dex_hash;
+      return this.$services.dex.isNewerDexContractAvailable() || this.isMarketClosed;
     },
 
     isMarketClosed() {
@@ -705,16 +696,6 @@ export default {
 
     async setMarket() {
       console.log(wallet.getScriptHashFromAddress(this.$services.wallets.getCurrentWallet().address));
-      /*
-      await this.$services.dex.setManager(
-        wallet.getScriptHashFromAddress(''))
-        .then(() => {
-          this.$services.alerts.success('Set Manager');
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
-      */
 
       try {
 
@@ -727,6 +708,8 @@ export default {
     async reclaimOrhphanFunds() {
       this.$services.alerts.info('Start reclaim of orphaned GAS');
       await this.$services.dex.reclaimOrphanFundsToOwner(this.$services.assets.GAS);
+      // await this.$services.dex.reclaimOrphanFundsToOwner('3a4acd3647086e7c44398aac0349802e6a171129');
+      // this.$services.assets.NEO);
     },
 
     async setMinimumClaimBlocks() {
@@ -740,9 +723,9 @@ export default {
     },
 
     collapseDexUtxos() {
-      // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.GAS, 20, 0, false)
-      // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 1, 1, true)
-      this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 20, 1, false)
+      // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.GAS, 10, 0, false)
+      // this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 10, 30, true)
+      this.$services.dex.collapseSmallestContractUTXOs(this.$services.assets.NEO, 10, 1, true)
         .then(() => {
           this.$services.alerts.success('Sent TX to collapse UTXOs');
         })
@@ -751,14 +734,20 @@ export default {
         });
     },
 
-    claimGasForDexContract() {
-      this.$services.dex.claimGasForDexContract()
-        .then(() => {
-          this.$services.alerts.success(this.$t('claimGasForDexContract'));
-        })
-        .catch((e) => {
-          this.$services.alerts.exception(e);
-        });
+    async claimGasForDexContract() {
+      try {
+        const timeout = millis => new Promise(res => setTimeout(res, millis));
+        let result;
+        do {
+          result = await this.$services.dex.claimGasForDexContract();
+          console.log(`totalClaims ${result.totalClaims.claims.length}`);
+          await this.$services.neo.monitorTransactionConfirmation(result.tx, true);
+          // perhaps wait for another block so the explorer will pick up new claims info
+          await timeout(30000);
+        } while (result.totalClaims.claims.length > 20);
+      } catch (e) {
+        this.$services.alerts.exception(e);
+      }
     },
   },
 };
