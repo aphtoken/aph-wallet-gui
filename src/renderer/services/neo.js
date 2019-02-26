@@ -546,6 +546,22 @@ export default {
           }
         });
 
+        const resp = (await rpcClient.query({ method: 'getcontractbalances',
+          params: [
+            currentNetwork.dex_hash,
+            wallet.getScriptHashFromAddress(currentWallet.address)],
+        })).result;
+
+        if (resp) {
+          const contractBalances = {};
+          resp.balance.forEach((asset) => {
+            contractBalances[asset.asset_hash] = asset.amount;
+            holdings.forEach((holding) => {
+              holding.contractBalance = toBigNumber(contractBalances[holding.assetId] || 0);
+            });
+          });
+        }
+
         const fetchHoldingBalanceComponent = (fetchFunc, memberBeingFetched, holding) => {
           return fetchFunc.call(dex, holding.assetId)
             .then((res) => {
@@ -566,7 +582,7 @@ export default {
 
         const valuationSymbols = [];
         holdings.forEach((holding) => {
-          promises.push(fetchHoldingBalanceComponent(dex.fetchContractBalance, 'contractBalance', holding));
+          // promises.push(fetchHoldingBalanceComponent(dex.fetchContractBalance, 'contractBalance', holding));
           promises.push(fetchHoldingBalanceComponent(dex.fetchOpenOrderBalance, 'openOrdersBalance', holding));
 
           if (holding.symbol === 'NEO') {
