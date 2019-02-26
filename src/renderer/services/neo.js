@@ -556,9 +556,14 @@ export default {
           const contractBalances = {};
           resp.balance.forEach((asset) => {
             contractBalances[asset.asset_hash] = asset.amount;
-            holdings.forEach((holding) => {
-              holding.contractBalance = toBigNumber(contractBalances[holding.assetId] || 0);
-            });
+            if (!_.has(userAssets, asset.asset_hash)) {
+              // Add any missing assets that have contract balance.
+              assets.addUserAsset(asset.asset_hash);
+            }
+          });
+
+          holdings.forEach((holding) => {
+            holding.contractBalance = toBigNumber(contractBalances[holding.assetId] || 0);
           });
         }
 
