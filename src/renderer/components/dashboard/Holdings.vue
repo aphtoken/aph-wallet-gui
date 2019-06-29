@@ -94,6 +94,7 @@ export default {
   display: flex;
   flex-direction: column;
   margin: $space;
+  padding: $space;
 
   .body {
     overflow: auto;

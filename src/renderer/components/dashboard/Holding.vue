@@ -1,5 +1,5 @@
 <template>
-  <div class="holding" @click="handleOnClick">
+  <div class="dashboard-holding" @click="handleOnClick">
     <div class="left">
       <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
       <div class="token">
@@ -8,10 +8,10 @@
           <div v-if="holding.change24hrPercent > 0" class="change increase">({{ $formatNumber(holding.change24hrPercent) }}%)</div>
           <div v-if="holding.change24hrPercent < 0" class="change decrease">({{ $formatNumber(holding.change24hrPercent) }}%)</div>
         </div>
+        <div class="center" v-if="canBeRemoved">
+          <div class="remove" @click="handleOnRemove">{{$t('remove')}}</div>
+        </div>
       </div>
-    </div>
-    <div class="center" v-if="canBeRemoved">
-      <div class="remove" @click="handleOnRemove">{{$t('remove')}}</div>
     </div>
     <div class="right">
       <div class="balance">
@@ -20,6 +20,7 @@
           <span class="value">{{ holding.symbol }}</span>
         </div>
         <div class="value">{{ $formatMoney(holding.balance * holding.unitValue) }}</div>
+        <claim-gas-button v-if="this.holding.symbol === 'NEO'"></claim-gas-button>
       </div>
     </div>
   </div>
@@ -88,16 +89,16 @@ export default {
 </script>
 
 <style lang="scss">
-.holding {
+.dashboard-holding {
   align-items: center;
   background: white;
   border-radius: $border-radius;
   cursor: pointer;
   display: flex;
-  padding: 1.5rem;
+  padding: $space;
 
   &:hover {
-    background: $border-grey;
+    background: $lightest-grey;
   }
 
   &.active {
@@ -165,9 +166,7 @@ export default {
     @include transition(background-color, color, opacity, visibility);
 
     cursor: pointer;
-    opacity: 0;
-    padding: $space;
-    visibility: none;
+    margin-top: $space-sm;
 
     &:hover {
       color: $purple;
@@ -188,6 +187,10 @@ export default {
       .value {
         margin: 0 0 0 $space-sm ;
       }
+    }
+
+    .claim-gas-button {
+      margin-top: $space-sm
     }
   }
 

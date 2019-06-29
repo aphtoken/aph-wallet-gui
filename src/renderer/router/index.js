@@ -178,9 +178,9 @@ export default new Router({
               path: '',
               components: {
                 'bottom-left': require('@/components/settings/AddressBook').default,
-                'right-first': require('@/components/settings/Wallets').default,
-                'right-second': require('@/components/settings/WalletActions').default,
-                'right-third': require('@/components/settings/Preferences').default,
+                'bottom-right': require('@/components/settings/Wallets').default,
+                'top-left': require('@/components/settings/WalletActions').default,
+                'top-right': require('@/components/settings/Preferences').default,
               },
             },
           ],

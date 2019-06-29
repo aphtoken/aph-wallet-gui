@@ -334,7 +334,7 @@ async function fetchRecentTransactions({ commit }) {
   }
 
   try {
-    recentTransactions = await neo.fetchRecentTransactions(currentWallet.address, false, moment().subtract(3000, 'days'), null, lastBlockIndex + 1); // eslint-disable-line
+    recentTransactions = await neo.fetchRecentTransactions(currentWallet.address, false, moment().subtract(30, 'days'), null, lastBlockIndex + 1); // eslint-disable-line
     commit('setRecentTransactions', recentTransactions);
     commit('endRequest', { identifier: 'fetchRecentTransactions' });
   } catch (message) {

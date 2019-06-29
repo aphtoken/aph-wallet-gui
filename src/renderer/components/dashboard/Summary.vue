@@ -4,10 +4,10 @@
       <div class="left">
         <div class="label">My Holdings ({{ $store.state.statsToken.symbol }})</div>
         <div class="balance">
-          <div class="count">254,254</div>
-          <div class="symbol">{{ $store.state.currency }}</div>
+          <div class="count">{{ $formatNumber($store.state.statsToken.balance) }}</div>
+          <div class="symbol">{{ $store.state.statsToken.symbol }}</div>
         </div>
-        <div class="value">$3,862.10</div>
+        <div class="value">{{ $formatMoney($store.state.statsToken.unitValue * $store.state.statsToken.balance) }}</div>
       </div>
       <div class="right">
         <aph-token-icon :symbol="$store.state.statsToken.symbol"></aph-token-icon>
@@ -136,7 +136,7 @@ export default {
       flex: 1;
 
       .label {
-        font-size: toRem(18px);
+        // font-size: toRem(18px);
       }
 
       .balance {
