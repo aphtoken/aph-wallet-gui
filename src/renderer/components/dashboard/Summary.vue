@@ -43,19 +43,19 @@
             <div class="symbol">{{ $store.state.currency }}</div>
           </div>
         </div>
-        <div class="flex-1 market-cap-volume">
+        <!-- <div class="flex-1 market-cap-volume">
           <div class="label">Volume (24h)</div>
           <div class="value">
             <div class="money">$5,734</div>
             <div class="symbol">{{ $store.state.currency }}</div>
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="row">
         <div class="flex-1 circulating">
           <div class="label">Circulating Supply</div>
           <div class="value">
-            <div class="count">50,000,000</div>
+            <div class="count">{{ $formatNumber($store.state.statsToken.availableSupply) }}</div>
             <div class="symbol">{{ $store.state.statsToken.symbol }}</div>
           </div>
         </div>
