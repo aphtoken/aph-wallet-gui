@@ -5,9 +5,6 @@
   "description": "Aphelion Desktop Wallet",
   "license": "LicenseRef-LICENSE",
   "main": "./dist/electron/main.js",
-  "engines": {
-    "node": "8.11.1"
-  },
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
