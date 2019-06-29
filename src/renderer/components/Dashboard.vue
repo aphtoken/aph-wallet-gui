@@ -1,7 +1,26 @@
 <template>
   <section id="dashboard">
     <div class="grid">
+      <div class="grid--column left">
+        <div class="grid--cell">
+          <router-view name="left"></router-view>
+        </div>
+      </div>
       <div class="grid--column">
+        <div class="grid--cell right-first">
+          <router-view name="right-first"></router-view>
+        </div>
+        <div class="grid--cell right-second">
+          <router-view name="right-second"></router-view>
+        </div>
+        <div class="grid--cell right-third">
+          <router-view name="right-third"></router-view>
+        </div>
+        <div class="grid--cell right-forth">
+          <router-view name="right-forth"></router-view>
+        </div>
+      </div>
+      <!-- <div class="grid--column">
         <div class="grid--cell top-left">
           <router-view name="top-left"></router-view>
         </div>
@@ -16,13 +35,14 @@
         <div class="grid--cell bottom-right">
           <router-view name="bottom-right"></router-view>
         </div>
-      </div>
+      </div> -->
     </div>
   </section>
 </template>
 
 <script>
 export default {
+  //
 };
 </script>
 
@@ -47,15 +67,12 @@ export default {
     flex: 1 0 50%;
 
     &:first-child {
-      max-width: toRem(650px);
+      width: 33%;
     }
   }
 
   .grid--cell {
-    display: flex;
-    flex-direction: row;
     flex: 1;
-    padding: $space;
 
     > * {
       flex: 1;
@@ -78,4 +95,3 @@ export default {
   }
 }
 </style>
-

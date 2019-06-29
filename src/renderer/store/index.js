@@ -65,7 +65,7 @@ const state = {
   showLoginToWalletModal: false,
   showOrderConfirmationModal: false,
   showPortfolioHeader: true,
-  showPriceTile: true,
+  showSummaryTile: true,
   showSendAddressModal: false,
   showSendRequestLedgerSignature: false,
   showSendWithLedgerModal: false,

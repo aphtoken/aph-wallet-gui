@@ -1,17 +1,16 @@
 <template>
-  <price v-if="$store.state.showPriceTile"></price>
+  <holding-summary v-if="$store.state.showSummaryTile"></holding-summary>
   <transaction-detail v-else></transaction-detail>
 </template>
 
 <script>
-import Price from './Price';
+import HoldingSummary from './Summary';
 import TransactionDetail from './TransactionDetail';
 
 export default {
   components: {
-    Price,
+    HoldingSummary,
     TransactionDetail,
   },
 };
 </script>
-

@@ -1,7 +1,7 @@
 <template>
   <section id="dashboard--send">
     <div class="header">
-      <h1 class="underlined">{{$t('send')}}</h1>
+      <h2 class="underlined">{{$t('send')}}</h2>
     </div>
     <template v-if="showConfirmation">
       <div class="body">
@@ -264,18 +264,12 @@ export default {
   box-shadow: $box-shadow;
   display: flex;
   flex-direction: column;
+  margin: $space;
 
   .header {
-    display: flex;
     flex: none;
-    padding: $space-lg;
-
-    h1.underlined {
-      @extend %underlined-header;
-
-      flex: 1;
-      margin-bottom: 0;
-    }
+    padding: $space $space-lg;
+    font-size: toRem(10px);
   }
 
   .body {
