@@ -116,7 +116,7 @@ export default {
     flex: 1;
 
     .name {
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       font-size: toRem(19px);
       margin-bottom: $space-sm;
       white-space: nowrap;
@@ -145,7 +145,7 @@ export default {
 
   .balance {
     flex: 1;
-    font-family: GilroyMedium;
+    font-family: ProximaMedium;
     text-align: right;
 
     .amount {
@@ -215,4 +215,3 @@ export default {
   }
 }
 </style>
-

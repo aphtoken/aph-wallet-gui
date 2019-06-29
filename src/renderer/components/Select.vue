@@ -168,7 +168,7 @@ export default {
     border: $border;
     color: white;
     cursor: pointer;
-    font-family: GilroyMedium;
+    font-family: ProximaMedium;
     font-size: toRem(13px);
     height: $input-height;
     padding: toRem(16px) 0;

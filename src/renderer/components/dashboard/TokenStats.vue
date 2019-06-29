@@ -117,18 +117,18 @@ export default {
 
       .name {
         color: $purple;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
         font-size: toRem(23px);
         margin-bottom: $space;
       }
 
       .amount {
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
         font-size: toRem(32px);
         margin-bottom: $space;
 
         .currency {
-          font-family: Gilroy;
+          font-family: Proxima;
           font-size: toRem(20px);
           margin-left: $space-sm;
         }
@@ -136,7 +136,7 @@ export default {
 
       .value {
         color: $darker-grey;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
         font-size: toRem(16px);
 
         .currency {
@@ -195,13 +195,13 @@ export default {
     }
 
     .amount {
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       font-size: toRem(18px);
     }
 
     .change {
       .amount {
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
 
         &:after {
           content: "%";
@@ -229,5 +229,3 @@ export default {
   }
 }
 </style>
-
-

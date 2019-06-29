@@ -215,7 +215,7 @@ export default {
 
       .label {
         color: $purple;
-        font-weight: GilroyMedium;
+        font-weight: ProximaMedium;
         margin-top: $space-lg;
       }
     }
@@ -235,7 +235,7 @@ export default {
 
       .cell {
         flex: 1;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
         padding: $space;
 
         .aph-icon {
@@ -306,7 +306,7 @@ export default {
             }
 
             .value {
-              font-family: GilroySemibold;
+              font-family: ProximaSemibold;
               font-size: toRem(12px);
 
               &.purple {
@@ -390,4 +390,3 @@ export default {
   }
 }
 </style>
-

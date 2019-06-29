@@ -8,7 +8,7 @@
         <aph-icon name="no-transactions"></aph-icon>
         <div class="label">{{$t('noTransactions')}}</div>
       </div>
-      <aph-simple-transactions v-else :transactions="transactions" :onClick="viewTransaction"></aph-simple-transactions>
+      <aph-simple-transactions v-else :transactions="transactions" :onClick="viewTransaction" :show-status="true"></aph-simple-transactions>
     </div>
   </section>
 </template>
@@ -105,7 +105,7 @@ export default {
 
       .label {
         color: $purple;
-        font-weight: GilroyMedium;
+        font-weight: ProximaMedium;
         margin-top: $space-lg;
       }
     }

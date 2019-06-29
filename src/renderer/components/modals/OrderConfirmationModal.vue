@@ -211,12 +211,12 @@ export default {
     }
 
     h2 {
-      font-family: GilroySemibold;
+      font-family: ProximaSemibold;
     }
 
     .description {
       .type, .side, .quantity, .currency, .price, .postOnly {
-        font-family: GilroySemibold;
+        font-family: ProximaSemibold;
         font-size: toRem(16px);
       }
 
@@ -269,4 +269,3 @@ export default {
   }
 }
 </style>
-

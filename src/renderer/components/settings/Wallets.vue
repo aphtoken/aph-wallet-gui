@@ -160,7 +160,7 @@ export default {
         padding: $space-lg;
 
         .name {
-          font-family: GilroyMedium;
+          font-family: ProximaMedium;
           font-size: toRem(18px);
         }
 
@@ -182,5 +182,3 @@ export default {
   }
 }
 </style>
-
-

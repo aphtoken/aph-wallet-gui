@@ -76,7 +76,7 @@ export default {
 
       .label {
         color: $purple;
-        font-weight: GilroyMedium;
+        font-weight: ProximaMedium;
         margin-top: $space-lg;
       }
     }
@@ -97,7 +97,7 @@ export default {
 
         .cell {
           flex: 1;
-          font-family: GilroySemibold;
+          font-family: ProximaSemibold;
           padding: $space;
 
           &.copy {

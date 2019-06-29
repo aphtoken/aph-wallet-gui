@@ -57,7 +57,7 @@ export default {
   }
 
   .address {
-    font-family: GilroySemibold;
+    font-family: ProximaSemibold;
     font-size: toRem(12px);
     margin-top: $space-sm;
   }
@@ -67,5 +67,3 @@ export default {
   }
 }
 </style>
-
-

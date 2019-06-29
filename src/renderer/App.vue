@@ -116,7 +116,7 @@ export default {
 #fixed-notifications {
   background: rgba(black, 0.8);
   color: $red;
-  font-family: GilroyMedium;
+  font-family: ProximaMedium;
   font-size: toRem(14px);
   height: auto;
   left: 0;

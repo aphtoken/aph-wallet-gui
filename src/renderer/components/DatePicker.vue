@@ -177,7 +177,7 @@ export default {
     border-radius: $border-radius;
     cursor: pointer;
     display: flex;
-    font-family: GilroyMedium;
+    font-family: ProximaMedium;
     height: $input-height;
     padding: 0 $space;
 
@@ -235,7 +235,7 @@ export default {
         color: $purple;
         display: flex;
         flex: 1;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
         font-size: toRem(14px);
         justify-content: center;
       }
@@ -270,7 +270,7 @@ export default {
           cursor: pointer;
           display: flex;
           flex: 1;
-          font-family: GilroyMedium;
+          font-family: ProximaMedium;
           font-size: toRem(13px);
           justify-content: center;
           margin: $space-xs;
@@ -300,5 +300,3 @@ export default {
   }
 }
 </style>
-
-

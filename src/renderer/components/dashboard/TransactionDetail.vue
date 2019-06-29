@@ -157,7 +157,7 @@ export default {
         }
 
         .value {
-          font-family: GilroySemibold;
+          font-family: ProximaSemibold;
           font-size: toRem(12px);
 
           &.purple {

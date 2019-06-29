@@ -130,7 +130,7 @@ export default {
 
       &:first-child {
         span {
-          font-family: GilroySemibold;
+          font-family: ProximaSemibold;
         }
       }
       & + p {
@@ -151,7 +151,7 @@ export default {
       text-align: left;
       .checklist-header {
         font-size: toRem(20px);
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
         padding: $space-lg;
         text-align: center;
       }
@@ -167,7 +167,7 @@ export default {
           }
           &.in-progress {
             color: $dark;
-            font-family: GilroySemibold;
+            font-family: ProximaSemibold;
             &:last-child {
               color: $green;
             }
@@ -184,7 +184,7 @@ export default {
       .error {
         color: $red;
         font-size: toRem(15px);
-        font-family: GilroySemibold;
+        font-family: ProximaSemibold;
         text-align: center;
         padding: $space;
       }

@@ -129,7 +129,7 @@ export default {
     justify-content: center;
 
     .name {
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       margin-bottom: $space-sm;
       white-space: nowrap;
     }
@@ -176,7 +176,7 @@ export default {
 
   .balance {
     flex: 1;
-    font-family: GilroyMedium;
+    font-family: ProximaMedium;
     text-align: right;
 
     .amount {

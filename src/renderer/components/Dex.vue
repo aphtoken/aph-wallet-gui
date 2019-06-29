@@ -289,7 +289,7 @@ export default {
 
     .label {
       color: $purple;
-      font-weight: GilroyMedium;
+      font-weight: ProximaMedium;
       margin-top: $space-lg;
     }
   }

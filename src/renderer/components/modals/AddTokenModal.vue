@@ -98,7 +98,7 @@ export default {
 
       .placeholder {
         color: $grey;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
       }
 
       & + .aph-input {

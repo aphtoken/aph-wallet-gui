@@ -1,17 +1,28 @@
 <template>
   <table class="transactions-table" :class="{'is-clickable': isClickable}">
-    <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)" :class="[{active: transaction.active}]">
-      <td width="50%" class="address truncate" v-if="showBlockTime">{{ transaction.address }}</td>
-      <td width="50%" class="address" v-else>{{ transaction.address }}</td>
-      <td v-if="showBlockTime">{{ $formatDate(transaction.block_time) }}</td>
-      <td class="currency">{{ transaction.symbol }}</td>
-      <td v-if="transaction.block_time" :class="['amount', {sent: transaction.value < 0, received: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</td>
-      <td width="25%" class="amount" v-else>{{ $formatNumber(transaction.value) }}</td>
-      <td v-if="showStatus && transaction.details" class="status">
-        <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
-        <aph-icon name="unconfirmed" v-else></aph-icon>
-      </td>
-    </tr>
+    <thead>
+      <tr>
+        <th v-if="showStatus" class="status">Status</th>
+        <th>Currency</th>
+        <th v-if="showBlockTime">When</th>
+        <th>Address</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)" :class="[{active: transaction.active}]">
+        <td v-if="showStatus" class="status">
+          <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
+          <aph-icon name="unconfirmed" v-else></aph-icon>
+        </td>
+        <td class="currency">{{ transaction.symbol }}</td>
+        <td v-if="showBlockTime">{{ $formatDate(transaction.block_time) }}</td>
+        <td width="50%" class="address truncate" v-if="showBlockTime">{{ transaction.address }}</td>
+        <td width="50%" class="address" v-else>{{ transaction.address }}</td>
+        <td v-if="transaction.block_time" :class="['amount', {sent: transaction.value < 0, received: transaction.value > 0}]">{{ $formatNumber(transaction.value) }}</td>
+        <td class="amount" v-else>{{ $formatNumber(transaction.value) }}</td>
+      </tr>
+    </tbody>
   </table>
 </template>
 
@@ -59,14 +70,36 @@ export default {
 <style lang="scss">
 .transactions-table {
   border-collapse: collapse;
-  font-family: GilroySemibold;
-  font-size: toRem(12px);
+  font-family: Proxima;
+  // font-size: toRem(12px);
   table-layout: fixed;
   width: 100%;
 
+  th {
+    background: $light-grey;
+    padding: $space;
+    color: $dark-grey;
+    text-align: left;
+
+    &:first-child {
+      border-top-left-radius: $border-radius;
+      border-bottom-left-radius: $border-radius;
+    }
+
+    &:last-child {
+      border-top-right-radius: $border-radius;
+      border-bottom-right-radius: $border-radius;
+      text-align: right;
+    }
+
+    &.status {
+      text-align: center;
+    }
+  }
+
   td {
     border-top: toRem(1px) solid $border-grey;
-    padding: $space $space-sm;
+    padding: $space;
     white-space: nowrap;
 
     &:first-child {
@@ -79,10 +112,6 @@ export default {
 
     &.truncate {
       @include truncate();
-    }
-
-    &.currency {
-      text-align: center;
     }
 
     &.amount {
@@ -102,7 +131,7 @@ export default {
     }
 
     &.status {
-      text-align: right;
+      text-align: center;
 
       .aph-icon {
         svg {
@@ -155,5 +184,3 @@ export default {
   }
 }
 </style>
-
-

@@ -20,7 +20,7 @@
 
     td {
       border-bottom: $border-table-header;
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       padding: $space-sm 0;
       text-align: left;
 
@@ -51,7 +51,7 @@
 
     .cell {
       flex: 1;
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
     }
   }
 
@@ -67,7 +67,7 @@
 
       .cell {
         flex: 1;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
         font-size: toRem(12px);
 
         &.green {

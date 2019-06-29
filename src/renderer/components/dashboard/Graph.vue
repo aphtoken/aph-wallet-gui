@@ -160,7 +160,7 @@ export default {
                     },
                     autoSkip: true,
                     fontColor: '#66688D',
-                    fontFamily: 'GilroySemibold',
+                    fontFamily: 'ProximaSemibold',
                     fontSize: 12,
                     max: this.high,
                     maxTicksLimit: 5,
@@ -190,7 +190,7 @@ export default {
                       }
                     },
                     fontColor: '#B5B5CA',
-                    fontFamily: 'GilroySemibold',
+                    fontFamily: 'ProximaSemibold',
                     fontSize: 12,
                   },
                 },

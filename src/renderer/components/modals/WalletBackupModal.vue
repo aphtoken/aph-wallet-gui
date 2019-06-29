@@ -101,7 +101,7 @@ export default {
 
   .help-text {
     color: $purple;
-    font-family: GilroySemibold;
+    font-family: ProximaSemibold;
     font-size: toRem(12px);
     text-transform: uppercase;
   }
@@ -143,7 +143,7 @@ export default {
 
         p {
           color: $dark;
-          font-family: GilroyMedium;
+          font-family: ProximaMedium;
           font-size: toRem(14px);
           margin: $space-sm 0 $space-lg;
         }
@@ -190,5 +190,3 @@ export default {
   }
 }
 </style>
-
-

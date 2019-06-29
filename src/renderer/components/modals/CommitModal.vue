@@ -101,7 +101,7 @@ export default {
     padding: $space $space-lg $space-lg;
 
     p {
-      font-family: GilroySemiBold;
+      font-family: ProximaSemiBold;
     }
 
 
@@ -146,7 +146,7 @@ export default {
 
       .placeholder {
         color: $grey;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
       }
 
       & + .aph-input {
@@ -212,4 +212,3 @@ export default {
   }
 }
 </style>
-

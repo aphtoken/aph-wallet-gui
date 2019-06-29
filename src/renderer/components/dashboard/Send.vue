@@ -291,7 +291,7 @@ export default {
 
       .placeholder {
         color: $grey;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
       }
     }
 
@@ -341,7 +341,7 @@ export default {
       }
       .value {
         color: $darker-grey;
-        font-family: GilroySemibold;
+        font-family: ProximaSemibold;
         font-size: toRem(12px);
         margin-left: $space-sm;
       }
@@ -364,7 +364,7 @@ export default {
         }
 
         .value {
-          font-family: GilroySemibold;
+          font-family: ProximaSemibold;
           font-size: toRem(12px);
 
           &.purple {
@@ -389,7 +389,7 @@ export default {
 
   .waiting {
     border-top: toRem(1px) solid $border-grey;
-    font-family: GilroyMedium;
+    font-family: ProximaMedium;
     padding: $space 0;
     text-align: center;
   }
