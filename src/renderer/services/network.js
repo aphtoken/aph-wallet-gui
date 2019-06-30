@@ -16,7 +16,7 @@ const NETWORKS = [
       net: 'MainNet',
       rpc: 'https://mainneo.aphelion-neo.com:10331',
       fee: 0,
-      websocketUri: 'wss://mainnet.aphelion-neo.com:62443/ws',
+      websocketUri: 'wss://mainnet.aphelion-neo.com/ws',
       kycUrl: 'https://regtech.identitymind.store/viewform/mc99c/',
     },
   },
