@@ -15,16 +15,18 @@
     </div>
     <div class="body">
       <div class="row">
-        <div class="flex-1 token">
+        <div class="flex-2 token">
           <div class="name">{{ $store.state.statsToken.name }}</div>
           <div class="symbol">{{ $store.state.statsToken.symbol }}</div>
         </div>
         <div class="flex-none">
-          <a href="https://aphelion.org/" class="visit-website-btn" target="_blank">Visit Website</a>
+          <a :href="`https://coinmarketcap.com/currencies/${$store.state.statsToken.name}/`" class="visit-cmc-btn" target="_blank">
+            <img src="@/assets/img/cmc.svg" alt="">
+          </a>
         </div>
       </div>
       <div class="row">
-        <div class="flex-1 current-price">
+        <div class="flex-2 current-price">
           <div class="label">{{ $t('currentPrice') }}</div>
           <div class="value">
             <div class="money">{{ $formatMoney($store.state.statsToken.unitValue) }}</div>
@@ -36,14 +38,14 @@
         </div>
       </div>
       <div class="row">
-        <div class="flex-1 market-cap">
+        <div class="flex-2 market-cap">
           <div class="label">{{$t('marketCap')}}</div>
           <div class="value">
             <div class="money">{{ $formatMoneyWithoutCents($store.state.statsToken.marketCap) }}</div>
             <div class="symbol">{{ $store.state.currency }}</div>
           </div>
         </div>
-        <!-- <div class="flex-1 market-cap-volume">
+        <!-- <div class="flex-2 market-cap-volume">
           <div class="label">Volume (24h)</div>
           <div class="value">
             <div class="money">$5,734</div>
@@ -52,14 +54,14 @@
         </div> -->
       </div>
       <div class="row">
-        <div class="flex-1 circulating">
+        <div class="flex-2 circulating">
           <div class="label">Circulating Supply</div>
           <div class="value">
             <div class="count">{{ $formatNumber($store.state.statsToken.availableSupply) }}</div>
             <div class="symbol">{{ $store.state.statsToken.symbol }}</div>
           </div>
         </div>
-        <div class="flex-1 circulating-volume">
+        <div class="flex-2 circulating-volume">
           <div class="label">Volume (24h)</div>
           <div class="value">
             <div class="money">{{ $formatMoneyWithoutCents($store.state.statsToken.unitValue * volume) }}</div>
@@ -135,10 +137,6 @@ export default {
     .left {
       flex: 1;
 
-      .label {
-        // font-size: toRem(18px);
-      }
-
       .balance {
         display: flex;
         align-items: flex-end;
@@ -174,36 +172,45 @@ export default {
       display: flex;
       align-items: center;
 
-      .visit-website-btn {
+      .visit-cmc-btn {
         @extend %btn;
 
-        padding-left: $space-lg;
-        padding-right: $space-lg;
+        font-size: 0;
+        height: auto;
+        padding: $space-sm $space;
+        width: auto;
       }
 
       .token {
+        flex: 1;
+        width: auto;
+
         .name {
           font-size: toRem(32px);
           font-weight: bold;
         }
 
         .symbol {
+          color: $dark-grey;
+          font-size: toRem(20px);
           font-weight: bold;
           margin-top: $space-sm;
-          font-size: toRem(20px);
-          color: $dark-grey;
         }
       }
 
-      .flex-1 {
+      .flex-2 {
         width: 66%
       }
 
-      .flex-none {
+      .flex-1 {
         width: 33%
       }
 
-      .flex-1, .flex-none {
+      .flex-none {
+        flex: none;
+      }
+
+      .flex-2, .flex-1, .flex-none {
         font-weight: bold;
         margin-top: $space-sm;
 
@@ -213,10 +220,10 @@ export default {
         }
 
         .value {
-          display: flex;
-          margin: $space 0;
           align-items: flex-end;
+          display: flex;
           line-height: 1;
+          margin: $space 0;
 
           .money, .count {
             @include truncate();

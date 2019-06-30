@@ -23,7 +23,10 @@ export default {
   beforeMount() {
     const shell = require('electron').shell;
     document.addEventListener('click', (e) => {
-      if (e.target.tagName === 'A' && e.target.target === '_blank' && e.target.href.startsWith('http')) {
+      if (e.target.tagName === 'A'
+          && e.target.target === '_blank'
+          && (e.target.href.startsWith('http') || e.target.href.startsWith('https'))
+      ) {
         e.preventDefault();
         shell.openExternal(e.target.href);
       }

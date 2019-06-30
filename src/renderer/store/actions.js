@@ -225,6 +225,7 @@ async function fetchHoldings({ commit }, { done, isRequestSilent } = {}) {
   // TODO: isn't this only useful if current state of holdings is empty? This should be optimized.
   try {
     holdings = await fetchCachedData(holdingsStorageKey);
+    console.log(holdings);
     commit('setHoldings', holdings);
   } catch (holdings) {
     commit('setHoldings', holdings);
@@ -240,6 +241,7 @@ async function fetchHoldings({ commit }, { done, isRequestSilent } = {}) {
 
   try {
     holdings = await neo.fetchHoldings(currentWallet.address, false);
+    console.log(holdings);
 
     commit('setHoldings', holdings.holdings);
     commit('setPortfolio', {
