@@ -1319,9 +1319,9 @@ export default {
               return;
             }
 
-            if (res.data.offersToTake.length > 2
+            if (res.data.offersToTake.length > 5
               && currentWallet.isLedger === true) {
-              reject('Unable to place taker order with more than 2 matches on Ledger.');
+              reject('Unable to place taker order with more than 5 matches on Ledger.');
               return;
             }
 
@@ -1697,8 +1697,6 @@ export default {
           config.account = new wallet.Account(currentWallet.wif);
         }
 
-        let utxoIndex = -1;
-
         const assetHolding = neo.getHolding(assetId);
         if (tryCount > 1) {
           alerts.success(`Processing withdraw request for ${quantity.toString()} ${assetHolding.symbol}... Retry attempt ${tryCount}`);
@@ -1764,7 +1762,7 @@ export default {
         }
 
         let i = 0;
-
+        let utxoIndex = -1;
         configResponse.tx.outputs.forEach(({ value }) => {
           if (utxoIndex === -1 && quantity.isEqualTo(value)) {
             utxoIndex = i;
