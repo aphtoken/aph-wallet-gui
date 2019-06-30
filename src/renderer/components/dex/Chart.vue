@@ -550,7 +550,7 @@ export default {
     padding: $space;
 
     #chart-container, #depth-container {
-      height: 400px;
+      height: 500px;
       display: none;
 
       &.visible {
