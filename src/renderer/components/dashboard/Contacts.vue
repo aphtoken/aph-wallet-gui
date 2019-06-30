@@ -1,7 +1,7 @@
 <template>
   <section id="dashboard--contacts">
     <div class="header">
-      <h1 class="underlined">{{$t('contacts')}}</h1>
+      <h2 class="underlined">{{$t('contacts')}}</h2>
     </div>
     <div class="body">
       <div v-if="!$store.state.contacts.length" class="zero-state">
@@ -43,17 +43,13 @@ export default {
 
   display: flex;
   flex-direction: column;
+  margin: $space;
   padding-bottom: $space-lg;
 
   .header {
-    padding: $space-lg;
-
-    h1.underlined {
-      @extend %underlined-header;
-
-      flex: 1;
-      margin-bottom: 0;
-    }
+    flex: none;
+    padding: $space $space-lg;
+    font-size: toRem(10px);
   }
 
   .body {
@@ -80,7 +76,7 @@ export default {
 
       .label {
         color: $purple;
-        font-weight: GilroyMedium;
+        font-weight: ProximaMedium;
         margin-top: $space-lg;
       }
     }
@@ -101,7 +97,7 @@ export default {
 
         .cell {
           flex: 1;
-          font-family: GilroySemibold;
+          font-family: ProximaSemibold;
           padding: $space;
 
           &.copy {
@@ -120,4 +116,3 @@ export default {
 
 }
 </style>
-

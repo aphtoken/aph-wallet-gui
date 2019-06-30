@@ -73,7 +73,7 @@ export default {
 
   .label {
     fill: $darker-grey;
-    font-family: GilroyMedium;
+    font-family: ProximaMedium;
     font-size: toRem(12px);
     text-transform: uppercase;
   }
@@ -91,5 +91,3 @@ export default {
   }
 }
 </style>
-
-

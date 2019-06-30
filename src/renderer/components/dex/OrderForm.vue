@@ -828,7 +828,7 @@ export default {
       @extend %btn-outline;
       @extend %selected-text;
 
-      font-family: GilroySemibold;
+      font-family: ProximaSemibold;
       margin: $space 0 0;
 
       &:disabled {
@@ -851,7 +851,7 @@ export default {
 
       .placeholder {
         color: $grey;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
       }
     }
 
@@ -895,7 +895,7 @@ export default {
       @extend %selected-text;
 
       flex: 1;
-      font-family: Gilroy;
+      font-family: Proxima;
 
       height: toRem(38px);
       line-height: toRem(36px);
@@ -952,7 +952,7 @@ export default {
       @extend %btn-outline;
       @extend %selected-text;
 
-      font-family: GilroySemibold;
+      font-family: ProximaSemibold;
 
       &:disabled {
         color: $grey;
@@ -1026,7 +1026,7 @@ export default {
 
     .value {
       flex: 1;
-      font-family: GilroySemibold;
+      font-family: ProximaSemibold;
       font-size: toRem(12px);
       text-align: right;
     }
@@ -1045,7 +1045,7 @@ export default {
 
       .label {
         color: $purple !important;
-        font-family: GilroySemibold;
+        font-family: ProximaSemibold;
       }
     }
   }
@@ -1089,5 +1089,3 @@ export default {
   }
 }
 </style>
-
-

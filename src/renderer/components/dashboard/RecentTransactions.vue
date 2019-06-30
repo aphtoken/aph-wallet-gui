@@ -1,14 +1,14 @@
 <template>
   <section id="dashboard--recent-transactions">
     <div class="header">
-      <h1 class="underlined">{{$t('recentTransactions')}}</h1>
+      <h2 class="underlined">{{$t('recentTransactions')}} ({{ $store.state.statsToken.symbol }})</h2>
     </div>
     <div class="body">
       <div v-if="!transactions.length" class="zero-state">
         <aph-icon name="no-transactions"></aph-icon>
         <div class="label">{{$t('noTransactions')}}</div>
       </div>
-      <aph-simple-transactions v-else :transactions="transactions" :onClick="viewTransaction"></aph-simple-transactions>
+      <aph-simple-transactions v-else :transactions="transactions" :onClick="viewTransaction" :show-status="true"></aph-simple-transactions>
     </div>
   </section>
 </template>
@@ -72,18 +72,13 @@ export default {
 
   display: flex;
   flex-direction: column;
+  margin: $space;
   padding-bottom: $space-lg;
 
   .header {
     flex: none;
-    padding: $space-lg;
-
-    h1.underlined {
-      @extend %underlined-header;
-
-      flex: 1;
-      margin-bottom: 0;
-    }
+    padding: $space $space-lg;
+    font-size: toRem(10px);
   }
 
   .body {
@@ -110,11 +105,10 @@ export default {
 
       .label {
         color: $purple;
-        font-weight: GilroyMedium;
+        font-weight: ProximaMedium;
         margin-top: $space-lg;
       }
     }
   }
 }
 </style>
-

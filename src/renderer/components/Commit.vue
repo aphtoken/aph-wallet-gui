@@ -267,7 +267,7 @@ export default {
   .header {
     color: $purple;
     flex-basis: 15%;
-    font-family: 'GilroySemibold';
+    font-family: 'ProximaSemibold';
 
     h1 {
       display: inline-block;
@@ -316,14 +316,14 @@ export default {
       }
 
       .label {
-        font-family: 'Gilroy';
+        font-family: 'Proxima';
         font-size: toRem(18px);
         max-width: toRem(250px);
       }
 
       .highlight {
         color: $purple;
-        font-family: 'GilroySemibold';
+        font-family: 'ProximaSemibold';
         font-size: toRem(28px);
         padding: $space-sm 0;
       }
@@ -381,7 +381,7 @@ export default {
 
       .highlight {
         color: $purple;
-        font-family: 'GilroySemibold';
+        font-family: 'ProximaSemibold';
         font-size: toRem(18px);
         margin: 0 0 $space 0;
       }

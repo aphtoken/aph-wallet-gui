@@ -80,7 +80,7 @@ export default {
 
   .header {
     color: $purple;
-    font-family: GilroySemibold;
+    font-family: ProximaSemibold;
     margin-top: $space-xxl;
     text-align: center;
 

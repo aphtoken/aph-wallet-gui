@@ -58,7 +58,7 @@ export default {
 .aph-copy-text--confirmation-text {
   color: $purple;
   display: inline-block;
-  font-family: GilroyMedium;
+  font-family: ProximaMedium;
   font-size: toRem(12px);
   opacity: 1;
   position: fixed;

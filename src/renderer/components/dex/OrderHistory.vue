@@ -316,7 +316,7 @@ export default {
       color: $purple;
       cursor: pointer;
       flex: none;
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       font-size: toRem(14px);
       margin-left: $space;
       padding: $space-sm $space;
@@ -345,5 +345,3 @@ export default {
   }
 }
 </style>
-
-

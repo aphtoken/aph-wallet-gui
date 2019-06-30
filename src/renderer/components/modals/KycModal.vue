@@ -187,7 +187,7 @@ export default {
 
       .header {
         flex: 1;
-        font-family: GilroySemiBold;
+        font-family: ProximaSemiBold;
         font-size: toRem(30px);
         padding: $space-lg $space-lg 0;
         text-align: center;
@@ -210,7 +210,7 @@ export default {
         padding: $space $space-lg $space-lg;
 
         p {
-          font-family: GilroySemiBold;
+          font-family: ProximaSemiBold;
           font-size: toRem(20px);
           text-align: center;
         }

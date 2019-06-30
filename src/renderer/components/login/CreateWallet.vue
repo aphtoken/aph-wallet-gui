@@ -61,7 +61,7 @@ export default {
 
   .help-text {
     color: white;
-    font-family: Gilroy;
+    font-family: Proxima;
     font-size: toRem(12px);
   }
 
@@ -80,5 +80,3 @@ export default {
   }
 }
 </style>
-
-

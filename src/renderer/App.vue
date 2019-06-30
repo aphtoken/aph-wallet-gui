@@ -23,7 +23,10 @@ export default {
   beforeMount() {
     const shell = require('electron').shell;
     document.addEventListener('click', (e) => {
-      if (e.target.tagName === 'A' && e.target.target === '_blank' && e.target.href.startsWith('http')) {
+      if (e.target.tagName === 'A'
+          && e.target.target === '_blank'
+          && (e.target.href.startsWith('http') || e.target.href.startsWith('https'))
+      ) {
         e.preventDefault();
         shell.openExternal(e.target.href);
       }
@@ -116,7 +119,7 @@ export default {
 #fixed-notifications {
   background: rgba(black, 0.8);
   color: $red;
-  font-family: GilroyMedium;
+  font-family: ProximaMedium;
   font-size: toRem(14px);
   height: auto;
   left: 0;

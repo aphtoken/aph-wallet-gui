@@ -1,7 +1,7 @@
 <template>
   <section id="dashboard--transaction-detail">
     <div class="header">
-      <h1 class="underlined">{{$t('transaction')}}</h1>
+      <h2 class="underlined">{{$t('transaction')}}</h2>
     </div>
     <div class="body" v-if="$store.state.activeTransaction">
       <div class="section">
@@ -110,17 +110,13 @@ export default {
   display: flex;
   flex-direction: column;
   padding-bottom: $space-lg;
+  margin: $space;
 
   .header {
-    padding: $space-lg;
     position: relative;
-
-    h1.underlined {
-      @extend %underlined-header;
-
-      flex: 1;
-      margin-bottom: 0;
-    }
+    flex: none;
+    padding: $space $space-lg;
+    font-size: toRem(10px);
   }
 
   .body {
@@ -161,7 +157,7 @@ export default {
         }
 
         .value {
-          font-family: GilroySemibold;
+          font-family: ProximaSemibold;
           font-size: toRem(12px);
 
           &.purple {
@@ -230,4 +226,3 @@ export default {
   }
 }
 </style>
-

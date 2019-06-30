@@ -32,11 +32,12 @@ import Form from '@/components/Form';
 import Holding from '@/components/Holding';
 import Icon from '@/components/Icon';
 import Input from '@/components/Input';
+import Radio from '@/components/Radio';
 import Select from '@/components/Select';
 import SimpleTransactions from '@/components/SimpleTransactions';
+import SpinnerWrapper from '@/components/SpinnerWrapper';
 import TimestampFromNow from '@/components/TimestampFromNow';
 import TokenIcon from '@/components/TokenIcon';
-import SpinnerWrapper from '@/components/SpinnerWrapper';
 
 // Global Libraries.
 window._ = _;
@@ -78,11 +79,12 @@ Vue.component('aph-form', Form);
 Vue.component('aph-holding', Holding);
 Vue.component('aph-icon', Icon);
 Vue.component('aph-input', Input);
+Vue.component('aph-radio', Radio);
 Vue.component('aph-select', Select);
 Vue.component('aph-simple-transactions', SimpleTransactions);
+Vue.component('aph-spinner-wrapper', SpinnerWrapper);
 Vue.component('aph-timestamp-from-now', TimestampFromNow);
 Vue.component('aph-token-icon', TokenIcon);
-Vue.component('aph-spinner-wrapper', SpinnerWrapper);
 
 // Sync local storage to store.
 storage.init();

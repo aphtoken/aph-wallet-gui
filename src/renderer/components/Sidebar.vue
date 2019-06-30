@@ -262,7 +262,7 @@ export default {
     background: $purple-hover;
     color: white;
     flex: none;
-    font-family: GilroyMedium;
+    font-family: ProximaMedium;
     font-size: toRem(12px);
     padding: $space-lg 0;
     text-transform: uppercase;
@@ -276,7 +276,7 @@ export default {
 
         .network {
           color: $dark;
-          font-family: GilroySemibold;
+          font-family: ProximaSemibold;
         }
 
         .index {
@@ -291,14 +291,14 @@ export default {
 
     .network-error {
       color: $red;
-      font-family: GilroySemibold;
+      font-family: ProximaSemibold;
     }
 
     .version-number {
       &:before {
         content: "V";
         color: $dark;
-        font-family: GilroySemibold;
+        font-family: ProximaSemibold;
       }
     }
   }
@@ -360,5 +360,3 @@ export default {
   }
 }
 </style>
-
-

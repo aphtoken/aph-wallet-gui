@@ -17,7 +17,7 @@
             <div>{{ $t('vol') }} <span class="small">{{ baseCurrency }}</span></div>
         </div>
         <div class="body">
-          <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null" 
+          <div @click="market.marketName !== $store.state.currentMarket.marketName ? selectMarket(market) : null"
             :class="['row', {selected: $store.state.currentMarket && market.marketName === $store.state.currentMarket.marketName }]"
                v-for="market in filteredMarkets" :key="market.marketName">
             <div class="cell flex-horizontal">
@@ -143,11 +143,11 @@ export default {
 
     .label {
       flex: 1;
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       white-space: nowrap;
       font-size: toRem(20px);
     }
-    
+
     .disabled {
       font-size: toRem(12px);
     }
@@ -187,7 +187,7 @@ export default {
         color: $purple;
         cursor: pointer;
         flex: 1;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
         font-size: toRem(14px);
         padding: $space-sm 0;
         text-align: center;
@@ -242,7 +242,7 @@ export default {
           .cell {
             display: flex;
             font-size: toRem(16px);
-            
+
             &.disabled {
               font-size: toRem(11px);
               text-align: right;
@@ -332,5 +332,3 @@ export default {
   }
 }
 </style>
-
-

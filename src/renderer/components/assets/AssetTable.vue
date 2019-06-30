@@ -120,7 +120,7 @@ export default {
       background: none;
       border: none;
       color: $dark;
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       font-size: toRem(15px);
       outline: none;
       padding: 0;
@@ -153,5 +153,3 @@ export default {
   }
 }
 </style>
-
-

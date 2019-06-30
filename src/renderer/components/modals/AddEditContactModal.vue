@@ -111,7 +111,7 @@ export default {
 
       color: $grey;
       cursor: pointer;
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       font-size: toRem(10px);
       text-align: right;
       text-transform: uppercase;
@@ -147,7 +147,7 @@ export default {
 
       .placeholder {
         color: $grey;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
       }
 
       & + .aph-input {
@@ -177,4 +177,3 @@ export default {
   }
 }
 </style>
-

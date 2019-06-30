@@ -168,7 +168,7 @@ export default {
         background: none;
         border: none;
         color: $dark;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
         font-size: toRem(15px);
         outline: none;
         padding: 0;
@@ -206,7 +206,7 @@ export default {
 
           .cell {
             flex: 1;
-            font-family: GilroySemibold;
+            font-family: ProximaSemibold;
             padding: $space;
           }
 
@@ -280,7 +280,7 @@ export default {
                 }
 
                 .value {
-                  font-family: GilroySemibold;
+                  font-family: ProximaSemibold;
                   font-size: toRem(12px);
                 }
 
@@ -294,7 +294,7 @@ export default {
                   flex: none;
                   font-size: toRem(12px);
                   justify-content: right;
-                  font-family: GilroySemibold;
+                  font-family: ProximaSemibold;
 
                   .edit {
                     @include transition(color);
@@ -354,7 +354,7 @@ export default {
       border-top-left-radius: 0;
       border-top-right-radius: 0;
       color: $purple;
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       font-size: toRem(16px);
       padding: $space-lg 0 $space-xl;
       text-align: center;

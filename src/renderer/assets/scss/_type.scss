@@ -3,7 +3,7 @@
 }
 
 %underlined-header {
-  font-family: GilroyMedium;
+  font-family: ProximaMedium;
   font-size: toRem(20px);
   font-weight: normal;
   margin: 0 0 $space 0;
@@ -26,14 +26,14 @@
 
 %small-uppercase-grey-label {
   color: $grey;
-  font-family: GilroyMedium;
+  font-family: ProximaMedium;
   font-size: toRem(12px);
   text-transform: uppercase;
 }
 
 %small-uppercase-grey-label-dark {
   color: $darker-grey;
-  font-family: GilroyMedium;
+  font-family: ProximaMedium;
   font-size: toRem(12px);
   text-transform: uppercase;
 }

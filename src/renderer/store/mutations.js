@@ -96,7 +96,7 @@ export {
 const TRADE_MSG_LENGTH = 3;
 
 function clearActiveTransaction(state) {
-  state.showPriceTile = true;
+  state.showSummaryTile = true;
 }
 
 function clearLocalNetworkState(state, newNetwork) {
@@ -201,7 +201,7 @@ function setAcceptDexOutOfDate(state, value) {
 
 function setActiveTransaction(state, transaction) {
   state.activeTransaction = transaction;
-  state.showPriceTile = false;
+  state.showSummaryTile = false;
 }
 
 function setClaimModalModel(state, model) {
@@ -465,7 +465,7 @@ function setSocketOrderMatchFailed(state, value) {
 
 function setStatsToken(state, token) {
   state.statsToken = token;
-  state.showPriceTile = true;
+  state.showSummaryTile = true;
   state.activeTransaction = null;
 }
 

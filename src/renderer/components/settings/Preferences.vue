@@ -169,7 +169,7 @@ export default {
 
           > label {
             cursor: pointer;
-            font-family: GilroySemibold;
+            font-family: ProximaSemibold;
             font-size: toRem(16px);
             margin-left: $space;
           }

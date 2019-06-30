@@ -170,7 +170,7 @@ export default {
 
 <style lang="scss">
 #dex--order-book {
-  
+
 
   display: flex;
   flex-direction: column;
@@ -224,7 +224,7 @@ export default {
         }
 
         .value {
-          font-family: GilroyMedium;
+          font-family: ProximaMedium;
         }
       }
 
@@ -267,7 +267,7 @@ export default {
               &.red {
                 background-color: $red;
               }
-              
+
               &.size-total {
                 &.green {
                   background-color: $light-green;
@@ -299,7 +299,7 @@ export default {
     cursor: pointer;
     display: flex;
     flex-direction: row;
-    font-family: GilroySemibold;
+    font-family: ProximaSemibold;
     padding: $space 0;
 
     .aph-icon {
@@ -326,5 +326,3 @@ export default {
   }
 }
 </style>
-
-

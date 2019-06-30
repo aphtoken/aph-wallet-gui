@@ -1,34 +1,29 @@
 <template>
   <section id="dashboard--price" v-if="$store.state.statsToken">
-    <div class="header">
-      <h1 class="underlined">{{$t('price')}}</h1>
-      <div class="current-value">
-        <div class="label">{{ $formatDate(date) }}</div>
-        <div class="amount">{{ $store.state.statsToken.symbol }} {{ $formatMoney($store.state.statsToken.unitValue) }}</div>
+    <div class="timeframes">
+      <div class="timeframe">
+        <aph-radio @click="toggleTimeframe('D')" :selected="timeframeOption == 'D'"></aph-radio>
+        <div class="label">{{$t('shortDayLabel')}}</div>
       </div>
-    </div>
-    <div class="sub-header">
-      <div class="volume">
-        <div class="label">{{$t('volume')}}</div>
-        <div class="value">{{ $formatMoneyWithoutCents(volume) }}</div>
+      <div class="timeframe">
+        <aph-radio @click="toggleTimeframe('W')" :selected="timeframeOption == 'W'"></aph-radio>
+        <div class="label">{{$t('shortWeekLabel')}}</div>
       </div>
-      <div class="low">
-        <div class="label">{{$t('low')}}</div>
-        <div class="value">{{ $formatMoney(low > $store.state.statsToken.unitValue ? $store.state.statsToken.unitValue : low) }}</div>
+      <div class="timeframe">
+        <aph-radio @click="toggleTimeframe('M')" :selected="timeframeOption == 'M'"></aph-radio>
+        <div class="label">{{$t('shortMonthLabel')}}</div>
       </div>
-      <div class="high">
-        <div class="label">{{$t('high')}}</div>
-        <div class="value">{{ $formatMoney(high < $store.state.statsToken.unitValue ? $store.state.statsToken.unitValue : high) }}</div>
+      <div class="timeframe">
+        <aph-radio @click="toggleTimeframe('3M')" :selected="timeframeOption == '3M'"></aph-radio>
+        <div class="label">{{$t('short3MonthLabel')}}</div>
+      </div>
+      <div class="timeframe">
+        <aph-radio @click="toggleTimeframe('Y')" :selected="timeframeOption == 'Y'"></aph-radio>
+        <div class="label">{{$t('shortYearLabel')}}</div>
       </div>
     </div>
     <div class="body">
       <line-chart ref="chart" :chart-data="chartData" :options="chartOptions" v-if="chartOptions"></line-chart>
-    </div>
-    <div class="footer">
-      <div @click="changeTimeframe('D')" :class="['option', {active: timeframeOption === 'D'}]">{{$t('shortDayLabel')}}</div>
-      <div @click="changeTimeframe('W')" :class="['option', {active: timeframeOption === 'W'}]">{{$t('shortWeekLabel')}}</div>
-      <div @click="changeTimeframe('M')" :class="['option', {active: timeframeOption === 'M'}]">{{$t('shortMonthLabel')}}</div>
-      <div @click="changeTimeframe('3M')" :class="['option', {active: timeframeOption === '3M'}]">{{$t('short3MonthLabel')}}</div>
     </div>
   </section>
 </template>
@@ -95,7 +90,7 @@ export default {
       }, this.reloadInterval);
     },
 
-    changeTimeframe(timeframe) {
+    toggleTimeframe(timeframe) {
       this.timeframeOption = timeframe;
 
       switch (this.timeframeOption) {
@@ -110,6 +105,9 @@ export default {
           break;
         case '3M':
           this.timeframeHours = 3 * 30 * 24;
+          break;
+        case 'Y':
+          this.timeframeHours = 12 * 30 * 24;
           break;
       }
 
@@ -162,7 +160,7 @@ export default {
                     },
                     autoSkip: true,
                     fontColor: '#66688D',
-                    fontFamily: 'GilroySemibold',
+                    fontFamily: 'ProximaSemibold',
                     fontSize: 12,
                     max: this.high,
                     maxTicksLimit: 5,
@@ -192,7 +190,7 @@ export default {
                       }
                     },
                     fontColor: '#B5B5CA',
-                    fontFamily: 'GilroySemibold',
+                    fontFamily: 'ProximaSemibold',
                     fontSize: 12,
                   },
                 },
@@ -230,52 +228,22 @@ export default {
 
   display: flex;
   flex-direction: column;
+  margin: $space;
 
-  .header {
-    display: flex;
-    flex: none;
+  .timeframes {
     padding: $space-lg;
-
-    h1.underlined {
-      @extend %underlined-header;
-
-      flex: 1;
-      margin-bottom: 0;
-    }
-
-    .current-value {
-      flex: none;
-      text-align: right;
-
-      .amount {
-        color: $purple;
-        font-size: toRem(20px);
-      }
-    }
-  }
-
-  .sub-header {
     display: flex;
-    flex: none;
-    justify-content: flex-end;
-    padding: 0 $space-lg;
+    align-items: center;
+    justify-content: space-between;
 
-    > div {
-      align-items: center;
+    .timeframe {
       display: flex;
+      align-items: center;
 
-      & + div {
-        margin-left: $space-lg;
+      .label {
+        font-weight: bold;
+        margin-left: $space;
       }
-    }
-
-    .label {
-      margin: 0 $space-xs 0 0;
-    }
-
-    .value {
-      font-family: GilroySemibold;
-      font-size: toRem(12px);
     }
   }
 
@@ -285,35 +253,8 @@ export default {
     padding: $space-lg;
 
     > div {
-      height: 100%;
+      height: toRem(300px);
     }
-  }
-
-  .footer {
-    display: flex;
-    justify-content: space-around;
-
-    .option {
-      border-bottom: $border-width-thick solid transparent;
-      color: $purple;
-      cursor: pointer;
-      flex: none;
-      font-family: GilroyMedium;
-      font-size: toRem(14px);
-      padding: $space-sm $space-lg;
-      text-align: center;
-
-      &:hover, &.active {
-        border-color: $purple;
-      }
-    }
-  }
-
-  .label {
-    @extend %small-uppercase-grey-label;
-
-    margin-bottom: $space-sm;
   }
 }
 </style>
-

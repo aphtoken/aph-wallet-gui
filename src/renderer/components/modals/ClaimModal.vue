@@ -116,10 +116,10 @@ export default {
     padding: $space $space-lg $space-lg;
 
     .note {
-      font-family: Gilroy;
+      font-family: Proxima;
     }
     p {
-      font-family: GilroySemiBold;
+      font-family: ProximaSemiBold;
       text-align: center;
 
     }
@@ -182,4 +182,3 @@ export default {
   }
 }
 </style>
-

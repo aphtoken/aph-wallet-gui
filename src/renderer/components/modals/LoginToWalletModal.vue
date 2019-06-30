@@ -144,7 +144,7 @@ export default {
 
       color: $grey;
       cursor: pointer;
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       font-size: toRem(10px);
       text-align: right;
       text-transform: uppercase;
@@ -163,7 +163,7 @@ export default {
 
     .wallet-name {
       color: $purple;
-      font-family: GilroyMedium;
+      font-family: ProximaMedium;
       font-size: toRem(18px);
       padding: $space-lg 0;
     }
@@ -173,7 +173,7 @@ export default {
 
       &:first-child {
         span {
-          font-family: GilroySemibold;
+          font-family: ProximaSemibold;
         }
       }
     }
@@ -223,7 +223,7 @@ export default {
 
       .placeholder {
         color: $grey;
-        font-family: GilroyMedium;
+        font-family: ProximaMedium;
       }
 
       & + .aph-input {
@@ -253,4 +253,3 @@ export default {
   }
 }
 </style>
-

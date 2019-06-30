@@ -21,7 +21,7 @@
             <div class="label">{{$t('OPEN')}}</div>
             <div class="value">{{ $formatTokenAmount(tickerData.open24hr) }}</div>
           </div>
-          <div class="row"> 
+          <div class="row">
             <div class="label">{{$t('HIGH')}}</div>
             <div class="value">{{ $formatTokenAmount(tickerData.high24hr) }}</div>
           </div>
@@ -100,7 +100,7 @@ export default {
 #dex--marketselection {
   .header {
     @extend %tile-light;
-    
+
     flex: none;
     padding: $space $space 0;
 
@@ -144,12 +144,12 @@ export default {
 
       .value {
         flex: 3;
-        font-family: GilroySemibold;
+        font-family: ProximaSemibold;
         font-size: toRem(12px);
         white-space: nowrap;
       }
 
-      &.row, 
+      &.row,
       .quote-volume {
         margin-top: $space-sm;
       }
@@ -165,7 +165,7 @@ export default {
       }
 
       .market-name {
-        font-family: GilroySemibold;
+        font-family: ProximaSemibold;
         margin-top: $space;
       }
 
@@ -174,12 +174,12 @@ export default {
       }
 
       .base-price {
-        font-family: GilroySemibold;
+        font-family: ProximaSemibold;
         font-size: toRem(16px);
       }
 
       .base-price-converted {
-        font-family: GilroySemibold;
+        font-family: ProximaSemibold;
         font-size: toRem(12px);
       }
 

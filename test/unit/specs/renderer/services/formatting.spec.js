@@ -113,8 +113,8 @@ describe('services/formatting', () => {
 
   describe('formatTime', () => {
     it('should properly format', () => {
-      expect(formatting.formatTime(1524752757)).to.be.eql('8:25');
-      expect(formatting.formatTime('1524752757')).to.be.eql('8:25');
+      expect(formatting.formatTime(1524752757)).to.be.eql('08:25:57');
+      expect(formatting.formatTime('1524752757')).to.be.eql('08:25:57');
       expect(formatting.formatTime(null)).to.eql('--');
       expect(formatting.formatTime(undefined)).to.be.eql('--');
       expect(formatting.formatTime(null, 'default')).to.eql('default');

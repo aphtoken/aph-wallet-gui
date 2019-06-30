@@ -270,7 +270,7 @@ export default {
     .header {
       color: $purple;
       flex: none;
-      font-family: GilroySemibold;
+      font-family: ProximaSemibold;
       text-align: center;
       z-index: 1;
 
@@ -299,7 +299,7 @@ export default {
       .aph-input {
         .placeholder {
           color: white;
-          font-family: GilroyMedium;
+          font-family: ProximaMedium;
         }
       }
 
@@ -353,7 +353,7 @@ export default {
 
         .value {
           color: white;
-          font-family: GilroySemibold;
+          font-family: ProximaSemibold;
           font-size: toRem(12px);
           margin-left: $space-sm;
         }
@@ -437,5 +437,3 @@ export default {
   }
 }
 </style>
-
-
