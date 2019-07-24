@@ -160,11 +160,43 @@ export default {
       }
     },
 
-    send() {
+    async send() {
+      let fee;
+
+      if (this.currency.symbol === 'BTC') {
+        this.sending = true;
+
+        this.$services.neo.sendFundsBTC(this.address, this.amount)
+          .then((res) => {
+            console.log(res);
+            this.sending = false;
+            this.$store.commit('setSendInProgress', false);
+            this.address = '';
+            this.amount = '';
+            this.currency = null;
+            this.showConfirmation = false;
+          })
+          .catch((e) => {
+            if (e.msg) {
+              this.$services.alerts.info(e.msg);
+            } else {
+              this.$services.alerts.exception(e);
+            }
+            this.sending = false;
+            this.$store.commit('setSendInProgress', false);
+            this.address = '';
+            this.amount = '';
+            this.currency = null;
+            this.showConfirmation = false;
+          });
+        return;
+      }
+
       if (new BigNumber(this.amount).isGreaterThan(this.currency.balance)) {
         this.$services.alerts
           .exception(`Insufficient ${this.currency.symbol}!` +
             ` Need ${this.amount} but only found ${this.currency.balance}`);
+        this.amount = (parseFloat(this.amount) - fee).toString();
         return;
       }
 

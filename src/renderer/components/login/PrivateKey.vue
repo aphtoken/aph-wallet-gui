@@ -1,8 +1,8 @@
 <template>
   <section id="login--saved-wallet">
     <login-form-wrapper identifier="openPrivateKey" :on-submit="login">
-      <aph-input :hasError="$isFailed('openPrivateKey')" v-model="wif" :placeholder="$t('enterYourPrivateKeyWIF')" type="password"></aph-input>
-      <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{$t('login')}}</button>
+      <aph-input :hasError="$isFailed('openPrivateKey')" v-model="wif" placeholder="Enter WIF" type="password"></aph-input>
+      <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
     </login-form-wrapper>
   </section>
 </template>
@@ -16,8 +16,12 @@ export default {
   },
 
   computed: {
+    buttonLabel() {
+      return this.$isPending('openPrivateKey') ? this.$t('loggingIn') : this.$t('login');
+    },
+
     shouldDisableLoginButton() {
-      return this.wif.length === 0;
+      return this.$isPending('openPrivateKey') || this.wif.length === 0;
     },
   },
 
@@ -29,12 +33,14 @@ export default {
 
   methods: {
     login() {
-      this.$store.dispatch('openPrivateKey', {
-        wif: this.wif,
-        done: () => {
-          this.$router.push('/authenticated/dashboard');
-        },
-      });
+      if (!this.$isPending('openPrivateKey')) {
+        this.$store.dispatch('openPrivateKey', {
+          wif: this.wif,
+          done: () => {
+            this.$router.push('/authenticated/dashboard');
+          },
+        });
+      }
     },
   },
 };

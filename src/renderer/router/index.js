@@ -66,6 +66,13 @@ export default new Router({
             right: require('@/components/login/PrivateKey').default,
           },
         },
+        {
+          path: 'private-key-seed-words',
+          components: {
+            left: require('@/components/login/Logo').default,
+            right: require('@/components/login/PrivateKeySeedWords').default,
+          },
+        },
       ],
     },
     {

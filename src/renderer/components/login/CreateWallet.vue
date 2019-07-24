@@ -44,11 +44,13 @@ export default {
 
   methods: {
     create() {
-      this.$store.dispatch('createWallet', {
-        name: this.walletName,
-        passphrase: this.passphrase,
-        passphraseConfirm: this.passphraseConfirm,
-      });
+      if (!this.$isPending('createWallet')) {
+        this.$store.dispatch('createWallet', {
+          name: this.walletName,
+          passphrase: this.passphrase,
+          passphraseConfirm: this.passphraseConfirm,
+        });
+      }
     },
   },
 };

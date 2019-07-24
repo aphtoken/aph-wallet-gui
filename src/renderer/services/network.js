@@ -4,6 +4,7 @@ import { rpc, settings, api } from '@cityofzion/neon-js';
 import { store } from '../store';
 import storage from './storage';
 import { intervals } from '../constants';
+import wallets from './wallets';
 
 const NETWORK_STORAGE_KEY = 'network';
 const NETWORKS = [
@@ -16,8 +17,9 @@ const NETWORKS = [
       net: 'MainNet',
       rpc: 'https://mainneo.aphelion-neo.com:10331',
       fee: 0,
-      websocketUri: 'wss://mainnet.aphelion-neo.com/ws',
+      websocketUri: 'wss://mainnet.aphelion-neo.com:62443/ws',
       kycUrl: 'https://regtech.identitymind.store/viewform/mc99c/',
+      infuraApi: 'https://mainnet.infura.io/v3/3850f6cc7ccc4ee8a3a7395ac4617e25',
     },
   },
   {
@@ -32,6 +34,7 @@ const NETWORKS = [
       fee: 0,
       websocketUri: 'wss://testnet.aphelion-neo.com:62443/ws',
       kycUrl: 'https://regtech.identitymind.store/viewform/z3wy8/',
+      infuraApi: 'https://ropsten.infura.io/v3/3850f6cc7ccc4ee8a3a7395ac4617e25',
     },
   },
   /*
@@ -170,6 +173,9 @@ export default {
 
   setSelectedNetwork(network) {
     this.normalizeAndStore(network).sync();
+
+    // changing BTC ADDRESS
+    wallets.changeBTCAddress();
 
     if (loadNetworkStatusIntervalId) {
       clearInterval(loadNetworkStatusIntervalId);

@@ -1,6 +1,7 @@
 <template>
   <modal-wrapper id="aph-wallet-backup-modal">
     <div class="body">
+      <h2>NEO</h2>
       <p class="help-text">{{$t('saveAndBackupTheKeys')}}</p>
       <p class="help-text">{{$t('ifYouLoseThem')}}</p>
       <div class="qr-codes">
@@ -10,39 +11,46 @@
         </div>
         <div class="qr-code">
           <vue-qrcode :value="$store.state.currentWallet.wif" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
-          <p class="help-text">{{$t('encryptedPrivateKey')}}</p>
+          <p class="help-text">WIF</p>
         </div>
       </div>
       <div class="data">
         <div class="wallet-data public-address">
-          <div class="label">{{$t('publicAddress')}}</div>
+          <div class="label">NEO {{$t('publicAddress')}}</div>
           <div class="value">
             <p>{{ $store.state.currentWallet.address }}</p>
             <aph-copy-text :text="$store.state.currentWallet.address"></aph-copy-text>
           </div>
         </div>
-        <div class="wallet-data encrypted-key">
-          <div class="label">{{$t('encryptedKey')}}</div>
+        <div class="wallet-data encrypted-key" v-if="$store.state.currentWallet.encryptedWIF != null">
+          <div class="label">NEO {{$t('encryptedKey')}}</div>
           <div class="value">
             <p>{{ $store.state.currentWallet.encryptedWIF }}</p>
             <aph-copy-text :text="$store.state.currentWallet.encryptedWIF"></aph-copy-text>
           </div>
         </div>
         <div class="wallet-data private-key">
-          <div class="label">{{$t('privateKey')}}</div>
+          <div class="label">NEO {{$t('privateKey')}}</div>
           <div class="value">
             <p>{{ $store.state.currentWallet.privateKey }}</p>
             <aph-copy-text :text="$store.state.currentWallet.privateKey"></aph-copy-text>
           </div>
         </div>
         <div class="wallet-data private-key">
-          <div class="label">WIF</div>
+          <div class="label">NEO WIF</div>
           <div class="value">
             <p>{{ $store.state.currentWallet.wif }}</p>
             <aph-copy-text :text="$store.state.currentWallet.wif"></aph-copy-text>
           </div>
         </div>
-      </div>
+        <div class="wallet-data private-key">
+          <div class="label">MNEMONIC</div>
+          <div class="value">
+            <p>{{ $store.state.currentWallet.mnemonic }}</p>
+            <aph-copy-text :text="$store.state.currentWallet.mnemonic"></aph-copy-text>
+          </div>
+        </div>
+      </div>      
       <div class="btn-group">
         <div @click="print()" class="btn print">{{$t('print')}}</div>
       </div>
@@ -101,7 +109,7 @@ export default {
 
   .help-text {
     color: $purple;
-    font-family: ProximaSemibold;
+    font-family: GilroySemibold;
     font-size: toRem(12px);
     text-transform: uppercase;
   }
@@ -143,7 +151,7 @@ export default {
 
         p {
           color: $dark;
-          font-family: ProximaMedium;
+          font-family: GilroyMedium;
           font-size: toRem(14px);
           margin: $space-sm 0 $space-lg;
         }
@@ -190,3 +198,5 @@ export default {
   }
 }
 </style>
+
+

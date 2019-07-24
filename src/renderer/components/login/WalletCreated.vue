@@ -55,6 +55,27 @@
         <aph-copy-text :text="wallet.wif"></aph-copy-text>
       </div>
     </div>
+    <div class="wallet-data private-key">
+      <div class="label">BITCOIN ADDRESS</div>
+      <div class="value">
+        <p>{{ wallet.btcAddress }}</p>
+        <aph-copy-text :text="wallet.btcAddress"></aph-copy-text>
+      </div>
+    </div>
+    <div class="wallet-data private-key">
+      <div class="label">ETHEREUM ADDRESS</div>
+      <div class="value">
+        <p>{{ wallet.ethAddress }}</p>
+        <aph-copy-text :text="wallet.ethAddress"></aph-copy-text>
+      </div>
+    </div>
+    <div class="wallet-data private-key">
+      <div class="label">MNEMONIC</div>
+      <div class="value">
+        <p>{{ wallet.mnemonic }}</p>
+        <aph-copy-text :text="wallet.mnemonic"></aph-copy-text>
+      </div>
+    </div>
     <div class="btn-group">
       <div @click="print()" class="btn print">{{$t('print')}}</div>
     </div>
@@ -100,7 +121,7 @@ export default {
 
   .help-text {
     color: $purple;
-    font-family: ProximaSemibold;
+    font-family: GilroySemibold;
     font-size: toRem(12px);
     text-align: center;
     text-transform: uppercase;
@@ -132,7 +153,7 @@ export default {
 
       p {
         color: $dark;
-        font-family: ProximaMedium;
+        font-family: GilroyMedium;
         font-size: toRem(14px);
         margin: $space-sm 0 $space-lg;
       }
@@ -194,3 +215,5 @@ export default {
   }
 }
 </style>
+
+

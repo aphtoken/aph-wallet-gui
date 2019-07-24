@@ -1,0 +1,188 @@
+<template>
+  <modal-wrapper id="aph-wallet-backup-modal">
+    <div class="body">
+      <h2>Bitcoin & Ethereum</h2>
+      <p class="help-text">{{$t('saveAndBackupTheKeys')}}</p>
+      <p class="help-text">{{$t('ifYouLoseThem')}}</p>
+      <div class="qr-codes">
+        <div class="qr-code">
+          <vue-qrcode :value="$store.state.currentWallet.btcAddress" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
+          <p class="help-text">BITCOIN {{$t('publicAddress')}}</p>
+        </div>
+        <div class="qr-code">
+          <vue-qrcode :value="$store.state.currentWallet.ethAddress" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
+          <p class="help-text">ETHEREUM {{$t('publicAddress')}}</p>
+        </div>
+      </div>
+      <div class="data">
+        <div class="wallet-data public-address">
+          <div class="label">BITCOIN {{$t('publicAddress')}}</div>
+          <div class="value">
+            <p>{{ $store.state.currentWallet.btcAddress }}</p>
+            <aph-copy-text :text="$store.state.currentWallet.btcAddress"></aph-copy-text>
+          </div>
+        </div>
+        <div class="wallet-data public-address">
+          <div class="label">ETHEREUM {{$t('publicAddress')}}</div>
+          <div class="value">
+            <p>{{ $store.state.currentWallet.ethAddress }}</p>
+            <aph-copy-text :text="$store.state.currentWallet.ethAddress"></aph-copy-text>
+          </div>
+        </div>
+        <div class="wallet-data private-key">
+          <div class="label">MNEMONIC</div>
+          <div class="value">
+            <p>{{ $store.state.currentWallet.mnemonic }}</p>
+            <aph-copy-text :text="$store.state.currentWallet.mnemonic"></aph-copy-text>
+          </div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <div @click="print()" class="btn print">{{$t('print')}}</div>
+      </div>
+      <div class="btn-group">
+        <div @click="onDone()" class="btn done">{{$t('done')}}</div>
+      </div>
+    </div>
+  </modal-wrapper>
+</template>
+
+<script>
+import VueQrcode from '@xkeshi/vue-qrcode';
+
+import ModalWrapper from './ModalWrapper';
+
+export default {
+  components: {
+    ModalWrapper,
+    VueQrcode,
+  },
+
+  methods: {
+    print() {
+      window.print();
+    },
+  },
+
+  props: {
+    onDone: {
+      required: true,
+      type: Function,
+    },
+  },
+};
+</script>
+
+<style lang="scss">
+#aph-wallet-backup-modal {
+  .content {
+    overflow: hidden;
+    width: 50%;
+  }
+
+  .body {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: auto;
+    padding: $space-xl;
+
+    @include lowRes() {
+      padding: $space-lg;
+    }
+  }
+
+  .help-text {
+    color: $purple;
+    font-family: GilroySemibold;
+    font-size: toRem(12px);
+    text-transform: uppercase;
+  }
+
+  .qr-codes {
+    display: flex;
+    margin-top: $space;
+  }
+
+  .qr-code {
+    text-align: center;
+
+    & + .qr-code {
+      margin-left: $space-xxl;
+    }
+  }
+
+  .data {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: $space-lg;
+
+    .wallet-data {
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: center;
+
+      .label {
+        @extend %small-uppercase-grey-label;
+      }
+
+      .value {
+        display: inline-block;
+        position: relative;
+
+        p {
+          color: $dark;
+          font-family: GilroyMedium;
+          font-size: toRem(14px);
+          margin: $space-sm 0 $space-lg;
+        }
+
+        .aph-copy-text {
+          position: absolute;
+          right: 0;
+          top: $space * .4;
+          transform: translate(100%, 0);
+        }
+
+        .aph-icon {
+          margin-left: $space-sm;
+        }
+      }
+
+      &.passphrase {
+        margin: $space-lg 0 0;
+      }
+    }
+  }
+  .btn-group {
+    display: flex;
+    justify-content: center;
+    margin-top: $space-lg;
+    max-width: toRem(400px);
+    width: 60%;
+
+    a, div {
+      &.done {
+        @extend %btn;
+      }
+
+      &.print {
+        @extend %btn-outline;
+
+        color: $purple;
+      }
+    }
+
+    @include lowRes() {
+      margin-top: $space;
+    }
+  }
+}
+</style>
+
+

@@ -3,7 +3,7 @@
     <login-form-wrapper identifier="openEncryptedKey" :on-submit="login">
       <aph-input :hasError="$isFailed('openEncryptedKey')" v-model="passphrase" :placeholder="$t('enterYourPassphrase')" type="password"></aph-input>
       <aph-input :hasError="$isFailed('openEncryptedKey')" v-model="encryptedKey" :placeholder="$t('enterYourEncryptedKey')" type="password"></aph-input>
-      <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{$t('login')}}</button>
+      <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
     </login-form-wrapper>
   </section>
 </template>
@@ -17,8 +17,12 @@ export default {
   },
 
   computed: {
+    buttonLabel() {
+      return this.$isPending('openEncryptedKey') ? this.$t('loggingIn') : this.$t('login');
+    },
+
     shouldDisableLoginButton() {
-      return this.passphrase.length === 0 || this.encryptedKey.length === 0;
+      return this.$isPending('openEncryptedKey') || this.passphrase.length === 0 || this.encryptedKey.length === 0;
     },
   },
 
@@ -31,13 +35,15 @@ export default {
 
   methods: {
     login() {
-      this.$store.dispatch('openEncryptedKey', {
-        encryptedKey: this.encryptedKey,
-        passphrase: this.passphrase,
-        done: () => {
-          this.$router.push('/authenticated/dashboard');
-        },
-      });
+      if (!this.$isPending('openEncryptedKey')) {
+        this.$store.dispatch('openEncryptedKey', {
+          encryptedKey: this.encryptedKey,
+          passphrase: this.passphrase,
+          done: () => {
+            this.$router.push('/authenticated/dashboard');
+          },
+        });
+      }
     },
   },
 };

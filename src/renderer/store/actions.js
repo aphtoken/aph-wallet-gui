@@ -23,6 +23,7 @@ export {
   openEncryptedKey,
   openLedger,
   openPrivateKey,
+  openPrivateKeySeedWords,
   openSavedWallet,
   fetchOrderHistory,
   fetchSystemAssetBalances,
@@ -489,6 +490,21 @@ function openPrivateKey({ commit }, { wif, done }) {
       })
       .catch((e) => {
         commit('failRequest', { identifier: 'openPrivateKey', message: e });
+      });
+  }, timeouts.NEO_API_CALL);
+}
+
+function openPrivateKeySeedWords({ commit }, { wif, seedwords, done }) {
+  commit('startRequest', { identifier: 'openPrivateKeySeedWords' });
+
+  setTimeout(() => {
+    wallets.openWIFseedWords(wif, seedwords)
+      .then(() => {
+        done();
+        commit('endRequest', { identifier: 'openPrivateKeySeedWords' });
+      })
+      .catch((e) => {
+        commit('failRequest', { identifier: 'openPrivateKeySeedWords', message: e });
       });
   }, timeouts.NEO_API_CALL);
 }

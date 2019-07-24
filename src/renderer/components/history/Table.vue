@@ -52,25 +52,24 @@
           </div>
           <div class="section">
             <div class="row">
-              <div class="column inputs">
-                <div class="label">{{$t('from')}}</div>
-                <aph-simple-transactions :transactions="transaction.details.vin"></aph-simple-transactions>
-              </div>
-            </div>
-            <div class="row">
               <div class="column outputs">
                 <div class="label">{{$t('to')}}</div>
-                <aph-simple-transactions :transactions="transaction.details.vout"></aph-simple-transactions>
+                <aph-simple-transactions v-if="transaction.symbol === 'BTC'" :transactions="transaction.details.voutData"></aph-simple-transactions>
+                <aph-simple-transactions v-if="transaction.symbol !== 'BTC'" :transactions="transaction.details.vout"></aph-simple-transactions>
               </div>
             </div>
           </div>
           <div class="section">
             <div class="row">
-              <div class="column">
+              <div class="column" v-if="transaction.symbol !== 'BTC'">
                 <div class="label">{{$t('networkFee')}}</div>
                 <div class="value">{{$t('gas', { gas: $formatNumber(transaction.details.net_fee)})}}</div>
               </div>
-              <div class="column">
+              <div class="column" v-if="transaction.symbol === 'BTC'">
+                <div class="label">{{$t('networkFee')}}</div>
+                <div class="value">{{ $formatNumber(transaction.details.net_fee)}} BTC</div>
+              </div>
+              <div class="column" v-if="transaction.symbol !== 'BTC'">
                 <div class="label">{{$t('systemFee')}}</div>
                 <div class="value">{{$t('gas', { gas: $formatNumber(transaction.details.sys_fee)})}}</div>
               </div>
@@ -78,6 +77,10 @@
                 <div class="label">{{$t('Size')}}</div>
                 <div class="value">{{$t('bytes', { bytes: $formatNumber(transaction.details.size)})}}</div>
               </div>
+              <div class="column" v-if="transaction.symbol === 'BTC'">
+                <div class="label">View on Bitpay</div>
+                <div class="value"><a :href="`https://test-insight.bitpay.com/tx/${transaction.details.txid}/`" target="_blank">click here</a></div>
+              </div>              
             </div>
             <div class="row has-equal-columns">
               <div class="column" v-if="transaction.details.confirmed">

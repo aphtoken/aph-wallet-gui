@@ -22,7 +22,7 @@
       </div>
     </div>
     <zoom></zoom>
-    <address-modal v-if="$store.state.showSendAddressModal" :address="getCurrentWalletAddress()" :onDone="hideSendAddressModal"></address-modal>
+    <address-modal v-if="$store.state.showSendAddressModal" :neoAddress="getCurrentWalletAddress()" :btcAddress="getCurrentWalletBTCAddress()" :ethAddress="getCurrentWalletETHAddress()" :onDone="hideSendAddressModal"></address-modal>
   </section>
   <section v-else></section>
 </template>
@@ -51,6 +51,12 @@ export default {
       return this.$services.wallets.getCurrentWallet().address;
     },
 
+    getCurrentWalletBTCAddress() {
+      return this.$services.wallets.getCurrentWallet().btcAddress;
+    },
+    getCurrentWalletETHAddress() {
+      return this.$services.wallets.getCurrentWallet().ethAddress;
+    },
     hideSendAddressModal() {
       this.$store.commit('setShowSendAddressModal', false);
     },

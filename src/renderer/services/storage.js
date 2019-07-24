@@ -22,6 +22,7 @@ export default {
   },
 
   has(key) {
+    _.clear();
     return _.has(localStore, key);
   },
 
