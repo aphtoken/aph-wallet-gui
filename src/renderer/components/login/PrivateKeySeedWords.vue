@@ -1,7 +1,7 @@
 <template>
   <section id="login--saved-wallet">
     <login-form-wrapper identifier="openPrivateKeySeedWords" :on-submit="login">
-      <aph-input :hasError="$isFailed('openPrivateKeySeedWords')" v-model="wif" placeholder="Entert WIF" type="password"></aph-input>
+      <aph-input :hasError="$isFailed('openPrivateKeySeedWords')" v-model="wif" placeholder="Enter WIF" type="password"></aph-input>
       <aph-input :hasError="$isFailed('openPrivateKeySeedWords')" v-model="seedwords" placeholder="Enter Mnemonic Words" type="text"></aph-input>
       <button class="login" @click="login" :disabled="shouldDisableLoginButton">{{ buttonLabel }}</button>
     </login-form-wrapper>

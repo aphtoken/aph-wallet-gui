@@ -35,11 +35,11 @@ export default {
     print() {
       window.print();
     },
-    callMe(ele) {
-      if (ele.target.value === 'NEO') {
+    callMe(element) {
+      if (element.target.value === 'NEO') {
         document.getElementById('headLabel').innerHTML = 'NEO';
         this.address = this.neoAddress;
-      } else if (ele.target.value === 'BTC') {
+      } else if (element.target.value === 'BTC') {
         document.getElementById('headLabel').innerHTML = 'BTC';
         this.address = this.btcAddress;
       } else {

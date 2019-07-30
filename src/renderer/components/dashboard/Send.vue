@@ -169,12 +169,7 @@ export default {
         this.$services.neo.sendFundsBTC(this.address, this.amount)
           .then((res) => {
             console.log(res);
-            this.sending = false;
-            this.$store.commit('setSendInProgress', false);
-            this.address = '';
-            this.amount = '';
-            this.currency = null;
-            this.showConfirmation = false;
+            this.clearSendProcess();
           })
           .catch((e) => {
             if (e.msg) {
@@ -182,12 +177,7 @@ export default {
             } else {
               this.$services.alerts.exception(e);
             }
-            this.sending = false;
-            this.$store.commit('setSendInProgress', false);
-            this.address = '';
-            this.amount = '';
-            this.currency = null;
-            this.showConfirmation = false;
+            this.clearSendProcess();
           });
         return;
       }
@@ -229,13 +219,18 @@ export default {
       this.$router.push('/authenticated/dashboard/confirming');
     },
 
-    end() {
+    clearSendProcess() {
       this.sending = false;
       this.$store.commit('setSendInProgress', false);
       this.address = '';
       this.amount = '';
       this.currency = null;
       this.showConfirmation = false;
+      console.log('cleared');
+    },
+
+    end() {
+      this.clearSendProcess();
       this.$router.push('/authenticated/dashboard');
 
       if (this.$services.wallets.getCurrentWallet().isLedger === true) {

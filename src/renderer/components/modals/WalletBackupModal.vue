@@ -43,13 +43,6 @@
             <aph-copy-text :text="$store.state.currentWallet.wif"></aph-copy-text>
           </div>
         </div>
-        <div class="wallet-data private-key">
-          <div class="label">MNEMONIC</div>
-          <div class="value">
-            <p>{{ $store.state.currentWallet.mnemonic }}</p>
-            <aph-copy-text :text="$store.state.currentWallet.mnemonic"></aph-copy-text>
-          </div>
-        </div>
       </div>      
       <div class="btn-group">
         <div @click="print()" class="btn print">{{$t('print')}}</div>

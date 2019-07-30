@@ -12,6 +12,7 @@ import assets from './assets';
 import network from './network';
 import settings from './settings';
 import valuation from './valuation';
+import bwclient from './bwclient';
 import wallets from './wallets';
 import storageNew from './storageNew';
 import ledger from './ledger';
@@ -24,8 +25,6 @@ const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider(network.getSelectedNetwork().infuraApi));
 const CryptoJS = require('crypto-js');
 const bitcoin = require('bitcoinjs-lib');
-const TESTNET_BTC = bitcoin.networks.testnet;
-const MAINNET_BTC = bitcoin.networks.bitcoin;
 const { Transaction } = tx;
 const DBG_LOG = false;
 
@@ -290,13 +289,16 @@ export default {
                     }));
                 });
                 const currentWallet = wallets.getCurrentWallet();
+                const currentNetwork = network.getSelectedNetwork();
 
                 const walletClient = currentWallet.btcWalletClient;
-                const fetchedBTCTx = await valuation.getLast50TxByAddressNew(walletClient);
+                const fetchedBTCTx = await bwclient.getLast50TxByAddressNew(walletClient);
 
                 /* ---- New BTC Tx ---- */
                 fetchedBTCTx.forEach((fetchedTransaction) => {
-                  const value = fetchedTransaction.action === 'sent' ? toBigNumber('-'.concat((fetchedTransaction.amount / 100000000).toString())) : toBigNumber((fetchedTransaction.amount / 100000000).toString()); // eslint-disable-line max-len
+                  const value = fetchedTransaction.action === 'sent' ?
+                    toBigNumber('-'.concat((fetchedTransaction.amount / 100000000).toString())) :
+                    toBigNumber((fetchedTransaction.amount / 100000000).toString());
                   let confirmed;
                   fetchedTransaction.symbol = 'BTC';
                   fetchedTransaction.blocktime = fetchedTransaction.time;
@@ -356,6 +358,7 @@ export default {
                     from: '-',
                     to: '-',
                     confirmed,
+                    btcPage: currentNetwork.btcPage.concat(`tx/${fetchedTransaction.txid}/`),
                   });
                 });
                 Promise.all(promises)
@@ -715,65 +718,20 @@ export default {
         let balBTC;
         const walletClient = currentWallet.btcWalletClient;
         try {
-          balBTCtemp = await valuation.getBTCBalanceByAddress(walletClient);
+          balBTCtemp = await bwclient.getBTCBalanceByAddress(walletClient);
           balBTC = balBTCtemp.availableAmount;
         } catch (e) {
           alerts.networkException(e);
         }
 
-        const walletToOpenNew = storageNew.getOne(currentWallet.wif);
-        let set1test = currentWallet.btcTestnetAddress;
-        let set2main = currentWallet.btcMainnetAddress;
-        const net = currentNetwork.net;
         const addressesTemp = balBTCtemp.byAddress;
         const addressArr = [];
 
         addressesTemp.forEach((addressData) => {
           addressArr.push(addressData.address);
         });
-        if (addressArr.indexOf(currentWallet.btcAddress) !== -1) {
-          const data1 = await wallets.createNewBTCAddress(walletClient);
-          if (data1.err) {
-            const data2 = await wallets.getMainAddress(walletClient);
-            if (net === 'TestNet') {
-              currentWallet.btcTestnetAddress = data2.address;
-              set1test = data2.address;
-            } else {
-              currentWallet.btcMainnetAddress = data2.address;
-              set2main = data2.address;
-            }
-            currentWallet.btcAddress = data2.address;
-            alerts.success('New Bitcoin address generated.');
-            wallets.setCurrentWallet(currentWallet).sync();
-            storageNew
-              .add(currentWallet.wif, {
-                label: currentWallet.wif,
-                encryptedMnemonicString: walletToOpenNew.encryptedMnemonicString,
-                btcTestnetAddress: set1test,
-                btcMainnetAddress: set2main,
-              })
-              .sync();
-          } else {
-            if (net === 'TestNet') {
-              currentWallet.btcTestnetAddress = data1.address;
-              set1test = data1.address;
-            } else {
-              currentWallet.btcMainnetAddress = data1.address;
-              set2main = data1.address;
-            }
-            currentWallet.btcAddress = data1.address;
-            alerts.success('New Bitcoin address generated.');
-            wallets.setCurrentWallet(currentWallet).sync();
-            storageNew
-              .add(currentWallet.wif, {
-                label: currentWallet.wif,
-                encryptedMnemonicString: walletToOpenNew.encryptedMnemonicString,
-                btcTestnetAddress: set1test,
-                btcMainnetAddress: set2main,
-              })
-              .sync();
-          }
-        }
+
+        this.generateNewBTCAddress(addressArr, currentWallet, currentNetwork, walletClient);
 
         holdingBTC.assetId = '1111111111111111111111111111111111';
         holdingBTC.name = 'Bitcoin';
@@ -840,6 +798,63 @@ export default {
           .catch(e => reject(e));
       } catch (e) {
         return reject(e.message);
+      }
+    });
+  },
+
+  generateNewBTCAddress(addressArr, currentWallet, currentNetwork, walletClient) {
+    return new Promise(async (resolve) => {
+      if (addressArr.indexOf(currentWallet.btcAddress) !== -1) {
+        const walletToOpenNew = storageNew.getOne(currentWallet.wif);
+        let set1test = currentWallet.btcTestnetAddress;
+        let set2main = currentWallet.btcMainnetAddress;
+        const net = currentNetwork.net;
+
+        const data1 = await wallets.createNewBTCAddress(walletClient);
+        if (data1.err) {
+          const data2 = await wallets.getMainAddress(walletClient);
+          if (net === 'TestNet') {
+            currentWallet.btcTestnetAddress = data2.address;
+            set1test = data2.address;
+          } else {
+            currentWallet.btcMainnetAddress = data2.address;
+            set2main = data2.address;
+          }
+          currentWallet.btcAddress = data2.address;
+          alerts.success('New Bitcoin address generated.');
+          wallets.setCurrentWallet(currentWallet).sync();
+          storageNew
+            .add(currentWallet.wif, {
+              label: currentWallet.wif,
+              encryptedMnemonicString: walletToOpenNew.encryptedMnemonicString,
+              btcTestnetAddress: set1test,
+              btcMainnetAddress: set2main,
+            })
+            .sync();
+        } else {
+          if (net === 'TestNet') {
+            currentWallet.btcTestnetAddress = data1.address;
+            set1test = data1.address;
+          } else {
+            currentWallet.btcMainnetAddress = data1.address;
+            set2main = data1.address;
+          }
+          currentWallet.btcAddress = data1.address;
+          alerts.success('New Bitcoin address generated.');
+          wallets.setCurrentWallet(currentWallet).sync();
+          storageNew
+            .add(currentWallet.wif, {
+              label: currentWallet.wif,
+              encryptedMnemonicString: walletToOpenNew.encryptedMnemonicString,
+              btcTestnetAddress: set1test,
+              btcMainnetAddress: set2main,
+            })
+            .sync();
+        }
+
+        resolve({
+          done: true,
+        });
       }
     });
   },
@@ -967,13 +982,7 @@ export default {
   sendFundsBTC(toAddress, amount) {
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
-    let net;
-
-    if (currentNetwork.net === 'MainNet') {
-      net = MAINNET_BTC;
-    } else {
-      net = TESTNET_BTC;
-    }
+    const net = currentNetwork.net === 'MainNet' ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
 
     return new Promise(async (resolve, reject) => {
       try {
@@ -984,18 +993,18 @@ export default {
           return reject('Invalid Recipient Address.');
         }
 
-        const pendingTxProposals = await valuation.getPendingTxProposal(currentWallet.btcWalletClient);
+        const pendingTxProposals = await bwclient.getPendingTxProposal(currentWallet.btcWalletClient);
 
         pendingTxProposals.forEach(async (pendingTxProposal) => {
           try {
-            const rmtx = await valuation.removeTxProposal(pendingTxProposal);
+            const rmtx = await bwclient.removeTxProposal(pendingTxProposal);
             console.log(rmtx);
           } catch (e) {
             reject('error in removing pending transaction proposals!');
           }
         });
 
-        const balanceTemp = await valuation.getBTCBalanceByAddress(currentWallet.btcWalletClient);
+        const balanceTemp = await bwclient.getBTCBalanceByAddress(currentWallet.btcWalletClient);
         const balanceBTC = balanceTemp.availableConfirmedAmount / 100000000;
         const toAmountBTC = amount;
         const toAmountSAT = parseInt((amount * 100000000).toFixed(0), 10);
@@ -1013,7 +1022,7 @@ export default {
           dryRun: false,
         };
         try {
-          output1 = await valuation.createTxProposal(currentWallet.btcWalletClient, txp);
+          output1 = await bwclient.createTxProposal(currentWallet.btcWalletClient, txp);
         } catch (e) {
           return reject(e.err.message);
         }
@@ -1026,18 +1035,18 @@ export default {
         }
 
         try {
-          output2 = await valuation.publishTxProposal(currentWallet.btcWalletClient, output1.createdTxp);
+          output2 = await bwclient.publishTxProposal(currentWallet.btcWalletClient, output1.createdTxp);
         } catch (e) {
           return reject('Something went wrong while publishing transaction proposal!');
         }
 
         try {
           /* eslint-disable max-len */
-          output3 = await valuation.signTxProposal(currentWallet.btcWalletClient, output2.publishedTxp, currentWallet.btcKey);
+          output3 = await bwclient.signTxProposal(currentWallet.btcWalletClient, output2.publishedTxp, currentWallet.btcKey);
           /* eslint-enable max-len */
         } catch (e) {
           try {
-            const rm3 = await valuation.removeTxProposal(currentWallet.btcWalletClient, output2.publishedTxp);
+            const rm3 = await bwclient.removeTxProposal(currentWallet.btcWalletClient, output2.publishedTxp);
             console.log(rm3);
           } catch (err2) {
             return reject('Something went wrong while signing transaction proposal!');
@@ -1046,10 +1055,10 @@ export default {
         }
 
         try {
-          output4 = await valuation.broadcastTxProposal(currentWallet.btcWalletClient, output3.signedTxp);
+          output4 = await bwclient.broadcastTxProposal(currentWallet.btcWalletClient, output3.signedTxp);
         } catch (e) {
           try {
-            const rm4 = await valuation.removeTxProposal(currentWallet.btcWalletClient, txp);
+            const rm4 = await bwclient.removeTxProposal(currentWallet.btcWalletClient, txp);
             console.log(rm4);
           } catch (e) {
             return reject('Something went wrong while broadcasting transaction proposal!');

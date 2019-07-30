@@ -79,7 +79,7 @@
               </div>
               <div class="column" v-if="transaction.symbol === 'BTC'">
                 <div class="label">View on Bitpay</div>
-                <div class="value"><a :href="`https://test-insight.bitpay.com/tx/${transaction.details.txid}/`" target="_blank">click here</a></div>
+                <div class="value"><a :href="`${transaction.btcPage}`" target="_blank">click here</a></div>
               </div>              
             </div>
             <div class="row has-equal-columns">

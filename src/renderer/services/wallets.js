@@ -83,6 +83,7 @@ export default {
       try {
         const walletToOpen = this.getOne(name);
         const net = network.getSelectedNetwork().net;
+        const bwsurl = network.getSelectedNetwork().bwsurl;
 
         const wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
         const account = new wallet.Account(wif);
@@ -133,7 +134,7 @@ export default {
               m: 1,
               n: 1,
               myName: 'me',
-              bwsurl: 'https://bws.bitpay.com/bws/api',
+              bwsurl,
               singleAddress: false,
               coin: 'btc',
             };
@@ -579,9 +580,10 @@ export default {
   },
 
   getClient() {
-    // note use `bwsurl` all lowercase;
+    // note: use `bwsurl` all lowercase;
+    const bwsurl = network.getSelectedNetwork().bwsurl;
     const bwc = new BWC({
-      baseUrl: 'https://bws.bitpay.com/bws/api',
+      baseUrl: bwsurl,
       verbose: false,
       timeout: 100000,
       transports: ['polling'],
@@ -596,12 +598,13 @@ export default {
 
   generateBTCETHWallet(walletName) {
     return new Promise(async (resolve, reject) => {
+      const bwsurl = network.getSelectedNetwork().bwsurl;
       const opts = {
         name: walletName,
         m: 1,
         n: 1,
         myName: 'me',
-        bwsurl: 'https://bws.bitpay.com/bws/api',
+        bwsurl,
         singleAddress: false,
         coin: 'btc',
       };
@@ -615,7 +618,7 @@ export default {
       // creating key
 
       const key = Key.create({
-        lang // eslint-disable-line comma-dangle
+        lang,
       });
 
       const btcTestnet = await this.createTestnetBTCWallet(key, opts);
@@ -646,7 +649,7 @@ export default {
     // creating key
 
     const key = Key.create({
-      lang // eslint-disable-line comma-dangle
+      lang,
     });
 
     return ({
@@ -663,8 +666,8 @@ export default {
           coin: opts.coin,
           network: 'testnet',
           account: opts.account || 0,
-          n: opts.n || 1 // eslint-disable-line comma-dangle
-        }) // eslint-disable-line comma-dangle
+          n: opts.n || 1,
+        }),
       );
 
       walletClient.createWallet(
@@ -676,7 +679,7 @@ export default {
           network: 'testnet',
           singleAddress: opts.singleAddress,
           walletPrivKey: opts.walletPrivKey,
-          coin: opts.coin // eslint-disable-line comma-dangle
+          coin: opts.coin,
         },
         (err) => {
           if (err) {
@@ -689,7 +692,7 @@ export default {
               walletClient,
             });
           }
-        } // eslint-disable-line comma-dangle
+        },
       );
     });
   },
@@ -703,7 +706,7 @@ export default {
           coin: opts.coin,
           network: 'livenet',
           account: opts.account || 0,
-          n: opts.n || 1 // eslint-disable-line comma-dangle
+          n: opts.n || 1,
         }),
       );
 
@@ -716,7 +719,7 @@ export default {
           network: 'livenet',
           singleAddress: opts.singleAddress,
           walletPrivKey: opts.walletPrivKey,
-          coin: opts.coin // eslint-disable-line comma-dangle
+          coin: opts.coin,
         },
         (err) => {
           if (err) {
@@ -729,22 +732,23 @@ export default {
               walletClient,
             });
           }
-        } // eslint-disable-line comma-dangle
+        },
       );
     });
   },
 
   getBTCWalletObjects(mnemonic) {
     return new Promise((resolve, reject) => {
+      const bwsurl = network.getSelectedNetwork().bwsurl;
       const opts = {
-        bwsurl: 'https://bws.bitpay.com/bws/api',
+        bwsurl,
         passphrase: null,
         words: mnemonic,
       };
       BWC.serverAssistedImport(
         opts,
         {
-          baseUrl: opts.bwsurl // eslint-disable-line comma-dangle
+          baseUrl: opts.bwsurl,
         },
         (err, key, walletClients) => {
           // walletClients.length === 0 => WALLET_DOES_NOT_EXIST
@@ -753,8 +757,10 @@ export default {
               err: true,
             });
           } else {
-            const btcTestnetWalletClient = walletClients[0].credentials.network === 'testnet' ? walletClients[0] : walletClients[1]; // eslint-disable-line max-len
-            const btcMainnetWalletClient = walletClients[0].credentials.network === 'livenet' ? walletClients[0] : walletClients[1]; // eslint-disable-line max-len
+            const btcTestnetWalletClient = walletClients[0].credentials.network === 'testnet' ?
+              walletClients[0] : walletClients[1];
+            const btcMainnetWalletClient = walletClients[0].credentials.network === 'livenet' ?
+              walletClients[0] : walletClients[1];
 
             resolve({
               key,
@@ -789,7 +795,7 @@ export default {
       walletClient.getMainAddresses(
         {
           reverse: true,
-          limit: 1 // eslint-disable-line comma-dangle
+          limit: 1,
         },
         (err, addr) => {
           if (err) {

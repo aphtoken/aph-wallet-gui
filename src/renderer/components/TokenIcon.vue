@@ -25,7 +25,11 @@ export default {
       return `https://s3.us-east-2.amazonaws.com/aphelion-public-artifacts/TokenLogos/${this.symbol.toLowerCase()}.png`;
     },
     symbolRequiresFetch() {
-      return this.symbol !== 'APH' && this.symbol !== 'GAS' && this.symbol !== 'NEO' && this.symbol !== 'BTC' && this.symbol !== 'ETH'; // eslint-disable-line max-len
+      return this.symbol !== 'APH'
+        && this.symbol !== 'GAS'
+        && this.symbol !== 'NEO'
+        && this.symbol !== 'BTC'
+        && this.symbol !== 'ETH';
     },
   },
 
