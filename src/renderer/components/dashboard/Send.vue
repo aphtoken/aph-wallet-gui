@@ -37,6 +37,12 @@
             <div class="value">{{ address }}</div>
           </div>
         </div>
+        <div class="row">
+          <div class="column" v-if="currency.symbol === 'BTC'">
+            <div class="label">{{$t('networkFee')}}</div>
+            <div class="value">{{ btcFee }} BTC</div>        
+          </div>
+        </div>
       </div>
       <div class="waiting" v-if="sendInProgress">{{$t('waitingForTransaction')}}</div>
       <div class="footer">
@@ -62,15 +68,16 @@
             <div class="label">{{$t('estimated')}}</div>
             <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
           </div>
-          <div class="network-fee" v-if="currentNetwork.fee > 0">
+          <div class="network-fee" v-if="currentNetwork.fee > 0 && currency.symbol !== 'BTC'">
             <div class="label">{{$t('networkFee')}}</div>
             <div class="value">{{ $formatNumber(currentNetwork.fee) }} GAS</div>
           </div>
         </aph-form>
       </div>
+      <div class="waiting" v-if="calculatingFees">Calculating Fees</div>
       <div class="footer">
         <router-link class="cancel-btn" to="/dashboard">{{$t('cancel')}}</router-link>
-        <button class="next-btn" @click="next" :disabled="shouldDisableNextButton">{{$t('next')}}</button>
+        <button class="next-btn" @click="next" :disabled="shouldDisableNextButton || calculatingFees">{{$t('next')}}</button>
       </div>
     </template>
   </section>
@@ -140,15 +147,34 @@ export default {
       currency: null,
       showConfirmation: false,
       sending: false,
+      calculatingFees: false,
+      btcFee: '',
     };
   },
 
   methods: {
-    next() {
+    async next() {
       if (!(this.address && this.amount && parseFloat(this.amount) && this.currency)) {
         return;
       }
-      this.showConfirmation = true;
+
+      if (this.currency.symbol === 'BTC') {
+        this.calculatingFees = true;
+        this.$services.bwclient.getEstimatedFeeByTx(this.address, this.amount)
+          .then((res) => {
+            this.btcFee = res.fee;
+            this.showConfirmation = true;
+            this.calculatingFees = false;
+          })
+          .catch((e) => {
+            this.$services.alerts.exception(e.err.message);
+            this.calculatingFees = false;
+            this.btcFee = '';
+            // this.clearSendProcess();
+          });
+      } else {
+        this.showConfirmation = true;
+      }
     },
 
     setAmountToMax() {
@@ -179,44 +205,43 @@ export default {
             }
             this.clearSendProcess();
           });
-        return;
-      }
-
-      if (new BigNumber(this.amount).isGreaterThan(this.currency.balance)) {
-        this.$services.alerts
-          .exception(`Insufficient ${this.currency.symbol}!` +
-            ` Need ${this.amount} but only found ${this.currency.balance}`);
-        this.amount = (parseFloat(this.amount) - fee).toString();
-        return;
-      }
-
-      this.sending = true;
-
-      setTimeout(() => {
-        this.$services.neo.sendFunds(this.address, this.currency.assetId,
-          this.amount, this.currency.isNep5, null, true)
-          .then(() => {
-            this.end();
-          })
-          .catch((e) => {
-            this.sending = false;
-            this.$services.alerts.exception(e);
-            this.$store.commit('setSendInProgress', false);
-          });
-      }, this.$constants.timeouts.NEO_API_CALL);
-
-      let transactionTimeout = this.$constants.timeouts.TRANSACTION;
-      if (this.$services.wallets.getCurrentWallet().isLedger === true) {
-        transactionTimeout = this.$constants.timeouts.TRANSACTION_WITH_HARDWARE;
-      }
-
-      sendTimeoutIntervalId = setTimeout(() => {
-        if (this.sending) {
-          this.end();
+      } else {
+        if (new BigNumber(this.amount).isGreaterThan(this.currency.balance)) {
+          this.$services.alerts
+            .exception(`Insufficient ${this.currency.symbol}!` +
+              ` Need ${this.amount} but only found ${this.currency.balance}`);
+          this.amount = (parseFloat(this.amount) - fee).toString();
+          return;
         }
-      }, transactionTimeout);
 
-      this.$router.push('/authenticated/dashboard/confirming');
+        this.sending = true;
+
+        setTimeout(() => {
+          this.$services.neo.sendFunds(this.address, this.currency.assetId,
+            this.amount, this.currency.isNep5, null, true)
+            .then(() => {
+              this.end();
+            })
+            .catch((e) => {
+              this.sending = false;
+              this.$services.alerts.exception(e);
+              this.$store.commit('setSendInProgress', false);
+            });
+        }, this.$constants.timeouts.NEO_API_CALL);
+
+        let transactionTimeout = this.$constants.timeouts.TRANSACTION;
+        if (this.$services.wallets.getCurrentWallet().isLedger === true) {
+          transactionTimeout = this.$constants.timeouts.TRANSACTION_WITH_HARDWARE;
+        }
+
+        sendTimeoutIntervalId = setTimeout(() => {
+          if (this.sending) {
+            this.end();
+          }
+        }, transactionTimeout);
+
+        this.$router.push('/authenticated/dashboard/confirming');
+      }
     },
 
     clearSendProcess() {
@@ -226,6 +251,8 @@ export default {
       this.amount = '';
       this.currency = null;
       this.showConfirmation = false;
+      this.btcFee = '';
+      this.calculatingFees = false;
       console.log('cleared');
     },
 

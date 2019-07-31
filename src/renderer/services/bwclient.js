@@ -3,6 +3,7 @@
  * https://github.com/bitpay/bitcore/tree/master/packages/bitcore-wallet-client#class-api
  *
  ************************************************************************************** */
+import wallets from './wallets';
 
 export default {
   getBTCBalanceByAddress(walletClient) {
@@ -19,6 +20,34 @@ export default {
       } catch (e) {
         reject(e);
       }
+    });
+  },
+
+  getEstimatedFeeByTx(toAddress, toAmount) {
+    const currentWallet = wallets.getCurrentWallet();
+    const walletClient = currentWallet.btcWalletClient;
+    const toAmountSAT = parseInt((toAmount * 100000000).toFixed(0), 10);
+    const txp = {
+      outputs: [{
+        toAddress,
+        amount: toAmountSAT,
+      }],
+      feeLevel: 'normal',
+      excludeUnconfirmedUtxos: true,
+      dryRun: false,
+    };
+    return new Promise((resolve, reject) => {
+      walletClient.createTxProposal(txp, (err, createdTxp) => {
+        if (err) {
+          reject({
+            err,
+          });
+        } else {
+          resolve({
+            fee: (createdTxp.fee / 100000000),
+          });
+        }
+      });
     });
   },
 

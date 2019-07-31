@@ -8,8 +8,6 @@ import network from './network';
 
 const BWC = require('bitcore-wallet-client');
 const CryptoJS = require('crypto-js');
-const bip39 = require('bip39');
-const hdkey = require('ethereumjs-wallet/hdkey');
 const WALLETS_STORAGE_KEY = 'wallets';
 let currentWallet = null;
 
@@ -96,9 +94,9 @@ export default {
         let btcKey;
 
         if (walletToOpen.encryptedMnemonicString === undefined) {
-          const dataBTCgen = await this.generateBTCETHWallet(name);
+          const dataBTCgen = await this.generateBTCWallet(name);
           if (dataBTCgen.err) {
-            return reject('An error occured while trying to generate a new Bitcoin & Ethereum wallet.');
+            return reject('An error occured while trying to generate a new Bitcoin wallet.');
           }
           mnemonic = dataBTCgen.key.mnemonic;
           btcKey = dataBTCgen.key;
@@ -150,15 +148,6 @@ export default {
           btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
           btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
         }
-        const seedString = bip39.mnemonicToSeedSync(mnemonic, wif).toString('hex');
-
-        const hdnode = hdkey.fromMasterSeed(Buffer.from(seedString, 'hex'));
-        // setting for ethereum
-        hdnode.derivePath("m/44'/60'/0'/0/0");
-        // eth address
-        const ethAddress = hdnode.getWallet().getAddressString();
-        // eth key
-        const ethPrivateKey = (hdnode.getWallet().getPrivateKeyString()).substring(2);
 
         let btcTestnetAddress;
         let btcMainnetAddress;
@@ -193,7 +182,7 @@ export default {
               })
               .sync();
           }
-          alerts.success('New addresses generated for Bitcoin & Ethereum.');
+          alerts.success('New addresses generated for Bitcoin.');
         } else {
           btcTestnetAddress = walletToOpenNew.btcTestnetAddress;
           btcMainnetAddress = walletToOpenNew.btcMainnetAddress;
@@ -216,8 +205,6 @@ export default {
           btcTestnetWalletClient,
           btcMainnetWalletClient,
           btcKey,
-          ethAddress,
-          ethPrivateKey,
           mnemonic,
         };
 
@@ -236,8 +223,10 @@ export default {
 
     if (currentWallet) {
       const net = network.getSelectedNetwork().net;
-      currentWallet.btcAddress = net === 'TestNet' ? currentWallet.btcTestnetAddress : currentWallet.btcMainnetAddress; // eslint-disable-line max-len
-      currentWallet.btcWalletClient = net === 'TestNet' ? currentWallet.btcTestnetWalletClient : currentWallet.btcMainnetWalletClient; // eslint-disable-line max-len
+      currentWallet.btcAddress = net === 'TestNet' ?
+        currentWallet.btcTestnetAddress : currentWallet.btcMainnetAddress;
+      currentWallet.btcWalletClient = net === 'TestNet' ?
+        currentWallet.btcTestnetWalletClient : currentWallet.btcMainnetWalletClient;
       this.setCurrentWallet(currentWallet).sync();
     }
   },
@@ -292,9 +281,9 @@ export default {
           btcTestnetAddress = walletToOpen.btcTestnetAddress;
           btcMainnetAddress = walletToOpen.btcMainnetAddress;
         } else {
-          const dataBTCgen = await this.generateBTCETHWallet('wall');
+          const dataBTCgen = await this.generateBTCWallet('wall');
           if (dataBTCgen.err) {
-            return reject('An error occured while trying to generate a new Bitcoin & Ethereum wallet.');
+            return reject('An error occured while trying to generate a new Bitcoin.');
           }
           mnemonic = dataBTCgen.key.mnemonic;
           btcKey = dataBTCgen.key;
@@ -332,17 +321,8 @@ export default {
               })
               .sync();
           }
-          alerts.success('New addresses generated for Bitcoin & Ethereum.');
+          alerts.success('New addresses generated for Bitcoin.');
         }
-        const seedString = bip39.mnemonicToSeedSync(mnemonic, wif).toString('hex');
-
-        const hdnode = hdkey.fromMasterSeed(Buffer.from(seedString, 'hex'));
-        // setting for ethereum
-        hdnode.derivePath("m/44'/60'/0'/0/0");
-        // eth address
-        const ethAddress = hdnode.getWallet().getAddressString();
-        // eth key
-        const ethPrivateKey = (hdnode.getWallet().getPrivateKeyString()).substring(2);
         // btc address
         const btcAddress = net === 'TestNet' ? btcTestnetAddress : btcMainnetAddress;
         const btcWalletClient = net === 'TestNet' ? btcTestnetWalletClient : btcMainnetWalletClient;
@@ -360,8 +340,6 @@ export default {
           btcTestnetWalletClient,
           btcMainnetWalletClient,
           btcKey,
-          ethAddress,
-          ethPrivateKey,
           mnemonic,
         };
 
@@ -402,9 +380,9 @@ export default {
           btcTestnetAddress = walletToOpen.btcTestnetAddress;
           btcMainnetAddress = walletToOpen.btcMainnetAddress;
         } else {
-          const dataBTCgen = await this.generateBTCETHWallet('wall');
+          const dataBTCgen = await this.generateBTCWallet('wall');
           if (dataBTCgen.err) {
-            return reject('An error occured while trying to generate a new Bitcoin & Ethereum wallet.');
+            return reject('An error occured while trying to generate a new Bitcoin wallet.');
           }
           mnemonic = dataBTCgen.key.mnemonic;
           btcKey = dataBTCgen.key;
@@ -442,17 +420,8 @@ export default {
               .sync();
           }
 
-          alerts.success('New addresses generated for Bitcoin & Ethereum.');
+          alerts.success('New addresses generated for Bitcoin.');
         }
-        const seedString = bip39.mnemonicToSeedSync(mnemonic, wif).toString('hex');
-
-        const hdnode = hdkey.fromMasterSeed(Buffer.from(seedString, 'hex'));
-        // setting for ethereum
-        hdnode.derivePath("m/44'/60'/0'/0/0");
-        // eth address
-        const ethAddress = hdnode.getWallet().getAddressString();
-        // eth key
-        const ethPrivateKey = (hdnode.getWallet().getPrivateKeyString()).substring(2);
 
         const btcAddress = net === 'TestNet' ? btcTestnetAddress : btcMainnetAddress;
         const btcWalletClient = net === 'TestNet' ? btcTestnetWalletClient : btcMainnetWalletClient;
@@ -461,8 +430,6 @@ export default {
           wif,
           address: account.address,
           privateKey: account.privateKey,
-          ethAddress,
-          ethPrivateKey,
           btcAddress,
           btcTestnetAddress,
           btcMainnetAddress,
@@ -501,15 +468,6 @@ export default {
         const btcKey = dataBTCgen.key;
         const btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
         const btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
-        const seedString = bip39.mnemonicToSeedSync(seedwords, wif).toString('hex');
-
-        const hdnode = hdkey.fromMasterSeed(Buffer.from(seedString, 'hex'));
-        // setting for ethereum
-        hdnode.derivePath("m/44'/60'/0'/0/0");
-        // eth address
-        const ethAddress = hdnode.getWallet().getAddressString();
-        // eth key
-        const ethPrivateKey = (hdnode.getWallet().getPrivateKeyString()).substring(2);
 
         const dataBTCadd1 = await this.getMainAddress(btcTestnetWalletClient);
         const dataBTCadd2 = await this.getMainAddress(btcMainnetWalletClient);
@@ -528,8 +486,6 @@ export default {
           wif,
           address: account.address,
           privateKey: account.privateKey,
-          ethAddress,
-          ethPrivateKey,
           btcAddress,
           btcTestnetAddress,
           btcMainnetAddress,
@@ -596,7 +552,7 @@ export default {
     return BWC.Key;
   },
 
-  generateBTCETHWallet(walletName) {
+  generateBTCWallet(walletName) {
     return new Promise(async (resolve, reject) => {
       const bwsurl = network.getSelectedNetwork().bwsurl;
       const opts = {

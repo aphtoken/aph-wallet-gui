@@ -21,8 +21,6 @@ import { store } from '../store';
 import { timeouts, intervals } from '../constants';
 import { toBigNumber } from './formatting.js';
 
-const Web3 = require('web3');
-const web3 = new Web3(new Web3.providers.HttpProvider(network.getSelectedNetwork().infuraApi));
 const CryptoJS = require('crypto-js');
 const bitcoin = require('bitcoinjs-lib');
 const { Transaction } = tx;
@@ -699,19 +697,6 @@ export default {
           valuationSymbols.push(holding.symbol);
         });
 
-        // ETH
-        const ethAddress = currentWallet.ethAddress;
-        const holdingETH = {};
-        const balEth = await web3.eth.getBalance(ethAddress);
-        holdingETH.assetId = '0x0000000000000000000000000000000000000000';
-        holdingETH.name = 'Ethereum';
-        holdingETH.symbol = 'ETH';
-        holdingETH.decimals = 18;
-        holdingETH.isNep5 = false;
-        holdingETH.balance = toBigNumber(balEth).dividedBy(10 ** (holdingETH.decimals));
-        holdings.push(holdingETH);
-        valuationSymbols.push(holdingETH.symbol);
-
         // BTC
         const holdingBTC = {};
         let balBTCtemp;
@@ -991,6 +976,10 @@ export default {
           bitcoin.address.toOutputScript(toAddress, net);
         } catch (e) {
           return reject('Invalid Recipient Address.');
+        }
+
+        if (currentWallet.btcAddress === toAddress) {
+          return reject('Can not send to own address.');
         }
 
         const pendingTxProposals = await bwclient.getPendingTxProposal(currentWallet.btcWalletClient);

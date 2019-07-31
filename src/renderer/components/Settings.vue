@@ -11,25 +11,25 @@
       </div>
     </div>
     <wallet-backup-modal v-if="$store.state.showWalletBackupModal" :onDone="hideWalletBackupModal"></wallet-backup-modal>
-    <btc-eth-wallet-backup-modal v-if="$store.state.showWalletBackupModalBTCETH" :onDone="hideWalletBackupModalBTCETH"></btc-eth-wallet-backup-modal>
+    <btc-wallet-backup-modal v-if="$store.state.showWalletBackupModalBTC" :onDone="hideWalletBackupModalBTC"></btc-wallet-backup-modal>
   </section>
 </template>
 <script>
 import WalletBackupModal from './modals/WalletBackupModal';
-import WalletBackupModalBTCETH from './modals/WalletBackupModalBTCETH';
+import WalletBackupModalBTC from './modals/WalletBackupModalBTC';
 
 export default {
   components: {
     'wallet-backup-modal': WalletBackupModal,
-    'btc-eth-wallet-backup-modal': WalletBackupModalBTCETH,
+    'btc-wallet-backup-modal': WalletBackupModalBTC,
   },
 
   methods: {
     hideWalletBackupModal() {
       this.$store.commit('setShowWalletBackupModal', false);
     },
-    hideWalletBackupModalBTCETH() {
-      this.$store.commit('setShowWalletBackupModalBTCETH', false);
+    hideWalletBackupModalBTC() {
+      this.$store.commit('setShowWalletBackupModalBTC', false);
     },
   },
 };

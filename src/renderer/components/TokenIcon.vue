@@ -4,7 +4,6 @@
     <img src="~@/assets/img/token-icons/APH.png" v-if="symbol === 'APH'">
     <img src="~@/assets/img/token-icons/GAS.png" v-else-if="symbol === 'GAS'">
     <img src="~@/assets/img/token-icons/NEO.png" v-else-if="symbol === 'NEO'">
-    <img src="~@/assets/img/token-icons/ETH.png" v-else-if="symbol === 'ETH'">
     <img src="~@/assets/img/token-icons/BTC.png" v-else-if="symbol === 'BTC'">
     <img :src="imageUrl" v-else-if="useImage" />
     <div class="placeholder" v-else>
@@ -28,8 +27,7 @@ export default {
       return this.symbol !== 'APH'
         && this.symbol !== 'GAS'
         && this.symbol !== 'NEO'
-        && this.symbol !== 'BTC'
-        && this.symbol !== 'ETH';
+        && this.symbol !== 'BTC';
     },
   },
 

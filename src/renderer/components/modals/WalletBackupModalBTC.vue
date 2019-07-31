@@ -1,34 +1,16 @@
 <template>
   <modal-wrapper id="aph-wallet-backup-modal">
     <div class="body">
-      <h2>Bitcoin & Ethereum</h2>
+      <h2>Bitcoin</h2>
       <p class="help-text">{{$t('saveAndBackupTheKeys')}}</p>
       <p class="help-text">{{$t('ifYouLoseThem')}}</p>
       <div class="qr-codes">
         <div class="qr-code">
-          <vue-qrcode :value="$store.state.currentWallet.btcAddress" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
-          <p class="help-text">BITCOIN {{$t('publicAddress')}}</p>
-        </div>
-        <div class="qr-code">
-          <vue-qrcode :value="$store.state.currentWallet.ethAddress" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
-          <p class="help-text">ETHEREUM {{$t('publicAddress')}}</p>
+          <vue-qrcode :value="$store.state.currentWallet.mnemonic" :options="{ backgroundAlpha: 0, size: 150 }"></vue-qrcode>
+          <p class="help-text">MNEMONIC</p>
         </div>
       </div>
       <div class="data">
-        <div class="wallet-data public-address">
-          <div class="label">BITCOIN {{$t('publicAddress')}}</div>
-          <div class="value">
-            <p>{{ $store.state.currentWallet.btcAddress }}</p>
-            <aph-copy-text :text="$store.state.currentWallet.btcAddress"></aph-copy-text>
-          </div>
-        </div>
-        <div class="wallet-data public-address">
-          <div class="label">ETHEREUM {{$t('publicAddress')}}</div>
-          <div class="value">
-            <p>{{ $store.state.currentWallet.ethAddress }}</p>
-            <aph-copy-text :text="$store.state.currentWallet.ethAddress"></aph-copy-text>
-          </div>
-        </div>
         <div class="wallet-data private-key">
           <div class="label">MNEMONIC</div>
           <div class="value">

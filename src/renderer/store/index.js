@@ -70,7 +70,7 @@ const state = {
   showSendRequestLedgerSignature: false,
   showSendWithLedgerModal: false,
   showWalletBackupModal: false,
-  showWalletBackupModalBTCETH: false,
+  showWalletBackupModalBTC: false,
   socket: {
     lastMessage: null,
     isConnected: false,

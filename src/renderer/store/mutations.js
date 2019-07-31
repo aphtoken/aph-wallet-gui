@@ -70,7 +70,7 @@ export {
   setShowSendRequestLedgerSignature,
   setShowSendWithLedgerModal,
   setShowWalletBackupModal,
-  setShowWalletBackupModalBTCETH,
+  setShowWalletBackupModalBTC,
   setSocketOrderCreated,
   setSocketOrderCreationFailed,
   setSocketOrderMatchFailed,
@@ -449,8 +449,8 @@ function setShowWalletBackupModal(state, value) {
   state.showWalletBackupModal = value;
 }
 
-function setShowWalletBackupModalBTCETH(state, value) {
-  state.showWalletBackupModalBTCETH = value;
+function setShowWalletBackupModalBTC(state, value) {
+  state.showWalletBackupModalBTC = value;
 }
 
 function setSocketOrderCreated(state, value) {

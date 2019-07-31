@@ -5,6 +5,7 @@ import db from './db';
 import formatting from './formatting';
 import ledger from './ledger';
 import neo from './neo';
+import bwclient from './bwclient';
 import network from './network';
 import settings from './settings';
 import storage from './storage';
@@ -21,6 +22,7 @@ export {
   formatting,
   ledger,
   neo,
+  bwclient,
   network,
   settings,
   storage,

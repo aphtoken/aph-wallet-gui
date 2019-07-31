@@ -2,7 +2,7 @@
   <section id="settings--wallet-actions" v-if="canBackupWallet">
     <div class="body">
       <button class="backup-wallet" @click="showWalletBackupModal">NEO {{$t('backupWallet')}}</button><p></p>
-      <button class="backup-wallet" @click="showWalletBackupModalBTCETH">Ethereum & Bitcoin {{$t('backupWallet')}}</button><p></p>
+      <button class="backup-wallet" @click="showWalletBackupModalBTC">Bitcoin {{$t('backupWallet')}}</button><p></p>
     </div>
   </section>
 </template>
@@ -19,8 +19,8 @@ export default {
     showWalletBackupModal() {
       this.$store.commit('setShowWalletBackupModal', true);
     },
-    showWalletBackupModalBTCETH() {
-      this.$store.commit('setShowWalletBackupModalBTCETH', true);
+    showWalletBackupModalBTC() {
+      this.$store.commit('setShowWalletBackupModalBTC', true);
     },
   },
 };
