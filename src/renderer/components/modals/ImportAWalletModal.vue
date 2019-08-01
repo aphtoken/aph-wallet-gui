@@ -5,6 +5,7 @@
         <aph-icon name="wallet"></aph-icon>
         <aph-input :placeholder="$t('name')" v-model="walletName"></aph-input>
         <aph-input :placeholder="$t('privateKey')" v-model="wif"></aph-input>
+        <aph-input placeholder="Enter Mnemonic (optional)" v-model="mnemonic"></aph-input>
         <aph-input :placeholder="$t('passphrase')" v-model="passphrase" type="password"></aph-input>
         <aph-input :placeholder="$t('confirmPassphrase')" v-model="passphraseConfirm" type="password"></aph-input>
       </aph-form>
@@ -46,6 +47,7 @@ export default {
       passphraseConfirm: '',
       walletName: '',
       wif: '',
+      mnemonic: '',
     };
   },
 
@@ -59,10 +61,19 @@ export default {
         return;
       }
 
+      this.mnemonic = this.mnemonic.trim();
+      const mnemonicCount = this.mnemonic.split(' ');
+
+      if (this.mnemonic !== '' && mnemonicCount.length < 12) {
+        this.$services.alerts.exception('Invalid manmonic!');
+        return;
+      }
+
       this.$store.dispatch('importWallet', {
         name: this.walletName,
         wif: this.wif,
         passphrase: this.passphrase,
+        mnemonic: this.mnemonic,
         done: () => {
           this.onCancel();
         },
