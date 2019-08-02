@@ -162,6 +162,8 @@ export default {
     network.aph_hash = defaultForNetwork.aph_hash;
     network.websocketUri = defaultForNetwork.websocketUri;
     network.kycUrl = defaultForNetwork.kycUrl;
+    network.btcPage = defaultForNetwork.btcPage;
+    network.bwsurl = defaultForNetwork.bwsurl;
 
     return this;
   },

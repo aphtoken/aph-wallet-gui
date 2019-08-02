@@ -136,8 +136,11 @@ export default {
               singleAddress: false,
               coin: 'btc',
             };
-            await this.createTestnetBTCWallet(walletToOpenNew.key, opts);
-            await this.createMainnetBTCWallet(walletToOpenNew.key, opts);
+            const check1 = await this.createTestnetBTCWallet(walletToOpenNew.key, opts);
+            const check2 = await this.createMainnetBTCWallet(walletToOpenNew.key, opts);
+            if (check1.err || check2.err) {
+              return reject('An error occured while generating Bitcoin wallet.');
+            }
           }
 
           const dataBTCgen = await this.getBTCWalletObjects(mnemonic);

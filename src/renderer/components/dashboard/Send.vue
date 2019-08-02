@@ -54,7 +54,7 @@
       <div class="body">
         <aph-form :on-submit="next">
           <div class="currency">
-            <aph-select :options="currencies" :light="true" :placeholder="$t('selectCurrency')" v-model="currency"></aph-select>
+            <aph-select :options="currencies" :light="true" :onclick="this.currencyChanged()" :placeholder="$t('selectCurrency')" v-model="currency"></aph-select>
           </div>
           <div class="address">
             <aph-input :placeholder="$t('enterSendToAddress')" v-model="address"></aph-input>
@@ -68,7 +68,7 @@
             <div class="label">{{$t('estimated')}}</div>
             <div class="value">{{ $formatMoney(currency ? currency.unitValue * amount : 0) }} {{ $store.state.currency }}</div>
           </div>
-          <div class="network-fee" v-if="currentNetwork.fee > 0 && currency.symbol !== 'BTC'">
+          <div class="network-fee" v-if="currentNetwork.fee > 0 && noBTC">
             <div class="label">{{$t('networkFee')}}</div>
             <div class="value">{{ $formatNumber(currentNetwork.fee) }} GAS</div>
           </div>
@@ -149,6 +149,7 @@ export default {
       sending: false,
       calculatingFees: false,
       btcFee: '',
+      noBTC: true,
     };
   },
 
@@ -174,6 +175,16 @@ export default {
           });
       } else {
         this.showConfirmation = true;
+      }
+    },
+
+    currencyChanged() {
+      if (this.currency) {
+        if (this.currency.symbol === 'BTC') {
+          this.noBTC = false;
+        } else {
+          this.noBTC = true;
+        }
       }
     },
 
