@@ -109,25 +109,30 @@ function createWallet({ commit }, { name, passphrase, passphraseConfirm }) {
 function deleteWallet({ commit }, { name, passphrase, done }) {
   commit('startRequest', { identifier: 'deleteWallet' });
   const walletToOpen = wallets.getOne(name);
+  let wif;
 
-  const wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
-
-  setTimeout(() => {
-    wallets.remove(name)
-      .then(() => {
-        wallets.sync();
-        done();
-        storageNew.remove(wif)
-          .then(() => {
-            storageNew.sync();
-          });
-        commit('endRequest', { identifier: 'deleteWallet' });
-      })
-      .catch((e) => {
-        alerts.exception(e);
-        commit('failRequest', { identifier: 'deleteWallet', message: e });
-      });
-  }, timeouts.NEO_API_CALL);
+  try {
+    wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
+    setTimeout(() => {
+      wallets.remove(name)
+        .then(() => {
+          wallets.sync();
+          done();
+          storageNew.remove(wif)
+            .then(() => {
+              storageNew.sync();
+            });
+          commit('endRequest', { identifier: 'deleteWallet' });
+        })
+        .catch((e) => {
+          alerts.exception(e);
+          commit('failRequest', { identifier: 'deleteWallet', message: e });
+        });
+    }, timeouts.NEO_API_CALL);
+  } catch (e) {
+    alerts.exception(e);
+    commit('failRequest', { identifier: 'deleteWallet', message: e });
+  }
 }
 
 // Returns if a value is a string
