@@ -11,8 +11,12 @@
     </thead>
     <tbody>
       <tr v-for="(transaction, index) in transactions" :key="index" @click="handleOnClick(transaction)" :class="[{active: transaction.active}]">
-        <td v-if="showStatus" class="status">
+        <td v-if="showStatus && transaction.symbol !== 'BTC'" class="status">
           <aph-icon name="confirmed" v-if="transaction.details.confirmed"></aph-icon>
+          <aph-icon name="unconfirmed" v-else></aph-icon>
+        </td>
+        <td v-else-if="showStatus && transaction.symbol === 'BTC'" class="status">
+          <aph-icon name="confirmed" v-if="transaction.details.confirmations > 0"></aph-icon>
           <aph-icon name="unconfirmed" v-else></aph-icon>
         </td>
         <td class="currency">{{ transaction.symbol }}</td>

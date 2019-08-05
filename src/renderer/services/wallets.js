@@ -1,8 +1,13 @@
 import { wallet } from '@cityofzion/neon-js';
 
+import alerts from './alerts';
 import { store } from '../store';
 import storage from './storage';
+import storageNew from './storageNew';
+import network from './network';
 
+const BWC = require('bitcore-wallet-client');
+const CryptoJS = require('crypto-js');
 const WALLETS_STORAGE_KEY = 'wallets';
 let currentWallet = null;
 
@@ -54,7 +59,6 @@ export default {
     const values = Object.values(wallets);
     for (let i = 0; i < keys.length; i += 1) {
       if (!values[i].label) {
-        console.log(wallets);
         storage.set(WALLETS_STORAGE_KEY, _.omit(wallets, keys[i]));
       }
     }
@@ -73,11 +77,123 @@ export default {
   },
 
   openSavedWallet(name, passphrase) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         const walletToOpen = this.getOne(name);
+        const net = network.getSelectedNetwork().net;
+        const bwsurl = network.getSelectedNetwork().bwsurl;
+
         const wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
         const account = new wallet.Account(wif);
+
+        let walletToOpenNew = storageNew.getOne(wif);
+        let mnemonic;
+        let encryptedMnemonicString;
+        let btcTestnetWalletClient;
+        let btcMainnetWalletClient;
+        let btcKey;
+
+        if (walletToOpen.encryptedMnemonicString === undefined) {
+          const dataBTCgen = await this.generateBTCWallet(name);
+          if (dataBTCgen.err) {
+            return reject('An error occured while trying to generate a new Bitcoin wallet.');
+          }
+          mnemonic = dataBTCgen.key.mnemonic;
+          btcKey = dataBTCgen.key;
+          btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
+          btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
+          const encryptedMnemonic = CryptoJS.AES.encrypt(mnemonic, account.WIF);
+          encryptedMnemonicString = encryptedMnemonic.toString();
+
+          this
+            .add(name, {
+              label: name,
+              encryptedWIF: walletToOpen.encryptedWIF,
+              address: walletToOpen.address,
+              scriptHash: walletToOpen.scriptHash,
+              encryptedMnemonicString,
+            })
+            .sync();
+
+          storageNew
+            .add(account.WIF, {
+              label: account.WIF,
+              encryptedMnemonicString,
+              isNew: true,
+            })
+            .sync();
+        } else {
+          const mnemonicBytes = CryptoJS.AES.decrypt(walletToOpen.encryptedMnemonicString, wif);
+          mnemonic = mnemonicBytes.toString(CryptoJS.enc.Utf8);
+
+          if (walletToOpenNew.isNew) {
+            const opts = {
+              name,
+              m: 1,
+              n: 1,
+              myName: 'me',
+              bwsurl,
+              singleAddress: false,
+              coin: 'btc',
+            };
+            const check1 = await this.createTestnetBTCWallet(walletToOpenNew.key, opts);
+            const check2 = await this.createMainnetBTCWallet(walletToOpenNew.key, opts);
+            if (check1.err || check2.err) {
+              return reject('An error occured while generating Bitcoin wallet.');
+            }
+          }
+
+          const dataBTCgen = await this.getBTCWalletObjects(mnemonic);
+          if (dataBTCgen.err) {
+            return reject('An error occured while trying to login to Bitcoin wallet.');
+          }
+          btcKey = dataBTCgen.key;
+          btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
+          btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
+        }
+
+        let btcTestnetAddress;
+        let btcMainnetAddress;
+        walletToOpenNew = storageNew.getOne(wif);
+
+        if (walletToOpenNew.isNew) {
+          const dataBTCadd1 = await this.createNewBTCAddress(btcTestnetWalletClient);
+          const dataBTCadd2 = await this.createNewBTCAddress(btcMainnetWalletClient);
+
+          if (dataBTCadd1.err || dataBTCadd2.err) {
+            const dataTemp1 = await this.getMainAddress(btcTestnetWalletClient);
+            const dataTemp2 = await this.getMainAddress(btcMainnetWalletClient);
+            btcTestnetAddress = dataTemp1.address;
+            btcMainnetAddress = dataTemp2.address;
+            storageNew
+              .add(account.WIF, {
+                label: account.WIF,
+                encryptedMnemonicString: walletToOpenNew.encryptedMnemonicString,
+                btcTestnetAddress: dataTemp1.address,
+                btcMainnetAddress: dataTemp2.address,
+              })
+              .sync();
+          } else {
+            btcTestnetAddress = dataBTCadd1.address;
+            btcMainnetAddress = dataBTCadd2.address;
+            storageNew
+              .add(account.WIF, {
+                label: account.WIF,
+                encryptedMnemonicString: walletToOpenNew.encryptedMnemonicString,
+                btcTestnetAddress: dataBTCadd1.address,
+                btcMainnetAddress: dataBTCadd2.address,
+              })
+              .sync();
+          }
+          alerts.success('New addresses generated for Bitcoin.');
+        } else {
+          btcTestnetAddress = walletToOpenNew.btcTestnetAddress;
+          btcMainnetAddress = walletToOpenNew.btcMainnetAddress;
+        }
+
+        const btcAddress = net === 'TestNet' ? btcTestnetAddress : btcMainnetAddress;
+        const btcWalletClient = net === 'TestNet' ? btcTestnetWalletClient : btcMainnetWalletClient;
+
         const currentWallet = {
           address: account.address,
           encryptedWIF: walletToOpen.encryptedWIF,
@@ -85,6 +201,14 @@ export default {
           passphrase,
           privateKey: account.privateKey,
           wif,
+          btcAddress,
+          btcTestnetAddress,
+          btcMainnetAddress,
+          btcWalletClient,
+          btcTestnetWalletClient,
+          btcMainnetWalletClient,
+          btcKey,
+          mnemonic,
         };
 
         this.setCurrentWallet(currentWallet).sync();
@@ -92,10 +216,22 @@ export default {
         return resolve(currentWallet);
       } catch (e) {
         console.log(e);
-
         return reject('Wrong passphrase');
       }
     });
+  },
+
+  changeBTCAddress() {
+    const currentWallet = this.getCurrentWallet();
+
+    if (currentWallet) {
+      const net = network.getSelectedNetwork().net;
+      currentWallet.btcAddress = net === 'TestNet' ?
+        currentWallet.btcTestnetAddress : currentWallet.btcMainnetAddress;
+      currentWallet.btcWalletClient = net === 'TestNet' ?
+        currentWallet.btcTestnetWalletClient : currentWallet.btcMainnetWalletClient;
+      this.setCurrentWallet(currentWallet).sync();
+    }
   },
 
   openLedger(publicKey) {
@@ -120,16 +256,94 @@ export default {
   },
 
   openEncryptedKey(encryptedKey, passphrase) {
-    return new Promise((resolve, reject) => {
+    console.log('enc called');
+    return new Promise(async (resolve, reject) => {
       try {
         const wif = wallet.decrypt(encryptedKey, passphrase);
         const account = new wallet.Account(wif);
+        const net = network.getSelectedNetwork().net;
+
+        let mnemonic;
+        let btcTestnetAddress;
+        let btcMainnetAddress;
+        let btcTestnetWalletClient;
+        let btcMainnetWalletClient;
+        let btcKey;
+
+        if (storageNew.walletExists(wif)) {
+          const walletToOpen = storageNew.getOne(wif);
+          const mnemonicBytes = CryptoJS.AES.decrypt(walletToOpen.encryptedMnemonicString, wif);
+          mnemonic = mnemonicBytes.toString(CryptoJS.enc.Utf8);
+          const dataBTCgen = await this.getBTCWalletObjects(mnemonic);
+          if (dataBTCgen.err) {
+            return reject('An error occured while trying to login to Bitcoin wallet.');
+          }
+          btcKey = dataBTCgen.key;
+          btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
+          btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
+          btcTestnetAddress = walletToOpen.btcTestnetAddress;
+          btcMainnetAddress = walletToOpen.btcMainnetAddress;
+        } else {
+          const dataBTCgen = await this.generateBTCWallet('wall');
+          if (dataBTCgen.err) {
+            return reject('An error occured while trying to generate a new Bitcoin.');
+          }
+          mnemonic = dataBTCgen.key.mnemonic;
+          btcKey = dataBTCgen.key;
+          btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
+          btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
+
+          const encryptedMnemonic = CryptoJS.AES.encrypt(mnemonic, wif);
+          const encryptedMnemonicString = encryptedMnemonic.toString();
+
+          const dataBTCadd1 = await this.createNewBTCAddress(btcTestnetWalletClient);
+          const dataBTCadd2 = await this.createNewBTCAddress(btcMainnetWalletClient);
+
+          if (dataBTCadd1.err || dataBTCadd2.err) {
+            const dataTemp1 = await this.getMainAddress(btcTestnetWalletClient);
+            const dataTemp2 = await this.getMainAddress(btcMainnetWalletClient);
+            btcTestnetAddress = dataTemp1.address;
+            btcMainnetAddress = dataTemp2.address;
+            storageNew
+              .add(wif, {
+                label: wif,
+                encryptedMnemonicString,
+                btcTestnetAddress: dataTemp1.address,
+                btcMainnetAddress: dataTemp2.address,
+              })
+              .sync();
+          } else {
+            btcTestnetAddress = dataBTCadd1.address;
+            btcMainnetAddress = dataBTCadd2.address;
+            storageNew
+              .add(wif, {
+                label: wif,
+                encryptedMnemonicString,
+                btcTestnetAddress: dataBTCadd1.address,
+                btcMainnetAddress: dataBTCadd2.address,
+              })
+              .sync();
+          }
+          alerts.success('New addresses generated for Bitcoin.');
+        }
+        // btc address
+        const btcAddress = net === 'TestNet' ? btcTestnetAddress : btcMainnetAddress;
+        const btcWalletClient = net === 'TestNet' ? btcTestnetWalletClient : btcMainnetWalletClient;
+
         const currentWallet = {
           wif,
           encryptedWIF: encryptedKey,
           address: account.address,
           passphrase,
           privateKey: account.privateKey,
+          btcAddress,
+          btcTestnetAddress,
+          btcMainnetAddress,
+          btcWalletClient,
+          btcTestnetWalletClient,
+          btcMainnetWalletClient,
+          btcKey,
+          mnemonic,
         };
 
         this.setCurrentWallet(currentWallet).sync();
@@ -137,20 +351,96 @@ export default {
         return resolve(currentWallet);
       } catch (e) {
         console.log(e);
-
         return reject('Wrong key or passphrase');
       }
     });
   },
 
   openWIF(wif) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
+        const net = network.getSelectedNetwork().net;
         const account = new wallet.Account(wif);
+
+        let mnemonic;
+        let btcTestnetAddress;
+        let btcMainnetAddress;
+        let btcTestnetWalletClient;
+        let btcMainnetWalletClient;
+        let btcKey;
+
+        if (storageNew.walletExists(wif)) {
+          const walletToOpen = storageNew.getOne(wif);
+          const mnemonicBytes = CryptoJS.AES.decrypt(walletToOpen.encryptedMnemonicString, wif);
+          mnemonic = mnemonicBytes.toString(CryptoJS.enc.Utf8);
+          const dataBTCgen = await this.getBTCWalletObjects(mnemonic);
+          if (dataBTCgen.err) {
+            return reject('An error occured while trying to login to Bitcoin wallet.');
+          }
+          btcKey = dataBTCgen.key;
+          btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
+          btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
+          btcTestnetAddress = walletToOpen.btcTestnetAddress;
+          btcMainnetAddress = walletToOpen.btcMainnetAddress;
+        } else {
+          const dataBTCgen = await this.generateBTCWallet('wall');
+          if (dataBTCgen.err) {
+            return reject('An error occured while trying to generate a new Bitcoin wallet.');
+          }
+          mnemonic = dataBTCgen.key.mnemonic;
+          btcKey = dataBTCgen.key;
+          btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
+          btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
+          const encryptedMnemonic = CryptoJS.AES.encrypt(mnemonic, wif);
+          const encryptedMnemonicString = encryptedMnemonic.toString();
+
+          const dataBTCadd1 = await this.createNewBTCAddress(btcTestnetWalletClient);
+          const dataBTCadd2 = await this.createNewBTCAddress(btcMainnetWalletClient);
+
+          if (dataBTCadd1.err || dataBTCadd2.err) {
+            const dataTemp1 = await this.getMainAddress(btcTestnetWalletClient);
+            const dataTemp2 = await this.getMainAddress(btcMainnetWalletClient);
+            btcTestnetAddress = dataTemp1.address;
+            btcMainnetAddress = dataTemp2.address;
+            storageNew
+              .add(wif, {
+                label: wif,
+                encryptedMnemonicString,
+                btcTestnetAddress: dataTemp1.address,
+                btcMainnetAddress: dataTemp2.address,
+              })
+              .sync();
+          } else {
+            btcTestnetAddress = dataBTCadd1.address;
+            btcMainnetAddress = dataBTCadd2.address;
+            storageNew
+              .add(wif, {
+                label: wif,
+                encryptedMnemonicString,
+                btcTestnetAddress: dataBTCadd1.address,
+                btcMainnetAddress: dataBTCadd2.address,
+              })
+              .sync();
+          }
+
+          alerts.success('New addresses generated for Bitcoin.');
+        }
+
+        const btcAddress = net === 'TestNet' ? btcTestnetAddress : btcMainnetAddress;
+        const btcWalletClient = net === 'TestNet' ? btcTestnetWalletClient : btcMainnetWalletClient;
+
         const currentWallet = {
           wif,
           address: account.address,
           privateKey: account.privateKey,
+          btcAddress,
+          btcTestnetAddress,
+          btcMainnetAddress,
+          btcWalletClient,
+          btcTestnetWalletClient,
+          btcMainnetWalletClient,
+          btcKey,
+          mnemonic,
         };
 
         this.setCurrentWallet(currentWallet).sync();
@@ -158,25 +448,161 @@ export default {
         return resolve(currentWallet);
       } catch (e) {
         console.log(e);
-
         return reject('Wrong private key');
       }
     });
   },
 
-
-  importWIF(name, wif, passphrase) {
-    return new Promise((resolve, reject) => {
+  openWIFseedWords(wif, seedwords) {
+    return new Promise(async (resolve, reject) => {
       try {
-        if (this.walletExists(name) === true) {
-          return reject(`Wallet with name '${name}' already exists.`);
-        }
         const account = new wallet.Account(wif);
-        const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
+        seedwords = seedwords.trim();
+        const seedwordsCount = seedwords.split(' ');
+        if (seedwordsCount.length < 12) {
+          return reject('Wrong number of seed words');
+        }
+        const net = network.getSelectedNetwork().net;
+
+        const dataBTCgen = await this.getBTCWalletObjects(seedwords);
+        if (dataBTCgen.err) {
+          return reject('An error occured while trying to login to Bitcoin wallet.');
+        }
+        const btcKey = dataBTCgen.key;
+        const btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
+        const btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
+
+        const dataBTCadd1 = await this.getMainAddress(btcTestnetWalletClient);
+        const dataBTCadd2 = await this.getMainAddress(btcMainnetWalletClient);
+
+        if (dataBTCadd1.err || dataBTCadd2.err) {
+          return reject('An error occured while trying to generate Bitcoin address.');
+        }
+
+        const btcTestnetAddress = dataBTCadd1.address;
+        const btcMainnetAddress = dataBTCadd2.address;
+        // btc address
+        const btcAddress = net === 'TestNet' ? btcTestnetAddress : btcMainnetAddress;
+        const btcWalletClient = net === 'TestNet' ? btcTestnetWalletClient : btcMainnetWalletClient;
+
         const currentWallet = {
           wif,
           address: account.address,
           privateKey: account.privateKey,
+          btcAddress,
+          btcTestnetAddress,
+          btcMainnetAddress,
+          btcWalletClient,
+          btcTestnetWalletClient,
+          btcMainnetWalletClient,
+          btcKey,
+          mnemonic: seedwords,
+        };
+
+        this.setCurrentWallet(currentWallet).sync();
+
+        return resolve(currentWallet);
+      } catch (e) {
+        console.log(e);
+        return reject('Wrong private key');
+      }
+    });
+  },
+
+  importWIF(name, wif, passphrase, mnemonic) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (this.walletExists(name) === true) {
+          return reject(`Wallet with name '${name}' already exists.`);
+        }
+
+        if (storageNew.walletExists(wif)) {
+          return reject('Wallet with WIF already exists.');
+        }
+
+        const account = new wallet.Account(wif);
+        const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
+
+        let btcKey;
+        let btcAddress;
+        let btcWalletClient;
+        let encryptedMnemonicString;
+        let btcTestnetWalletClient;
+        let btcMainnetWalletClient;
+        let btcTestnetAddress;
+        let btcMainnetAddress;
+
+        if (mnemonic !== '') {
+          const net = network.getSelectedNetwork().net;
+
+          const dataBTCgen = await this.getBTCWalletObjects(mnemonic);
+
+          if (dataBTCgen.err) {
+            return reject('An error occured while trying to login to Bitcoin wallet.');
+          }
+
+          if (dataBTCgen.nowall) {
+            return reject('No wallets found on entered mnemonic.');
+          }
+          btcKey = dataBTCgen.key;
+          btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
+          btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
+
+          const dataBTCadd1 = await this.getMainAddress(btcTestnetWalletClient);
+          const dataBTCadd2 = await this.getMainAddress(btcMainnetWalletClient);
+
+          if (dataBTCadd1.err || dataBTCadd2.err) {
+            return reject('An error occured while trying to generate Bitcoin address.');
+          }
+
+          btcTestnetAddress = dataBTCadd1.address;
+          btcMainnetAddress = dataBTCadd2.address;
+          // btc address
+          btcAddress = net === 'TestNet' ? btcTestnetAddress : btcMainnetAddress;
+          btcWalletClient = net === 'TestNet' ? btcTestnetWalletClient : btcMainnetWalletClient;
+
+          const encryptedMnemonic = CryptoJS.AES.encrypt(mnemonic, wif);
+          encryptedMnemonicString = encryptedMnemonic.toString();
+        } else {
+          const dataBTCgen = await this.generateBTCWallet('wall');
+          if (dataBTCgen.err) {
+            return reject('An error occured while trying to generate a new Bitcoin.');
+          }
+          mnemonic = dataBTCgen.key.mnemonic;
+          btcKey = dataBTCgen.key;
+          btcTestnetWalletClient = dataBTCgen.btcTestnetWalletClient;
+          btcMainnetWalletClient = dataBTCgen.btcMainnetWalletClient;
+
+          const encryptedMnemonic = CryptoJS.AES.encrypt(mnemonic, wif);
+          encryptedMnemonicString = encryptedMnemonic.toString();
+
+          const dataBTCadd1 = await this.createNewBTCAddress(btcTestnetWalletClient);
+          const dataBTCadd2 = await this.createNewBTCAddress(btcMainnetWalletClient);
+
+          if (dataBTCadd1.err || dataBTCadd2.err) {
+            const dataTemp1 = await this.getMainAddress(btcTestnetWalletClient);
+            const dataTemp2 = await this.getMainAddress(btcMainnetWalletClient);
+            btcTestnetAddress = dataTemp1.address;
+            btcMainnetAddress = dataTemp2.address;
+          } else {
+            btcTestnetAddress = dataBTCadd1.address;
+            btcMainnetAddress = dataBTCadd2.address;
+          }
+          alerts.success('New addresses generated for Bitcoin.');
+        }
+
+        const currentWallet = {
+          wif,
+          address: account.address,
+          privateKey: account.privateKey,
+          btcAddress,
+          btcTestnetAddress,
+          btcMainnetAddress,
+          btcWalletClient,
+          btcTestnetWalletClient,
+          btcMainnetWalletClient,
+          btcKey,
+          mnemonic,
         };
 
         this.setCurrentWallet(currentWallet).sync();
@@ -187,10 +613,256 @@ export default {
           scriptHash: account.scriptHash,
         })
           .sync();
+
+        storageNew
+          .add(wif, {
+            label: wif,
+            encryptedMnemonicString,
+            btcTestnetAddress,
+            btcMainnetAddress,
+          })
+          .sync();
         return resolve(currentWallet);
       } catch (e) {
         return reject('Wrong key or passphrase');
       }
+    });
+  },
+
+  getClient() {
+    // note: use `bwsurl` all lowercase;
+    const bwsurl = network.getSelectedNetwork().bwsurl;
+    const bwc = new BWC({
+      baseUrl: bwsurl,
+      verbose: false,
+      timeout: 100000,
+      transports: ['polling'],
+    });
+
+    return bwc;
+  },
+
+  getKey() {
+    return BWC.Key;
+  },
+
+  generateBTCWallet(walletName) {
+    return new Promise(async (resolve, reject) => {
+      const bwsurl = network.getSelectedNetwork().bwsurl;
+      const opts = {
+        name: walletName,
+        m: 1,
+        n: 1,
+        myName: 'me',
+        bwsurl,
+        singleAddress: false,
+        coin: 'btc',
+      };
+      const Key = this.getKey();
+
+      const lang = {
+        name: 'English',
+        isoCode: 'en',
+      };
+
+      // creating key
+
+      const key = Key.create({
+        lang,
+      });
+
+      const btcTestnet = await this.createTestnetBTCWallet(key, opts);
+      const btcMainnet = await this.createMainnetBTCWallet(key, opts);
+
+      if (btcTestnet.err || btcMainnet.err) {
+        reject({
+          err: true,
+        });
+      } else {
+        resolve({
+          key,
+          btcTestnetWalletClient: btcTestnet.walletClient,
+          btcMainnetWalletClient: btcMainnet.walletClient,
+        });
+      }
+    });
+  },
+
+  generateBTCwalletKey() {
+    const Key = this.getKey();
+
+    const lang = {
+      name: 'English',
+      isoCode: 'en',
+    };
+
+    // creating key
+
+    const key = Key.create({
+      lang,
+    });
+
+    return ({
+      key,
+    });
+  },
+
+  createTestnetBTCWallet(key, opts) {
+    return new Promise((resolve, reject) => {
+      opts.networkName = 'testnet';
+      const walletClient = this.getClient(null, opts);
+      walletClient.fromString(
+        key.createCredentials('', {
+          coin: opts.coin,
+          network: 'testnet',
+          account: opts.account || 0,
+          n: opts.n || 1,
+        }),
+      );
+
+      walletClient.createWallet(
+        opts.name,
+        opts.myName,
+        opts.m,
+        opts.n,
+        {
+          network: 'testnet',
+          singleAddress: opts.singleAddress,
+          walletPrivKey: opts.walletPrivKey,
+          coin: opts.coin,
+        },
+        (err) => {
+          if (err) {
+            console.log(err);
+            reject({
+              err: true,
+            });
+          } else {
+            resolve({
+              walletClient,
+            });
+          }
+        },
+      );
+    });
+  },
+
+  createMainnetBTCWallet(key, opts) {
+    return new Promise((resolve, reject) => {
+      opts.networkName = 'livenet';
+      const walletClient = this.getClient(null, opts);
+      walletClient.fromString(
+        key.createCredentials('', {
+          coin: opts.coin,
+          network: 'livenet',
+          account: opts.account || 0,
+          n: opts.n || 1,
+        }),
+      );
+
+      walletClient.createWallet(
+        opts.name,
+        opts.myName,
+        opts.m,
+        opts.n,
+        {
+          network: 'livenet',
+          singleAddress: opts.singleAddress,
+          walletPrivKey: opts.walletPrivKey,
+          coin: opts.coin,
+        },
+        (err) => {
+          if (err) {
+            console.log(err);
+            reject({
+              err: true,
+            });
+          } else {
+            resolve({
+              walletClient,
+            });
+          }
+        },
+      );
+    });
+  },
+
+  getBTCWalletObjects(mnemonic) {
+    return new Promise((resolve, reject) => {
+      const bwsurl = network.getSelectedNetwork().bwsurl;
+      const opts = {
+        bwsurl,
+        passphrase: null,
+        words: mnemonic,
+      };
+      BWC.serverAssistedImport(
+        opts,
+        {
+          baseUrl: opts.bwsurl,
+        },
+        (err, key, walletClients) => {
+          // walletClients.length === 0 => WALLET_DOES_NOT_EXIST
+          if (err) {
+            reject({
+              err: true,
+            });
+          } else if (walletClients.length !== 2) {
+            reject({
+              nowall: true,
+            });
+          } else {
+            const btcTestnetWalletClient = walletClients[0].credentials.network === 'testnet' ?
+              walletClients[0] : walletClients[1];
+            const btcMainnetWalletClient = walletClients[0].credentials.network === 'livenet' ?
+              walletClients[0] : walletClients[1];
+
+            resolve({
+              key,
+              btcTestnetWalletClient,
+              btcMainnetWalletClient,
+            });
+          }
+        },
+      );
+    });
+  },
+
+  createNewBTCAddress(walletClient) {
+    return new Promise((resolve, reject) => {
+      walletClient.createAddress({}, (err, addr) => {
+        if (err) {
+          console.log(err);
+          reject({
+            err: true,
+          });
+        } else {
+          resolve({
+            address: addr.address,
+          });
+        }
+      });
+    });
+  },
+
+  getMainAddress(walletClient) {
+    return new Promise((resolve, reject) => {
+      walletClient.getMainAddresses(
+        {
+          reverse: true,
+          limit: 1,
+        },
+        (err, addr) => {
+          if (err) {
+            reject({
+              err: true,
+            });
+          } else {
+            resolve({
+              address: addr[0].address,
+            });
+          }
+        },
+      );
     });
   },
 

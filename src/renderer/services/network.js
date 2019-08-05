@@ -4,6 +4,7 @@ import { rpc, settings, api } from '@cityofzion/neon-js';
 import { store } from '../store';
 import storage from './storage';
 import { intervals } from '../constants';
+import wallets from './wallets';
 
 const NETWORK_STORAGE_KEY = 'network';
 const NETWORKS = [
@@ -18,6 +19,8 @@ const NETWORKS = [
       fee: 0,
       websocketUri: 'wss://mainnet.aphelion-neo.com/ws',
       kycUrl: 'https://regtech.identitymind.store/viewform/mc99c/',
+      btcPage: 'https://insight.bitpay.com/',
+      bwsurl: 'https://bws.bitpay.com/bws/api',
     },
   },
   {
@@ -32,6 +35,8 @@ const NETWORKS = [
       fee: 0,
       websocketUri: 'wss://testnet.aphelion-neo.com:62443/ws',
       kycUrl: 'https://regtech.identitymind.store/viewform/z3wy8/',
+      btcPage: 'https://test-insight.bitpay.com/',
+      bwsurl: 'https://bws.bitpay.com/bws/api',
     },
   },
   /*
@@ -157,6 +162,8 @@ export default {
     network.aph_hash = defaultForNetwork.aph_hash;
     network.websocketUri = defaultForNetwork.websocketUri;
     network.kycUrl = defaultForNetwork.kycUrl;
+    network.btcPage = defaultForNetwork.btcPage;
+    network.bwsurl = defaultForNetwork.bwsurl;
 
     return this;
   },
@@ -170,6 +177,9 @@ export default {
 
   setSelectedNetwork(network) {
     this.normalizeAndStore(network).sync();
+
+    // changing BTC ADDRESS
+    wallets.changeBTCAddress();
 
     if (loadNetworkStatusIntervalId) {
       clearInterval(loadNetworkStatusIntervalId);

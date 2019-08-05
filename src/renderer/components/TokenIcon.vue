@@ -4,6 +4,7 @@
     <img src="~@/assets/img/token-icons/APH.png" v-if="symbol === 'APH'">
     <img src="~@/assets/img/token-icons/GAS.png" v-else-if="symbol === 'GAS'">
     <img src="~@/assets/img/token-icons/NEO.png" v-else-if="symbol === 'NEO'">
+    <img src="~@/assets/img/token-icons/BTC.png" v-else-if="symbol === 'BTC'">
     <img :src="imageUrl" v-else-if="useImage" />
     <div class="placeholder" v-else>
       <div class="placeholder-text">{{ symbol }}</div>
@@ -23,7 +24,10 @@ export default {
       return `https://s3.us-east-2.amazonaws.com/aphelion-public-artifacts/TokenLogos/${this.symbol.toLowerCase()}.png`;
     },
     symbolRequiresFetch() {
-      return this.symbol !== 'APH' && this.symbol !== 'GAS' && this.symbol !== 'NEO';
+      return this.symbol !== 'APH'
+        && this.symbol !== 'GAS'
+        && this.symbol !== 'NEO'
+        && this.symbol !== 'BTC';
     },
   },
 

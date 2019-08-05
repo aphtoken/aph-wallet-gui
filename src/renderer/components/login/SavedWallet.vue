@@ -55,13 +55,15 @@ export default {
 
   methods: {
     login() {
-      this.$store.dispatch('openSavedWallet', {
-        name: this.wallet,
-        passphrase: this.passphrase,
-        done: () => {
-          this.$router.push('/authenticated/dashboard');
-        },
-      });
+      if (!this.$isPending('openSavedWallet')) {
+        this.$store.dispatch('openSavedWallet', {
+          name: this.wallet,
+          passphrase: this.passphrase,
+          done: () => {
+            this.$router.push('/authenticated/dashboard');
+          },
+        });
+      }
     },
     create() {
       this.$router.push('/login/create-wallet');

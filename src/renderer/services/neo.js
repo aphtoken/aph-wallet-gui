@@ -12,13 +12,17 @@ import assets from './assets';
 import network from './network';
 import settings from './settings';
 import valuation from './valuation';
+import bwclient from './bwclient';
 import wallets from './wallets';
+import storageNew from './storageNew';
 import ledger from './ledger';
 import dex from './dex';
 import { store } from '../store';
 import { timeouts, intervals } from '../constants';
 import { toBigNumber } from './formatting.js';
 
+const CryptoJS = require('crypto-js');
+const bitcoin = require('bitcoinjs-lib');
 const { Transaction } = tx;
 const DBG_LOG = false;
 
@@ -41,7 +45,7 @@ const calculateHoldingAvailableBalance = (holding) => {
 
 export default {
   createWallet(name, passphrase, passphraseConfirm) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       // TODO: abstract validation
       if (wallets.walletExists(name)) {
         return reject(`Wallet with name '${name}' already exists!`);
@@ -54,8 +58,12 @@ export default {
       }
 
       try {
+        const dataBTCgen = wallets.generateBTCwalletKey();
         const account = new wallet.Account(wallet.generatePrivateKey());
         const encryptedWIF = wallet.encrypt(account.WIF, passphrase);
+        const mnemonic = dataBTCgen.key.mnemonic;
+        const encryptedMnemonic = CryptoJS.AES.encrypt(mnemonic, account.WIF);
+        const encryptedMnemonicString = encryptedMnemonic.toString();
 
         account.label = name;
         wallets
@@ -64,10 +72,19 @@ export default {
             encryptedWIF,
             address: account.address,
             scriptHash: account.scriptHash,
+            encryptedMnemonicString,
           })
           .sync();
 
-        wallets.openSavedWallet(name, passphrase);
+        storageNew
+          .add(account.WIF, {
+            label: account.WIF,
+            encryptedMnemonicString,
+            isNew: true,
+            key: dataBTCgen.key,
+          })
+          .sync();
+        await wallets.openSavedWallet(name, passphrase);
         return resolve(_.merge(account, { encryptedWIF, passphrase }));
       } catch (e) {
         return reject('An error occured while trying to generate a new wallet.');
@@ -81,7 +98,7 @@ export default {
         return this.fetchSystemTransactions(address)
           .then((fetchedTransactions) => {
             this.fetchNEP5Transfers(address, fromDate, toDate, fromBlock, toBlock)
-              .then((nep5) => {
+              .then(async (nep5) => {
                 const splitTransactions = [];
 
                 nep5.data.transfers.forEach((nep5Transfer) => {
@@ -269,7 +286,79 @@ export default {
                       }
                     }));
                 });
+                const currentWallet = wallets.getCurrentWallet();
+                const currentNetwork = network.getSelectedNetwork();
 
+                const walletClient = currentWallet.btcWalletClient;
+                const fetchedBTCTx = await bwclient.getLast50TxByAddressNew(walletClient);
+
+                /* ---- New BTC Tx ---- */
+                fetchedBTCTx.forEach((fetchedTransaction) => {
+                  const value = fetchedTransaction.action === 'sent' ?
+                    toBigNumber('-'.concat((fetchedTransaction.amount / 100000000).toString())) :
+                    toBigNumber((fetchedTransaction.amount / 100000000).toString());
+                  let confirmed;
+                  fetchedTransaction.symbol = 'BTC';
+                  fetchedTransaction.blocktime = fetchedTransaction.time;
+                  fetchedTransaction.block = fetchedTransaction.blockheight;
+                  fetchedTransaction.fees /= 100000000;
+                  fetchedTransaction.net_fee = fetchedTransaction.fees;
+                  if (fetchedTransaction.confirmations > 0) {
+                    fetchedTransaction.confirmed = true;
+                    confirmed = true;
+                  } else {
+                    fetchedTransaction.confirmed = false;
+                    confirmed = false;
+                  }
+
+                  fetchedTransaction.vin = [];
+                  fetchedTransaction.vout = [];
+                  fetchedTransaction.vinData = [];
+                  fetchedTransaction.voutData = [];
+
+                  if (fetchedTransaction.outputs !== undefined) {
+                    fetchedTransaction.outputs.forEach((output) => {
+                      fetchedTransaction.vout.push({
+                        symbol: 'BTC',
+                        address: output.address,
+                        value: (output.amount / 100000000),
+                      });
+                      fetchedTransaction.voutData.push({
+                        symbol: 'BTC',
+                        address: output.address,
+                        value: (output.amount / 100000000),
+                      });
+                    });
+                  }
+
+                  if (fetchedTransaction.inputs !== undefined) {
+                    fetchedTransaction.inputs.forEach((input) => {
+                      fetchedTransaction.vin.push({
+                        symbol: 'BTC',
+                        address: input.address,
+                        value: (input.amount / 100000000),
+                      });
+                      fetchedTransaction.vinData.push({
+                        symbol: 'BTC',
+                        address: input.address,
+                        value: (input.amount / 100000000),
+                      });
+                    });
+                  }
+
+                  splitTransactions.push({
+                    hash: fetchedTransaction.txid,
+                    block_index: fetchedTransaction.blockheight,
+                    symbol: fetchedTransaction.symbol,
+                    value,
+                    block_time: fetchedTransaction.time,
+                    details: fetchedTransaction,
+                    from: '-',
+                    to: '-',
+                    confirmed,
+                    btcPage: currentNetwork.btcPage.concat(`tx/${fetchedTransaction.txid}/`),
+                  });
+                });
                 Promise.all(promises)
                   .then(() => {
                     resolve(_.sortBy(splitTransactions, 'block_time').reverse());
@@ -448,7 +537,6 @@ export default {
           };
           holdings.push(systemAssetHolding);
         };
-
         await rpcClient.query({ method: 'getaccountstate', params: [address] })
           .then(async (res) => {
             res.result.balances.forEach((fetchedBalance) => {
@@ -608,6 +696,37 @@ export default {
           }
           valuationSymbols.push(holding.symbol);
         });
+
+        // BTC
+        const holdingBTC = {};
+        let balBTCtemp;
+        let balBTC;
+        const walletClient = currentWallet.btcWalletClient;
+        try {
+          balBTCtemp = await bwclient.getBTCBalanceByAddress(walletClient);
+          balBTC = balBTCtemp.availableAmount;
+        } catch (e) {
+          alerts.networkException(e);
+        }
+
+        const addressesTemp = balBTCtemp.byAddress;
+        const addressArr = [];
+
+        addressesTemp.forEach((addressData) => {
+          addressArr.push(addressData.address);
+        });
+
+        this.generateNewBTCAddress(addressArr, currentWallet, currentNetwork, walletClient);
+
+        holdingBTC.assetId = '1111111111111111111111111111111111';
+        holdingBTC.name = 'Bitcoin';
+        holdingBTC.symbol = 'BTC';
+        holdingBTC.decimals = 8;
+        holdingBTC.isNep5 = false;
+        holdingBTC.balance = toBigNumber(balBTC).dividedBy(10 ** (holdingBTC.decimals));
+        holdings.push(holdingBTC);
+        valuationSymbols.push(holdingBTC.symbol);
+
         let valuations;
         try {
           valuations = await valuation.getValuations(valuationSymbols);
@@ -652,7 +771,6 @@ export default {
                 }
               }
             });
-
             const res = {};
             res.holdings = _.sortBy(holdings, [holding => holding.symbol.toLowerCase()], ['symbol']);
             res.totalBalance = _.sumBy(holdings, 'totalValue');
@@ -665,6 +783,63 @@ export default {
           .catch(e => reject(e));
       } catch (e) {
         return reject(e.message);
+      }
+    });
+  },
+
+  generateNewBTCAddress(addressArr, currentWallet, currentNetwork, walletClient) {
+    return new Promise(async (resolve) => {
+      if (addressArr.indexOf(currentWallet.btcAddress) !== -1) {
+        const walletToOpenNew = storageNew.getOne(currentWallet.wif);
+        let set1test = currentWallet.btcTestnetAddress;
+        let set2main = currentWallet.btcMainnetAddress;
+        const net = currentNetwork.net;
+
+        const data1 = await wallets.createNewBTCAddress(walletClient);
+        if (data1.err) {
+          const data2 = await wallets.getMainAddress(walletClient);
+          if (net === 'TestNet') {
+            currentWallet.btcTestnetAddress = data2.address;
+            set1test = data2.address;
+          } else {
+            currentWallet.btcMainnetAddress = data2.address;
+            set2main = data2.address;
+          }
+          currentWallet.btcAddress = data2.address;
+          alerts.success('New Bitcoin address generated.');
+          wallets.setCurrentWallet(currentWallet).sync();
+          storageNew
+            .add(currentWallet.wif, {
+              label: currentWallet.wif,
+              encryptedMnemonicString: walletToOpenNew.encryptedMnemonicString,
+              btcTestnetAddress: set1test,
+              btcMainnetAddress: set2main,
+            })
+            .sync();
+        } else {
+          if (net === 'TestNet') {
+            currentWallet.btcTestnetAddress = data1.address;
+            set1test = data1.address;
+          } else {
+            currentWallet.btcMainnetAddress = data1.address;
+            set2main = data1.address;
+          }
+          currentWallet.btcAddress = data1.address;
+          alerts.success('New Bitcoin address generated.');
+          wallets.setCurrentWallet(currentWallet).sync();
+          storageNew
+            .add(currentWallet.wif, {
+              label: currentWallet.wif,
+              encryptedMnemonicString: walletToOpenNew.encryptedMnemonicString,
+              btcTestnetAddress: set1test,
+              btcMainnetAddress: set2main,
+            })
+            .sync();
+        }
+
+        resolve({
+          done: true,
+        });
       }
     });
   },
@@ -785,6 +960,105 @@ export default {
             transfers: [],
           },
         });
+      }
+    });
+  },
+
+  sendFundsBTC(toAddress, amount) {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
+    const net = currentNetwork.net === 'MainNet' ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        store.commit('setSendInProgress', true);
+        try {
+          bitcoin.address.toOutputScript(toAddress, net);
+        } catch (e) {
+          return reject('Invalid Recipient Address.');
+        }
+
+        if (currentWallet.btcAddress === toAddress) {
+          return reject('Can not send to own address.');
+        }
+
+        const pendingTxProposals = await bwclient.getPendingTxProposal(currentWallet.btcWalletClient);
+
+        pendingTxProposals.forEach(async (pendingTxProposal) => {
+          try {
+            const rmtx = await bwclient.removeTxProposal(pendingTxProposal);
+            console.log(rmtx);
+          } catch (e) {
+            reject('error in removing pending transaction proposals!');
+          }
+        });
+
+        const balanceTemp = await bwclient.getBTCBalanceByAddress(currentWallet.btcWalletClient);
+        const balanceBTC = balanceTemp.availableConfirmedAmount / 100000000;
+        const toAmountBTC = amount;
+        const toAmountSAT = parseInt((amount * 100000000).toFixed(0), 10);
+        let output1;
+        let output2;
+        let output3;
+        let output4;
+        const txp = {
+          outputs: [{
+            toAddress,
+            amount: toAmountSAT,
+          }],
+          feeLevel: 'normal',
+          excludeUnconfirmedUtxos: true,
+          dryRun: false,
+        };
+        try {
+          output1 = await bwclient.createTxProposal(currentWallet.btcWalletClient, txp);
+        } catch (e) {
+          return reject(e.err.message);
+        }
+        const feeBTC = parseInt((output1.createdTxp.fee * 100000000).toFixed(0), 10);
+
+        const finalAmountBTC = toAmountBTC + feeBTC;
+
+        if (finalAmountBTC > balanceBTC) {
+          return reject(`Insufficiant BTC! Need ${finalAmountBTC} but only found ${balanceBTC}`);
+        }
+
+        try {
+          output2 = await bwclient.publishTxProposal(currentWallet.btcWalletClient, output1.createdTxp);
+        } catch (e) {
+          return reject('Something went wrong while publishing transaction proposal!');
+        }
+
+        try {
+          /* eslint-disable max-len */
+          output3 = await bwclient.signTxProposal(currentWallet.btcWalletClient, output2.publishedTxp, currentWallet.btcKey);
+          /* eslint-enable max-len */
+        } catch (e) {
+          try {
+            const rm3 = await bwclient.removeTxProposal(currentWallet.btcWalletClient, output2.publishedTxp);
+            console.log(rm3);
+          } catch (err2) {
+            return reject('Something went wrong while signing transaction proposal!');
+          }
+          return reject('Something went wrong while signing transaction proposal!');
+        }
+
+        try {
+          output4 = await bwclient.broadcastTxProposal(currentWallet.btcWalletClient, output3.signedTxp);
+        } catch (e) {
+          try {
+            const rm4 = await bwclient.removeTxProposal(currentWallet.btcWalletClient, txp);
+            console.log(rm4);
+          } catch (e) {
+            return reject('Something went wrong while broadcasting transaction proposal!');
+          }
+          return reject('Something went wrong while broadcasting transaction proposal!');
+        }
+
+        alerts.success(`Transaction Hash: ${output4.broadcastedTxp.txid} Successfully Sent, waiting for confirmation.`);
+        return resolve(output4.broadcastedTxp);
+      } catch (e) {
+        return reject('Error in fetching api data!');
       }
     });
   },

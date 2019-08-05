@@ -70,6 +70,7 @@ export {
   setShowSendRequestLedgerSignature,
   setShowSendWithLedgerModal,
   setShowWalletBackupModal,
+  setShowWalletBackupModalBTC,
   setSocketOrderCreated,
   setSocketOrderCreationFailed,
   setSocketOrderMatchFailed,
@@ -82,6 +83,7 @@ export {
   setTradeHistory,
   setTradesBucketed,
   setWallets,
+  setWalletsNew,
   setWithdrawInProgressModalModel,
   startRequest,
   startSilentRequest,
@@ -447,6 +449,10 @@ function setShowWalletBackupModal(state, value) {
   state.showWalletBackupModal = value;
 }
 
+function setShowWalletBackupModalBTC(state, value) {
+  state.showWalletBackupModalBTC = value;
+}
+
 function setSocketOrderCreated(state, value) {
   state.socket.orderCreated = value;
 }
@@ -471,6 +477,10 @@ function setStatsToken(state, token) {
 
 function setWallets(state, wallets) {
   state.wallets = wallets;
+}
+
+function setWalletsNew(state, walletsNew) {
+  state.walletsNew = walletsNew;
 }
 
 function setWithdrawInProgressModalModel(state, model) {

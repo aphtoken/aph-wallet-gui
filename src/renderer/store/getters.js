@@ -41,6 +41,7 @@ export const showOrderConfirmationModal = state => state.showOrderConfirmationMo
 export const showPortfolioHeader = state => state.showPortfolioHeader;
 export const showSendAddressModal = state => state.showSendAddressModal;
 export const showWalletBackupModal = state => state.showWalletBackupModal;
+export const showWalletBackupModalBTC = state => state.showWalletBackupModalBTC;
 export const statsToken = state => state.statsToken;
 export const tradeHistory = state => state.tradeHistory;
 export const transactionDetails = state => state.transactionDetails;

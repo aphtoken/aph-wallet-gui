@@ -70,6 +70,7 @@ const state = {
   showSendRequestLedgerSignature: false,
   showSendWithLedgerModal: false,
   showWalletBackupModal: false,
+  showWalletBackupModalBTC: false,
   socket: {
     lastMessage: null,
     isConnected: false,
@@ -84,6 +85,7 @@ const state = {
   tickerDataByMarket: {},
   version: pjson.version,
   wallets: [],
+  walletsNew: [],
   withdrawInProgressModalModel: null,
 };
 

@@ -10,7 +10,11 @@
       {{$t('encryptedKey')}}
     </router-link>
     <router-link class="private-key-btn" to="/login/private-key">
-      {{$t('privateKey')}}
+      <!-- {{$t('privateKey')}} -->
+      WIF
+    </router-link>
+    <router-link class="private-key-seed-words-btn" to="/login/private-key-seed-words">
+      WIF + Mnemonic Words
     </router-link>
   </section>
 </template>
@@ -37,7 +41,7 @@ export default {
     }
   }
 
-  .saved-wallet-btn, .encrypted-key-btn, .private-key-btn {
+  .saved-wallet-btn, .encrypted-key-btn, .private-key-btn, .private-key-seed-words-btn {
     @extend %btn-outline;
   }
 }

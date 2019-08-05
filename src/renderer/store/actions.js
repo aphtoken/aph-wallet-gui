@@ -1,7 +1,9 @@
 /* eslint-disable no-use-before-define */
 import moment from 'moment';
+import { wallet } from '@cityofzion/neon-js';
 
 import { alerts, assets, db, dex, neo, network, wallets, ledger } from '../services';
+import storageNew from '../services/storageNew';
 import { timeouts } from '../constants';
 import router from '../router';
 
@@ -23,6 +25,7 @@ export {
   openEncryptedKey,
   openLedger,
   openPrivateKey,
+  openPrivateKeySeedWords,
   openSavedWallet,
   fetchOrderHistory,
   fetchSystemAssetBalances,
@@ -103,14 +106,21 @@ function createWallet({ commit }, { name, passphrase, passphraseConfirm }) {
   }, timeouts.NEO_API_CALL);
 }
 
-function deleteWallet({ commit }, { name, done }) {
+function deleteWallet({ commit }, { name, passphrase, done }) {
   commit('startRequest', { identifier: 'deleteWallet' });
+  const walletToOpen = wallets.getOne(name);
+
+  const wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
 
   setTimeout(() => {
     wallets.remove(name)
       .then(() => {
         wallets.sync();
         done();
+        storageNew.remove(wif)
+          .then(() => {
+            storageNew.sync();
+          });
         commit('endRequest', { identifier: 'deleteWallet' });
       })
       .catch((e) => {
@@ -430,11 +440,11 @@ async function formOrder({ commit }, { order }) {
   }
 }
 
-function importWallet({ commit }, { name, wif, passphrase, done }) {
+function importWallet({ commit }, { name, wif, passphrase, mnemonic, done }) {
   commit('startRequest', { identifier: 'importWallet' });
 
   setTimeout(() => {
-    wallets.importWIF(name, wif, passphrase)
+    wallets.importWIF(name, wif, passphrase, mnemonic)
       .then(() => {
         wallets.sync();
         done();
@@ -489,6 +499,21 @@ function openPrivateKey({ commit }, { wif, done }) {
       })
       .catch((e) => {
         commit('failRequest', { identifier: 'openPrivateKey', message: e });
+      });
+  }, timeouts.NEO_API_CALL);
+}
+
+function openPrivateKeySeedWords({ commit }, { wif, seedwords, done }) {
+  commit('startRequest', { identifier: 'openPrivateKeySeedWords' });
+
+  setTimeout(() => {
+    wallets.openWIFseedWords(wif, seedwords)
+      .then(() => {
+        done();
+        commit('endRequest', { identifier: 'openPrivateKeySeedWords' });
+      })
+      .catch((e) => {
+        commit('failRequest', { identifier: 'openPrivateKeySeedWords', message: e });
       });
   }, timeouts.NEO_API_CALL);
 }
