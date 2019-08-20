@@ -11,6 +11,7 @@
         <br>
         <button class="visit-cmc-btn" value="NEO" @click="callMe">NEO</button>
         <button class="visit-cmc-btn" value="BTC" @click="callMe">BTC</button>
+        <button class="visit-cmc-btn" value="ETH" @click="callMe">ETH</button>
       </div>
     </div>
     <div class="footer">
@@ -38,9 +39,12 @@ export default {
       if (element.target.value === 'NEO') {
         document.getElementById('headLabel').innerHTML = 'NEO';
         this.address = this.neoAddress;
-      } else {
+      } else if (element.target.value === 'BTC') {
         document.getElementById('headLabel').innerHTML = 'BTC';
         this.address = this.btcAddress;
+      } else {
+        document.getElementById('headLabel').innerHTML = 'ETH';
+        this.address = this.ethAddress;
       }
     },
   },
@@ -55,6 +59,11 @@ export default {
     },
 
     btcAddress: {
+      required: true,
+      type: String,
+    },
+
+    ethAddress: {
       required: true,
       type: String,
     },

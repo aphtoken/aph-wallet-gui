@@ -3,7 +3,10 @@
     <div class="body">
       <aph-form :on-submit="add">
         <aph-icon name="create"></aph-icon>
-        <aph-input placeholder="Script Hash or Token Symbol" :light="true" v-model="hashOrSymbol"></aph-input>
+        <aph-select :options="currencies" :light="true" :onclick="this.currencyChanged()" :placeholder="$t('selectCurrency')" v-model="currency"></aph-select>
+        <aph-input v-if="showNEO" placeholder="Script Hash or Token Symbol" :light="true" v-model="hashOrSymbol"></aph-input>
+        <aph-input v-if="showETH" placeholder="Token Contract address" :light="true" v-model="contractAddress"></aph-input>
+        <aph-input v-if="!currency" :light="true" v-model="contractAddress" :disabled="true"></aph-input>
       </aph-form>
     </div>
     <div class="footer">
@@ -22,29 +25,90 @@ export default {
   },
 
   computed: {
+    currencies() {
+      return [
+        {
+          label: 'NEO',
+          value: 'NEO',
+        },
+        {
+          label: 'ETH',
+          value: 'ETH',
+        },
+      ];
+    },
+
     shouldDisableAddButton() {
-      return !this.hashOrSymbol.length || this.$isPending('addToken');
+      let check = true;
+      if (this.currency === 'NEO') {
+        check = !this.hashOrSymbol.length;
+      }
+
+      if (this.currency === 'ETH') {
+        check = !this.contractAddress.length;
+      }
+
+      return check || this.$isPending('addToken');
     },
   },
 
   data() {
     return {
       hashOrSymbol: '',
+      currency: null,
+      contractAddress: '',
+      showETH: false,
+      showNEO: false,
     };
   },
 
   methods: {
     add() {
-      if (!this.hashOrSymbol) {
+      if (!this.currency) {
         return;
       }
 
-      this.$store.dispatch('addToken', {
-        hashOrSymbol: this.hashOrSymbol,
-        done: () => {
-          this.onCancel();
-        },
-      });
+      if (this.currency === 'NEO') {
+        if (!this.hashOrSymbol) {
+          return;
+        }
+
+        this.$store.dispatch('addToken', {
+          currency: this.currency,
+          hashOrSymbol: this.hashOrSymbol,
+          done: () => {
+            this.onCancel();
+          },
+        });
+      }
+
+      if (this.currency === 'ETH') {
+        if (!this.contractAddress) {
+          return;
+        }
+
+        this.$store.dispatch('addToken', {
+          currency: this.currency,
+          hashOrSymbol: this.contractAddress,
+          done: () => {
+            this.onCancel();
+          },
+        });
+      }
+    },
+
+    currencyChanged() {
+      if (this.currency) {
+        if (this.currency === 'NEO') {
+          this.contractAddress = '';
+          this.showETH = false;
+          this.showNEO = true;
+        } else {
+          this.hashOrSymbol = '';
+          this.showNEO = false;
+          this.showETH = true;
+        }
+      }
     },
   },
 
@@ -82,6 +146,13 @@ export default {
 
       svg {
         height: toRem(52px);
+      }
+    }
+
+    .aph-select {
+      margin-bottom: $space;
+      svg {
+        height: toRem(7px);
       }
     }
 

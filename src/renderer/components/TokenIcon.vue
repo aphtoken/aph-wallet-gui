@@ -5,6 +5,7 @@
     <img src="~@/assets/img/token-icons/GAS.png" v-else-if="symbol === 'GAS'">
     <img src="~@/assets/img/token-icons/NEO.png" v-else-if="symbol === 'NEO'">
     <img src="~@/assets/img/token-icons/BTC.png" v-else-if="symbol === 'BTC'">
+    <img src="~@/assets/img/token-icons/ETH.png" v-else-if="symbol === 'ETH'">
     <img :src="imageUrl" v-else-if="useImage" />
     <div class="placeholder" v-else>
       <div class="placeholder-text">{{ symbol }}</div>
@@ -18,16 +19,27 @@ export default {
     symbol: {
       type: String,
     },
+    isETHToken: {
+      type: Boolean,
+    },
+    tokenIcon: {
+      type: String,
+    },
   },
   computed: {
     imageUrl() {
-      return `https://s3.us-east-2.amazonaws.com/aphelion-public-artifacts/TokenLogos/${this.symbol.toLowerCase()}.png`;
+      if (this.isETHToken) {
+        return this.tokenIcon;
+      }
+      return 'https://s3.us-east-2.amazonaws.com/aphelion-public-artifacts/TokenLogos/'
+        + `${this.symbol.toLowerCase()}.png`;
     },
     symbolRequiresFetch() {
       return this.symbol !== 'APH'
         && this.symbol !== 'GAS'
         && this.symbol !== 'NEO'
-        && this.symbol !== 'BTC';
+        && this.symbol !== 'BTC'
+        && this.symbol !== 'ETH';
     },
   },
 

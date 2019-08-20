@@ -96,7 +96,7 @@ export default {
   computed: {
     currencies() {
       return this.$store.state.holdings.reduce(
-        (result, { name, symbol, assetId, isNep5, unitValue, balance, decimals }) => {
+        (result, { name, symbol, assetId, isNep5, unitValue, balance, decimals, abi, isETHToken }) => {
           if (!name || !symbol) {
             return result;
           }
@@ -112,6 +112,8 @@ export default {
               unitValue,
               balance,
               decimals,
+              abi,
+              isETHToken,
             },
             assetId,
             isNep5,
@@ -180,7 +182,7 @@ export default {
 
     currencyChanged() {
       if (this.currency) {
-        if (this.currency.symbol === 'BTC') {
+        if (this.currency.symbol === 'BTC' || this.currency.symbol === 'ETH' || this.currency.isETHToken) {
           this.noBTC = false;
         } else {
           this.noBTC = true;
@@ -200,10 +202,58 @@ export default {
     async send() {
       let fee;
 
+      console.log(this.currency);
       if (this.currency.symbol === 'BTC') {
         this.sending = true;
 
         this.$services.neo.sendFundsBTC(this.address, this.amount)
+          .then((res) => {
+            console.log(res);
+            this.clearSendProcess();
+          })
+          .catch((e) => {
+            if (e.msg) {
+              this.$services.alerts.info(e.msg);
+            } else {
+              this.$services.alerts.exception(e);
+            }
+            this.clearSendProcess();
+          });
+      } else if (this.currency.symbol === 'ETH') {
+        if (new BigNumber(this.amount).isGreaterThan(this.currency.balance)) {
+          this.$services.alerts
+            .exception(`Insufficient ${this.currency.symbol}!` +
+              ` Need ${this.amount} but only found ${this.currency.balance}`);
+          return;
+        }
+
+        this.sending = true;
+
+        this.$services.neo.sendFundsETH(this.address, this.amount)
+          .then((res) => {
+            console.log(res);
+            this.clearSendProcess();
+          })
+          .catch((e) => {
+            if (e.msg) {
+              this.$services.alerts.info(e.msg);
+            } else {
+              this.$services.alerts.exception(e);
+            }
+            this.clearSendProcess();
+          });
+      } else if (this.currency.isETHToken) {
+        if (new BigNumber(this.amount).isGreaterThan(this.currency.balance)) {
+          this.$services.alerts
+            .exception(`Insufficient ${this.currency.symbol}!` +
+              ` Need ${this.amount} but only found ${this.currency.balance}`);
+          return;
+        }
+
+        this.sending = true;
+
+        this.$services.neo.sendFundsETHToken(this.address, this.amount, this.currency.symbol,
+          this.currency.assetId, this.currency.abi, this.currency.decimals)
           .then((res) => {
             console.log(res);
             this.clearSendProcess();

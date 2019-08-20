@@ -13,6 +13,7 @@ import network from './network';
 import settings from './settings';
 import valuation from './valuation';
 import bwclient from './bwclient';
+import ethclient from './ethclient';
 import wallets from './wallets';
 import storageNew from './storageNew';
 import ledger from './ledger';
@@ -23,6 +24,8 @@ import { toBigNumber } from './formatting.js';
 
 const CryptoJS = require('crypto-js');
 const bitcoin = require('bitcoinjs-lib');
+const Web3 = require('web3');
+const EthereumTx = require('ethereumjs-tx');
 const { Transaction } = tx;
 const DBG_LOG = false;
 
@@ -288,21 +291,148 @@ export default {
                 });
                 const currentWallet = wallets.getCurrentWallet();
                 const currentNetwork = network.getSelectedNetwork();
+                const web3 = new Web3(new Web3.providers.HttpProvider(network.getSelectedNetwork().infuraApi));
+
+                /* ---- New ETH Tx ---- */
+                let fetchedETHTx = await ethclient.getLast50TxByAddress(currentNetwork.etherscanApi,
+                  currentWallet.ethAddress);
+
+                if (fetchedETHTx === '' || fetchedETHTx === null) {
+                  fetchedETHTx = [];
+                }
+
+                fetchedETHTx.forEach(async (fetchedTransaction) => {
+                  if (await web3.eth.getCode(fetchedTransaction.from) === '0x' &&
+                    await web3.eth.getCode(fetchedTransaction.to) === '0x') {
+                    let confirmed;
+                    fetchedTransaction.symbol = 'ETH';
+                    fetchedTransaction.blocktime = fetchedTransaction.timeStamp;
+                    fetchedTransaction.block = fetchedTransaction.blockNumber;
+                    fetchedTransaction.txid = fetchedTransaction.hash;
+                    fetchedTransaction.isETHBased = true;
+
+                    const tempValue = fetchedTransaction.value / 1000000000000000000;
+                    const value = fetchedTransaction.from === currentWallet.ethAddress ?
+                      toBigNumber('-'.concat((tempValue).toString())) :
+                      toBigNumber(tempValue);
+
+                    const fees = (fetchedTransaction.gasPrice * fetchedTransaction.gasUsed) / 1000000000000000000;
+                    fetchedTransaction.fees = fees;
+                    fetchedTransaction.net_fee = fees;
+
+                    if (fetchedTransaction.isError === '0') {
+                      fetchedTransaction.confirmed = true;
+                      confirmed = true;
+                    } else {
+                      fetchedTransaction.confirmed = false;
+                      confirmed = false;
+                    }
+
+                    fetchedTransaction.vin = [];
+                    fetchedTransaction.vout = [];
+                    fetchedTransaction.vinData = [];
+                    fetchedTransaction.voutData = [];
+
+                    fetchedTransaction.vin.push({
+                      symbol: 'ETH',
+                      address: fetchedTransaction.from,
+                      value: toBigNumber(tempValue),
+                    });
+
+                    fetchedTransaction.vout.push({
+                      symbol: 'ETH',
+                      address: fetchedTransaction.to,
+                      value: toBigNumber(tempValue),
+                    });
+
+                    splitTransactions.push({
+                      hash: fetchedTransaction.hash,
+                      block_index: fetchedTransaction.blockNumber,
+                      symbol: fetchedTransaction.symbol,
+                      value,
+                      block_time: fetchedTransaction.timeStamp,
+                      details: fetchedTransaction,
+                      from: fetchedTransaction.from,
+                      to: fetchedTransaction.to,
+                      confirmed,
+                      ethPage: currentNetwork.ethPage.concat(`tx/${fetchedTransaction.hash}/`),
+                    });
+                  }
+                });
+
+                /* ---- New ETH Tx ---- */
+                let fetchedETHTokenTx = await ethclient.getLast50TokenTxByAddress(currentNetwork.etherscanApi,
+                  currentWallet.ethAddress);
+
+                if (fetchedETHTokenTx === '' || fetchedETHTokenTx === null) {
+                  fetchedETHTokenTx = [];
+                }
+
+                fetchedETHTokenTx.forEach((fetchedTransaction) => {
+                  fetchedTransaction.symbol = fetchedTransaction.tokenSymbol;
+                  fetchedTransaction.blocktime = fetchedTransaction.timeStamp;
+                  fetchedTransaction.block = fetchedTransaction.blockNumber;
+                  fetchedTransaction.txid = fetchedTransaction.hash;
+                  fetchedTransaction.isETHBased = true;
+
+                  const tempValue = fetchedTransaction.value / (10 ** fetchedTransaction.tokenDecimal);
+                  const value = fetchedTransaction.from === currentWallet.ethAddress ?
+                    toBigNumber('-'.concat((tempValue).toString())) :
+                    toBigNumber(tempValue);
+
+                  const fees = (fetchedTransaction.gasPrice * fetchedTransaction.gasUsed) / 1000000000000000000;
+                  fetchedTransaction.fees = fees;
+                  fetchedTransaction.net_fee = fees;
+                  fetchedTransaction.confirmed = true;
+
+                  fetchedTransaction.vin = [];
+                  fetchedTransaction.vout = [];
+                  fetchedTransaction.vinData = [];
+                  fetchedTransaction.voutData = [];
+
+                  fetchedTransaction.vin.push({
+                    symbol: fetchedTransaction.tokenSymbol,
+                    address: fetchedTransaction.from,
+                    value: toBigNumber(tempValue),
+                  });
+
+                  fetchedTransaction.vout.push({
+                    symbol: fetchedTransaction.tokenSymbol,
+                    address: fetchedTransaction.to,
+                    value: toBigNumber(tempValue),
+                  });
+
+                  splitTransactions.push({
+                    hash: fetchedTransaction.hash,
+                    block_index: fetchedTransaction.blockNumber,
+                    symbol: fetchedTransaction.tokenSymbol,
+                    value,
+                    block_time: fetchedTransaction.timeStamp,
+                    details: fetchedTransaction,
+                    from: fetchedTransaction.from,
+                    to: fetchedTransaction.to,
+                    confirmed: true,
+                    ethPage: currentNetwork.ethPage.concat(`tx/${fetchedTransaction.hash}/`),
+                  });
+                });
 
                 const walletClient = currentWallet.btcWalletClient;
                 const fetchedBTCTx = await bwclient.getLast50TxByAddressNew(walletClient);
 
                 /* ---- New BTC Tx ---- */
                 fetchedBTCTx.forEach((fetchedTransaction) => {
+                  const tempValue = fetchedTransaction.amount / 100000000;
                   const value = fetchedTransaction.action === 'sent' ?
-                    toBigNumber('-'.concat((fetchedTransaction.amount / 100000000).toString())) :
-                    toBigNumber((fetchedTransaction.amount / 100000000).toString());
+                    toBigNumber('-'.concat((tempValue).toString())) :
+                    toBigNumber(tempValue);
                   let confirmed;
                   fetchedTransaction.symbol = 'BTC';
                   fetchedTransaction.blocktime = fetchedTransaction.time;
                   fetchedTransaction.block = fetchedTransaction.blockheight;
                   fetchedTransaction.fees /= 100000000;
                   fetchedTransaction.net_fee = fetchedTransaction.fees;
+                  fetchedTransaction.isBTCBased = true;
+
                   if (fetchedTransaction.confirmations > 0) {
                     fetchedTransaction.confirmed = true;
                     confirmed = true;
@@ -511,6 +641,7 @@ export default {
     const currentNetwork = network.getSelectedNetwork();
     const currentWallet = wallets.getCurrentWallet();
     const rpcClient = network.getRpcClient();
+    const web3 = new Web3(new Web3.providers.HttpProvider(network.getSelectedNetwork().infuraApi));
 
     return new Promise(async (resolve, reject) => {
       try {
@@ -573,6 +704,81 @@ export default {
           pushSystemAssetHolding(GAS_ASSET_ID, 'GAS', 0);
         }
 
+        const pushNewHolding = (assetId, name, symbol, balance, decimals,
+          canPull, isETHToken, abi, availableSupply) => {
+          const systemAssetHolding = {
+            assetId,
+            balance: new BigNumber(balance),
+            symbol,
+            name,
+            contractBalance: new BigNumber(0),
+            totalBalance: new BigNumber(0),
+            decimals,
+            isUserAsset: true,
+            canPull,
+            isETHToken,
+            abi,
+            availableSupply,
+          };
+          holdings.push(systemAssetHolding);
+        };
+
+        // ETH System Holding
+
+        const ethAddress = currentWallet.ethAddress;
+        const balEthTemp = await web3.eth.getBalance(ethAddress);
+        const balEth = toBigNumber(balEthTemp).dividedBy(10 ** 18);
+
+        pushNewHolding('0x0000000000000000000000000000000000000000',
+          'Ethereum', 'ETH', balEth, 18, undefined, undefined, undefined, undefined);
+
+        // BTC System Holding
+
+        let balBTCtemp;
+        let balBTC;
+        const walletClient = currentWallet.btcWalletClient;
+
+        try {
+          balBTCtemp = await bwclient.getBTCBalanceByAddress(walletClient);
+          balBTC = balBTCtemp.availableAmount;
+        } catch (e) {
+          alerts.networkException(e);
+        }
+
+        const addressesTemp = balBTCtemp.byAddress;
+        const addressArr = [];
+
+        addressesTemp.forEach((addressData) => {
+          addressArr.push(addressData.address);
+        });
+
+        this.generateNewBTCAddress(addressArr, currentWallet, currentNetwork, walletClient);
+
+        const balBTCset = toBigNumber(balBTC).dividedBy(10 ** 8);
+        pushNewHolding('1111111111111111111111111111111111',
+          'Bitcoin', 'BTC', balBTCset, 8, undefined, undefined, undefined, undefined);
+
+        // ERC20 token balance
+
+        _.values(userAssets).forEach(async (asset) => {
+          if (asset.isETHBased) {
+            pushNewHolding(asset.assetId, asset.name, asset.symbol,
+              0, asset.decimals, true, true, asset.abi, 0);
+          }
+        });
+
+        _.values(holdings).forEach(async (holding) => {
+          if (holding.isETHToken) {
+            const tokenContract = new web3.eth.Contract(JSON.parse(holding.abi), holding.assetId);
+            const balanceTokenTemp = await tokenContract.methods.balanceOf(ethAddress).call();
+            holding.balance = toBigNumber(balanceTokenTemp).dividedBy(10 ** (holding.decimals));
+
+            if (network.getSelectedNetwork().net === 'TestNet') {
+              holding.availableSupply = await tokenContract.methods.totalSupply().call() / (10 ** holding.decimals);
+            }
+          }
+        });
+
         const assetToHolding = (asset, isUserAsset) => {
           const assetId = asset.assetId.replace('0x', '');
           return {
@@ -628,7 +834,7 @@ export default {
             return;
           }
 
-          if (!_.find(holdings, { assetId: nep5Asset.assetId })) {
+          if (!_.find(holdings, { assetId: nep5Asset.assetId }) && !nep5Asset.isETHBased) {
             const holding = assetToHolding(nep5Asset, true);
             holdings.push(holding);
           }
@@ -697,36 +903,6 @@ export default {
           valuationSymbols.push(holding.symbol);
         });
 
-        // BTC
-        const holdingBTC = {};
-        let balBTCtemp;
-        let balBTC;
-        const walletClient = currentWallet.btcWalletClient;
-        try {
-          balBTCtemp = await bwclient.getBTCBalanceByAddress(walletClient);
-          balBTC = balBTCtemp.availableAmount;
-        } catch (e) {
-          alerts.networkException(e);
-        }
-
-        const addressesTemp = balBTCtemp.byAddress;
-        const addressArr = [];
-
-        addressesTemp.forEach((addressData) => {
-          addressArr.push(addressData.address);
-        });
-
-        this.generateNewBTCAddress(addressArr, currentWallet, currentNetwork, walletClient);
-
-        holdingBTC.assetId = '1111111111111111111111111111111111';
-        holdingBTC.name = 'Bitcoin';
-        holdingBTC.symbol = 'BTC';
-        holdingBTC.decimals = 8;
-        holdingBTC.isNep5 = false;
-        holdingBTC.balance = toBigNumber(balBTC).dividedBy(10 ** (holdingBTC.decimals));
-        holdings.push(holdingBTC);
-        valuationSymbols.push(holdingBTC.symbol);
-
         let valuations;
         try {
           valuations = await valuation.getValuations(valuationSymbols);
@@ -769,6 +945,7 @@ export default {
                   holding.change24hrPercent = null;
                   holding.change24hrValue = null;
                 }
+                holding.tokenIcon = val.tokenImage;
               }
             });
             const res = {};
@@ -1059,6 +1236,131 @@ export default {
         return resolve(output4.broadcastedTxp);
       } catch (e) {
         return reject('Error in fetching api data!');
+      }
+    });
+  },
+
+  sendFundsETH(toAddress, amountTemp) {
+    const amount = toBigNumber(amountTemp);
+    const currentWallet = wallets.getCurrentWallet();
+    const web3 = new Web3(new Web3.providers.HttpProvider(network.getSelectedNetwork().infuraApi));
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        try {
+          const cAddress = web3.utils.toChecksumAddress(toAddress);
+          console.log(cAddress);
+        } catch (e) {
+          return reject(e);
+        }
+        const privateKey = Buffer(currentWallet.ethPrivateKey, 'hex');
+        const balEthTemp = await web3.eth.getBalance(currentWallet.ethAddress);
+        const bal = balEthTemp / (10 ** 18);
+
+        if (amount > bal) {
+          return reject(`Insufficient ETH! Need ${amount} but only found ${bal}`);
+        }
+
+        const nonce1 = await web3.eth.getTransactionCount(currentWallet.ethAddress, 'pending');
+        const nonce2 = await web3.eth.getTransactionCount(currentWallet.ethAddress);
+
+        if (nonce1 !== nonce2) {
+          return reject('Please wait for confirmation of pending transaction!');
+        }
+
+        const _amount = web3.utils.toHex(web3.utils.toWei(amountTemp, 'ether'));
+
+        const rawTransaction = {
+          from: currentWallet.ethAddress,
+          gasPrice: web3.utils.toHex(2 * 1e9),
+          gasLimit: web3.utils.toHex(210000),
+          to: toAddress,
+          value: _amount,
+          data: web3.utils.toHex('Tx using Aphelion'),
+          nonce: web3.utils.toHex(nonce1),
+        };
+
+        const estimatedGas = await web3.eth.estimateGas(rawTransaction);
+
+        const amountWithFees = amount.plus(toBigNumber((2 / 1e9) * estimatedGas));
+
+        if (amountWithFees > bal) {
+          return reject(`Insufficient ETH for fees! Need ${amountWithFees} but only found ${bal}`);
+        }
+
+        const transaction = new EthereumTx(rawTransaction);
+        transaction.sign(privateKey);
+
+        const hash1 = await web3.eth.sendSignedTransaction(`0x${transaction.serialize().toString('hex')}`);
+        alerts.success(`Transaction Hash: ${hash1.transactionHash} Successfully Sent, waiting for confirmation.`);
+        return resolve(hash1);
+      } catch (e) {
+        console.log(e);
+        return reject(e);
+      }
+    });
+  },
+
+  sendFundsETHToken(toAddress, amount, symbol, contractAddress, abi, decimals) {
+    const currentWallet = wallets.getCurrentWallet();
+    const web3 = new Web3(new Web3.providers.HttpProvider(network.getSelectedNetwork().infuraApi));
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        try {
+          const cAddress = web3.utils.toChecksumAddress(toAddress);
+          console.log(cAddress);
+        } catch (e) {
+          return reject(e);
+        }
+
+        const privateKey = Buffer(currentWallet.ethPrivateKey, 'hex');
+
+        const tokenContract = new web3.eth.Contract(JSON.parse(abi), contractAddress);
+        const balanceTokenWei = await tokenContract.methods.balanceOf(currentWallet.ethAddress).call();
+        const balanceToken = toBigNumber(balanceTokenWei).dividedBy(10 ** (decimals));
+
+        if (amount > balanceToken) {
+          return reject(`Insufficient ${symbol}! Need ${amount} but only found ${balanceToken}`);
+        }
+
+        const nonce1 = await web3.eth.getTransactionCount(currentWallet.ethAddress, 'pending');
+        const nonce2 = await web3.eth.getTransactionCount(currentWallet.ethAddress);
+
+        if (nonce1 !== nonce2) {
+          return reject('Please wait for confirmation of pending transaction!');
+        }
+
+        const _amount = web3.utils.toHex(toBigNumber(amount) * (10 ** decimals));
+
+        const rawTransaction = {
+          from: currentWallet.ethAddress,
+          gasPrice: web3.utils.toHex(2 * 1e9),
+          gasLimit: web3.utils.toHex(210000),
+          to: contractAddress,
+          value: '0x0',
+          data: tokenContract.methods.transfer(toAddress, _amount).encodeABI(),
+          nonce: web3.utils.toHex(nonce1),
+        };
+
+        const balEthTemp = await web3.eth.getBalance(currentWallet.ethAddress);
+        const bal = balEthTemp / (10 ** 18);
+        const estimatedGas = await web3.eth.estimateGas(rawTransaction);
+
+        const fees = ((2 / 1e9) * estimatedGas);
+        if (fees > bal) {
+          return reject(`Insufficient ETH for fees! Need ${fees} but only found ${bal}`);
+        }
+
+        const transaction = new EthereumTx(rawTransaction);
+        transaction.sign(privateKey);
+
+        const hash1 = await web3.eth.sendSignedTransaction(`0x${transaction.serialize().toString('hex')}`);
+        alerts.success(`Transaction Hash: ${hash1.transactionHash} Successfully Sent, waiting for confirmation.`);
+        return resolve('hello');
+      } catch (e) {
+        console.log(e);
+        return reject(e);
       }
     });
   },

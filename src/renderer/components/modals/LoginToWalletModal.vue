@@ -21,7 +21,7 @@
         <aph-form :on-submit="login">
           <aph-icon name="wallet"></aph-icon>
           <div class="wallet-name">{{ $store.state.currentLoginToWallet.label }}</div>
-          <aph-input v-if="isNotCurrentWallet" :placeholder="loginMessage" :light="true" v-model="passphrase" type="password"></aph-input>
+          <aph-input :placeholder="loginMessage" :light="true" v-model="passphrase" type="password"></aph-input>
         </aph-form>
       </div>
       <div class="footer">

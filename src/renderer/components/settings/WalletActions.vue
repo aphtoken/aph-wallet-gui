@@ -2,7 +2,7 @@
   <section id="settings--wallet-actions" v-if="canBackupWallet">
     <div class="body">
       <button class="backup-wallet" @click="showWalletBackupModal">NEO {{$t('backupWallet')}}</button><p></p>
-      <button class="backup-wallet" @click="showWalletBackupModalBTC">Bitcoin {{$t('backupWallet')}}</button><p></p>
+      <button class="backup-wallet" @click="showWalletBackupModalBTC">Bitcoin & Ethereum {{$t('backupWallet')}}</button><p></p>
     </div>
   </section>
 </template>

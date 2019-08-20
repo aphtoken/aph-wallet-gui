@@ -5,7 +5,7 @@
       <input v-model="searchBy" type="text" placeholder="Search here...">
     </div>
     <div class="body">
-      <dashboard-holding v-for="(holding, index) in filteredHoldings" :holding="holding" :on-click="viewHoldingDetail" :class="[{active: isActive(holding)}]" :key="index"></dashboard-holding>
+      <dashboard-holding v-for="(holding, index) in filteredHoldings" :holding="holding" :on-click="viewHoldingDetail" :class="[{active: isActive(holding)}]" :key="index" :onRemove="remove"></dashboard-holding>
     </div>
   </section>
 </template>
@@ -33,8 +33,12 @@ export default {
         return name.toLowerCase().indexOf(searchBy) > -1
           || symbol.toLowerCase().indexOf(searchBy) > -1;
       }).map((holding) => {
-        const canRemove = holding.isNep5 === true && holding.isUserAsset === true
+        let canRemove = holding.isNep5 === true && holding.isUserAsset === true
           && holding.symbol !== 'APH' && new BigNumber(holding.balance).isZero();
+
+        if (holding.isETHToken) {
+          canRemove = new BigNumber(holding.balance).isZero();
+        }
 
         // Note: this must clone the holding or it will modify the holding without using store mutations and cause
         //       side effects.
@@ -72,6 +76,11 @@ export default {
   methods: {
     isActive({ assetId }) {
       return _.get(this.$store.state.statsToken, 'assetId') === assetId;
+    },
+
+    remove(holding) {
+      this.$services.assets.removeUserAsset(holding.assetId);
+      this.$services.alerts.success(`Removed ${holding.symbol}`);
     },
 
     viewHoldingDetail(holding) {

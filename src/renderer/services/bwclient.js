@@ -158,7 +158,6 @@ export default {
             console.log(err);
             reject(err);
           } else {
-            console.log(txsFromServer);
             resolve(txsFromServer);
           }
         });

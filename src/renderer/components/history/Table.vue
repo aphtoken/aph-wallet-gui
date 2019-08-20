@@ -51,33 +51,47 @@
             </div>
           </div>
           <div class="section">
+            <div class="row" v-if="!transaction.details.isBTCBased">
+              <div class="column inputs">
+                <div class="label">{{$t('from')}}</div>
+                <aph-simple-transactions :transactions="transaction.details.vin"></aph-simple-transactions>
+              </div>
+            </div>
             <div class="row">
               <div class="column outputs">
                 <div class="label">{{$t('to')}}</div>
-                <aph-simple-transactions v-if="transaction.symbol === 'BTC'" :transactions="transaction.details.voutData"></aph-simple-transactions>
-                <aph-simple-transactions v-if="transaction.symbol !== 'BTC'" :transactions="transaction.details.vout"></aph-simple-transactions>
+                <aph-simple-transactions v-if="!transaction.details.isBTCBased" :transactions="transaction.details.vout"></aph-simple-transactions>
+                <aph-simple-transactions v-if="transaction.details.isBTCBased" :transactions="transaction.details.voutData"></aph-simple-transactions>
               </div>
             </div>
           </div>
           <div class="section">
             <div class="row">
-              <div class="column" v-if="transaction.symbol !== 'BTC'">
+              <div class="column" v-if="!transaction.details.isETHBased && !transaction.details.isBTCBased">
                 <div class="label">{{$t('networkFee')}}</div>
                 <div class="value">{{$t('gas', { gas: $formatNumber(transaction.details.net_fee)})}}</div>
               </div>
-              <div class="column" v-if="transaction.symbol === 'BTC'">
+              <div class="column" v-if="transaction.details.isETHBased">
+                <div class="label">{{$t('networkFee')}}</div>
+                <div class="value">{{ $formatNumber(transaction.details.net_fee)}} ETH</div>
+              </div>
+              <div class="column" v-if="transaction.details.isBTCBased">
                 <div class="label">{{$t('networkFee')}}</div>
                 <div class="value">{{ $formatNumber(transaction.details.net_fee)}} BTC</div>
               </div>
-              <div class="column" v-if="transaction.symbol !== 'BTC'">
+              <div class="column" v-if="!transaction.details.isETHBased && !transaction.details.isBTCBased">
                 <div class="label">{{$t('systemFee')}}</div>
                 <div class="value">{{$t('gas', { gas: $formatNumber(transaction.details.sys_fee)})}}</div>
               </div>
-              <div class="column">
+              <div class="column" v-if="!transaction.details.isETHBased">
                 <div class="label">{{$t('Size')}}</div>
                 <div class="value">{{$t('bytes', { bytes: $formatNumber(transaction.details.size)})}}</div>
               </div>
-              <div class="column" v-if="transaction.symbol === 'BTC'">
+              <div class="column" v-if="transaction.details.isETHBased">
+                <div class="label">View on Etherscan</div>
+                <div class="value"><a :href="`${transaction.ethPage}`" target="_blank">click here</a></div>
+              </div>
+              <div class="column" v-if="transaction.details.isBTCBased">
                 <div class="label">View on Bitpay</div>
                 <div class="value"><a :href="`${transaction.btcPage}`" target="_blank">click here</a></div>
               </div>              
