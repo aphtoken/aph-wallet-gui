@@ -77,7 +77,12 @@ async function addToken({ commit, dispatch }, { done, hashOrSymbol, currency }) 
 
     try {
       cAddress = web3.utils.toChecksumAddress(hashOrSymbol);
-      console.log(cAddress);
+
+      const tCheck = await web3.eth.getCode(cAddress);
+
+      if (tCheck === '0x') {
+        return commit('failRequest', { identifier: 'addToken', message: `'${hashOrSymbol}' is not a token contract!` });
+      }
 
       if (_.has(userAssets, cAddress)) {
         /* eslint-disable max-len */
@@ -100,9 +105,40 @@ async function addToken({ commit, dispatch }, { done, hashOrSymbol, currency }) 
       }
 
       const tokenContract = new web3.eth.Contract(JSON.parse(abiCheck), cAddress);
-      const decimal = await tokenContract.methods.decimals().call();
-      const tokenName = await tokenContract.methods.name().call();
-      const tokenSymbol = await tokenContract.methods.symbol().call();
+      let decimal;
+      let tokenName;
+      let tokenSymbol;
+
+      try {
+        tokenContract.methods.transfer(cAddress, 0);
+        tokenContract.methods.balanceOf(cAddress);
+      } catch (e) {
+        return commit('failRequest', { identifier: 'addToken', message: 'Insufficiant data found for token!' });
+      }
+
+      if (currentNetwork.net === 'MainNet') {
+        let tokenInfo;
+        try {
+          tokenInfo = await ethclient.getTokenInfo(cAddress);
+          decimal = tokenInfo.decimals === 0 ||
+            tokenInfo.decimals === '0' || tokenInfo.decimals === '' ? 1 : tokenInfo.decimals;
+          tokenName = tokenInfo.name;
+          tokenSymbol = tokenInfo.symbol === '' ? tokenInfo.name : tokenInfo.symbol;
+        } catch (err) {
+          return commit('failRequest', { identifier: 'addToken', message: `${err}` });
+        }
+      } else {
+        try {
+          decimal = await tokenContract.methods.decimals().call();
+          decimal = decimal === '0' || decimal === 0 ? 1 : decimal;
+          tokenName = await tokenContract.methods.name().call();
+          tokenName = web3.utils.isHex(tokenName) ? web3.utils.hexToUtf8(tokenName) : tokenName;
+          tokenSymbol = await tokenContract.methods.symbol().call();
+          tokenSymbol = web3.utils.isHex(tokenSymbol) ? web3.utils.hexToUtf8(tokenSymbol) : tokenSymbol;
+        } catch (err) {
+          return commit('failRequest', { identifier: 'addToken', message: 'Insufficiant data found for token!' });
+        }
+      }
 
       const asset = {
         assetId: cAddress,

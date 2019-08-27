@@ -62,4 +62,24 @@ export default {
       }
     });
   },
+
+  getTokenInfo(address) {
+    return new Promise((resolve, reject) => {
+      try {
+        return axios.get(`http://api.ethplorer.io/getTokenInfo/${address}?apiKey=freekey`)
+          .then((res) => {
+            if (res.data.error) {
+              return reject(res.data.error.message);
+            }
+            return resolve(res.data);
+          }).catch((e) => {
+            alerts.exception(e);
+            return reject(e);
+          });
+      } catch (e) {
+        alerts.exception(e);
+        return reject(e);
+      }
+    });
+  },
 };

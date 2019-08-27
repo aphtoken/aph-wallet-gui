@@ -726,8 +726,17 @@ export default {
         // ETH System Holding
 
         const ethAddress = currentWallet.ethAddress;
-        const balEthTemp = await web3.eth.getBalance(ethAddress);
-        const balEth = toBigNumber(balEthTemp).dividedBy(10 ** 18);
+        let balEthTemp;
+        let balEth;
+
+        try {
+          balEthTemp = await web3.eth.getBalance(ethAddress);
+          balEth = toBigNumber(balEthTemp).dividedBy(10 ** 18);
+        } catch (e) {
+          balEthTemp = 0;
+          balEth = 0;
+          alerts.networkException(e);
+        }
 
         pushNewHolding('0x0000000000000000000000000000000000000000',
           'Ethereum', 'ETH', balEth, 18, undefined, undefined, undefined, undefined);
@@ -742,6 +751,8 @@ export default {
           balBTCtemp = await bwclient.getBTCBalanceByAddress(walletClient);
           balBTC = balBTCtemp.availableAmount;
         } catch (e) {
+          balBTCtemp = 0;
+          balBTC = 0;
           alerts.networkException(e);
         }
 
@@ -769,12 +780,18 @@ export default {
 
         _.values(holdings).forEach(async (holding) => {
           if (holding.isETHToken) {
-            const tokenContract = new web3.eth.Contract(JSON.parse(holding.abi), holding.assetId);
-            const balanceTokenTemp = await tokenContract.methods.balanceOf(ethAddress).call();
-            holding.balance = toBigNumber(balanceTokenTemp).dividedBy(10 ** (holding.decimals));
+            try {
+              const tokenContract = new web3.eth.Contract(JSON.parse(holding.abi), holding.assetId);
+              const balanceTokenTemp = await tokenContract.methods.balanceOf(ethAddress).call();
+              holding.balance = toBigNumber(balanceTokenTemp).dividedBy(10 ** (holding.decimals));
 
-            if (network.getSelectedNetwork().net === 'TestNet') {
-              holding.availableSupply = await tokenContract.methods.totalSupply().call() / (10 ** holding.decimals);
+              if (network.getSelectedNetwork().net === 'TestNet') {
+                holding.availableSupply = await tokenContract.methods.totalSupply().call() / (10 ** holding.decimals);
+              }
+            } catch (e) {
+              holding.balance = 0;
+              holding.availableSupply = 0;
+              alerts.networkException(e);
             }
           }
         });

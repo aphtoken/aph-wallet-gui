@@ -134,7 +134,6 @@ function failRequest(state, payload) {
 }
 
 function handleLogout(state) {
-  // db.remove('txs.AHG2dDtZ5yLSt6ByJVh9qmC7FeNNAyP3qF.TestNet');
   state.holdings = [];
   state.recentTransactions = [];
   state.searchTransactions = [];
