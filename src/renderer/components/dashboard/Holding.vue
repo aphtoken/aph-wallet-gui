@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-holding" @click="handleOnClick">
     <div class="left">
-      <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
+      <aph-token-icon :symbol="holding.symbol" :isETHToken="holding.isETHToken" :tokenIcon="holding.tokenIcon"></aph-token-icon>
       <div class="token">
         <div class="name" :title="holding.asset">{{ holding.name }}</div>
         <div class="value">{{ $store.state.currencySymbol }}{{ $formatNumber(holding.unitValue) }}

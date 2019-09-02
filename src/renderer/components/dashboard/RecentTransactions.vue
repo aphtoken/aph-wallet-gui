@@ -32,13 +32,19 @@ export default {
 
   computed: {
     transactions() {
-      return this.$store.state.recentTransactions
+      const tArr = this.$store.state.recentTransactions
         .map((transaction) => {
           return _.merge(transaction, {
             active: this.isActive(transaction),
             address: transaction.value >= 0 ? transaction.from : transaction.to,
           });
         });
+
+      const txs = tArr.filter((tx) => {
+        return tx.symbol === this.$store.state.statsToken.symbol;
+      });
+
+      return txs;
     },
 
     ...mapGetters([

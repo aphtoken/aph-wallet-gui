@@ -3,9 +3,11 @@ import moment from 'moment';
 import { wallet } from '@cityofzion/neon-js';
 
 import { alerts, assets, db, dex, neo, network, wallets, ledger } from '../services';
+import ethclient from '../services/ethclient';
 import storageNew from '../services/storageNew';
 import { timeouts } from '../constants';
 import router from '../router';
+const Web3 = require('web3');
 
 export {
   addToken,
@@ -37,7 +39,7 @@ export {
   verifyLedgerConnection,
 };
 
-function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
+async function addToken({ commit, dispatch }, { done, hashOrSymbol, currency }) {
   const networkAssets = assets.getNetworkAssets();
   const userAssets = assets.getUserAssets();
   const currentNetwork = network.getSelectedNetwork();
@@ -45,27 +47,115 @@ function addToken({ commit, dispatch }, { done, hashOrSymbol }) {
 
   commit('startRequest', { identifier: 'addToken' });
 
-  hashOrSymbol = hashOrSymbol.replace('0x', '');
+  if (currency === 'NEO') {
+    hashOrSymbol = hashOrSymbol.replace('0x', '');
 
-  token = _.find(_.values(networkAssets), { symbol: hashOrSymbol });
+    token = _.find(_.values(networkAssets), { symbol: hashOrSymbol });
 
-  if (!token) {
-    token = _.get(networkAssets, hashOrSymbol);
+    if (!token) {
+      token = _.get(networkAssets, hashOrSymbol);
+    }
+
+    if (!token) {
+      /* eslint-disable max-len */
+      return commit('failRequest', { identifier: 'addToken', message: `Unable to find a token with the symbol or script hash of '${hashOrSymbol}' on ${currentNetwork.net}` });
+      /* eslint-enable max-len */
+    }
+
+    if (_.has(userAssets, token.assetId)) {
+      /* eslint-disable max-len */
+      return commit('failRequest', { identifier: 'addToken', message: `'${hashOrSymbol}' is already in your token list ${currentNetwork.net}` });
+      /* eslint-enable max-len */
+    }
+
+    assets.addUserAsset(token.assetId);
   }
 
-  if (!token) {
-    /* eslint-disable max-len */
-    return commit('failRequest', { identifier: 'addToken', message: `Unable to find a token with the symbol or script hash of '${hashOrSymbol}' on ${currentNetwork.net}` });
-    /* eslint-enable max-len */
-  }
+  if (currency === 'ETH') {
+    const web3 = new Web3(new Web3.providers.HttpProvider(network.getSelectedNetwork().infuraApi));
+    let cAddress;
 
-  if (_.has(userAssets, token.assetId)) {
-    /* eslint-disable max-len */
-    return commit('failRequest', { identifier: 'addToken', message: `'${hashOrSymbol}' is already in your token list ${currentNetwork.net}` });
-    /* eslint-enable max-len */
-  }
+    try {
+      cAddress = web3.utils.toChecksumAddress(hashOrSymbol);
 
-  assets.addUserAsset(token.assetId);
+      const tCheck = await web3.eth.getCode(cAddress);
+
+      if (tCheck === '0x') {
+        return commit('failRequest', { identifier: 'addToken', message: `'${hashOrSymbol}' is not a token contract!` });
+      }
+
+      if (_.has(userAssets, cAddress)) {
+        /* eslint-disable max-len */
+        return commit('failRequest', { identifier: 'addToken', message: `'${hashOrSymbol}' is already in your token list ${currentNetwork.net}` });
+        /* eslint-enable max-len */
+      }
+
+      let abiCheck;
+
+      try {
+        abiCheck = await ethclient.getAbiByAddress(network.getSelectedNetwork().etherscanApi, cAddress);
+      } catch (err) {
+        return commit('failRequest', { identifier: 'addToken', message: `${err}` });
+      }
+
+      if (abiCheck.length === 0) {
+        /* eslint-disable max-len */
+        return commit('failRequest', { identifier: 'addToken', message: `Unable to find a token with the symbol or script hash of '${hashOrSymbol}' on ${currentNetwork.net}` });
+        /* eslint-enable max-len */
+      }
+
+      const tokenContract = new web3.eth.Contract(JSON.parse(abiCheck), cAddress);
+      let decimal;
+      let tokenName;
+      let tokenSymbol;
+
+      try {
+        tokenContract.methods.transfer(cAddress, 0);
+        tokenContract.methods.balanceOf(cAddress);
+      } catch (e) {
+        return commit('failRequest', { identifier: 'addToken', message: 'Insufficiant data found for token!' });
+      }
+
+      if (currentNetwork.net === 'MainNet') {
+        let tokenInfo;
+        try {
+          tokenInfo = await ethclient.getTokenInfo(cAddress);
+          decimal = tokenInfo.decimals === 0 ||
+            tokenInfo.decimals === '0' || tokenInfo.decimals === '' ? 1 : tokenInfo.decimals;
+          tokenName = tokenInfo.name;
+          tokenSymbol = tokenInfo.symbol === '' ? tokenInfo.name : tokenInfo.symbol;
+        } catch (err) {
+          return commit('failRequest', { identifier: 'addToken', message: `${err}` });
+        }
+      } else {
+        try {
+          decimal = await tokenContract.methods.decimals().call();
+          decimal = decimal === '0' || decimal === 0 ? 1 : decimal;
+          tokenName = await tokenContract.methods.name().call();
+          tokenName = web3.utils.isHex(tokenName) ? web3.utils.hexToUtf8(tokenName) : tokenName;
+          tokenSymbol = await tokenContract.methods.symbol().call();
+          tokenSymbol = web3.utils.isHex(tokenSymbol) ? web3.utils.hexToUtf8(tokenSymbol) : tokenSymbol;
+        } catch (err) {
+          return commit('failRequest', { identifier: 'addToken', message: 'Insufficiant data found for token!' });
+        }
+      }
+
+      const asset = {
+        assetId: cAddress,
+        canPull: true,
+        decimals: parseInt(decimal, 10),
+        name: tokenName,
+        symbol: tokenSymbol,
+        isETHBased: true,
+        abi: abiCheck,
+      };
+
+      assets.addUserETHAsset(asset);
+    } catch (error) {
+      return commit('failRequest', { identifier: 'addToken',
+        message: `${error}` });
+    }
+  }
 
   dispatch('fetchHoldings', { done });
 
@@ -109,25 +199,30 @@ function createWallet({ commit }, { name, passphrase, passphraseConfirm }) {
 function deleteWallet({ commit }, { name, passphrase, done }) {
   commit('startRequest', { identifier: 'deleteWallet' });
   const walletToOpen = wallets.getOne(name);
+  let wif;
 
-  const wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
-
-  setTimeout(() => {
-    wallets.remove(name)
-      .then(() => {
-        wallets.sync();
-        done();
-        storageNew.remove(wif)
-          .then(() => {
-            storageNew.sync();
-          });
-        commit('endRequest', { identifier: 'deleteWallet' });
-      })
-      .catch((e) => {
-        alerts.exception(e);
-        commit('failRequest', { identifier: 'deleteWallet', message: e });
-      });
-  }, timeouts.NEO_API_CALL);
+  try {
+    wif = wallet.decrypt(walletToOpen.encryptedWIF, passphrase);
+    setTimeout(() => {
+      wallets.remove(name)
+        .then(() => {
+          wallets.sync();
+          done();
+          storageNew.remove(wif)
+            .then(() => {
+              storageNew.sync();
+            });
+          commit('endRequest', { identifier: 'deleteWallet' });
+        })
+        .catch((e) => {
+          alerts.exception(e);
+          commit('failRequest', { identifier: 'deleteWallet', message: e });
+        });
+    }, timeouts.NEO_API_CALL);
+  } catch (e) {
+    alerts.exception(e);
+    commit('failRequest', { identifier: 'deleteWallet', message: e });
+  }
 }
 
 // Returns if a value is a string
@@ -235,7 +330,6 @@ async function fetchHoldings({ commit }, { done, isRequestSilent } = {}) {
   // TODO: isn't this only useful if current state of holdings is empty? This should be optimized.
   try {
     holdings = await fetchCachedData(holdingsStorageKey);
-    console.log(holdings);
     commit('setHoldings', holdings);
   } catch (holdings) {
     commit('setHoldings', holdings);
@@ -251,7 +345,6 @@ async function fetchHoldings({ commit }, { done, isRequestSilent } = {}) {
 
   try {
     holdings = await neo.fetchHoldings(currentWallet.address, false);
-    console.log(holdings);
 
     commit('setHoldings', holdings.holdings);
     commit('setPortfolio', {

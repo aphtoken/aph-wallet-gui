@@ -1,7 +1,7 @@
 <template>
   <div :class="['holding', {'is-clickable': isClickable}]" @click="handleOnClick">
     <div class="left">
-      <aph-token-icon :symbol="holding.symbol"></aph-token-icon>
+      <aph-token-icon :symbol="holding.symbol" :isETHToken="holding.isETHToken" :tokenIcon="holding.tokenIcon"></aph-token-icon>
       <div class="token">
         <div class="name" :title="holding.asset">{{ holding.name }}</div>
         <div class="currency">{{ holding.symbol }}</div>

@@ -8,6 +8,8 @@ const ASSETS_ADDED_STORAGE_KEY = (net, wallet) => `assets_${net}_${wallet.addres
 export default {
   GAS: '602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7',
   NEO: 'c56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b',
+  BTC: '1111111111111111111111111111111111',
+  ETH: '0x0000000000000000000000000000000000000000',
 
   updateNetworkAssets(assets) {
     const currentNetwork = network.getSelectedNetwork();
@@ -52,9 +54,25 @@ export default {
       };
     }
 
+    const btcToken = {
+      symbol: 'BTC',
+      assetId: this.BTC,
+      name: 'Bitcoin',
+      decimals: 8,
+    };
+
+    const ethToken = {
+      symbol: 'ETH',
+      assetId: this.ETH,
+      name: 'Ethereum',
+      decimals: 18,
+    };
+
     this.addNetworkAsset(neo, true);
     this.addNetworkAsset(gas, true);
     this.addNetworkAsset(aphToken, true);
+    this.addNetworkAsset(btcToken, true);
+    this.addNetworkAsset(ethToken, true);
 
     storage.set(ASSETS_STORAGE_KEY(currentNetwork.net), assets);
   },
@@ -105,6 +123,20 @@ export default {
 
     const assets = this.getNetworkAssets();
     const userAssets = _.set(this.getUserAssets(), assetId, _.get(assets, assetId));
+    // console.log(`Adding user asset ${asset.symbol}`)
+
+    storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);
+  },
+
+  addUserETHAsset(asset) {
+    const currentNetwork = network.getSelectedNetwork();
+    const currentWallet = wallets.getCurrentWallet();
+
+    if (!currentNetwork || !currentWallet) {
+      return;
+    }
+
+    const userAssets = _.set(this.getUserAssets(), asset.assetId, asset);
     // console.log(`Adding user asset ${asset.symbol}`)
 
     storage.set(ASSETS_ADDED_STORAGE_KEY(currentNetwork.net, currentWallet), userAssets);

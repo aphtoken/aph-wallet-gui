@@ -39,8 +39,12 @@ export default {
         return name.toLowerCase().indexOf(searchBy) > -1
           || symbol.toLowerCase().indexOf(searchBy) > -1;
       }).map((holding) => {
-        const canRemove = holding.isNep5 === true && holding.isUserAsset === true
+        let canRemove = holding.isNep5 === true && holding.isUserAsset === true
           && holding.symbol !== 'APH' && new BigNumber(holding.balance).isZero();
+
+        if (holding.isETHToken) {
+          canRemove = new BigNumber(holding.balance).isZero();
+        }
 
         // Note: this must clone the holding or it will modify the holding without using store mutations and cause
         //       side effects.

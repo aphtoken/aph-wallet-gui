@@ -1,7 +1,7 @@
 <template>
   <modal-wrapper id="aph-wallet-backup-modal">
     <div class="body">
-      <h2>Bitcoin</h2>
+      <h2>Bitcoin & Ethereum</h2>
       <p class="help-text">{{$t('saveAndBackupTheKeys')}}</p>
       <p class="help-text">{{$t('ifYouLoseThem')}}</p>
       <div class="qr-codes">

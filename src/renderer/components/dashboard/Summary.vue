@@ -10,7 +10,7 @@
         <div class="value">{{ $formatMoney($store.state.statsToken.unitValue * $store.state.statsToken.balance) }}</div>
       </div>
       <div class="right">
-        <aph-token-icon :symbol="$store.state.statsToken.symbol"></aph-token-icon>
+        <aph-token-icon :symbol="$store.state.statsToken.symbol" :isETHToken="$store.state.statsToken.isETHToken" :tokenIcon="$store.state.statsToken.tokenIcon"></aph-token-icon>
       </div>
     </div>
     <div class="body">

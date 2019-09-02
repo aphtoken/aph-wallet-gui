@@ -21,6 +21,9 @@ const NETWORKS = [
       kycUrl: 'https://regtech.identitymind.store/viewform/mc99c/',
       btcPage: 'https://insight.bitpay.com/',
       bwsurl: 'https://bws.bitpay.com/bws/api',
+      ethPage: 'https://etherscan.io/',
+      infuraApi: 'https://mainnet.infura.io/v3/3850f6cc7ccc4ee8a3a7395ac4617e25',
+      etherscanApi: 'http://api.etherscan.io/api?apikey=SAREDMDSQFYRJUS9IJ5NK6VWDPXTP12B42',
     },
   },
   {
@@ -37,6 +40,9 @@ const NETWORKS = [
       kycUrl: 'https://regtech.identitymind.store/viewform/z3wy8/',
       btcPage: 'https://test-insight.bitpay.com/',
       bwsurl: 'https://bws.bitpay.com/bws/api',
+      ethPage: 'https://ropsten.etherscan.io/',
+      infuraApi: 'https://ropsten.infura.io/v3/3850f6cc7ccc4ee8a3a7395ac4617e25',
+      etherscanApi: 'http://api-ropsten.etherscan.io/api?apikey=SAREDMDSQFYRJUS9IJ5NK6VWDPXTP12B42',
     },
   },
   /*
@@ -164,6 +170,9 @@ export default {
     network.kycUrl = defaultForNetwork.kycUrl;
     network.btcPage = defaultForNetwork.btcPage;
     network.bwsurl = defaultForNetwork.bwsurl;
+    network.ethPage = defaultForNetwork.ethPage;
+    network.infuraApi = defaultForNetwork.infuraApi;
+    network.etherscanApi = defaultForNetwork.etherscanApi;
 
     return this;
   },

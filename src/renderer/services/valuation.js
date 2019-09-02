@@ -62,6 +62,7 @@ export default {
               rank: 0,
               symbol,
               total_supply: symbol === 'APH' ? DEFAULT_APH_TOTAL_SUPPLY : 0,
+              tokenImage: `https://www.cryptocompare.com${data.IMAGEURL}?width=260`,
             };
           });
           prices = priceInfo;

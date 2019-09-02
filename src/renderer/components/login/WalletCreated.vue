@@ -63,6 +63,13 @@
       </div>
     </div>
     <div class="wallet-data private-key">
+      <div class="label">ETHEREUM ADDRESS</div>
+      <div class="value">
+        <p>{{ wallet.ethAddress }}</p>
+        <aph-copy-text :text="wallet.ethAddress"></aph-copy-text>
+      </div>
+    </div>
+    <div class="wallet-data private-key">
       <div class="label">MNEMONIC</div>
       <div class="value">
         <p>{{ wallet.mnemonic }}</p>
