@@ -78,7 +78,7 @@
     "highcharts": "^6.1.0",
     "ipc-promise": "^0.1.4",
     "lodash": "^4.17.4",
-    "moment": "^2.22.1",
+    "moment": "^2.29.2",
     "numeral": "github:michaeltomasik/Numeral-js#master",
     "pouchdb": "^6.4.3",
     "pouchdb-upsert": "^2.2.0",
